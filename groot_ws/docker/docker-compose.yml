@@ -1,0 +1,41 @@
+version: '3'
+services:
+  ros2-groot-ws:
+    build:
+      context: .
+      args:
+        USERNAME: user
+    image: tedwang/groot-ws-humble:latest
+    container_name: groot-ws-ros2
+    stdin_open: true
+    tty: true
+    privileged: true
+
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #       - driver: nvidia
+    #         count: all
+    #         capabilities: [gpu]
+
+    network_mode: host
+    working_dir: /home/user/groot_ws
+    environment:
+      - DISPLAY=host.docker.internal:0.0
+      - XAUTHORITY=/root/.Xauthority
+      - ROS_WS=/home/user/groot_ws
+      - GROOT_APPIMAGE=/home/user/groot_ws/groot/groot.AppImage
+    volumes:
+      # Mount local timezone into container. ( Readonly )
+      # Reference: https://stackoverflow.com/questions/57607381/how-do-i-change-timezone-in-a-docker-container
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+      # Mount X11 server
+      - /d/.Xauthority:/root/.Xauthority
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      # Direct Rendering Infrastructure
+      - /dev:/dev
+      - ../:/home/user/groot_ws
+
+    command: /bin/bash
