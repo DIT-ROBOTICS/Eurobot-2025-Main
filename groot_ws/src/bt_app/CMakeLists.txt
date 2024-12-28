@@ -22,7 +22,7 @@ find_package(tf2 REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
-find_package(action_tutorials_interfaces REQUIRED)
+find_package(btcpp_ros2_interfaces REQUIRED)
 
 # Include directories
 include_directories(
@@ -32,9 +32,9 @@ include_directories(
 add_executable(bt_ros2 src/node/bt_ros2.cpp)
 ament_target_dependencies(bt_ros2
   ${THIS_PACKAGE_DEPS}
-  "action_tutorials_interfaces"
   "behaviortree_ros2"
   "behaviortree_cpp"
+  "btcpp_ros2_interfaces"
   "std_msgs"
   "std_srvs"
   "geometry_msgs"
@@ -48,43 +48,66 @@ target_link_libraries(bt_ros2
   BT_DECORATOR_NODE 
   BT_UTILS_NODE_NODE 
 )
+install(TARGETS
+  bt_ros2
+  DESTINATION lib/${PROJECT_NAME}
+)
 
-# add_executable(navigationTest src/node/navigationTest.cpp)
-# ament_target_dependencies(navigationTest
-#   ${THIS_PACKAGE_DEPS}
-#   "std_msgs"
-#   "std_srvs"
-#   "geometry_msgs"
-#   "nav_msgs"
-#   "rclcpp"
-#   "rclcpp_action"
-#   "rclcpp_components"
-# )
-# target_link_libraries(navigationTest 
-# )
+add_library(navigationServer SHARED
+  src/node/navigationServer.cpp)
+target_include_directories(navigationServer PRIVATE
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>)
+target_compile_definitions(navigationServer
+  PRIVATE "ACTION_TUTORIALS_CPP_BUILDING_DLL")
+ament_target_dependencies(navigationServer
+  "btcpp_ros2_interfaces"
+  "behaviortree_ros2"
+  "behaviortree_cpp"
+  "std_msgs"
+  "std_srvs"
+  "geometry_msgs"
+  "nav_msgs"
+  "rclcpp"
+  "rclcpp_action"
+  "rclcpp_components")
+rclcpp_components_register_node(navigationServer PLUGIN "TestNavServer" EXECUTABLE test_nav_server)
+install(TARGETS
+  navigationServer
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin)
 
-# add_library(navigationTest src/navigationTest.cpp)
-# ament_target_dependencies(navigationTest
-#   ${THIS_PACKAGE_DEPS}
-#   "action_tutorials_interfaces"
+# add_library(navigationClient SHARED
+#   src/node/navigationClient.cpp)
+# target_include_directories(navigationClient PRIVATE
+#   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+#   $<INSTALL_INTERFACE:include>)
+# target_compile_definitions(navigationClient
+#   PRIVATE "ACTION_TUTORIALS_CPP_BUILDING_DLL")
+# ament_target_dependencies(navigationClient
 #   "behaviortree_ros2"
 #   "behaviortree_cpp"
+#   "btcpp_ros2_interfaces"
 #   "std_msgs"
 #   "std_srvs"
 #   "geometry_msgs"
 #   "nav_msgs"
 #   "rclcpp"
 #   "rclcpp_action"
-#   "rclcpp_components"
-# )
-# target_link_libraries(navigationTest 
-# )
+#   "rclcpp_components")
+# rclcpp_components_register_node(navigationClient PLUGIN "TestNavClient" EXECUTABLE navigationClient)
+# install(TARGETS
+#   navigationClient
+#   ARCHIVE DESTINATION lib
+#   LIBRARY DESTINATION lib
+#   RUNTIME DESTINATION bin)
 
 add_library(BT_ACTION_NODE src/bt_action_node_lib.cpp)
 target_link_libraries(BT_ACTION_NODE 
   ${ARMADILLO_LIBRARIES})
 ament_target_dependencies(BT_ACTION_NODE 
-  "action_tutorials_interfaces"
+  "btcpp_ros2_interfaces"
   "behaviortree_ros2"
   "behaviortree_cpp"
   "std_msgs"
@@ -102,13 +125,9 @@ add_library(BT_DECORATOR_NODE src/bt_decorator_node_lib.cpp)
 target_link_libraries(BT_DECORATOR_NODE 
   ${ARMADILLO_LIBRARIES})
 ament_target_dependencies(BT_DECORATOR_NODE 
-  "action_tutorials_interfaces"
+  "btcpp_ros2_interfaces"
   "behaviortree_ros2"
   "behaviortree_cpp"
-  "std_msgs"
-  "std_srvs"
-  "geometry_msgs"
-  "nav_msgs"
   "rclcpp"
   "rclcpp_action"
   "rclcpp_components"
@@ -118,7 +137,7 @@ add_library(BT_UTILS_NODE_NODE src/bt_utils_node_lib.cpp)
 target_link_libraries(BT_UTILS_NODE_NODE 
   ${ARMADILLO_LIBRARIES})
 ament_target_dependencies(BT_UTILS_NODE_NODE 
-  "action_tutorials_interfaces"
+  "btcpp_ros2_interfaces"
   "behaviortree_ros2"
   "behaviortree_cpp"
   "std_msgs"
@@ -130,18 +149,11 @@ ament_target_dependencies(BT_UTILS_NODE_NODE
   "rclcpp_components"
   ${THIS_PACKAGE_DEPS})
 
-# INSTALL
-install(TARGETS
-  bt_ros2
-  # navigationTest
-  DESTINATION lib/${PROJECT_NAME}
-)
-
 install(DIRECTORY
-    bt_config
-    # launch
-    DESTINATION share/${PROJECT_NAME}/
-    )
+  bt_config
+  # launch
+  DESTINATION share/${PROJECT_NAME}/
+  )
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
