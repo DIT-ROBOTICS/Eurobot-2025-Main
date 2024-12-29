@@ -1,8 +1,8 @@
 # Goal
-geometry_msgs/msg/Twist goal
+geometry_msgs/Twist goal
 ---
 # Result
 string result
 ---
 # Feedback
-geometry_msgs/msg/Twist feedback
+geometry_msgs/Twist feedback
