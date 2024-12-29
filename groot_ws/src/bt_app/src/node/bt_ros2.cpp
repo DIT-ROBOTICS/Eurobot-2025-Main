@@ -20,7 +20,7 @@ int main(int argc, char** argv)
   params.nh = node;
   params.default_port_value = "test";
   factory.registerNodeType<Testing>("Testing");
-  factory.registerNodeType<SimpleNavigation>("SimpleNavigation", params);
+  factory.registerNodeType<NavigationTemp>("NavigationTemp", params);
   factory.registerNodeType<TickFlow>("TickFlow");
   factory.registerNodeType<GeneratePathPoint>("GeneratePathPoint");
   factory.registerNodeType<BT::LoopNode<geometry_msgs::msg::TwistStamped>>("LoopWayPoin"
