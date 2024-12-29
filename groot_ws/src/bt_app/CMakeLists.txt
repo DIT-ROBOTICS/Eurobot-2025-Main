@@ -19,6 +19,7 @@ find_package(behaviortree_cpp REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(std_srvs REQUIRED)
 find_package(tf2 REQUIRED)
+find_package(tf2_ros REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
@@ -66,6 +67,10 @@ ament_target_dependencies(navigationServer
   "behaviortree_cpp"
   "std_msgs"
   "std_srvs"
+  "tf2"
+  "tf2_ros"
+  "tf2_geometry_msgs"
+  "nav_msgs"
   "geometry_msgs"
   "nav_msgs"
   "rclcpp"
@@ -110,12 +115,6 @@ ament_target_dependencies(BT_ACTION_NODE
   "btcpp_ros2_interfaces"
   "behaviortree_ros2"
   "behaviortree_cpp"
-  "std_msgs"
-  "std_srvs"
-  "tf2"
-  "tf2_geometry_msgs"
-  "geometry_msgs"
-  "nav_msgs"
   "rclcpp"
   "rclcpp_action"
   "rclcpp_components"
