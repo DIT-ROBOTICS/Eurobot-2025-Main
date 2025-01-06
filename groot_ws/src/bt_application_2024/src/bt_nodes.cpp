@@ -1,4 +1,4 @@
-#include "bt_application/bt_nodes.h"
+#include "bt_application_2024/bt_nodes.h"
 
 using namespace BT;
 using namespace std;
@@ -28,7 +28,7 @@ template <> inline std::deque<int> BT::convertFromString(StringView str) {
     auto parts = splitString(str, ',');
     std::deque<int> output;
 
-    for (int i = 0; i < parts.size(); i++) {
+    for (int i = 0; i < (int)parts.size(); i++) {
         output.push_back(convertFromString<int>(parts[i]));
     }
 
@@ -44,12 +44,12 @@ BT::PortsList Navigation::providedPorts() {
 }
 
 bool Navigation::setGoal(RosActionNode::Goal& goal) {
-    goal_ = getInput<geometry_msgs::msg::TwistStamped>("goal");
+    goal_ = getInput<geometry_msgs::msg::TwistStamped>("goal").value();
     nav_type_ = getInput<int>("type").value();
     goal.nav_goal = goal_;
     goal.nav_goal.twist.angular.x = nav_type_;
 
-    RCLCPP_INFO(logger(), "Sending Goal (%f, %f), Navigation Type: %d", goal.goal.twist.linear.x, goal.goal.twist.linear.y, goal.type);
+    RCLCPP_INFO(logger(), "Sending Goal (%f, %f), Navigation Type: %.f", goal.nav_goal.twist.linear.x, goal.nav_goal.twist.linear.y, goal.nav_goal.twist.angular.x);
     nav_finished_ = false;
 
     return true;
@@ -133,7 +133,7 @@ BT::PortsList Recovery::providedPorts() {
         BT::InputPort<geometry_msgs::msg::TwistStamped>("robot_pose"),
         BT::InputPort<geometry_msgs::msg::TwistStamped>("rival_pose"), 
         BT::InputPort<geometry_msgs::msg::TwistStamped>("base"),
-        BT::OutputPort<geometry_msgs::msg::TwistStamped>("result")
+        BT::OutputPort<geometry_msgs::msg::TwistStamped>("result"),
         BT::InputPort<int>("mission_type")
     };
 }
@@ -194,8 +194,7 @@ bool Recovery::setGoal(RosActionNode::Goal& goal) {
 
     // RCLCPP_INFO(logger(), "[Recovery]: Send base pose: " << base_.twist.linear.x << " " << base_.twist.linear.y);
     cout << "[Recovery]: Send base pose: " << base_.twist.linear.x << " " << base_.twist.linear.y << endl;
-
-    return BT::NodeStatus::RUNNING;
+    return true;
 }
 
 NodeStatus Recovery::onFeedback(const std::shared_ptr<const Feedback> feedback)
@@ -478,7 +477,7 @@ BT::NodeStatus BTFinisher::tick() {
     }
 
     // Log game status
-    RCLCPP_INFO(logger(), "[BTFinisher]: Game status: " << game_status);
+    // RCLCPP_INFO(logger(), "[BTFinisher]: Game status: " << game_status);
     cout << "[BTFinisher]: Game status: " << game_status << endl;
 
     int plant_number = 0; // Get by 2
@@ -490,7 +489,7 @@ BT::NodeStatus BTFinisher::tick() {
 
     int tmp = game_status;
 
-    std::string binary = std::bitset<32>(tmp).to_string();
+    std::string binary = bitset<32>(tmp).to_string();
 
     for (int i = 0; i < 32; i++) {
         if (tmp & 1) {
@@ -563,7 +562,7 @@ BT::NodeStatus BTFinisher::tick() {
 
     if (team_ == 0) {
         // Blue team
-        RCLCPP_INFO(logger(), "[BTFinisher]: Blue team");
+        RCLCPP_INFO(node_->get_logger(), "[BTFinisher]: Blue team");
         for (int i = 0; i < 3; i++) {
             if (solar_degree[i] >= 145) {
                 score += 5;
@@ -572,7 +571,7 @@ BT::NodeStatus BTFinisher::tick() {
                 score += 5;
             }
         }
-        for (int i = 3; i < solar_degree.size(); i++) {
+        for (int i = 3; i < (int)solar_degree.size(); i++) {
             if (solar_degree[i] >= 145) {
                 score += 5;
             }
@@ -583,7 +582,7 @@ BT::NodeStatus BTFinisher::tick() {
     }
     else {
         // Yellow team
-        RCLCPP_INFO(logger(), "[BTFinisher]: Yellow team");
+        RCLCPP_INFO(node_->get_logger(), "[BTFinisher]: Yellow team");
         for (int i = 0; i < 3; i++) {
             if (solar_degree[i] != -1 && (solar_degree[i] >= 180 || solar_degree[i] <= 35)) {
                 score += 5;
@@ -592,7 +591,7 @@ BT::NodeStatus BTFinisher::tick() {
                 score += 5;
             }
         }
-        for (int i = 3; i < solar_degree.size(); i++) {
+        for (int i = 3; i < (int)solar_degree.size(); i++) {
             if (solar_degree[i] != -1 && (solar_degree[i] >= 180 || solar_degree[i] <= 35)) {
                 score += 5;
             }
@@ -608,7 +607,7 @@ BT::NodeStatus BTFinisher::tick() {
     }
 
     // Log the score
-    RCLCPP_INFO(logger(), "[BTFinisher]: Current score: %d", score);
+    RCLCPP_INFO(node_->get_logger(), "[BTFinisher]: Current score: %f", score);
 
     // Log solar degree and solar number
     // RCLCPP_INFO(logger(), "[BTFinisher]: Solar degree: " << solar_degree[0] << " " << solar_degree[1] << " " << solar_degree[2] << " " << solar_degree[3] << " " << solar_degree[4]);
