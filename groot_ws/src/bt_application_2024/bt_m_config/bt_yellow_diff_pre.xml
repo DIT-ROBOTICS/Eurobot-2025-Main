@@ -1,0 +1,1095 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root BTCPP_format="4"
+      main_tree_to_execute="MainTree">
+  <BehaviorTree ID="All-Plant">
+    <Sequence>
+      <SubTree ID="Plant-1"
+               GameStatus="{GameStatus}"
+               result="GameStatus"
+               PrevGoal="{PrevGoal}"/>
+      <Sequence>
+        <TimerChecker timer="48">
+          <AlwaysSuccess/>
+        </TimerChecker>
+        <SubTree ID="Plant-2"
+                 GameStatus="{GameStatus}"
+                 result="GameStatus"
+                 PrevGoal="{PrevGoal}"/>
+      </Sequence>
+      <Sequence>
+        <Fallback>
+          <TimerChecker timer="55">
+            <AlwaysSuccess/>
+          </TimerChecker>
+          <ForceFailure>
+            <BTMission mission_type="1,1"
+                       mission_sub_type="4,5"
+                       description=""/>
+          </ForceFailure>
+        </Fallback>
+        <SubTree ID="Plant-3"
+                 GameStatus="{GameStatus}"
+                 result="GameStatus"
+                 PrevGoal="{PrevGoal}"/>
+      </Sequence>
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="Bad-Pot">
+    <Sequence>
+      <Navigation result="{PrevGoal}"
+                  goal="0.42, 0.586, 3.14"/>
+      <Fallback>
+        <IfThenElse>
+          <TimerChecker timer="47">
+            <AlwaysSuccess/>
+          </TimerChecker>
+          <Sequence>
+            <ForceSuccess>
+              <SubTree ID="SuckFirstPot&apos;"
+                       PrevGoal="{PrevGoal}"/>
+            </ForceSuccess>
+            <ForceSuccess>
+              <SubTree ID="PutFirstPot&apos;"
+                       PrevGoal="{PrevGoal}"
+                       GameStatus="{GameStatus}"
+                       result="GameStatus"/>
+            </ForceSuccess>
+            <ForceSuccess>
+              <SubTree ID="SuckSecondPot&apos;"
+                       PrevGoal="{PrevGoal}"/>
+            </ForceSuccess>
+            <SubTree ID="PutSecondPot&apos;"
+                     PrevGoal="{PrevGoal}"
+                     GameStatus="{GameStatus}"
+                     result="GameStatus"/>
+          </Sequence>
+          <SubTree ID="Fast-Suck-And-Put&apos;"
+                   PrevGoal="{PrevGoal}"
+                   GameStatus="{GameStatus}"
+                   result="GameStatus"/>
+        </IfThenElse>
+        <RetryUntilSuccessful num_attempts="3">
+          <Recovery result="{PrevGoal}"
+                    base="{PrevGoal}"/>
+        </RetryUntilSuccessful>
+      </Fallback>
+      <Fallback>
+        <SubTree ID="PutOnPlanter-2"
+                 PrevGoal="{PrevGoal}"
+                 GameStatus="{GameStatus}"
+                 result="GameStatus"/>
+        <ForceSuccess>
+          <RetryUntilSuccessful num_attempts="3">
+            <Recovery result="{PrevGoal}"
+                      base="{PrevGoal}"/>
+          </RetryUntilSuccessful>
+        </ForceSuccess>
+      </Fallback>
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="Best-Pot">
+    <Sequence>
+      <Navigation result="{PrevGoal}"
+                  goal="2.58, 1.658, -1.57"/>
+      <Docking result="{PrevGoal}"
+               offset="0.0, -0.25, 0.0"
+               base="{PrevGoal}"
+               mission_type="1"/>
+      <Docking result="{PrevGoal}"
+               offset="0.0, 0.0, 1.57"
+               base="{PrevGoal}"
+               mission_type="1"/>
+      <Fallback>
+        <IfThenElse>
+          <TimerChecker timer="47">
+            <AlwaysSuccess/>
+          </TimerChecker>
+          <Sequence>
+            <ForceSuccess>
+              <SubTree ID="SuckFirstPot"
+                       PrevGoal="{PrevGoal}"
+                       GameStatus="{GameStatus}"
+                       result="GameStatus"/>
+            </ForceSuccess>
+            <ForceSuccess>
+              <SubTree ID="PutFirstPot"
+                       PrevGoal="{PrevGoal}"
+                       GameStatus="{GameStatus}"
+                       result="GameStatus"/>
+            </ForceSuccess>
+            <ForceSuccess>
+              <SubTree ID="SuckSecondPot"
+                       PrevGoal="{PrevGoal}"
+                       GameStatus="{GameStatus}"
+                       result="GameStatus"/>
+            </ForceSuccess>
+            <SubTree ID="PutSecondPot"
+                     PrevGoal="{PrevGoal}"
+                     GameStatus="{GameStatus}"
+                     result="GameStatus"/>
+          </Sequence>
+          <SubTree ID="Fast-Suck-And-Put"
+                   PrevGoal="{PrevGoal}"
+                   GameStatus="{GameStatus}"
+                   result="GameStatus"/>
+        </IfThenElse>
+        <RetryUntilSuccessful num_attempts="3">
+          <Sequence>
+            <ForceSuccess>
+              <Recovery result="{PrevGoal}"
+                        base="{PrevGoal}"/>
+            </ForceSuccess>
+            <Navigation result="{PrevGoal}"
+                        goal="2.715, 1.354, 0.0"/>
+          </Sequence>
+        </RetryUntilSuccessful>
+      </Fallback>
+      <Fallback>
+        <SubTree ID="PutOnPlanter-1"
+                 PrevGoal="{PrevGoal}"
+                 GameStatus="{GameStatus}"
+                 result="GameStatus"/>
+        <ForceSuccess>
+          <RetryUntilSuccessful num_attempts="3">
+            <Recovery result="{PrevGoal}"
+                      base="{PrevGoal}"/>
+          </RetryUntilSuccessful>
+        </ForceSuccess>
+      </Fallback>
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="Fast-Suck-And-Put">
+    <Sequence>
+      <Sequence>
+        <BTMission mission_type="0"
+                   mission_sub_type="1"
+                   description=""/>
+        <ForceSuccess>
+          <Docking result="{PrevGoal}"
+                   offset="0.255, 0.0, 0.0"
+                   base="{PrevGoal}"
+                   mission_type="1"/>
+        </ForceSuccess>
+        <BTMission mission_type="1"
+                   mission_sub_type="6"
+                   description=""/>
+        <Docking result="{PrevGoal}"
+                 offset="-0.04, 0.0, 0.0"
+                 base="{PrevGoal}"
+                 mission_type="0"/>
+        <Docking result="{PrevGoal}"
+                 offset="0.0, 0.0, 1.57"
+                 base="{PrevGoal}"
+                 mission_type="1"/>
+        <BTMission mission_type="0"
+                   mission_sub_type="3"
+                   description=""/>
+      </Sequence>
+      <Sequence>
+        <ForceSuccess>
+          <Docking result="{PrevGoal}"
+                   offset="0.0, 0.35, 0."
+                   base="{PrevGoal}"
+                   mission_type="1"/>
+        </ForceSuccess>
+        <BTMission mission_type="1"
+                   mission_sub_type="7"
+                   description=""/>
+        <Docking result="{PrevGoal}"
+                 offset="0.0, -0.38, 0."
+                 base="{PrevGoal}"
+                 mission_type="0"/>
+        <Docking result="{PrevGoal}"
+                 offset="0.0, 0.0, -1.57"
+                 base="{PrevGoal}"
+                 mission_type="1"/>
+        <ForceSuccess>
+          <Docking result="{PrevGoal}"
+                   offset="0.08, 0.0, 0.0"
+                   base="{PrevGoal}"
+                   mission_type="1"/>
+        </ForceSuccess>
+        <BTFinisher mission_sub_type="0"
+                    mission_type="1"
+                    result="{GameStatus}"
+                    game_status="{GameStatus}"/>
+      </Sequence>
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="Fast-Suck-And-Put&apos;">
+    <Sequence>
+      <Sequence>
+        <BTMission mission_type="0"
+                   mission_sub_type="1"
+                   description=""/>
+        <ForceSuccess>
+          <Docking result="{PrevGoal}"
+                   offset="-0.255, 0.0, 0.0"
+                   base="{PrevGoal}"
+                   mission_type="1"/>
+        </ForceSuccess>
+        <BTMission mission_type="1"
+                   mission_sub_type="6"
+                   description=""/>
+        <Docking result="{PrevGoal}"
+                 offset="0.04, 0.0, 0.0"
+                 base="{PrevGoal}"
+                 mission_type="0"/>
+        <Docking result="{PrevGoal}"
+                 offset="0.0, 0.0, -1.57"
+                 base="{PrevGoal}"
+                 mission_type="1"/>
+        <BTMission mission_type="0"
+                   mission_sub_type="3"
+                   description=""/>
+      </Sequence>
+      <Sequence>
+        <ForceSuccess>
+          <Docking result="{PrevGoal}"
+                   offset="0.0, 0.35, 0."
+                   base="{PrevGoal}"
+                   mission_type="1"/>
+        </ForceSuccess>
+        <BTMission mission_type="1"
+                   mission_sub_type="7"
+                   description=""/>
+        <Docking result="{PrevGoal}"
+                 offset="0.0, -0.33, 0."
+                 base="{PrevGoal}"
+                 mission_type="0"/>
+        <Docking result="{PrevGoal}"
+                 offset="0.0, 0.0, 1.57"
+                 base="{PrevGoal}"
+                 mission_type="1"/>
+        <ForceSuccess>
+          <Docking result="{PrevGoal}"
+                   offset="-0.08, 0.0, 0.0"
+                   base="{PrevGoal}"
+                   mission_type="1"/>
+        </ForceSuccess>
+        <BTFinisher mission_sub_type="0"
+                    mission_type="1"
+                    result="{GameStatus}"
+                    game_status="{GameStatus}"/>
+      </Sequence>
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="FirstRow">
+    <Sequence>
+      <Docking result="{PrevGoal}"
+               offset="0.30, 0.0, 0.0"
+               base="{PrevGoal}"
+               mission_type="0"/>
+      <Docking result="{PrevGoal}"
+               offset="-0.20, 0.0,0.0"
+               base="{PrevGoal}"
+               mission_type="1"/>
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="MainTree">
+    <Sequence>
+      <BTStarter result="{GameStatus}"/>
+      <ForceSuccess>
+        <SubTree ID="Remove-Pot"
+                 PrevGoal="{PrevGoal}"
+                 GameStatus="{GameStatus}"
+                 result="GameStatus"/>
+      </ForceSuccess>
+      <ForceSuccess>
+        <SubTree ID="All-Plant"
+                 GameStatus="{GameStatus}"
+                 result="GameStatus"
+                 PrevGoal="{PrevGoal}"/>
+      </ForceSuccess>
+      <ForceSuccess>
+        <Fallback>
+          <TimerChecker timer="74">
+            <IfThenElse>
+              <Comparator compare_point="2.58, 1.586, 0.0"
+                          mission_type="1"
+                          mission_sub_type="0"
+                          game_status="{GameStatus}"/>
+              <SubTree ID="Best-Pot"
+                       GameStatus="{GameStatus}"
+                       result="GameStatus"/>
+              <SubTree ID="Bad-Pot"
+                       GameStatus="{GameStatus}"
+                       result="GameStatus"/>
+            </IfThenElse>
+          </TimerChecker>
+          <ForceSuccess>
+            <BTMission mission_type="1"
+                       mission_sub_type="16"
+                       description="Back to original place"/>
+          </ForceSuccess>
+        </Fallback>
+      </ForceSuccess>
+      <ForceSuccess>
+        <BTMission mission_type="1"
+                   mission_sub_type="20"
+                   description="TODO: new mission"/>
+      </ForceSuccess>
+      <ForceSuccess>
+        <TimerChecker timer="81">
+          <IfThenElse>
+            <TimerChecker timer="72">
+              <AlwaysSuccess/>
+            </TimerChecker>
+            <SubTree ID="Planter"
+                     GameStatus="{GameStatus}"
+                     result="GameStatus"/>
+          </IfThenElse>
+        </TimerChecker>
+      </ForceSuccess>
+      <ForceSuccess>
+        <BTMission mission_type="1"
+                   mission_sub_type="16"
+                   description="Back to original place"/>
+      </ForceSuccess>
+      <ForceSuccess>
+        <TimerChecker timer="96">
+          <SubTree ID="Solar"
+                   GameStatus="{GameStatus}"
+                   result="GameStatus"
+                   _autoremap="false"/>
+        </TimerChecker>
+      </ForceSuccess>
+      <BTMission mission_type="1,0,0"
+                 mission_sub_type="18,2,3"
+                 description=""/>
+      <TimerChecker timer="1100">
+        <AlwaysSuccess/>
+      </TimerChecker>
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="Plant-1">
+    <Fallback>
+      <Sequence>
+        <Sequence>
+          <Navigation result="{PrevGoal}"
+                      goal="0.6, 1.3, 0.0"/>
+          <BTFinisher mission_sub_type="2"
+                      mission_type="0"
+                      result="{GameStatus}"
+                      game_status="{GameStatus}"/>
+          <BTMission mission_type="0"
+                     mission_sub_type="1"
+                     description=""/>
+        </Sequence>
+        <Sequence>
+          <Fallback>
+            <Sequence>
+              <SubTree ID="FirstRow"
+                       PrevGoal="{PrevGoal}"
+                       result="PrevGoal"
+                       _autoremap="false"/>
+              <BTMission mission_type="1,0,0"
+                         mission_sub_type="0,3,0"
+                         description=""/>
+            </Sequence>
+            <Sequence>
+              <ForceSuccess>
+                <Recovery result="{PrevGoal}"
+                          base="{PrevGoal}"/>
+              </ForceSuccess>
+              <BTMission mission_type="1,0,0"
+                         mission_sub_type="0,3,0"
+                         description=""/>
+              <Timeout msec="3500">
+                <RetryUntilSuccessful num_attempts="-1">
+                  <Navigation result="{PrevGoal}"
+                              goal="0.7, 1.3, 0.0"/>
+                </RetryUntilSuccessful>
+              </Timeout>
+            </Sequence>
+          </Fallback>
+          <Fallback>
+            <SubTree ID="SecondRow"
+                     PrevGoal="{PrevGoal}"
+                     result="PrevGoal"/>
+            <ForceSuccess>
+              <Recovery result="{PrevGoal}"
+                        base="{PrevGoal}"/>
+            </ForceSuccess>
+          </Fallback>
+          <BTMission mission_type="1,0"
+                     mission_sub_type="1,2"
+                     description=""/>
+        </Sequence>
+      </Sequence>
+      <ForceSuccess>
+        <Sequence>
+          <Recovery result="{PrevGoal}"
+                    base="{PrevGoal}"/>
+          <BTMission mission_type="1,1"
+                     mission_sub_type="0,1"
+                     description=""/>
+        </Sequence>
+      </ForceSuccess>
+    </Fallback>
+  </BehaviorTree>
+
+  <BehaviorTree ID="Plant-2">
+    <Fallback>
+      <Sequence>
+        <Sequence>
+          <Navigation result="{PrevGoal}"
+                      goal="1.1,  1.5, 0.0"/>
+          <BTFinisher mission_sub_type="6"
+                      mission_type="0"
+                      result="{GameStatus}"
+                      game_status="{GameStatus}"/>
+          <BTMission mission_type="0"
+                     mission_sub_type="1"
+                     description=""/>
+        </Sequence>
+        <Sequence>
+          <Fallback>
+            <Sequence>
+              <SubTree ID="FirstRow"
+                       PrevGoal="{PrevGoal}"
+                       result="PrevGoal"
+                       _autoremap="false"/>
+              <BTMission mission_type="1,0,0"
+                         mission_sub_type="2,3,0"
+                         description=""/>
+            </Sequence>
+            <Sequence>
+              <ForceSuccess>
+                <Recovery result="{PrevGoal}"
+                          base="{PrevGoal}"/>
+              </ForceSuccess>
+              <BTMission mission_type="1,0,0"
+                         mission_sub_type="2,3,0"
+                         description=""/>
+              <RetryUntilSuccessful num_attempts="-1">
+                <Timeout msec="3500">
+                  <Navigation result="{PrevGoal}"
+                              goal="1.2,  1.5, 0.0"/>
+                </Timeout>
+              </RetryUntilSuccessful>
+            </Sequence>
+          </Fallback>
+          <Fallback>
+            <SubTree ID="SecondRow"
+                     PrevGoal="{PrevGoal}"
+                     result="PrevGoal"/>
+            <ForceSuccess>
+              <Recovery result="{PrevGoal}"
+                        base="{PrevGoal}"/>
+            </ForceSuccess>
+          </Fallback>
+          <BTMission mission_type="1,0"
+                     mission_sub_type="3,2"
+                     description=""/>
+        </Sequence>
+      </Sequence>
+      <ForceSuccess>
+        <Sequence>
+          <Recovery result="{PrevGoal}"
+                    base="{PrevGoal}"/>
+          <BTMission mission_type="1,1"
+                     mission_sub_type="2,3"
+                     description=""/>
+        </Sequence>
+      </ForceSuccess>
+    </Fallback>
+  </BehaviorTree>
+
+  <BehaviorTree ID="Plant-3">
+    <Fallback>
+      <Sequence>
+        <Sequence>
+          <Navigation result="{PrevGoal}"
+                      goal="1.6, 1.3, 0.0"/>
+          <BTFinisher mission_sub_type="10"
+                      mission_type="0"
+                      result="{GameStatus}"
+                      game_status="{GameStatus}"/>
+          <BTMission mission_type="0"
+                     mission_sub_type="1"
+                     description=""/>
+        </Sequence>
+        <Sequence>
+          <Fallback>
+            <Sequence>
+              <SubTree ID="FirstRow"
+                       PrevGoal="{PrevGoal}"
+                       result="PrevGoal"
+                       _autoremap="false"/>
+              <BTMission mission_type="1,0,0"
+                         mission_sub_type="4,3,0"
+                         description=""/>
+            </Sequence>
+            <Sequence>
+              <ForceSuccess>
+                <Recovery result="{PrevGoal}"
+                          base="{PrevGoal}"/>
+              </ForceSuccess>
+              <BTMission mission_type="1,0,0"
+                         mission_sub_type="4,3,0"
+                         description=""/>
+              <RetryUntilSuccessful num_attempts="-1">
+                <Timeout msec="3500">
+                  <Navigation result="{PrevGoal}"
+                              goal="1.7, 1.3, 0.0"/>
+                </Timeout>
+              </RetryUntilSuccessful>
+            </Sequence>
+          </Fallback>
+          <Fallback>
+            <SubTree ID="SecondRow"
+                     PrevGoal="{PrevGoal}"
+                     result="PrevGoal"/>
+            <ForceSuccess>
+              <Recovery result="{PrevGoal}"
+                        base="{PrevGoal}"/>
+            </ForceSuccess>
+          </Fallback>
+          <BTMission mission_type="1,0"
+                     mission_sub_type="5,2"
+                     description=""/>
+        </Sequence>
+      </Sequence>
+      <ForceSuccess>
+        <Sequence>
+          <Recovery result="{PrevGoal}"
+                    base="{PrevGoal}"/>
+          <BTMission mission_type="1,1"
+                     mission_sub_type="4,5"
+                     description=""/>
+        </Sequence>
+      </ForceSuccess>
+    </Fallback>
+  </BehaviorTree>
+
+  <BehaviorTree ID="Planter">
+    <Sequence>
+      <Comparator compare_point="2.26, 1.7, -1.57"
+                  mission_type="2"
+                  mission_sub_type="0"
+                  game_status="{GameStatus}"/>
+      <Navigation result="{PrevGoal}"
+                  goal="2.26, 1.7, -1.57"/>
+      <Docking result="{PrevGoal}"
+               offset="0.,0.175,0."
+               base="{PrevGoal}"
+               mission_type="1"/>
+      <BTMission mission_type="1"
+                 mission_sub_type="12"
+                 description=""/>
+      <Sleep msec="1000"/>
+      <Docking result="{PrevGoal}"
+               offset="0.,-0.2,0."
+               base="{PrevGoal}"
+               mission_type="1"/>
+      <BTMission mission_type="1"
+                 mission_sub_type="13"
+                 description=""/>
+      <BTFinisher mission_sub_type="0"
+                  mission_type="2"
+                  result="{GameStatus}"
+                  game_status="{GameStatus}"/>
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="PutFirstPot">
+    <Sequence>
+      <ForceSuccess>
+        <Docking result="{PrevGoal}"
+                 offset="0.0, 0.35, 0."
+                 base="{PrevGoal}"
+                 mission_type="1"/>
+      </ForceSuccess>
+      <BTMission mission_type="1"
+                 mission_sub_type="7"
+                 description=""/>
+      <Docking result="{PrevGoal}"
+               offset="0.0, -0.38, 0."
+               base="{PrevGoal}"
+               mission_type="0"/>
+      <Docking result="{PrevGoal}"
+               offset="0.0, 0.0, 1.57"
+               base="{PrevGoal}"
+               mission_type="1"/>
+      <BTFinisher mission_sub_type="0"
+                  mission_type="1"
+                  result="{GameStatus}"
+                  game_status="{GameStatus}"/>
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="PutFirstPot&apos;">
+    <Sequence>
+      <ForceSuccess>
+        <Docking result="{PrevGoal}"
+                 offset="0.0, 0.35, 0."
+                 base="{PrevGoal}"
+                 mission_type="1"/>
+      </ForceSuccess>
+      <BTMission mission_type="1"
+                 mission_sub_type="7"
+                 description=""/>
+      <Docking result="{PrevGoal}"
+               offset="0.0, -0.33, 0."
+               base="{PrevGoal}"
+               mission_type="0"/>
+      <Docking result="{PrevGoal}"
+               offset="0.0, 0.0, -1.57"
+               base="{PrevGoal}"
+               mission_type="1"/>
+      <BTFinisher mission_sub_type="0"
+                  mission_type="1"
+                  result="{GameStatus}"
+                  game_status="{GameStatus}"/>
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="PutOnPlanter-1">
+    <Sequence>
+      <ForceSuccess>
+        <Timeout msec="2300">
+          <Docking result="{PrevGoal}"
+                   offset="0.045, 0.0, 0.0"
+                   base="{PrevGoal}"
+                   mission_type="1"/>
+        </Timeout>
+      </ForceSuccess>
+      <BTMission mission_type="1"
+                 mission_sub_type="10"
+                 description=""/>
+      <Sleep msec="1000"/>
+      <Docking result="{PrevGoal}"
+               offset="-0.2, 0.0, 0.0"
+               base="{PrevGoal}"
+               mission_type="1"/>
+      <BTMission mission_type="1"
+                 mission_sub_type="11"
+                 description=""/>
+      <BTFinisher mission_sub_type="2"
+                  mission_type="1"
+                  result="{GameStatus}"
+                  game_status="{GameStatus}"/>
+      <BTFinisher mission_sub_type="3"
+                  mission_type="1"
+                  result="{GameStatus}"
+                  game_status="{GameStatus}"/>
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="PutOnPlanter-2">
+    <Sequence>
+      <Docking result="{PrevGoal}"
+               offset="-0.035, 0.0, 0.0"
+               base="{PrevGoal}"
+               mission_type="1"/>
+      <BTMission mission_type="1"
+                 mission_sub_type="10"
+                 description=""/>
+      <Sleep msec="1000"/>
+      <Docking result="{PrevGoal}"
+               offset="0.2, 0.0, 0.0"
+               base="{PrevGoal}"
+               mission_type="1"/>
+      <BTMission mission_type="1"
+                 mission_sub_type="11"
+                 description=""/>
+      <BTFinisher mission_sub_type="2"
+                  mission_type="1"
+                  result="{GameStatus}"
+                  game_status="{GameStatus}"/>
+      <BTFinisher mission_sub_type="3"
+                  mission_type="1"
+                  result="{GameStatus}"
+                  game_status="{GameStatus}"/>
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="PutSecondPot">
+    <Sequence>
+      <ForceSuccess>
+        <Docking result="{PrevGoal}"
+                 offset="0.0, 0.2, 0.0"
+                 base="{PrevGoal}"
+                 mission_type="1"/>
+      </ForceSuccess>
+      <BTMission mission_type="1"
+                 mission_sub_type="9"
+                 description=""/>
+      <Docking result="{PrevGoal}"
+               offset="0.0, -0.23, 0.0"
+               base="{PrevGoal}"
+               mission_type="1"/>
+      <Docking result="{PrevGoal}"
+               offset="0.0, 0.0, 1.57"
+               base="{PrevGoal}"
+               mission_type="1"/>
+      <BTFinisher mission_sub_type="1"
+                  mission_type="1"
+                  result="{GameStatus}"
+                  game_status="{GameStatus}"/>
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="PutSecondPot&apos;">
+    <Sequence>
+      <ForceSuccess>
+        <Docking result="{PrevGoal}"
+                 offset="0.0, 0.2, 0.0"
+                 base="{PrevGoal}"
+                 mission_type="1"/>
+      </ForceSuccess>
+      <BTMission mission_type="1"
+                 mission_sub_type="9"
+                 description=""/>
+      <Docking result="{PrevGoal}"
+               offset="0.0, -0.23, 0.0"
+               base="{PrevGoal}"
+               mission_type="1"/>
+      <Docking result="{PrevGoal}"
+               offset="0.0, 0.0, -1.57"
+               base="{PrevGoal}"
+               mission_type="1"/>
+      <BTFinisher mission_sub_type="1"
+                  mission_type="1"
+                  result="{GameStatus}"
+                  game_status="{GameStatus}"/>
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="Remove-Pot">
+    <Sequence>
+      <ForceSuccess>
+        <TimerChecker timer="25">
+          <RetryUntilSuccessful num_attempts="-1">
+            <Fallback>
+              <Sequence>
+                <Navigation result="{PrevGoal}"
+                            goal="2.35, 0.27, -2.8"/>
+                <Navigation result="{PrevGoal}"
+                            goal="2.15, 0.178, 3.14"/>
+              </Sequence>
+              <ForceFailure>
+                <Navigation result="{PrevGoal}"
+                            goal="2.55, 1.0, 1.57"/>
+              </ForceFailure>
+            </Fallback>
+          </RetryUntilSuccessful>
+        </TimerChecker>
+      </ForceSuccess>
+      <ForceSuccess>
+        <TimerChecker timer="45">
+          <RetryUntilSuccessful num_attempts="-1">
+            <Fallback>
+              <Sequence>
+                <Docking result="{PrevGoal}"
+                         offset="-0.4, 0.0, 0.0"
+                         base="{PrevGoal}"
+                         mission_type="0"/>
+                <Docking result="{PrevGoal}"
+                         offset="-0.4, 0.0, 0.0"
+                         base="{PrevGoal}"
+                         mission_type="0"/>
+              </Sequence>
+              <Sequence>
+                <Navigation result="{PrevGoal}"
+                            goal="2.35, 0.27, -2.8"/>
+                <Navigation result="{PrevGoal}"
+                            goal="2.15, 0.178, 3.14"/>
+                <Docking result="{PrevGoal}"
+                         offset="-0.4, 0.0, 0.0"
+                         base="{PrevGoal}"
+                         mission_type="0"/>
+                <Docking result="{PrevGoal}"
+                         offset="-0.4, 0.0, 0.0"
+                         base="{PrevGoal}"
+                         mission_type="0"/>
+              </Sequence>
+            </Fallback>
+          </RetryUntilSuccessful>
+        </TimerChecker>
+      </ForceSuccess>
+      <ForceSuccess>
+        <TimerChecker timer="55">
+          <RetryUntilSuccessful num_attempts="-1">
+            <Sequence>
+              <Navigation result="{PrevGoal}"
+                          goal="1.55, 0.27, -2.8"/>
+              <Navigation result="{PrevGoal}"
+                          goal="1.35, 0.178, 3.14"/>
+            </Sequence>
+          </RetryUntilSuccessful>
+        </TimerChecker>
+      </ForceSuccess>
+      <ForceSuccess>
+        <TimerChecker timer="65">
+          <RetryUntilSuccessful num_attempts="-1">
+            <Fallback>
+              <Sequence>
+                <Docking result="{PrevGoal}"
+                         offset="-0.5, 0.0, 0.0"
+                         base="{PrevGoal}"
+                         mission_type="0"/>
+                <Docking result="{PrevGoal}"
+                         offset="0.5, 0.0, 0.0"
+                         base="{PrevGoal}"
+                         mission_type="0"/>
+              </Sequence>
+              <Sequence>
+                <Navigation result="{PrevGoal}"
+                            goal="1.55, 0.27, -2.8"/>
+                <Navigation result="{PrevGoal}"
+                            goal="1.35, 0.178, 3.14"/>
+                <Docking result="{PrevGoal}"
+                         offset="-0.5, 0.0, 0.0"
+                         base="{PrevGoal}"
+                         mission_type="0"/>
+                <Docking result="{PrevGoal}"
+                         offset="0.5, 0.0, 0.0"
+                         base="{PrevGoal}"
+                         mission_type="0"/>
+              </Sequence>
+            </Fallback>
+          </RetryUntilSuccessful>
+        </TimerChecker>
+      </ForceSuccess>
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="SecondRow">
+    <Sequence>
+      <Docking result="{PrevGoal}"
+               offset="0.0, 0.0, 3.14"
+               base="{PrevGoal}"
+               mission_type="1"/>
+      <Docking result="{PrevGoal}"
+               offset="0.35,  0.0, 0.0"
+               base="{PrevGoal}"
+               mission_type="0"/>
+      <Docking result="{PrevGoal}"
+               offset="-0.10,  0.0, 0.0"
+               base="{PrevGoal}"
+               mission_type="1"/>
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="Solar">
+    <Sequence>
+      <TimerChecker timer="90">
+        <RetryUntilSuccessful num_attempts="-1">
+          <Sequence>
+            <Navigation result="{PrevGoal}"
+                        goal="1.25, 0.27, -2.8"/>
+            <Navigation result="{PrevGoal}"
+                        goal="1.05, 0.188, 3.14"/>
+          </Sequence>
+        </RetryUntilSuccessful>
+      </TimerChecker>
+      <LadybugActivate/>
+      <BTMission mission_type="1"
+                 mission_sub_type="14"
+                 description=""/>
+      <RetryUntilSuccessful num_attempts="-1">
+        <Inverter>
+          <TimerChecker timer="90">
+            <AlwaysSuccess/>
+          </TimerChecker>
+        </Inverter>
+      </RetryUntilSuccessful>
+      <Docking result="{PrevGoal}"
+               offset="0.9,0.0,0.0"
+               base="{PrevGoal}"
+               mission_type="2"/>
+      <Docking result="{PrevGoal}"
+               offset="0.85, 0.0, 0.0"
+               base="{PrevGoal}"
+               mission_type="2"/>
+      <BTMission mission_type="1"
+                 mission_sub_type="15"
+                 description=""/>
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="SuckFirstPot">
+    <Sequence>
+      <BTMission mission_type="0"
+                 mission_sub_type="1"
+                 description=""/>
+      <ForceSuccess>
+        <Docking result="{PrevGoal}"
+                 offset="0.15, 0.0, 0.0"
+                 base="{PrevGoal}"
+                 mission_type="1"/>
+      </ForceSuccess>
+      <BTMission mission_type="1"
+                 mission_sub_type="6"
+                 description=""/>
+      <Docking result="{PrevGoal}"
+               offset="-0.04, 0.0, 0.0"
+               base="{PrevGoal}"
+               mission_type="0"/>
+      <Docking result="{PrevGoal}"
+               offset="0.0, 0.0, 1.57"
+               base="{PrevGoal}"
+               mission_type="1"/>
+      <BTMission mission_type="0"
+                 mission_sub_type="3"
+                 description=""/>
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="SuckFirstPot&apos;">
+    <Sequence>
+      <BTMission mission_type="0"
+                 mission_sub_type="1"
+                 description=""/>
+      <ForceSuccess>
+        <Docking result="{PrevGoal}"
+                 offset="-0.165, 0.0, 0.0"
+                 base="{PrevGoal}"
+                 mission_type="1"/>
+      </ForceSuccess>
+      <BTMission mission_type="1"
+                 mission_sub_type="6"
+                 description=""/>
+      <Docking result="{PrevGoal}"
+               offset="0.04, 0.0, 0.0"
+               base="{PrevGoal}"
+               mission_type="0"/>
+      <Docking result="{PrevGoal}"
+               offset="0.0, 0.0, -1.57"
+               base="{PrevGoal}"
+               mission_type="1"/>
+      <BTMission mission_type="0"
+                 mission_sub_type="3"
+                 description=""/>
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="SuckSecondPot">
+    <Sequence>
+      <BTMission mission_type="0"
+                 mission_sub_type="0"
+                 description=""/>
+      <BTMission mission_type="1"
+                 mission_sub_type="17"
+                 description=""/>
+      <ForceSuccess>
+        <Docking result="{PrevGoal}"
+                 offset="0.14, 0.0, 0.0"
+                 base="{PrevGoal}"
+                 mission_type="1"/>
+      </ForceSuccess>
+      <Sleep msec="500"/>
+      <BTMission mission_type="1"
+                 mission_sub_type="8"
+                 description=""/>
+      <Docking result="{PrevGoal}"
+               offset="0.0, 0.0, 1.57"
+               base="{PrevGoal}"
+               mission_type="1"/>
+      <BTMission mission_type="0"
+                 mission_sub_type="2"
+                 description=""/>
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="SuckSecondPot&apos;">
+    <Sequence>
+      <BTMission mission_type="0"
+                 mission_sub_type="0"
+                 description=""/>
+      <BTMission mission_type="1"
+                 mission_sub_type="17"
+                 description=""/>
+      <ForceSuccess>
+        <Docking result="{PrevGoal}"
+                 offset="-0.14, 0.0, 0.0"
+                 base="{PrevGoal}"
+                 mission_type="1"/>
+      </ForceSuccess>
+      <Sleep msec="300"/>
+      <BTMission mission_type="1"
+                 mission_sub_type="8"
+                 description=""/>
+      <Docking result="{PrevGoal}"
+               offset="0.0, 0.0, -1.57"
+               base="{PrevGoal}"
+               mission_type="1"/>
+      <BTMission mission_type="0"
+                 mission_sub_type="2"
+                 description=""/>
+    </Sequence>
+  </BehaviorTree>
+
+  <!-- Description of Node Models (used by Groot) -->
+  <TreeNodesModel>
+    <Action ID="BTFinisher">
+      <input_port name="mission_sub_type"
+                  type="int"/>
+      <input_port name="mission_type"
+                  type="int"/>
+      <output_port name="result"
+                   type="int"/>
+      <input_port name="game_status"
+                  type="int"/>
+    </Action>
+    <Action ID="BTMission">
+      <output_port name="mission_type"
+                   type="int"/>
+      <output_port name="mission_sub_type"
+                   type="int"/>
+      <output_port name="description"
+                   type="string"/>
+    </Action>
+    <Action ID="BTStarter">
+      <output_port name="result"
+                   type="int"/>
+    </Action>
+    <Action ID="Comparator">
+      <input_port name="compare_point"
+                  type="geometry_msgs::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+      <input_port name="mission_type"
+                  type="int"/>
+      <input_port name="mission_sub_type"
+                  type="int"/>
+      <input_port name="game_status"
+                  type="int"/>
+    </Action>
+    <Action ID="Docking">
+      <output_port name="result"
+                   type="geometry_msgs::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+      <input_port name="offset"
+                  type="geometry_msgs::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+      <input_port name="base"
+                  type="geometry_msgs::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+      <input_port name="mission_type"
+                  type="int"/>
+    </Action>
+    <Action ID="LadybugActivate"/>
+    <Action ID="Navigation">
+      <output_port name="result"
+                   type="geometry_msgs::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+      <input_port name="goal"
+                  type="geometry_msgs::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+    </Action>
+    <Action ID="Recovery">
+      <output_port name="result"
+                   type="geometry_msgs::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+      <input_port name="base"
+                  type="geometry_msgs::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+    </Action>
+    <Decorator ID="TimerChecker">
+      <input_port name="timer"
+                  type="int"/>
+    </Decorator>
+  </TreeNodesModel>
+
+</root>
