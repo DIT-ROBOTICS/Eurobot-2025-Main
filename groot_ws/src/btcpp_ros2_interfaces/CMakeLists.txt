@@ -18,7 +18,8 @@ rosidl_generate_interfaces(btcpp_ros2_interfaces
     "action/ExecuteTree.action"
     "action/Sleep.action"
     "action/Navigation.action"
-    DEPENDENCIES geometry_msgs action_msgs
+    "action/NavMission.action"
+    DEPENDENCIES geometry_msgs action_msgs std_msgs
 )
 
 ament_export_dependencies(rosidl_default_runtime)

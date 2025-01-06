@@ -1,9 +1,7 @@
 <package format="3">
   <name>btcpp_ros2_interfaces</name>
   <version>0.2.0</version>
-  <description>
-  ROS2 interfaces, mostly used to demonstrate behaviortree_ros2
-  </description>
+  <description>TODO: Package description</description>
 
   <maintainer email="davide.faconti@gmail.com">Davide Faconti</maintainer>
   <license>MIT</license>

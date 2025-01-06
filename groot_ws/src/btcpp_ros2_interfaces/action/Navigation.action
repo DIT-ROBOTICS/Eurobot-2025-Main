@@ -1,5 +1,5 @@
 # Goal
-geometry_msgs/Twist goal
+geometry_msgs/TwistStamped goal
 ---
 # Result
 string result
