@@ -11,12 +11,13 @@
             <input_port name="if_empty" type="BT::NodeStatus" default="SUCCESS">Status to return if queue is empty: SUCCESS, FAILURE, SKIPPED</input_port>
             <inout_port name="queue" type="std::shared_ptr&lt;std::deque&lt;geometry_msgs::msg::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;, std::allocator&lt;geometry_msgs::msg::TwistStamped_&lt;std::allocator&lt;void&gt; &gt; &gt; &gt; &gt;"/>
         </Decorator>
+        <Action ID="NavigationTemp">
+            <input_port name="goal" type="geometry_msgs::msg::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+            <input_port name="action_name" type="std::string" default="">Action server name</input_port>
+        </Action>
         <Decorator ID="RaceTimeCheck">
             <input_port name="max_time_count" type="double"/>
         </Decorator>
-        <Action ID="SimpleNavigation">
-            <input_port name="goal" type="geometry_msgs::msg::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
-        </Action>
         <Action ID="StartRace">
             <output_port name="output" type="std::string"/>
         </Action>

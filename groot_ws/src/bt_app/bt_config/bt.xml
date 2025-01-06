@@ -126,7 +126,7 @@
       <LoopWayPoint value="{POINT}"
                     if_empty="SUCCESS"
                     queue="{WAY_POINT}">
-        <SimpleNavigation goal="{POINT}"/>
+        <NavigationTemp name="NavigationTemp" action_name="testing_action" goal="{POINT}"/>
       </LoopWayPoint>
     </Sequence>
   </BehaviorTree>
@@ -154,7 +154,7 @@
       <input_port name="max_time_count"
                   type="double"/>
     </Decorator>
-    <Action ID="SimpleNavigation">
+    <Action ID="NavigationTemp">
       <input_port name="goal"
                   type="geometry_msgs::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
     </Action>

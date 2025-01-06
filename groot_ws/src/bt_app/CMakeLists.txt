@@ -36,10 +36,6 @@ ament_target_dependencies(bt_ros2
   "behaviortree_ros2"
   "behaviortree_cpp"
   "btcpp_ros2_interfaces"
-  "std_msgs"
-  "std_srvs"
-  "geometry_msgs"
-  "nav_msgs"
   "rclcpp"
   "rclcpp_action"
   "rclcpp_components"
@@ -76,7 +72,7 @@ ament_target_dependencies(navigationServer
   "rclcpp"
   "rclcpp_action"
   "rclcpp_components")
-rclcpp_components_register_node(navigationServer PLUGIN "TestNavServer" EXECUTABLE test_nav_server)
+rclcpp_components_register_node(navigationServer PLUGIN "bt_app::TestNavServer" EXECUTABLE test_nav_server)
 install(TARGETS
   navigationServer
   ARCHIVE DESTINATION lib

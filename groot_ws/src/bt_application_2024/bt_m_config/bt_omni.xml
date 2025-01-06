@@ -1,0 +1,1273 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root BTCPP_format="4"
+      main_tree_to_execute="MainTree">
+  <BehaviorTree ID="All-Plant">
+    <Sequence>
+      <BTMission mission_type="0"
+                 mission_sub_type="1"/>
+      <SubTree ID="plant1"
+               GameStatus="{GameStatus}"
+               result="GameStatus"/>
+      <BTMission mission_type="0"
+                 mission_sub_type="0"/>
+      <SubTree ID="plant2"
+               GameStatus="{GameStatus}"
+               result="GameStatus"/>
+      <SubTree ID="plant3"
+               GameStatus="{GameStatus}"
+               result="GameStatus"/>
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="Bad-Pot">
+    <Sequence>
+      <Comparator compare_point="0.32, 0.625, 3.14159"
+                  mission_type="1"
+                  mission_sub_type="1"
+                  game_status="{GameStatus}"/>
+      <Navigation result="{PrevGoal}"
+                  goal="0.32, 0.625, 3.14159"/>
+      <Docking result="{PrevGoal}"
+               offset="-0.09, 0.0, 0.0"
+               base="{PrevGoal}"
+               mission_type=""/>
+      <Docking result="{PrevGoal}"
+               offset="0.09, 0.0, 0.0"
+               base="{PrevGoal}"
+               mission_type=""/>
+      <Docking result="{PrevGoal}"
+               offset="0.0, 0.0, -1.57"
+               base="{PrevGoal}"
+               mission_type=""/>
+      <Docking result="{PrevGoal}"
+               offset="0.0, 0.2, 0.0"
+               base="{PrevGoal}"
+               mission_type=""/>
+      <Docking result="{PrevGoal}"
+               offset="0.0, -0.27, 0.0"
+               base="{PrevGoal}"
+               mission_type=""/>
+      <Docking result="{PrevGoal}"
+               offset="0.0, 0.0, -1.57"
+               base="{PrevGoal}"
+               mission_type=""/>
+      <Docking result="{PrevGoal}"
+               offset="-0.12, 0.0, 0.0"
+               base="{PrevGoal}"
+               mission_type=""/>
+      <Docking result="{PrevGoal}"
+               offset="0.09, 0.0, 0.0"
+               base="{PrevGoal}"
+               mission_type=""/>
+      <Docking result="{PrevGoal}"
+               offset="0.0, 0.0, -1.57"
+               base="{PrevGoal}"
+               mission_type=""/>
+      <Docking result="{PrevGoal}"
+               offset="0.0, 0.27, 0.0"
+               base="{PrevGoal}"
+               mission_type=""/>
+      <Docking result="{PrevGoal}"
+               offset="0.0, -0.34, 0.0"
+               base="{PrevGoal}"
+               mission_type=""/>
+      <Docking result="{PrevGoal}"
+               offset="0.0, 0.0,  -1.57"
+               base="{PrevGoal}"
+               mission_type=""/>
+      <Docking result="{PrevGoal}"
+               offset="-0.13, 0.0, 0.0"
+               base="{PrevGoal}"
+               mission_type=""/>
+      <BTFinisher mission_sub_type="1"
+                  mission_type="1"
+                  result="{GameStatus}"
+                  game_status="{GameStatus}"/>
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="Best-Pot">
+    <Sequence>
+      <Comparator compare_point="2.68, 1.425, 1.57"
+                  mission_type="1"
+                  mission_sub_type="0"
+                  game_status="{GameStatus}"/>
+      <Navigation result="{PrevGoal}"
+                  goal="2.68, 1.425, 1.57"/>
+      <Sequence>
+        <SubTree ID="SuckPot"
+                 PrevGoal="{PrevGoal}"/>
+        <SubTree ID="PutPot"
+                 PrevGoal="{PrevGoal}"/>
+        <SubTree ID="GetPlantAndPut"
+                 PrevGoal="{PrevGoal}"/>
+      </Sequence>
+      <BTFinisher mission_sub_type="0"
+                  mission_type="1"
+                  result="{GameStatus}"
+                  game_status="{GameStatus}"/>
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="GetPlantAndPut">
+    <Sequence>
+      <BTMission mission_type="1"
+                 mission_sub_type="4"/>
+      <Sleep msec="1000"/>
+      <Docking result="{PrevGoal}"
+               offset="0.16,0.0,0.0"
+               base="{PrevGoal}"
+               mission_type=""/>
+      <BTMission mission_type="1"
+                 mission_sub_type="5"/>
+      <Sleep msec="1250"/>
+      <Docking result="{PrevGoal}"
+               offset="0.125,0.0,0.0"
+               base="{PrevGoal}"
+               mission_type=""/>
+      <BTMission mission_type="1"
+                 mission_sub_type="6"/>
+      <Sleep msec="800"/>
+      <Docking result="{PrevGoal}"
+               offset="-0.13,0.0,0.0"
+               base="{PrevGoal}"
+               mission_type=""/>
+      <BTMission mission_type="1"
+                 mission_sub_type="7"/>
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="HomeSolar">
+    <Sequence>
+      <Comparator compare_point="2.1, 0.4, -1.57"
+                  mission_type="3"
+                  mission_sub_type="0"
+                  game_status="{GameStatus}"/>
+      <Navigation result="{PrevGoal}"
+                  goal="2.1, 0.4, -1.57"/>
+      <Docking result="{PrevGoal}"
+               offset="0.0,-0.23,0.0"
+               base="{PrevGoal}"
+               mission_type="0"/>
+      <Docking result="{PrevGoal}"
+               offset="0.0,0.0,-1.57"
+               base="{PrevGoal}"
+               mission_type="0"/>
+      <Docking result="{PrevGoal}"
+               offset="0.65,0.0,0.0"
+               base="{PrevGoal}"
+               mission_type="0"/>
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="MainTree">
+    <Sequence>
+      <BTStarter result="{GameStatus}"/>
+      <SubTree ID="All-Plant"
+               GameStatus="{GameStatus}"
+               result="GameStatus"/>
+      <Fallback>
+        <SubTree ID="planter2"
+                 GameStatus="{GameStatus}"
+                 result="GameStatus"
+                 _autoremap="false"/>
+        <SubTree ID="Planter"
+                 GameStatus="{GameStatus}"
+                 result="GameStatus"/>
+      </Fallback>
+      <Fallback>
+        <SubTree ID="best_pot_new"
+                 GameStatus="{GameStatus}"
+                 result="GameStatus"/>
+        <SubTree ID="Best-Pot"
+                 GameStatus="{GameStatus}"
+                 result="GameStatus"/>
+        <SubTree ID="Bad-Pot"
+                 GameStatus="{GameStatus}"
+                 result="GameStatus"/>
+      </Fallback>
+      <SubTree ID="Solar"
+               GameStatus="{GameStatus}"
+               result="GameStatus"/>
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="Plant-A">
+    <Sequence>
+      <Docking result="{PrevGoal}"
+               offset="0.19, 0.0, 0.0"
+               base="{PrevGoal}"
+               mission_type="0"/>
+      <Sleep msec="100"/>
+      <BTMission mission_type="1"
+                 mission_sub_type="0"/>
+      <Docking result="{PrevGoal}"
+               offset="-0.08, 0.0, 1.57"
+               base="{PrevGoal}"
+               mission_type="1"/>
+      <Docking result="{PrevGoal}"
+               offset="0.26, 0.0, 0.0"
+               base="{PrevGoal}"
+               mission_type="0"/>
+      <BTMission mission_type="0"
+                 mission_sub_type="0"/>
+      <BTFinisher mission_sub_type="0"
+                  mission_type="0"
+                  result="{GameStatus}"
+                  game_status="{GameStatus}"/>
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="Plant-A&apos;">
+    <Sequence>
+      <Docking result="{PrevGoal}"
+               offset="0.27, 0.0, 0.0"
+               base="{PrevGoal}"
+               mission_type="0"/>
+      <Sleep msec="100"/>
+      <BTMission mission_type="1"
+                 mission_sub_type="1"/>
+      <Docking result="{PrevGoal}"
+               offset="-0.08, 0.0, 1.57"
+               base="{PrevGoal}"
+               mission_type=""/>
+      <Docking result="{PrevGoal}"
+               offset="0.27, 0.0, 0.0"
+               base="{PrevGoal}"
+               mission_type=""/>
+      <BTFinisher mission_sub_type="0"
+                  mission_type="0"
+                  result="{GameStatus}"
+                  game_status="{GameStatus}"/>
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="Plant-A&apos;&apos;">
+    <Sequence>
+      <Docking result="{PrevGoal}"
+               offset="0.16, 0.0, 0.0"
+               base="{PrevGoal}"
+               mission_type="0"/>
+      <Docking result="{PrevGoal}"
+               offset="-0.08, 0.0, 3.14"
+               base="{PrevGoal}"
+               mission_type=""/>
+      <Docking result="{PrevGoal}"
+               offset="0.26, 0.0, 0.0"
+               base="{PrevGoal}"
+               mission_type=""/>
+      <BTFinisher mission_sub_type="0"
+                  mission_type="0"
+                  result="{GameStatus}"
+                  game_status="{GameStatus}"/>
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="Plant-B">
+    <Sequence>
+      <Docking result="{PrevGoal}"
+               offset="0.28, 0.0, 0.0"
+               base="{PrevGoal}"
+               mission_type="0"/>
+      <Sleep msec="100"/>
+      <BTMission mission_type="1"
+                 mission_sub_type="0"/>
+      <Docking result="{PrevGoal}"
+               offset="-0.08, -0.00, 1.57"
+               base="{PrevGoal}"
+               mission_type="1"/>
+      <Docking result="{PrevGoal}"
+               offset="0.26,  0.00, 0.0"
+               base="{PrevGoal}"
+               mission_type="0"/>
+      <BTMission mission_type="0"
+                 mission_sub_type="0"/>
+      <BTFinisher mission_sub_type="1"
+                  mission_type="0"
+                  result="{GameStatus}"
+                  game_status="{GameStatus}"/>
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="Plant-B&apos;">
+    <Sequence>
+      <Docking result="{PrevGoal}"
+               offset="0.27, 0.0, 0.0"
+               base="{PrevGoal}"
+               mission_type="0"/>
+      <Sleep msec="100"/>
+      <BTMission mission_type="1"
+                 mission_sub_type="1"/>
+      <Docking result="{PrevGoal}"
+               offset="-0.08, 0.0, 1.57"
+               base="{PrevGoal}"
+               mission_type="0"/>
+      <Docking result="{PrevGoal}"
+               offset="0.27,  0.0, 0.0"
+               base="{PrevGoal}"
+               mission_type="0"/>
+      <BTFinisher mission_sub_type="1"
+                  mission_type="0"
+                  result="{GameStatus}"
+                  game_status="{GameStatus}"/>
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="Plant-B&apos;&apos;">
+    <Sequence>
+      <Docking result="{PrevGoal}"
+               offset="0.16, 0.0, 0.0"
+               base="{PrevGoal}"
+               mission_type="0"/>
+      <Docking result="{PrevGoal}"
+               offset="-0.08, 0.0, 3.14"
+               base="{PrevGoal}"
+               mission_type="0"/>
+      <Docking result="{PrevGoal}"
+               offset="0.26,  0.0, 0.0"
+               base="{PrevGoal}"
+               mission_type="0"/>
+      <BTFinisher mission_sub_type="1"
+                  mission_type="0"
+                  result="{GameStatus}"
+                  game_status="{GameStatus}"/>
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="Plant-C">
+    <Sequence>
+      <Docking result="{PrevGoal}"
+               offset="0.16, 0.0, 0.0"
+               base="{PrevGoal}"
+               mission_type="0"/>
+      <Sleep msec="100"/>
+      <BTMission mission_type="1"
+                 mission_sub_type="0"/>
+      <Docking result="{PrevGoal}"
+               offset="-0.08, 0.0, 1.57"
+               base="{PrevGoal}"
+               mission_type="0"/>
+      <Docking result="{PrevGoal}"
+               offset="0.26,  0.0, 0.0"
+               base="{PrevGoal}"
+               mission_type="0"/>
+      <BTFinisher mission_sub_type="2"
+                  mission_type="0"
+                  result="{GameStatus}"
+                  game_status="{GameStatus}"/>
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="Plant-C&apos;">
+    <Sequence>
+      <Docking result="{PrevGoal}"
+               offset="0.27, 0.0, 0.0"
+               base="{PrevGoal}"
+               mission_type="0"/>
+      <Sleep msec="100"/>
+      <BTMission mission_type="1"
+                 mission_sub_type="1"/>
+      <Docking result="{PrevGoal}"
+               offset="-0.08, 0.0, 1.57"
+               base="{PrevGoal}"
+               mission_type="0"/>
+      <Docking result="{PrevGoal}"
+               offset="0.27,  0.0, 0.0"
+               base="{PrevGoal}"
+               mission_type="0"/>
+      <BTFinisher mission_sub_type="2"
+                  mission_type="0"
+                  result="{GameStatus}"
+                  game_status="{GameStatus}"/>
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="Plant-C&apos;&apos;">
+    <Sequence>
+      <Docking result="{PrevGoal}"
+               offset="0.16, 0.0, 0.0"
+               base="{PrevGoal}"
+               mission_type="0"/>
+      <Docking result="{PrevGoal}"
+               offset="-0.08, 0.0, 3.14"
+               base="{PrevGoal}"
+               mission_type="0"/>
+      <Docking result="{PrevGoal}"
+               offset="0.26,  0.0, 0.0"
+               base="{PrevGoal}"
+               mission_type="0"/>
+      <BTFinisher mission_sub_type="2"
+                  mission_type="0"
+                  result="{GameStatus}"
+                  game_status="{GameStatus}"/>
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="Plant-D">
+    <Sequence>
+      <Docking result="{PrevGoal}"
+               offset="0.16, 0.0, 0.0"
+               base="{PrevGoal}"
+               mission_type=""/>
+      <Sleep msec="100"/>
+      <BTMission mission_type="1"
+                 mission_sub_type="0"/>
+      <Docking result="{PrevGoal}"
+               offset="-0.08, 0.0, 1.57"
+               base="{PrevGoal}"
+               mission_type=""/>
+      <Docking result="{PrevGoal}"
+               offset="0.35,  0.0, 0.0"
+               base="{PrevGoal}"
+               mission_type=""/>
+      <BTFinisher mission_sub_type="3"
+                  mission_type="0"
+                  result="{GameStatus}"
+                  game_status="{GameStatus}"/>
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="Plant-D&apos;">
+    <Sequence>
+      <Docking result="{PrevGoal}"
+               offset="0.27, 0.0, 0.0"
+               base="{PrevGoal}"
+               mission_type="0"/>
+      <Sleep msec="100"/>
+      <BTMission mission_type="1"
+                 mission_sub_type="1"/>
+      <Docking result="{PrevGoal}"
+               offset="-0.08, 0.0, 1.57"
+               base="{PrevGoal}"
+               mission_type="0"/>
+      <Docking result="{PrevGoal}"
+               offset="0.27,  0.0, 0.0"
+               base="{PrevGoal}"
+               mission_type="0"/>
+      <BTFinisher mission_sub_type="3"
+                  mission_type="0"
+                  result="{GameStatus}"
+                  game_status="{GameStatus}"/>
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="Plant-D&apos;&apos;">
+    <Sequence>
+      <Docking result="{PrevGoal}"
+               offset="0.26, 0.0, 0.0"
+               base="{PrevGoal}"
+               mission_type="0"/>
+      <Docking result="{PrevGoal}"
+               offset="-0.08, 0.0, 3.14"
+               base="{PrevGoal}"
+               mission_type="0"/>
+      <Docking result="{PrevGoal}"
+               offset="0.26,  0.0, 0.0"
+               base="{PrevGoal}"
+               mission_type="0"/>
+      <BTFinisher mission_sub_type="3"
+                  mission_type="0"
+                  result="{GameStatus}"
+                  game_status="{GameStatus}"/>
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="Plant-E">
+    <Sequence>
+      <Docking result="{PrevGoal}"
+               offset="0.16, 0.0, 0.0"
+               base="{PrevGoal}"
+               mission_type="0"/>
+      <Sleep msec="100"/>
+      <BTMission mission_type="1"
+                 mission_sub_type="0"/>
+      <Docking result="{PrevGoal}"
+               offset="-0.08, 0.0, 1.57"
+               base="{PrevGoal}"
+               mission_type="0"/>
+      <Docking result="{PrevGoal}"
+               offset="0.35,  0.0, 0.0"
+               base="{PrevGoal}"
+               mission_type="0"/>
+      <BTFinisher mission_sub_type="4"
+                  mission_type="0"
+                  result="{GameStatus}"
+                  game_status="{GameStatus}"/>
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="Plant-E&apos;">
+    <Sequence>
+      <Docking result="{PrevGoal}"
+               offset="0.27, 0.0, 0.0"
+               base="{PrevGoal}"
+               mission_type="0"/>
+      <Sleep msec="100"/>
+      <BTMission mission_type="1"
+                 mission_sub_type="1"/>
+      <Docking result="{PrevGoal}"
+               offset="-0.08, 0.0, 1.57"
+               base="{PrevGoal}"
+               mission_type="0"/>
+      <Docking result="{PrevGoal}"
+               offset="0.27,  0.0, 0.0"
+               base="{PrevGoal}"
+               mission_type="0"/>
+      <BTFinisher mission_sub_type="4"
+                  mission_type="0"
+                  result="{GameStatus}"
+                  game_status="{GameStatus}"/>
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="Plant-E&apos;&apos;">
+    <Sequence>
+      <Docking result="{PrevGoal}"
+               offset="0.16, 0.0, 0.0"
+               base="{PrevGoal}"
+               mission_type="0"/>
+      <Docking result="{PrevGoal}"
+               offset="-0.08, 0.0, 3.14"
+               base="{PrevGoal}"
+               mission_type="0"/>
+      <Docking result="{PrevGoal}"
+               offset="0.26,  0.0, 0.0"
+               base="{PrevGoal}"
+               mission_type="0"/>
+      <BTFinisher mission_sub_type="4"
+                  mission_type="0"
+                  result="{GameStatus}"
+                  game_status="{GameStatus}"/>
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="Plant-F">
+    <Sequence>
+      <Docking result="{PrevGoal}"
+               offset="0.16, 0.0, 0.0"
+               base="{PrevGoal}"
+               mission_type="0"/>
+      <Sleep msec="100"/>
+      <BTMission mission_type="1"
+                 mission_sub_type="0"/>
+      <Docking result="{PrevGoal}"
+               offset="-0.08, 0.0, 3.14"
+               base="{PrevGoal}"
+               mission_type="0"/>
+      <Docking result="{PrevGoal}"
+               offset="0.26,  0.0, 0.0"
+               base="{PrevGoal}"
+               mission_type="0"/>
+      <BTFinisher mission_sub_type="5"
+                  mission_type="0"
+                  result="{GameStatus}"
+                  game_status="{GameStatus}"/>
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="Plant-F&apos;">
+    <Sequence>
+      <Docking result="{PrevGoal}"
+               offset="0.27, 0.0, 0.0"
+               base="{PrevGoal}"
+               mission_type="0"/>
+      <Sleep msec="100"/>
+      <BTMission mission_type="1"
+                 mission_sub_type="1"/>
+      <Docking result="{PrevGoal}"
+               offset="-0.08, 0.0, 1.57"
+               base="{PrevGoal}"
+               mission_type="0"/>
+      <Docking result="{PrevGoal}"
+               offset="0.27,  0.0, 0.0"
+               base="{PrevGoal}"
+               mission_type="0"/>
+      <BTFinisher mission_sub_type="5"
+                  mission_type="0"
+                  result="{GameStatus}"
+                  game_status="{GameStatus}"/>
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="Plant-F&apos;&apos;">
+    <Sequence>
+      <Docking result="{PrevGoal}"
+               offset="0.16, 0.0, 0.0"
+               base="{PrevGoal}"
+               mission_type="0"/>
+      <Docking result="{PrevGoal}"
+               offset="-0.08, 0.0, 3.14"
+               base="{PrevGoal}"
+               mission_type="0"/>
+      <Docking result="{PrevGoal}"
+               offset="0.26,  0.0, 0.0"
+               base="{PrevGoal}"
+               mission_type="0"/>
+      <BTFinisher mission_sub_type="5"
+                  mission_type="0"
+                  result="{GameStatus}"
+                  game_status="{GameStatus}"/>
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="Planter">
+    <Sequence>
+      <Comparator compare_point="2.35, 1.7, 3.14"
+                  mission_type="1"
+                  mission_sub_type="0"
+                  game_status="{GameStatus}"/>
+      <Navigation result="{PrevGoal}"
+                  goal="2.35, 1.7,3.14"/>
+      <BTMission mission_type="0"
+                 mission_sub_type="2"/>
+      <Sleep msec="1300"/>
+      <Docking result="{PrevGoal}"
+               offset="-0.13,0.12,0."
+               base="{PrevGoal}"
+               mission_type="1"/>
+      <Docking result="{PrevGoal}"
+               offset="0.13,-0.12,0."
+               base="{PrevGoal}"
+               mission_type="1"/>
+      <BTMission mission_type="0"
+                 mission_sub_type="0"/>
+      <Sleep msec="700"/>
+      <BTMission mission_type="0"
+                 mission_sub_type="3"/>
+      <Docking result="{PrevGoal}"
+               offset="0.0,0.0,-3.14"
+               base="{PrevGoal}"
+               mission_type="1"/>
+      <Sleep msec="700"/>
+      <Docking result="{PrevGoal}"
+               offset="-0.13,0.08,0.0"
+               base="{PrevGoal}"
+               mission_type="1"/>
+      <Docking result="{PrevGoal}"
+               offset="-0.2,-0.2,1.57"
+               base="{PrevGoal}"
+               mission_type="1"/>
+      <Docking result="{PrevGoal}"
+               offset="0.2,0.0,0.0"
+               base="{PrevGoal}"
+               mission_type="1"/>
+      <BTMission mission_type="1"
+                 mission_sub_type="4"/>
+      <Sleep msec="1500"/>
+      <Docking result="{PrevGoal}"
+               offset="0.0,0.16,0.0"
+               base="{PrevGoal}"
+               mission_type="1"/>
+      <BTMission mission_type="1"
+                 mission_sub_type="5"/>
+      <Sleep msec="1250"/>
+      <Docking result="{PrevGoal}"
+               offset="0.0,0.08,0.0"
+               base="{PrevGoal}"
+               mission_type="1"/>
+      <BTMission mission_type="1"
+                 mission_sub_type="6"/>
+      <Sleep msec="800"/>
+      <BTMission mission_type="0"
+                 mission_sub_type="1"/>
+      <Docking result="{PrevGoal}"
+               offset="0.0,-0.18,1.57"
+               base="{PrevGoal}"
+               mission_type="1"/>
+      <Docking result="{PrevGoal}"
+               offset="0.13,0.0,0.0"
+               base="{PrevGoal}"
+               mission_type="1"/>
+      <BTMission mission_type="1"
+                 mission_sub_type="7"/>
+      <Sleep msec="700"/>
+      <BTFinisher mission_sub_type="0"
+                  mission_type="1"
+                  result="{GameStatus}"
+                  game_status="{GameStatus}"/>
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="PutPot">
+    <Sequence>
+      <Docking result="{PrevGoal}"
+               offset="-0.12, 0.4, -1.57"
+               base="{PrevGoal}"
+               mission_type="2"/>
+      <BTMission mission_type="0"
+                 mission_sub_type="2"/>
+      <Docking result="{PrevGoal}"
+               offset="0.12, -0.4, 0.0"
+               base="{PrevGoal}"
+               mission_type="2"/>
+      <Docking result="{PrevGoal}"
+               offset="-0.17, 0.25, 3.14"
+               base="{PrevGoal}"
+               mission_type="2"/>
+      <BTMission mission_type="0"
+                 mission_sub_type="3"/>
+      <Docking result="{PrevGoal}"
+               offset="0.11, -0.25, 0.0"
+               base="{PrevGoal}"
+               mission_type="2"/>
+      <Docking result="{PrevGoal}"
+               offset="-0.2, 0.0, 0.0"
+               base="{PrevGoal}"
+               mission_type="2"/>
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="Solar">
+    <Fallback>
+      <Sequence>
+        <Comparator compare_point="0.9, 0.4, 1.57"
+                    mission_type="3"
+                    mission_sub_type="0"
+                    game_status="{GameStatus}"/>
+        <Navigation result="{PrevGoal}"
+                    goal="0.9, 0.4, 1.57"/>
+        <BTMission mission_type="1"
+                   mission_sub_type="8"/>
+        <Docking result="{PrevGoal}"
+                 offset="0.0,-0.23,0.0"
+                 base="{PrevGoal}"
+                 mission_type="0"/>
+        <Docking result="{PrevGoal}"
+                 offset="0.0,0.0,0.0"
+                 base="{PrevGoal}"
+                 mission_type="0"/>
+        <Docking result="{PrevGoal}"
+                 offset="1.05,0.0,0.0"
+                 base="{PrevGoal}"
+                 mission_type="0"/>
+        <Docking result="{PrevGoal}"
+                 offset="0.8, 0.0, 0.0"
+                 base="{PrevGoal}"
+                 mission_type="0"/>
+      </Sequence>
+      <SubTree ID="HomeSolar"/>
+    </Fallback>
+  </BehaviorTree>
+
+  <BehaviorTree ID="Subtree">
+    <Sequence>
+      <Docking result="{PrevGoal}"
+               offset="0.09, 0.0, 0.0"
+               base="{PrevGoal}"
+               mission_type=""/>
+      <BTMission mission_type="1"
+                 mission_sub_type="1"/>
+      <Docking result="{PrevGoal}"
+               offset="-0.09, -0.04, 0.0"
+               base="{PrevGoal}"
+               mission_type=""/>
+      <BTMission mission_type="0"
+                 mission_sub_type="2"/>
+      <Docking result="{PrevGoal}"
+               offset="0.0, 0.0, 3.14"
+               base="{PrevGoal}"
+               mission_type=""/>
+      <Docking result="{PrevGoal}"
+               offset="0.09, 0.0, 0.0"
+               base="{PrevGoal}"
+               mission_type=""/>
+      <Docking result="{PrevGoal}"
+               offset="-0.09, 0.0, -1.57"
+               base="{PrevGoal}"
+               mission_type=""/>
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="SuckPot">
+    <Sequence>
+      <Docking result="{PrevGoal}"
+               offset="0.11, 0.0, 0.0"
+               base="{PrevGoal}"
+               mission_type="1"/>
+      <BTMission mission_type="1"
+                 mission_sub_type="3"/>
+      <Sleep msec="500"/>
+      <Docking result="{PrevGoal}"
+               offset="-0.2, -0.04, 0.0"
+               base="{PrevGoal}"
+               mission_type="1"/>
+      <Sleep msec="500"/>
+      <Docking result="{PrevGoal}"
+               offset="0.0, 0.0, 3.14"
+               base="{PrevGoal}"
+               mission_type="0"/>
+      <Docking result="{PrevGoal}"
+               offset="0.27, 0.0, 0.0"
+               base="{PrevGoal}"
+               mission_type="1"/>
+      <BTMission mission_type="1"
+                 mission_sub_type="2"/>
+      <Sleep msec="500"/>
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="best_pot_new">
+    <Sequence>
+      <Comparator compare_point="2.68, 1.425, 1.57"
+                  mission_type="2"
+                  mission_sub_type="0"
+                  game_status="{GameStatus}"/>
+      <BTMission mission_type="0"
+                 mission_sub_type="0"/>
+      <Navigation result="{PrevGoal}"
+                  goal="2.68, 1.425, 1.57"/>
+      <BTMission mission_type="0"
+                 mission_sub_type="1"/>
+      <Sequence>
+        <SubTree ID="SuckPot"
+                 PrevGoal="{PrevGoal}"/>
+        <Docking result="{PrevGoal}"
+                 offset="-0.1,0.0,1.57"
+                 base="{PrevGoal}"
+                 mission_type="1"/>
+        <BTMission mission_type="1"
+                   mission_sub_type="5"/>
+        <Docking result="{PrevGoal}"
+                 offset="0.11,0.0,0.0"
+                 base="{PrevGoal}"
+                 mission_type="1"/>
+        <BTMission mission_type="1"
+                   mission_sub_type="6"/>
+        <Sleep msec="600"/>
+        <Docking result="{PrevGoal}"
+                 offset="-0.1,0.0,0.0"
+                 base="{PrevGoal}"
+                 mission_type="1"/>
+        <BTMission mission_type="0"
+                   mission_sub_type="3"/>
+        <BTMission mission_type="1"
+                   mission_sub_type="9"/>
+        <Docking result="{PrevGoal}"
+                 offset="0.0,0.3,0.0"
+                 base="{PrevGoal}"
+                 mission_type="1"/>
+        <BTMission mission_type="1"
+                   mission_sub_type="7"/>
+        <Docking result="{PrevGoal}"
+                 offset="0.0,-0.1,3.14"
+                 base="{PrevGoal}"
+                 mission_type="1"/>
+        <BTMission mission_type="0"
+                   mission_sub_type="2"/>
+        <BTMission mission_type="1"
+                   mission_sub_type="10"/>
+        <Docking result="{PrevGoal}"
+                 offset="0.0,0.05,0.0"
+                 base="{PrevGoal}"
+                 mission_type="1"/>
+        <Docking result="{PrevGoal}"
+                 offset="0.0,-0.05,0.0"
+                 base="{PrevGoal}"
+                 mission_type="1"/>
+      </Sequence>
+      <BTFinisher mission_sub_type="0"
+                  mission_type="2"
+                  result="{GameStatus}"
+                  game_status="{GameStatus}"/>
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="plant1">
+    <Fallback>
+      <Sequence>
+        <Comparator compare_point="0.7, 0.7, -1.57"
+                    mission_type="0"
+                    mission_sub_type="0"
+                    game_status="{GameStatus}"/>
+        <BTMission mission_type="0"
+                   mission_sub_type="1"/>
+        <Navigation result="{PrevGoal}"
+                    goal="0.7, 0.7, -1.57"/>
+        <SubTree ID="Plant-A"
+                 PrevGoal="{PrevGoal}"
+                 GameStatus="{GameStatus}"
+                 result="GameStatus"/>
+      </Sequence>
+      <Sequence>
+        <Comparator compare_point="0.7, 1.3, -1.57"
+                    mission_type="0"
+                    mission_sub_type="1"
+                    game_status="{GameStatus}"/>
+        <BTMission mission_type="0"
+                   mission_sub_type="1"/>
+        <Navigation result="{PrevGoal}"
+                    goal="0.7, 1.3, -1.57"/>
+        <SubTree ID="Plant-B"
+                 PrevGoal="{PrevGoal}"
+                 GameStatus="{GameStatus}"
+                 result="GameStatus"/>
+      </Sequence>
+      <Sequence>
+        <Comparator compare_point="1.2, 0.5, -1.57"
+                    mission_type="0"
+                    mission_sub_type="2"
+                    game_status="{GameStatus}"/>
+        <BTMission mission_type="0"
+                   mission_sub_type="1"/>
+        <Navigation result="{PrevGoal}"
+                    goal="1.2, 0.5, -1.57"/>
+        <SubTree ID="Plant-C"
+                 PrevGoal="{PrevGoal}"
+                 result="{GameStatus}"
+                 game_status="{GameStatus}"/>
+      </Sequence>
+      <Sequence>
+        <Comparator compare_point="1.2, 1.5, -1.57"
+                    mission_type="0"
+                    mission_sub_type="3"
+                    game_status="{GameStatus}"/>
+        <BTMission mission_type="0"
+                   mission_sub_type="1"/>
+        <Navigation result="{PrevGoal}"
+                    goal="1.2, 1.5, -1.57"/>
+        <SubTree ID="Plant-D"
+                 PrevGoal="{PrevGoal}"
+                 GameStatus="{GameStatus}"
+                 result="GameStatus"/>
+      </Sequence>
+      <Sequence>
+        <Comparator compare_point="1.7, 0.7, -1.57"
+                    mission_type="0"
+                    mission_sub_type="4"
+                    game_status="{GameStatus}"/>
+        <BTMission mission_type="0"
+                   mission_sub_type="1"/>
+        <Navigation result="{PrevGoal}"
+                    goal="1.7, 0.7, -1.57"/>
+        <SubTree ID="Plant-E"
+                 PrevGoal="{PrevGoal}"
+                 GameStatus="{GameStatus}"
+                 result="GameStatus"/>
+      </Sequence>
+      <Sequence>
+        <Comparator compare_point="1.7, 1.3 , -1.57"
+                    mission_type="0"
+                    mission_sub_type="5"
+                    game_status="{GameStatus}"/>
+        <BTMission mission_type="0"
+                   mission_sub_type="1"/>
+        <Navigation result="{PrevGoal}"
+                    goal="1.7, 1.3 , -1.57"/>
+        <SubTree ID="Plant-F"
+                 PrevGoal="{PrevGoal}"
+                 GameStatus="{GameStatus}"
+                 result="GameStatus"/>
+      </Sequence>
+    </Fallback>
+  </BehaviorTree>
+
+  <BehaviorTree ID="plant2">
+    <Fallback>
+      <Sequence>
+        <Comparator compare_point="0.6, 0.7, 1.57"
+                    mission_type="0"
+                    mission_sub_type="0"
+                    game_status="{GameStatus}"/>
+        <BTMission mission_type="0"
+                   mission_sub_type="0"/>
+        <Navigation result="{PrevGoal}"
+                    goal="0.6, 0.7, 1.57"/>
+        <SubTree ID="Plant-A&apos;"
+                 PrevGoal="{PrevGoal}"
+                 GameStatus="{GameStatus}"
+                 result="GameStatus"/>
+      </Sequence>
+      <Sequence>
+        <Comparator compare_point="0.6, 1.3, 1.57"
+                    mission_type="0"
+                    mission_sub_type="1"
+                    game_status="{GameStatus}"/>
+        <BTMission mission_type="0"
+                   mission_sub_type="0"/>
+        <Navigation result="{PrevGoal}"
+                    goal="0.6, 1.3, 1.57"/>
+        <SubTree ID="Plant-B&apos;"
+                 PrevGoal="{PrevGoal}"
+                 GameStatus="{GameStatus}"
+                 result="GameStatus"/>
+      </Sequence>
+      <Sequence>
+        <Comparator compare_point="1.2, 0.5, 1.57"
+                    mission_type="0"
+                    mission_sub_type="2"
+                    game_status="{GameStatus}"/>
+        <BTMission mission_type="0"
+                   mission_sub_type="0"/>
+        <Navigation result="{PrevGoal}"
+                    goal="1.2, 0.5, 1.57"/>
+        <SubTree ID="Plant-C&apos;"
+                 PrevGoal="{PrevGoal}"
+                 GameStatus="{GameStatus}"
+                 result="GameStatus"/>
+      </Sequence>
+      <Sequence>
+        <Comparator compare_point="1.2, 1.5, 1.57"
+                    mission_type="0"
+                    mission_sub_type="3"
+                    game_status="{GameStatus}"/>
+        <BTMission mission_type="0"
+                   mission_sub_type="0"/>
+        <Navigation result="{PrevGoal}"
+                    goal="1.2, 1.5, 1.57"/>
+        <SubTree ID="Plant-D&apos;"
+                 PrevGoal="{PrevGoal}"
+                 GameStatus="{GameStatus}"
+                 result="GameStatus"/>
+      </Sequence>
+      <Sequence>
+        <Comparator compare_point="1.7, 0.7, 1.57"
+                    mission_type="0"
+                    mission_sub_type="4"
+                    game_status="{GameStatus}"/>
+        <BTMission mission_type="0"
+                   mission_sub_type="0"/>
+        <Navigation result="{PrevGoal}"
+                    goal="1.7, 0.7, 1.57"/>
+        <SubTree ID="Plant-E&apos;"
+                 PrevGoal="{PrevGoal}"
+                 GameStatus="{GameStatus}"
+                 result="GameStatus"/>
+      </Sequence>
+      <Sequence>
+        <Comparator compare_point="1.7, 1.3 , 1.57"
+                    mission_type="0"
+                    mission_sub_type="5"
+                    game_status="{GameStatus}"/>
+        <BTMission mission_type="0"
+                   mission_sub_type="0"/>
+        <Navigation result="{PrevGoal}"
+                    goal="1.7, 1.3 , 1.57"/>
+        <SubTree ID="Plant-F&apos;"
+                 PrevGoal="{PrevGoal}"
+                 GameStatus="{GameStatus}"
+                 result="GameStatus"/>
+      </Sequence>
+    </Fallback>
+  </BehaviorTree>
+
+  <BehaviorTree ID="plant3">
+    <Fallback>
+      <Sequence>
+        <Comparator compare_point="0.7, 0.7, 1.57"
+                    mission_type="0"
+                    mission_sub_type="0"
+                    game_status="{GameStatus}"/>
+        <Navigation result="{PrevGoal}"
+                    goal="0.7, 0.7, 1.57"/>
+        <SubTree ID="Plant-A&apos;&apos;"
+                 PrevGoal="{PrevGoal}"
+                 GameStatus="{GameStatus}"
+                 result="GameStatus"/>
+      </Sequence>
+      <Sequence>
+        <Comparator compare_point="0.7, 1.3, 1.57"
+                    mission_type="0"
+                    mission_sub_type="1"
+                    game_status="{GameStatus}"/>
+        <Navigation result="{PrevGoal}"
+                    goal="0.7, 1.3, 1.57"/>
+        <SubTree ID="Plant-B&apos;&apos;"
+                 PrevGoal="{PrevGoal}"
+                 GameStatus="{GameStatus}"
+                 result="GameStatus"/>
+      </Sequence>
+      <Sequence>
+        <Comparator compare_point="1.2, 0.5, 1.57"
+                    mission_type="0"
+                    mission_sub_type="2"
+                    game_status="{GameStatus}"/>
+        <Navigation result="{PrevGoal}"
+                    goal="1.2, 0.5, 1.57"/>
+        <SubTree ID="Plant-C&apos;&apos;"
+                 PrevGoal="{PrevGoal}"
+                 GameStatus="{GameStatus}"
+                 result="GameStatus"/>
+      </Sequence>
+      <Sequence>
+        <Comparator compare_point="1.2, 1.5, 1.57"
+                    mission_type="0"
+                    mission_sub_type="3"
+                    game_status="{GameStatus}"/>
+        <Navigation result="{PrevGoal}"
+                    goal="1.2, 1.5, 1.57"/>
+        <SubTree ID="Plant-D&apos;&apos;"
+                 PrevGoal="{PrevGoal}"
+                 GameStatus="{GameStatus}"
+                 result="GameStatus"/>
+      </Sequence>
+      <Sequence>
+        <Comparator compare_point="1.7, 0.7, 1.57"
+                    mission_type="0"
+                    mission_sub_type="4"
+                    game_status="{GameStatus}"/>
+        <Navigation result="{PrevGoal}"
+                    goal="1.7, 0.7, 1.57"/>
+        <SubTree ID="Plant-E&apos;&apos;"
+                 PrevGoal="{PrevGoal}"
+                 GameStatus="{GameStatus}"
+                 result="GameStatus"/>
+      </Sequence>
+      <Sequence>
+        <Comparator compare_point="1.7, 1.3 , 1.57"
+                    mission_type="0"
+                    mission_sub_type="5"
+                    game_status="{GameStatus}"/>
+        <Navigation result="{PrevGoal}"
+                    goal="1.7, 1.3 , 1.57"/>
+        <SubTree ID="Plant-F&apos;&apos;"
+                 PrevGoal="{PrevGoal}"
+                 GameStatus="{GameStatus}"
+                 result="GameStatus"/>
+      </Sequence>
+    </Fallback>
+  </BehaviorTree>
+
+  <BehaviorTree ID="planter2">
+    <Sequence>
+      <Comparator compare_point="2.5, 1.58, 3.14"
+                  mission_type="1"
+                  mission_sub_type="0"
+                  game_status="{GameStatus}"/>
+      <Navigation result="{PrevGoal}"
+                  goal="2.5, 1.58,3.14"/>
+      <BTMission mission_type="0"
+                 mission_sub_type="2"/>
+      <Docking result="{PrevGoal}"
+               offset="0.2,0.2,0.0"
+               base="{PrevGoal}"
+               mission_type="1"/>
+      <Sleep msec="1000"/>
+      <Docking result="{PrevGoal}"
+               offset="-0.2,-0.2,0.0"
+               base="{PrevGoal}"
+               mission_type="1"/>
+      <Docking result="{PrevGoal}"
+               offset="0.0,0.0,3.14"
+               base="{PrevGoal}"
+               mission_type="1"/>
+      <BTMission mission_type="0"
+                 mission_sub_type="3"/>
+      <Docking result="{PrevGoal}"
+               offset="0.19,0.185,0.0"
+               base="{PrevGoal}"
+               mission_type="1"/>
+      <Sleep msec="800"/>
+      <Docking result="{PrevGoal}"
+               offset="-0.1,-0.2,0.0"
+               base="{PrevGoal}"
+               mission_type="1"/>
+      <Docking result="{PrevGoal}"
+               offset="0.1,0.0,1.57"
+               base="{PrevGoal}"
+               mission_type="1"/>
+      <BTMission mission_type="1"
+                 mission_sub_type="4"/>
+      <Sleep msec="900"/>
+      <Docking result="{PrevGoal}"
+               offset="0.0,0.18,0.0"
+               base="{PrevGoal}"
+               mission_type="1"/>
+      <BTMission mission_type="1"
+                 mission_sub_type="5"/>
+      <Sleep msec="650"/>
+      <Docking result="{PrevGoal}"
+               offset="-0.45,0.0,0.0"
+               base="{PrevGoal}"
+               mission_type="1"/>
+      <Docking result="{PrevGoal}"
+               offset="0.0,0.13,0.0"
+               base="{PrevGoal}"
+               mission_type="1"/>
+      <BTMission mission_type="1"
+                 mission_sub_type="6"/>
+      <Sleep msec="620"/>
+      <Docking result="{PrevGoal}"
+               offset="0.0,-0.18,0.0"
+               base="{PrevGoal}"
+               mission_type="1"/>
+      <Docking result="{PrevGoal}"
+               offset="0.0,0.0,-1.57"
+               base="{PrevGoal}"
+               mission_type="1"/>
+      <BTMission mission_type="1"
+                 mission_sub_type="4"/>
+      <Docking result="{PrevGoal}"
+               offset="0.48,-0.05,0.0"
+               base="{PrevGoal}"
+               mission_type="1"/>
+      <BTMission mission_type="1"
+                 mission_sub_type="5"/>
+      <BTMission mission_type="1"
+                 mission_sub_type="11"/>
+      <Sleep msec="1000"/>
+      <Docking result="{PrevGoal}"
+               offset="-0.2,-0.2,0.0"
+               base="{PrevGoal}"
+               mission_type="0"/>
+      <Docking result="{PrevGoal}"
+               offset="0.0,0.0,1.57"
+               base="{PrevGoal}"
+               mission_type="0"/>
+      <BTFinisher mission_sub_type="0"
+                  mission_type="1"
+                  result="{GameStatus}"
+                  game_status="{GameStatus}"/>
+    </Sequence>
+  </BehaviorTree>
+
+  <!-- Description of Node Models (used by Groot) -->
+  <TreeNodesModel>
+    <Action ID="BTFinisher">
+      <input_port name="mission_sub_type"
+                  type="int"/>
+      <input_port name="mission_type"
+                  type="int"/>
+      <output_port name="result"
+                   type="int"/>
+      <input_port name="game_status"
+                  type="int"/>
+    </Action>
+    <Action ID="BTMission">
+      <output_port name="mission_type"
+                   type="int"/>
+      <output_port name="mission_sub_type"
+                   type="int"/>
+    </Action>
+    <Action ID="BTStarter">
+      <output_port name="result"
+                   type="int"/>
+    </Action>
+    <Action ID="Comparator">
+      <input_port name="compare_point"
+                  type="geometry_msgs::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+      <input_port name="mission_type"
+                  type="int"/>
+      <input_port name="mission_sub_type"
+                  type="int"/>
+      <input_port name="game_status"
+                  type="int"/>
+    </Action>
+    <Action ID="Docking">
+      <output_port name="result"
+                   type="geometry_msgs::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+      <input_port name="offset"
+                  type="geometry_msgs::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+      <input_port name="base"
+                  type="geometry_msgs::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+      <input_port name="mission_type"
+                  type="int"/>
+    </Action>
+    <Action ID="Navigation">
+      <output_port name="result"
+                   type="geometry_msgs::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+      <input_port name="goal"
+                  type="geometry_msgs::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+    </Action>
+  </TreeNodesModel>
+
+</root>

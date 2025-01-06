@@ -18,13 +18,12 @@ int main(int argc, char** argv)
   // TODO: Add the custom node
   BT::RosNodeParams params;
   params.nh = node;
-  params.default_port_value = "test";
+  params.default_port_value = "testing_action";
   factory.registerNodeType<Testing>("Testing");
   factory.registerNodeType<NavigationTemp>("NavigationTemp", params);
   factory.registerNodeType<TickFlow>("TickFlow");
   factory.registerNodeType<GeneratePathPoint>("GeneratePathPoint");
-  factory.registerNodeType<BT::LoopNode<geometry_msgs::msg::TwistStamped>>("LoopWayPoin"
-                                                                           "t");
+  factory.registerNodeType<BT::LoopNode<geometry_msgs::msg::TwistStamped>>("LoopWayPoint");
   factory.registerNodeType<ElapseTimeCheck>("ElapseTimeCheck");
   factory.registerNodeType<StartRace>("StartRace");
   factory.registerNodeType<RaceTimeCheck>("RaceTimeCheck");

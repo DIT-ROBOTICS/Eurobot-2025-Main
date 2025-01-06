@@ -23,7 +23,7 @@
         <Decorator ID="RaceTimeCheck">
             <input_port name="max_time_count" type="double"/>
         </Decorator>
-        <Action ID="SimpleNavigation">
+        <Action ID="NavigationTemp">
             <input_port name="goal" type="geometry_msgs::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
         </Action>
         <Action ID="StartRace">
