@@ -24,6 +24,8 @@
 // custom action
 #include <btcpp_ros2_interfaces/action/navigation.hpp>
 
+namespace bt_app{
+
 class TestNavServer : public rclcpp::Node {
 
 public:
@@ -47,7 +49,7 @@ private:
         std::shared_ptr<const btcpp_ros2_interfaces::action::Navigation::Goal> goal
     ) 
     {
-        RCLCPP_INFO(this->get_logger(), "Received goal (%f, %f)", goal->goal.linear.x, goal->goal.linear.y);
+        RCLCPP_INFO(this->get_logger(), "Received goal (%f, %f)", goal->goal.twist.linear.x, goal->goal.twist.linear.y);
         return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
     }
 
@@ -82,10 +84,10 @@ private:
         
         while(!is_arrived)
         {
-            rclcpp::spin_some(this->get_node_base_interface());
+            // rclcpp::spin_some(this->get_node_base_interface());
             
-            double dx = goal_.linear.x - loc_.pose.pose.position.x;
-            double dy = goal_.linear.y - loc_.pose.pose.position.y;
+            double dx = goal_.twist.linear.x - loc_.pose.pose.position.x;
+            double dy = goal_.twist.linear.y - loc_.pose.pose.position.y;
             double distance = sqrt(dx * dx + dy * dy);
 
             // Calculate the velocity (very simple local planner in nav2)
@@ -127,6 +129,8 @@ private:
             feedback_->feedback.angular.z = yaw;
             goal_handle->publish_feedback(feedback_);
             RCLCPP_INFO(this->get_logger(), "Publish feedback");
+            loop_rate.sleep();
+            // std::this_thread::sleep_for(std::chrono::seconds(1));
         }
     }
 
@@ -161,7 +165,7 @@ private:
     /* ROS Items */
     geometry_msgs::msg::Twist cmd_vel_;
     nav_msgs::msg::Odometry loc_;
-    geometry_msgs::msg::Twist goal_;
+    geometry_msgs::msg::TwistStamped goal_;
     std::shared_ptr<btcpp_ros2_interfaces::action::Navigation::Feedback> feedback_;
 
     /* nav params*/
@@ -169,4 +173,16 @@ private:
     float deltaTime = 0.01;
 };
 
-RCLCPP_COMPONENTS_REGISTER_NODE(TestNavServer)
+}
+// int main(int argc, char ** argv)
+// {
+//     rclcpp::init(argc, argv);
+//     rclcpp::Rate rate(1);
+//     auto node = std::make_shared<TestNavServer>();
+
+//     rclcpp::spin(node);
+//     rclcpp::shutdown();
+//     return 0;
+// }
+
+RCLCPP_COMPONENTS_REGISTER_NODE(bt_app::TestNavServer)

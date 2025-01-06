@@ -2,7 +2,7 @@
 
 using namespace BT;
 
-template <> inline geometry_msgs::Twist BT::convertFromString(StringView str) {
+template <> inline geometry_msgs::msg::Twist BT::convertFromString(StringView str) {
 
   auto parts = splitString(str, ',');
   if (parts.size() != 3) {
@@ -74,15 +74,13 @@ void Testing::onHalted()
 PortsList NavigationTemp::providedPorts()
 {
   // return providedBasicPorts({ InputPort<unsigned>("order") });
-  return { 
-    BT::InputPort<geometry_msgs::msg::Twist>("goal")
-  };
+  return providedBasicPorts({BT::InputPort<geometry_msgs::msg::TwistStamped>("goal")});
 }
 
 bool NavigationTemp::setGoal(RosActionNode::Goal& goal)
 {
-  getInput<geometry_msgs::msg::Twist>("goal", goal.goal);
-  RCLCPP_INFO(logger(), "Sending Goal");
+  getInput<geometry_msgs::msg::TwistStamped>("goal", goal.goal);
+  RCLCPP_INFO(logger(), "Sending Goal (%f, %f)", goal.goal.twist.linear.x, goal.goal.twist.linear.y);
   return true;
 }
 
