@@ -1,9 +1,17 @@
+// BT 
+#include "behaviortree_ros2/bt_action_node.hpp"
+// ROS
 #include "rclcpp/rclcpp.hpp"
+// ros message
 #include "std_srvs/srv/set_bool.hpp"
 #include "std_msgs/msg/float32.hpp"
-#include "bt_application/bt_nodes.h"
+// BTaction nodes
+#include "bt_application_2024/bt_nodes.h"
+// C++
 #include <memory>
 #include <string>
+
+using namespace BT;
 
 // Function to send a boolean value to the service
 bool sendBoolService(rclcpp::Client<std_srvs::srv::SetBool>::SharedPtr client, bool value, rclcpp::Node::SharedPtr node) {
@@ -32,7 +40,7 @@ void timeCallback(const std_msgs::msg::Float32::SharedPtr msg) {
     starting_time = msg->data;
 }
 
-int main(int argc, char *argv[]) {
+int main(int argc, char** argv) {
     rclcpp::init(argc, argv);
     auto node = rclcpp::Node::make_shared("bt_application");
 
@@ -103,8 +111,8 @@ int main(int argc, char *argv[]) {
     int team = 0;
     // kernel->GetTeam(team);
 
-    factory.registerNodeType<RivalStart>("RivalStart", team);
-    factory.registerNodeType<BTFinisher>("BTFinisher", score_filepath, team);
+    // factory.registerNodeType<RivalStart>("RivalStart", team);
+    factory.registerNodeType<BTFinisher>("BTFinisher", score_filepath, team, node);
 
     std::string groot_filename;
     if (team == 0) {
@@ -115,7 +123,7 @@ int main(int argc, char *argv[]) {
         RCLCPP_INFO(node->get_logger(), "[BT Application]: Yellow team is running!");
     }
 
-    std::string xml_models = BT::writeTreeNodesModelXML(factory);
+    // std::string xml_models = BT::writeTreeNodesModelXML(factory);
     factory.registerBehaviorTreeFromFile(groot_filename);
 
     auto tree = factory.createTree("MainTree");
