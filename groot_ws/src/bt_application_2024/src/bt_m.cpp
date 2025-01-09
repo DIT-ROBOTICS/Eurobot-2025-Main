@@ -1,7 +1,14 @@
 // BT 
 #include "behaviortree_ros2/bt_action_node.hpp"
+
+// #include "behaviortree_cpp/bt_factory.h"
+// #include "behaviortree_cpp/decorators/loop_node.h"
+#include "behaviortree_cpp/xml_parsing.h"
+// #include "behaviortree_cpp/loggers/groot2_publisher.h"
+// #include "behaviortree_cpp/decorators/loop_node.h"
 // ROS
 #include "rclcpp/rclcpp.hpp"
+// #include "rclcpp/executors.hpp"
 // ros message
 #include "std_srvs/srv/set_bool.hpp"
 #include "std_msgs/msg/float32.hpp"
@@ -42,7 +49,7 @@ void timeCallback(const std_msgs::msg::Float32::SharedPtr msg) {
 
 int main(int argc, char** argv) {
     rclcpp::init(argc, argv);
-    auto node = rclcpp::Node::make_shared("bt_application");
+    auto node = std::make_shared<rclcpp::Node>("bt_application_2024");
 
     // Parameters
     bool use_docking = false;
@@ -92,38 +99,31 @@ int main(int argc, char** argv) {
 
     // Service Client
     auto client = node->create_client<std_srvs::srv::SetBool>("/robot/objects/ladybug_activate");
-
     // Subscriber
-    auto time_sub = node->create_subscription<std_msgs::msg::Float32>(
-        "/robot/startup/time", 2, timeCallback);
-
-    rclcpp::Rate rate(100);
-
-    bool is_running = false;
-    while (rclcpp::ok() && !is_running) {
-        rclcpp::spin_some(node);
-        rate.sleep();
-        // kernel->KernelIsRunning(is_running);
-    }
-
-    RCLCPP_INFO(node->get_logger(), "[BT Application]: Kernel is ready!");
+    auto time_sub = node->create_subscription<std_msgs::msg::Float32>("/robot/startup/time", 2, timeCallback);
 
     int team = 0;
-    // kernel->GetTeam(team);
-
+    // To do: get team
     // factory.registerNodeType<RivalStart>("RivalStart", team);
     factory.registerNodeType<BTFinisher>("BTFinisher", score_filepath, team, node);
 
     std::string groot_filename;
+    groot_xml_config_directory = "/home/user/groot_ws/groot_ws/src/bt_application_2024/bt_m_config/";
+    // select tree
     if (team == 0) {
-        groot_filename = groot_xml_config_directory + "/" + blue_filename;
+        groot_filename = groot_xml_config_directory + "/" + "bt_blue.xml";
         RCLCPP_INFO(node->get_logger(), "[BT Application]: Blue team is running!");
     } else {
-        groot_filename = groot_xml_config_directory + "/" + yellow_filename;
+        groot_filename = groot_xml_config_directory + "/" + "bt_yellow.xml";
         RCLCPP_INFO(node->get_logger(), "[BT Application]: Yellow team is running!");
     }
 
-    // std::string xml_models = BT::writeTreeNodesModelXML(factory);
+    // generate the tree in xml and safe the xml into a file
+    std::string xml_models = BT::writeTreeNodesModelXML(factory);
+    std::ofstream file("/home/user/groot_ws/groot_ws/src/bt_application_2024/bt_m_config/bt_tree_node_model.xml");
+    file << xml_models;
+    file.close();
+
     factory.registerBehaviorTreeFromFile(groot_filename);
 
     auto tree = factory.createTree("MainTree");
@@ -132,6 +132,7 @@ int main(int argc, char** argv) {
 
     RCLCPP_INFO(node->get_logger(), "[BT Application]: Behavior Tree start running!");
 
+    rclcpp::Rate rate(100);
     while (rclcpp::ok() && status == BT::NodeStatus::RUNNING) {
         rclcpp::spin_some(node);
         rate.sleep();

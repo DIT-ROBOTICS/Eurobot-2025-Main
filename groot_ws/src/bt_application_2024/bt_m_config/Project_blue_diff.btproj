@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root BTCPP_format="4" project_name="Project">
+    <include path="groot_ws/src/bt_application_2024/bt_m_config/bt_blue_diff_pre.xml"/>
+    <!-- Description of Node Models (used by Groot) -->
+    <TreeNodesModel>
+        <Action ID="BTFinisher">
+            <input_port name="mission_sub_type" type="int"/>
+            <input_port name="mission_type" type="int"/>
+            <output_port name="result" type="int"/>
+            <input_port name="game_status" type="int"/>
+        </Action>
+        <Action ID="BTMission">
+            <output_port name="mission_type" type="int"/>
+            <output_port name="mission_sub_type" type="int"/>
+            <output_port name="description" type="string"/>
+        </Action>
+        <Action ID="BTStarter">
+            <output_port name="result" type="int"/>
+        </Action>
+        <Action ID="Comparator">
+            <input_port name="compare_point" type="geometry_msgs::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+            <input_port name="mission_type" type="int"/>
+            <input_port name="mission_sub_type" type="int"/>
+            <input_port name="game_status" type="int"/>
+        </Action>
+        <Action ID="Docking">
+            <output_port name="result" type="geometry_msgs::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+            <input_port name="offset" type="geometry_msgs::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+            <input_port name="base" type="geometry_msgs::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+            <input_port name="mission_type" type="int"/>
+        </Action>
+        <Action ID="LadybugActivate"/>
+        <Action ID="Navigation">
+            <output_port name="result" type="geometry_msgs::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+            <input_port name="goal" type="geometry_msgs::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+        </Action>
+        <Action ID="Recovery">
+            <output_port name="result" type="geometry_msgs::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+            <input_port name="base" type="geometry_msgs::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+        </Action>
+        <Decorator ID="TimerChecker">
+            <input_port name="timer" type="int"/>
+        </Decorator>
+    </TreeNodesModel>
+</root>
