@@ -4,15 +4,16 @@
 #include <filesystem>
 #include <fstream>
 #include <deque>
+#include <bitset>
 
 // Use behavior tree
 #include <behaviortree_ros2/bt_action_node.hpp>
 
-// Usse ROS
+// Use ROS
 #include <rclcpp/rclcpp.hpp>
 #include <rclcpp/logger.hpp>
 
-// Use the std srv bool
+// Use ros message
 #include "std_srvs/srv/set_bool.hpp"
 #include "std_msgs/msg/float32.hpp"
 
@@ -108,6 +109,7 @@ private:
     bool nav_finished_ = false;
     bool nav_error_ = false;
     int mission_type_ = 0;
+    bool start_mission_ = false;
     // std::shared_ptr<Kernel> kernel_;
     geometry_msgs::msg::TwistStamped base_;
 };
@@ -193,8 +195,8 @@ public:
 class BTFinisher : public BT::SyncActionNode {
 
 public:
-    BTFinisher(const std::string& name, const BT::NodeConfig& config, std::string file, int team)
-        : BT::SyncActionNode(name, config), score_filepath(file), team_(team) {}
+    BTFinisher(const std::string& name, const BT::NodeConfig& config, std::string file, int team, std::shared_ptr<rclcpp::Node> node)
+        : BT::SyncActionNode(name, config), score_filepath(file), team_(team),  node_(node){}
 
     /* Node remapping function */
     static BT::PortsList providedPorts();
@@ -205,6 +207,7 @@ public:
     std::string score_filepath;
 
     int team_;
+    std::shared_ptr<rclcpp::Node> node_;
     // std::shared_ptr<Kernel> kernel_;
 };
 

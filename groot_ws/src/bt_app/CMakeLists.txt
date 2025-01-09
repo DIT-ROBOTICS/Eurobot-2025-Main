@@ -79,30 +79,29 @@ install(TARGETS
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin)
 
-# add_library(navigationClient SHARED
-#   src/node/navigationClient.cpp)
-# target_include_directories(navigationClient PRIVATE
-#   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-#   $<INSTALL_INTERFACE:include>)
-# target_compile_definitions(navigationClient
-#   PRIVATE "ACTION_TUTORIALS_CPP_BUILDING_DLL")
-# ament_target_dependencies(navigationClient
-#   "behaviortree_ros2"
-#   "behaviortree_cpp"
-#   "btcpp_ros2_interfaces"
-#   "std_msgs"
-#   "std_srvs"
-#   "geometry_msgs"
-#   "nav_msgs"
-#   "rclcpp"
-#   "rclcpp_action"
-#   "rclcpp_components")
-# rclcpp_components_register_node(navigationClient PLUGIN "TestNavClient" EXECUTABLE navigationClient)
-# install(TARGETS
-#   navigationClient
-#   ARCHIVE DESTINATION lib
-#   LIBRARY DESTINATION lib
-#   RUNTIME DESTINATION bin)
+add_library(localizationServer SHARED
+  src/node/localizationServer.cpp)
+target_include_directories(localizationServer PRIVATE
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>)
+target_compile_definitions(localizationServer
+  PRIVATE "ACTION_TUTORIALS_CPP_BUILDING_DLL")
+ament_target_dependencies(localizationServer
+  "btcpp_ros2_interfaces"
+  "behaviortree_ros2"
+  "behaviortree_cpp"
+  "std_msgs"
+  "std_srvs"
+  "tf2"
+  "tf2_ros"
+  "tf2_geometry_msgs"
+  "nav_msgs"
+  "geometry_msgs"
+  "nav_msgs"
+  "rclcpp"
+  "rclcpp_action"
+  "rclcpp_components")
+rclcpp_components_register_node(localizationServer PLUGIN "bt_app::TestLocServer" EXECUTABLE test_loc_server)
 
 add_library(BT_ACTION_NODE src/bt_action_node_lib.cpp)
 target_link_libraries(BT_ACTION_NODE 
@@ -111,6 +110,9 @@ ament_target_dependencies(BT_ACTION_NODE
   "btcpp_ros2_interfaces"
   "behaviortree_ros2"
   "behaviortree_cpp"
+  "tf2"
+  "tf2_ros"
+  "tf2_geometry_msgs"
   "rclcpp"
   "rclcpp_action"
   "rclcpp_components"
@@ -143,6 +145,13 @@ ament_target_dependencies(BT_UTILS_NODE_NODE
   "rclcpp_action"
   "rclcpp_components"
   ${THIS_PACKAGE_DEPS})
+
+install(TARGETS
+  navigationServer
+  localizationServer
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin)
 
 install(DIRECTORY
   bt_config

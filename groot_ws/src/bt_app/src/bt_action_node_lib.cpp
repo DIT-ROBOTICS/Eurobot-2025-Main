@@ -2,27 +2,40 @@
 
 using namespace BT;
 
-template <> inline geometry_msgs::msg::Twist BT::convertFromString(StringView str) {
+template <> inline geometry_msgs::msg::TwistStamped BT::convertFromString(StringView str) {
 
   auto parts = splitString(str, ',');
   if (parts.size() != 3) {
     throw RuntimeError("invalid input)");
   }
   else {
-    // Testing function -> Only remain x and y
-    geometry_msgs::msg::Twist output;
-    output.linear.x = convertFromString<double>(parts[0]);
-    output.linear.y = convertFromString<double>(parts[1]);
+    geometry_msgs::msg::TwistStamped output;
+    output.twist.linear.x = convertFromString<double>(parts[0]);
+    output.twist.linear.y = convertFromString<double>(parts[1]);
+    output.twist.linear.z = convertFromString<double>(parts[2]);
     return output;
   }
 }
 
 template <> inline int BT::convertFromString(StringView str) {
-    auto value = convertFromString<double>(str);
-    return (int) value;
+  auto value = convertFromString<double>(str);
+  return (int) value;
 }
 
-BT::PortsList Testing::providedPorts()
+template <> inline std::deque<int> BT::convertFromString(StringView str) {
+
+  auto parts = splitString(str, ',');
+  std::deque<int> output;
+
+  for (int i = 0; i < (int)parts.size(); i++) {
+    output.push_back(convertFromString<int>(parts[i]));
+  }
+
+  return output;
+}
+
+
+PortsList Testing::providedPorts()
 {
   return { BT::InputPort<std::string>("input"), BT::OutputPort<std::string>("output") };
 }
@@ -39,6 +52,30 @@ BT::NodeStatus Testing::onStart()
   return BT::NodeStatus::RUNNING;
 }
 
+void Testing::UpdateRobotPose() {
+
+  geometry_msgs::msg::TransformStamped transformStamped;
+
+  try {
+    transformStamped = tf_buffer_.lookupTransform(
+      "robot/map" /* Parent frame - map */, 
+      "robot/base_footprint" /* Child frame - base */,
+      rclcpp::Time()
+    );
+
+    /* Extract (x, y, theta) from the transformed stamped */
+    robot_pose_.twist.linear.x = transformStamped.transform.translation.x;
+    robot_pose_.twist.linear.y = transformStamped.transform.translation.y;
+    double theta;
+    tf2::Quaternion q;
+    tf2::fromMsg(transformStamped.transform.rotation, q);
+    robot_pose_.twist.angular.z = tf2::impl::getYaw(q);
+  }
+  catch (tf2::TransformException &ex) {
+    // RCLCPP_WARN_STREAM(node->get_logger(), "[Kernel::UpdateRobotPose]: line " << __LINE__ << " " << ex.what());
+  }
+}
+
 BT::NodeStatus Testing::onRunning()
 {
   tick_count++;
@@ -49,7 +86,8 @@ BT::NodeStatus Testing::onRunning()
   if(tick_count == 10)
   {
     tick_count = 0;
-
+    UpdateRobotPose();
+    std::cout << "robot_pose_:(" << robot_pose_.twist.linear.x << ", " << robot_pose_.twist.linear.y << ")\n";
     // Set the output port
     setOutput("output", input);
 
@@ -71,6 +109,71 @@ void Testing::onHalted()
   return;
 }
 
+PortsList LocalizationTemp::providedPorts()
+{
+  return
+  { 
+    BT::InputPort<std::string>("input"), 
+    BT::OutputPort<geometry_msgs::msg::TwistStamped>("output") 
+  };
+}
+
+BT::NodeStatus LocalizationTemp::onStart()
+{
+  if(!getInput<std::string>("input", input))
+  {
+    throw BT::RuntimeError("[Testing]: Missing required input: ", input);
+  }
+
+  return BT::NodeStatus::RUNNING;
+}
+
+void LocalizationTemp::UpdateRobotPose() {
+
+  geometry_msgs::msg::TransformStamped transformStamped;
+
+  try {
+    transformStamped = tf_buffer_.lookupTransform(
+      "robot/map" /* Parent frame - map */, 
+      "robot/base_footprint" /* Child frame - base */,
+      rclcpp::Time()
+    );
+
+    /* Extract (x, y, theta) from the transformed stamped */
+    robot_pose_.twist.linear.x = transformStamped.transform.translation.x;
+    robot_pose_.twist.linear.y = transformStamped.transform.translation.y;
+    double theta;
+    tf2::Quaternion q;
+    tf2::fromMsg(transformStamped.transform.rotation, q);
+    robot_pose_.twist.angular.z = tf2::impl::getYaw(q);
+  }
+  catch (tf2::TransformException &ex) {
+    // RCLCPP_WARN_STREAM(node->get_logger(), "[Kernel::UpdateRobotPose]: line " << __LINE__ << " " << ex.what());
+  }
+}
+
+BT::NodeStatus LocalizationTemp::onRunning()
+{
+  UpdateRobotPose();
+  std::cout << "robot_pose_:(" << robot_pose_.twist.linear.x << ", " << robot_pose_.twist.linear.y << ")\n";
+  // Set the output port
+  setOutput("output", robot_pose_);
+
+  return BT::NodeStatus::SUCCESS;
+}
+
+void LocalizationTemp::onHalted()
+{
+  tick_count = 0;
+
+  // Reset the output port
+  setOutput("output", robot_pose_);
+
+  std::cout << "LocalizationTemp Node halted" << std::endl;
+
+  return;
+}
+
 PortsList NavigationTemp::providedPorts()
 {
   // return providedBasicPorts({ InputPort<unsigned>("order") });
@@ -84,18 +187,18 @@ bool NavigationTemp::setGoal(RosActionNode::Goal& goal)
   return true;
 }
 
-NodeStatus NavigationTemp::onResultReceived(const WrappedResult& wr)
+BT::NodeStatus NavigationTemp::onResultReceived(const WrappedResult& wr)
 {
   RCLCPP_INFO(logger(), "Result received");
   return NodeStatus::SUCCESS;
 }
 
-NodeStatus NavigationTemp::onFailure(ActionNodeErrorCode error)
+BT::NodeStatus NavigationTemp::onFailure(ActionNodeErrorCode error)
 {
-  return NodeStatus::FAILURE;
+  return BT::NodeStatus::FAILURE;
 }
 
-NodeStatus NavigationTemp::onFeedback(const std::shared_ptr<const Feedback> feedback)
+BT::NodeStatus NavigationTemp::onFeedback(const std::shared_ptr<const Feedback> feedback)
 {
-  return NodeStatus::RUNNING;
+  return BT::NodeStatus::RUNNING;
 }

@@ -70,7 +70,7 @@ ament_target_dependencies(BTNODE
 )
 
 install(DIRECTORY
-  bt_config
+  bt_m_config
   # launch
   DESTINATION share/${PROJECT_NAME}/
 )

@@ -29,6 +29,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     python3-pip \
     bash-completion \
     ros-humble-ament-cmake \
+    ros-humble-rqt-tf-tree\
     # Groot
     libfuse2 \
     fuse3 \
