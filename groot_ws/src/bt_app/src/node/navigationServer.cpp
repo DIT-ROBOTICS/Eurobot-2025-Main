@@ -21,7 +21,7 @@
 #include <tf2_ros/transform_listener.h>
 #include <tf2_ros/buffer.h>
 #include <tf2/exceptions.h>
-// custom action
+// self define message
 #include <btcpp_ros2_interfaces/action/navigation.hpp>
 
 namespace bt_app{

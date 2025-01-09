@@ -19,8 +19,9 @@ int main(int argc, char** argv)
   BT::RosNodeParams params;
   params.nh = node;
   params.default_port_value = "testing_action";
-  factory.registerNodeType<Testing>("Testing");
+  factory.registerNodeType<Testing>("Testing", node);
   factory.registerNodeType<NavigationTemp>("NavigationTemp", params);
+  factory.registerNodeType<LocalizationTemp>("LocalizationTemp", node);
   factory.registerNodeType<TickFlow>("TickFlow");
   factory.registerNodeType<GeneratePathPoint>("GeneratePathPoint");
   factory.registerNodeType<BT::LoopNode<geometry_msgs::msg::TwistStamped>>("LoopWayPoint");
@@ -48,9 +49,10 @@ int main(int argc, char** argv)
   }
 
   // Create the tree
-  auto tree = factory.createTree("Waypoint-Demo");
+  // auto tree = factory.createTree("Waypoint-Demo");
+  auto tree = factory.createTree("MainTree");
 
-  // BT::Groot2Publisher publisher(tree, 2227);
+  BT::Groot2Publisher publisher(tree, 2227);
 
   rclcpp::Rate rate(1);
   BT::NodeStatus status = BT::NodeStatus::RUNNING;
