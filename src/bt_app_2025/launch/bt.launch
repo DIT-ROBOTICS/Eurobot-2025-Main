@@ -1,0 +1,41 @@
+<launch>
+
+    <node pkg="bt_app_2025" type="bt_m" name="bt_m" output="screen" >
+        <param name="groot_xml_config_directory" value="$(find bt_app_2025)/bt_m_config"/>
+
+        <param name="groot_xml_yellow_config_file" value="bt_yellow.xml"/>
+        <param name="groot_xml_blue_config_file" value="bt_blue.xml"/>
+
+        <param name="score_filepath" value="/home/main_ws/webdata/score.cache"/>
+        
+        <param name="use_docking" value="true"/>
+        <param name="map_frame" value="robot/map"/>
+        <param name="mec_callback" value="true"/>
+        <param name="base_frame" value="robot/base_footprint"/>
+        <param name="rival_map_frame" value="robot/map"/>
+        <param name="rival_base_frame" value="rival/base_footprint"/>
+        <param name="nav_action_name" value="/robot/navigation_main"/>
+
+        <remap from="/vaccum" to="/robot/vacuum"/>
+        <remap from="/firmware" to="/take"/>
+        
+        <param name="using_rival" value="true"/>
+        <param name="lady_bug_avoidance" value="true"/>
+        <param name="avoidance_distance" value="0.2"/>
+
+        <rosparam>
+            fake_rival_pose: [0.1, 2.0, 0.0]
+        </rosparam>
+
+    </node>
+
+    <!-- Startup program -->
+    <node name="startup" pkg="startup" type="startup" output="screen">
+        <param name="file_path" value="/home/main_ws/webdata/state.json"/>
+        <param name="score_file_path" value="/home/main_ws/webdata/score.cache"/>
+    </node>
+
+    <!-- Include the communication -->
+    <include file="$(find bt_app_2025)/launch/comm.launch"/>
+
+</launch>
