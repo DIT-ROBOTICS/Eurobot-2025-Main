@@ -2,7 +2,5 @@
 */build
 */install
 */log
-/src/turtlebot3
-/src/turtlebot3_msgs
-/src/scan_merger_2
+/src/simulation_tools
 *.AppImage

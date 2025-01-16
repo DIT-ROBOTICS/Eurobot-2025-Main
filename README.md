@@ -2,17 +2,17 @@
 
 ## Setup Workspace Env
 ### Git
-- `git clone git@github.com:DIT-ROBOTICS/Eurobot-2025-Main.git`
+- `$ git clone git@github.com:DIT-ROBOTICS/Eurobot-2025-Main.git`
 <!-- - `git checkout devel` -->
 ### Build Docker Environment
-- `cd /docker`
-- `docker compose up -d --build`
-- `docker start main-ws`
+- `$ cd /docker`
+- `$ docker compose up -d --build`
+- `$ docker start main-ws`
 ### Open Work Space
 - Attach Visual Studio Code
-- `cd Eurobot-2025-Main-ws`
-- `source /opt/ros/noetic/setup.bash`
-- `catkin_make`
+- `$ cd Eurobot-2025-Main-ws`
+- `$ source /opt/ros/humble/setup.bash`
+- `$ colcon build --symlink-install`
 <!-- ### Some Other Steps
 - `echo "source /home/user/Eurobot-2025-Main-ws/devel/setup.bash" >> ~/.bashrc`
 - `echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc`
@@ -34,6 +34,3 @@
 ### run sim world
 - `$ export TURTLEBOT3_MODEL=burger`
 - `$ ros2 launch turtlebot3_gazebo empty_world.launch.py`
-
-### Building Command
-- `$ colcon build --packages-select --symlink-install`
