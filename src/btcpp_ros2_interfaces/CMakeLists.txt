@@ -19,6 +19,7 @@ rosidl_generate_interfaces(btcpp_ros2_interfaces
     "action/Sleep.action"
     "action/Navigation.action"
     "action/NavMission.action"
+    "action/FirmwareMission.action"
     DEPENDENCIES geometry_msgs action_msgs std_msgs
 )
 

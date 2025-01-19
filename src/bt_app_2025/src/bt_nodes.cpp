@@ -220,10 +220,10 @@ bool Recovery::setGoal(RosActionNode::Goal& goal) {
     }
 
     // Log the normal vector and rival pose
-    RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "[Recovery]: Normal vector: " << normal_vector.twist.linear.x << " " << normal_vector.twist.linear.y << " " << normal_vector.twist.linear.z);
-    RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "[Recovery]: Robot pose: " << robot_pose.twist.linear.x << " " << robot_pose.twist.linear.y);
-    RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "[Recovery]: Rival pose: " << rival_pose.twist.linear.x << " " << rival_pose.twist.linear.y);
-    RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "[Recovery]: Dot product: " << dot_product);
+    RCLCPP_INFO_STREAM(rclcpp::get_logger("rclcpp"), "[Recovery]: Normal vector: " << normal_vector.twist.linear.x << " " << normal_vector.twist.linear.y << " " << normal_vector.twist.linear.z);
+    RCLCPP_INFO_STREAM(rclcpp::get_logger("rclcpp"), "[Recovery]: Robot pose: " << robot_pose.twist.linear.x << " " << robot_pose.twist.linear.y);
+    RCLCPP_INFO_STREAM(rclcpp::get_logger("rclcpp"), "[Recovery]: Rival pose: " << rival_pose.twist.linear.x << " " << rival_pose.twist.linear.y);
+    RCLCPP_INFO_STREAM(rclcpp::get_logger("rclcpp"), "[Recovery]: Dot product: " << dot_product);
 
     // Clip x to [0.15, 2.85], y to [0.15, 1.85]
     base_.twist.linear.x = std::max(0.15, std::min(2.85, base_.twist.linear.x));
@@ -318,6 +318,7 @@ geometry_msgs::msg::TwistStamped Comparator::UpdateRobotPose() {
     catch (tf2::TransformException &ex) {
         // RCLCPP_WARN_STREAM(node->get_logger(), "[Kernel::UpdateRobotPose]: line " << __LINE__ << " " << ex.what());
     }
+    return robot_pose_;
 }
 
 geometry_msgs::msg::TwistStamped Comparator::UpdateRivalPose() {
@@ -396,7 +397,8 @@ BT::PortsList BTMission::providedPorts() {
     return { 
         BT::InputPort<std::deque<int>>("mission_type"),
         BT::InputPort<std::deque<int>>("mission_sub_type"),
-        BT::InputPort<std::string>("description")
+        BT::InputPort<std::string>("description"),
+        BT::OutputPort<int>("result")
     };
 }
 bool BTMission::setGoal(RosActionNode::Goal& goal) {
@@ -412,20 +414,20 @@ bool BTMission::setGoal(RosActionNode::Goal& goal) {
     return true;
 }
 NodeStatus BTMission::onResultReceived(const WrappedResult& wr) {
-    bool result_ = wr.result->outcome;
+    auto result_ = wr.result->outcome;
     mission_finished_ = true;
     mission_failed_ = false;
-    setOutput<geometry_msgs::msg::TwistStamped>("result", mission_type_);
+    setOutput<int>("result", mission_type_.front());
     return NodeStatus::SUCCESS;
 }
 NodeStatus BTMission::onFailure(ActionNodeErrorCode error) {
     mission_failed_ = true;
-    setOutput<geometry_msgs::msg::TwistStamped>("result", mission_type_);
+    setOutput<int>("result", mission_type_.front());
     RCLCPP_ERROR(logger(), "[BT]: Navigation error");
     return NodeStatus::FAILURE;
 }
 NodeStatus BTMission::onFeedback(const std::shared_ptr<const Feedback> feedback) {
-    char feedback_ = feedback->progress;
+    auto feedback_ = feedback->progress;
     return NodeStatus::RUNNING;
 }
 

@@ -17,8 +17,17 @@
 #include "std_srvs/srv/set_bool.hpp"
 #include "std_msgs/msg/float32.hpp"
 
+// tf2 
+#include <tf2/LinearMath/Quaternion.h>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
+#include <tf2/impl/utils.h>
+#include <tf2_ros/transform_listener.h>
+#include <tf2_ros/buffer.h>
+#include <tf2/exceptions.h>
+
 // Use self define message
 #include "btcpp_ros2_interfaces/action/nav_mission.hpp"
+#include "btcpp_ros2_interfaces/action/firmware_mission.hpp"
 
 // using std_srvs::SetBool;
 
@@ -93,7 +102,7 @@ public:
     // Recovery(const std::string& name, const BT::NodeConfig& config, std::shared_ptr<Kernel> kernel, bool use_docking, bool mec_callback)
     //     : BT::StatefulActionNode(name, config), kernel_(kernel), use_docking_(use_docking), mec_callback_(mec_callback) {}
     Recovery(const std::string& name, const NodeConfig& conf, const RosNodeParams& params)
-        : RosActionNode<btcpp_ros2_interfaces::action::NavMission>(name, conf, params), tf_buffer_(params.nh->get_clock()), listener_(tf_buffer_)
+        : RosActionNode<btcpp_ros2_interfaces::action::NavMission>(name, conf, params), tf_buffer_(params.nh.lock()->get_clock()), listener_(tf_buffer_)
     {}
 
     /* Node remapping function */
@@ -104,7 +113,7 @@ public:
     NodeStatus onFeedback(const std::shared_ptr<const Feedback> feedback);
 
 private:
-    geometry_msgs::msg::TwistStamped UpdateRobotPose()
+    geometry_msgs::msg::TwistStamped UpdateRobotPose();
     geometry_msgs::msg::TwistStamped UpdateRivalPose();
 
     double distance_ = 0.2;
@@ -152,13 +161,13 @@ private:
 // /*****************************************/
 // /* Mission - Send mission type to kernel */
 // /*****************************************/
-class BTMission : public RosActionNode<btcpp_ros2_interfaces::action::FirmwareMission> {
+class BTMission : public BT::RosActionNode<btcpp_ros2_interfaces::action::FirmwareMission> {
 
 public:
     // BTMission(const std::string& name, const BT::NodeConfig& config, std::shared_ptr<Kernel> kernel, bool mec_callback)
     //     : BT::StatefulActionNode(name, config), kernel_(kernel), mec_callback_(mec_callback) {}
     BTMission(const std::string& name, const NodeConfig& conf, const RosNodeParams& params)
-        : RosActionNode<btcpp_ros2_interfaces::action::NavMission>(name, conf, params)
+        : RosActionNode<btcpp_ros2_interfaces::action::FirmwareMission>(name, conf, params)
     {}
 
     /* Node remapping function */
