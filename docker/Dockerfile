@@ -52,10 +52,8 @@ RUN apt-get update \
     && apt-get autoclean -y \
     && rm -rf /var/lib/apt/lists/*
 
-RUN git clone git@github.com:BehaviorTree/BehaviorTree.ROS2.git
-
 RUN echo "source /opt/ros/humble/setup.bash" >> /etc/bash.bashrc \ 
-    && echo "source /home/Eurobot-2025-Main-ws/install/setup.bash" >> /etc/bash.bashrc
+    && echo "source /home/user/Eurobot-2025-Main-ws/install/setup.bash" >> /etc/bash.bashrc
 
 ENV SHELL /bin/bash
 ENV TERM=xterm-256color

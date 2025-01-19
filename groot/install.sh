@@ -5,7 +5,7 @@ WEB_URL="https://s3.us-west-1.amazonaws.com/download.behaviortree.dev/groot2_lin
 GROOT_VERSION="1.6.1"
 GROOT_FILE="Groot2-v${GROOT_VERSION}-x86_64.AppImage"
 
-WS_DIR=$HOME/groot_ws
+WS_DIR=$HOME/Eurobot-2025-Main-ws
 GROOT_APPIMAGE=./groot.AppImage
 
 cd $WS_DIR
