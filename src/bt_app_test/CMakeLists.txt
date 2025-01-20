@@ -50,6 +50,20 @@ install(TARGETS
   DESTINATION lib/${PROJECT_NAME}
 )
 
+add_executable(topicPubServer src/node/topicPubServer.cpp)
+ament_target_dependencies(topicPubServer
+  ${THIS_PACKAGE_DEPS}
+  "behaviortree_ros2"
+  "behaviortree_cpp"
+  "rclcpp"
+)
+target_link_libraries(topicPubServer
+)
+install(TARGETS
+  topicPubServer
+  DESTINATION lib/${PROJECT_NAME}
+)
+
 add_library(navigationServer SHARED
   src/node/navigationServer.cpp)
 target_include_directories(navigationServer PRIVATE
@@ -155,9 +169,10 @@ install(TARGETS
 
 install(DIRECTORY
   bt_config
-  # launch
+  launch
+  params
   DESTINATION share/${PROJECT_NAME}/
-  )
+)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)

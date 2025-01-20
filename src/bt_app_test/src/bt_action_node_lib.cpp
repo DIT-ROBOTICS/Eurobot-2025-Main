@@ -35,9 +35,11 @@ template <> inline std::deque<int> BT::convertFromString(StringView str) {
 }
 
 
-PortsList Testing::providedPorts()
-{
-  return { BT::InputPort<std::string>("input"), BT::OutputPort<std::string>("output") };
+PortsList Testing::providedPorts() {
+  return { 
+    BT::InputPort<std::string>("input"),
+    BT::OutputPort<std::string>("output") 
+  };
 }
 
 BT::NodeStatus Testing::onStart()
@@ -109,19 +111,67 @@ void Testing::onHalted()
   return;
 }
 
-PortsList LocalizationTemp::providedPorts()
-{
-  return
-  { 
+PortsList TopicSubTest::providedPorts() {
+  return {
+    BT::InputPort<std::string>("topic_name"), 
+    BT::OutputPort<int>("output") 
+  };
+}
+
+bool TopicSubTest::latchLastMessage() const {
+  return true;
+}
+
+NodeStatus TopicSubTest::onTick(const std::shared_ptr<std_msgs::msg::Int32>& last_msg) {
+  while (!last_msg) { // Check if the pointer is not null
+    std::cout << "No message received!" << std::endl;
+    return BT::NodeStatus::SUCCESS;
+  }
+  std::cout << "Received data: " << last_msg->data << std::endl;
+  // else {
+  
+  //   return BT::NodeStatus::FAILURE;
+  // }
+}
+
+PortsList TopicSubTest1::providedPorts() {
+  return { 
+    BT::OutputPort<int>("output") 
+  };
+}
+
+void TopicSubTest1::topic_callback(const std_msgs::msg::Int32::SharedPtr msg) {
+  number = msg->data;
+  RCLCPP_INFO(node_->get_logger(), "I heard: '%d'", msg->data);
+}
+
+BT::NodeStatus TopicSubTest1::onStart() {
+  RCLCPP_INFO(node_->get_logger(), "Node start");
+  return BT::NodeStatus::RUNNING;
+}
+
+BT::NodeStatus TopicSubTest1::onRunning() {
+  setOutput("output", number);
+  RCLCPP_INFO(node_->get_logger(), "Testing Node running");
+  return BT::NodeStatus::SUCCESS;
+}
+
+void TopicSubTest1::onHalted() {
+  // Reset the output port
+  setOutput("output", 0);
+  RCLCPP_INFO(node_->get_logger(), "Testing Node halted");
+  return;
+}
+
+PortsList LocalizationTemp::providedPorts() {
+  return { 
     BT::InputPort<std::string>("input"), 
     BT::OutputPort<geometry_msgs::msg::TwistStamped>("output") 
   };
 }
 
-BT::NodeStatus LocalizationTemp::onStart()
-{
-  if(!getInput<std::string>("input", input))
-  {
+BT::NodeStatus LocalizationTemp::onStart() {
+  if(!getInput<std::string>("input", input)) {
     throw BT::RuntimeError("[Testing]: Missing required input: ", input);
   }
 
@@ -152,8 +202,7 @@ void LocalizationTemp::UpdateRobotPose() {
   }
 }
 
-BT::NodeStatus LocalizationTemp::onRunning()
-{
+BT::NodeStatus LocalizationTemp::onRunning() {
   UpdateRobotPose();
   std::cout << "robot_pose_:(" << robot_pose_.twist.linear.x << ", " << robot_pose_.twist.linear.y << ")\n";
   // Set the output port
@@ -162,8 +211,7 @@ BT::NodeStatus LocalizationTemp::onRunning()
   return BT::NodeStatus::SUCCESS;
 }
 
-void LocalizationTemp::onHalted()
-{
+void LocalizationTemp::onHalted() {
   tick_count = 0;
 
   // Reset the output port
@@ -174,31 +222,26 @@ void LocalizationTemp::onHalted()
   return;
 }
 
-PortsList NavigationTemp::providedPorts()
-{
+BT::PortsList NavigationTemp::providedPorts() {
   // return providedBasicPorts({ InputPort<unsigned>("order") });
   return providedBasicPorts({BT::InputPort<geometry_msgs::msg::TwistStamped>("goal")});
 }
 
-bool NavigationTemp::setGoal(RosActionNode::Goal& goal)
-{
+bool NavigationTemp::setGoal(RosActionNode::Goal& goal) {
   getInput<geometry_msgs::msg::TwistStamped>("goal", goal.goal);
   RCLCPP_INFO(logger(), "Sending Goal (%f, %f)", goal.goal.twist.linear.x, goal.goal.twist.linear.y);
   return true;
 }
 
-BT::NodeStatus NavigationTemp::onResultReceived(const WrappedResult& wr)
-{
+BT::NodeStatus NavigationTemp::onResultReceived(const WrappedResult& wr) {
   RCLCPP_INFO(logger(), "Result received");
   return NodeStatus::SUCCESS;
 }
 
-BT::NodeStatus NavigationTemp::onFailure(ActionNodeErrorCode error)
-{
+BT::NodeStatus NavigationTemp::onFailure(ActionNodeErrorCode error) {
   return BT::NodeStatus::FAILURE;
 }
 
-BT::NodeStatus NavigationTemp::onFeedback(const std::shared_ptr<const Feedback> feedback)
-{
+BT::NodeStatus NavigationTemp::onFeedback(const std::shared_ptr<const Feedback> feedback) {
   return BT::NodeStatus::RUNNING;
 }

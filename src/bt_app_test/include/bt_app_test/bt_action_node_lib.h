@@ -12,6 +12,7 @@
 #include <geometry_msgs/msg/transform_stamped.hpp>
 #include <geometry_msgs/msg/pose_stamped.hpp>
 #include <geometry_msgs/msg/twist.hpp>
+#include <std_msgs/msg/int32.hpp>
 // tf2 
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
@@ -55,6 +56,61 @@ private:
   tf2_ros::TransformListener listener_;
 
   std::string input;
+};
+
+class TopicSubTest : public BT::RosTopicSubNode<std_msgs::msg::Int32>
+{
+public:
+  explicit TopicSubTest(const std::string& name, const BT::NodeConfig& conf, const RosNodeParams& params)
+    : RosTopicSubNode<std_msgs::msg::Int32>(name, conf, params)
+  {}
+
+  /* Node remapping function */
+  static BT::PortsList providedPorts();
+
+  /* Start and running function */
+  NodeStatus onTick(const std::shared_ptr<std_msgs::msg::Int32>& last_msg) override;
+  bool latchLastMessage() const override;
+  // void on_message_received(const std_msgs::msg::Int32::SharedPtr msg) override;
+  // BT::NodeStatus tick() override;
+
+  // BT::NodeStatus onStart() override;
+  // BT::NodeStatus onRunning() override;
+
+  /* Halt function */
+  // void onHalted() override;
+
+private:
+
+};
+
+class TopicSubTest1 : public BT::StatefulActionNode
+{
+public:
+  TopicSubTest1(const std::string& name, const BT::NodeConfig& config, std::shared_ptr<rclcpp::Node> node)
+    : BT::StatefulActionNode(name, config), node_(node) {
+    subscription_ = node_->create_subscription<std_msgs::msg::Int32>("number", 10, std::bind(&TopicSubTest1::topic_callback, this, std::placeholders::_1));
+  }
+
+  /* Node remapping function */
+  static BT::PortsList providedPorts();
+
+  /* Start and running function */
+  BT::NodeStatus onStart() override;
+  BT::NodeStatus onRunning() override;
+
+  /* Halt function */
+  void onHalted() override;
+
+private:
+  // void execute() {
+  //   subscription_ = node_->create_subscription<std_msgs::msg::Int32>("number", 10, std::bind(&TopicSubTest1::topic_callback, this, std::placeholders::_1));
+  // }
+  void topic_callback(const std_msgs::msg::Int32::SharedPtr msg);
+
+  rclcpp::Subscription<std_msgs::msg::Int32>::SharedPtr subscription_;
+  std::shared_ptr<rclcpp::Node> node_;
+  int number = 0;
 };
 
 class LocalizationTemp : public BT::StatefulActionNode

@@ -23,14 +23,14 @@
 - `$ cd ~/groot`
 - `$ .\groot.AppImage`
 ### Behavior Tree for Test
-- Open folder `bt_app`
+- Open folder `bt_app_test`
 - write action nodes in `bt_action_node_lib`
 - write decorator nodes in `decorator_node_lib`
-- `$ ros2 run bt_app bt_ros2` to execute the tree
+- `$ ros2 run bt_app_test bt_ros2` to execute the tree
 ### Behavior Tree for Game
-- Open folder `bt_application_2024`
+- Open folder `bt_app_2025`
 - write bt nodes in `bt_nodes`
-- `$ ros2 run bt_application_2024 bt_m` to execute the tree
+- `$ ros2 run bt_app_2025 bt_m` to execute the tree
 ### run sim world
 - `$ export TURTLEBOT3_MODEL=burger`
 - `$ ros2 launch turtlebot3_gazebo empty_world.launch.py`

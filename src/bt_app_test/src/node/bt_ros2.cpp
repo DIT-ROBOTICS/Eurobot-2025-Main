@@ -7,6 +7,7 @@
 #include "bt_app_test/bt_utils_node_lib.h"
 
 using namespace BT;
+using namespace std;
 
 int main(int argc, char** argv)
 {
@@ -14,12 +15,20 @@ int main(int argc, char** argv)
   BehaviorTreeFactory factory;
   auto node = std::make_shared<rclcpp::Node>("bt_node");
 
+  node->declare_parameter<string>("bt_tree_node_model", "/home/user/Eurobot-2025-Main-ws/src/bt_app_test/bt_config/"
+                     "bt_tree_node_model.xml");
+  node->declare_parameter<string>("groot_xml_config_directory", "/home/user/Eurobot-2025-Main-ws/src/bt_app_test/"
+                                           "bt_config/");
+
   // Register the custom node
   // TODO: Add the custom node
   BT::RosNodeParams params;
   params.nh = node;
-  params.default_port_value = "testing_action";
   factory.registerNodeType<Testing>("Testing", node);
+  params.default_port_value = "number";
+  factory.registerNodeType<TopicSubTest>("TopicSubTest", params);
+  factory.registerNodeType<TopicSubTest1>("TopicSubTest1", node);
+  params.default_port_value = "testing_action";
   factory.registerNodeType<NavigationTemp>("NavigationTemp", params);
   factory.registerNodeType<LocalizationTemp>("LocalizationTemp", node);
   factory.registerNodeType<TickFlow>("TickFlow");
@@ -31,14 +40,17 @@ int main(int argc, char** argv)
 
   // Write tree nodes model
   std::string xml_tree_model = BT::writeTreeNodesModelXML(factory);
-  std::ofstream file("/home/user/groot_ws/groot_ws/src/bt_app_test/bt_config/"
-                     "bt_tree_node_model.xml");
+  std::string bt_tree_node_model = node->get_parameter("bt_tree_node_model").as_string();
+  std::ofstream file(bt_tree_node_model);
+  // std::ofstream file("/home/user/Eurobot-2025-Main-ws/src/bt_app_test/bt_config/"
+  //                    "bt_tree_node_model.xml");
   file << xml_tree_model;
   file.close();
 
   // Create the tree from the XML file
-  std::string groot_xml_config_directory = "/home/user/groot_ws/groot_ws/src/bt_app_test/"
-                                           "bt_config/";
+  std::string groot_xml_config_directory = node->get_parameter("groot_xml_config_directory").as_string();
+  // std::string groot_xml_config_directory = "/home/user/Eurobot-2025-Main-ws/src/bt_app_test/"
+  //                                          "bt_config/";
   for(auto const& entry : std::filesystem::directory_iterator(groot_xml_config_directory))
   {
     if(entry.path().extension() == ".xml")
