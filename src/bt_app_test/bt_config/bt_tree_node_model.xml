@@ -32,5 +32,12 @@
         <Decorator ID="TickFlow">
             <input_port name="max_tick_count" type="int"/>
         </Decorator>
+        <Condition ID="TopicSubTest">
+            <output_port name="output" type="int"/>
+            <input_port name="topic_name" type="std::string"/>
+        </Condition>
+        <Action ID="TopicSubTest1">
+            <output_port name="output" type="int"/>
+        </Action>
     </TreeNodesModel>
 </root>
