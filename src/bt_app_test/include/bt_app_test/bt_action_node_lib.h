@@ -33,8 +33,8 @@ namespace BT {
 class Testing : public BT::StatefulActionNode
 {
 public:
-  Testing(const std::string& name, const BT::NodeConfig& config, std::shared_ptr<rclcpp::Node> node)
-    : BT::StatefulActionNode(name, config), node_(node), tf_buffer_(node_->get_clock()), listener_(tf_buffer_)
+  Testing(const std::string& name, const BT::NodeConfig& config)
+    : BT::StatefulActionNode(name, config)
   {}
 
   /* Node remapping function */
@@ -43,51 +43,20 @@ public:
   /* Start and running function */
   BT::NodeStatus onStart() override;
   BT::NodeStatus onRunning() override;
-  void UpdateRobotPose();
 
   /* Halt function */
   void onHalted() override;
 
 private:
   int tick_count = 0;
-  geometry_msgs::msg::TwistStamped robot_pose_;
-  std::shared_ptr<rclcpp::Node> node_;
-  tf2_ros::Buffer tf_buffer_;
-  tf2_ros::TransformListener listener_;
 
   std::string input;
 };
 
-class TopicSubTest : public BT::RosTopicSubNode<std_msgs::msg::Int32>
+class TopicSubTest : public BT::StatefulActionNode
 {
 public:
-  explicit TopicSubTest(const std::string& name, const BT::NodeConfig& conf, const RosNodeParams& params)
-    : RosTopicSubNode<std_msgs::msg::Int32>(name, conf, params)
-  {}
-
-  /* Node remapping function */
-  static BT::PortsList providedPorts();
-
-  /* Start and running function */
-  NodeStatus onTick(const std::shared_ptr<std_msgs::msg::Int32>& last_msg) override;
-  bool latchLastMessage() const override;
-  // void on_message_received(const std_msgs::msg::Int32::SharedPtr msg) override;
-  // BT::NodeStatus tick() override;
-
-  // BT::NodeStatus onStart() override;
-  // BT::NodeStatus onRunning() override;
-
-  /* Halt function */
-  // void onHalted() override;
-
-private:
-
-};
-
-class TopicSubTest1 : public BT::StatefulActionNode
-{
-public:
-  TopicSubTest1(const std::string& name, const BT::NodeConfig& config, std::shared_ptr<rclcpp::Node> node)
+  TopicSubTest(const std::string& name, const BT::NodeConfig& config, std::shared_ptr<rclcpp::Node> node)
     : BT::StatefulActionNode(name, config), node_(node) {
     subscription_ = node_->create_subscription<std_msgs::msg::Int32>("number", 10, std::bind(&TopicSubTest1::topic_callback, this, std::placeholders::_1));
   }

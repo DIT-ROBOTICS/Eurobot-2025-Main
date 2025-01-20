@@ -64,9 +64,9 @@
 
   <BehaviorTree ID="MainTree">
     <Sequence>
-      <TopicSubTest1 output="{POINT}"/>
-      <TopicSubTest1 output="{POINT1}"/>
-      <TopicSubTest1 output="{POINT2}"/>
+      <TopicSubTest output="{POINT}"/>
+      <TopicSubTest output="{POINT1}"/>
+      <TopicSubTest output="{POINT2}"/>
       <Sleep msec="100"/>
     </Sequence>
   </BehaviorTree>

@@ -24,10 +24,8 @@ int main(int argc, char** argv)
   // TODO: Add the custom node
   BT::RosNodeParams params;
   params.nh = node;
-  factory.registerNodeType<Testing>("Testing", node);
-  params.default_port_value = "number";
-  factory.registerNodeType<TopicSubTest>("TopicSubTest", params);
-  factory.registerNodeType<TopicSubTest1>("TopicSubTest1", node);
+  factory.registerNodeType<Testing>("Testing");
+  factory.registerNodeType<TopicSubTest>("TopicSubTest", node);
   params.default_port_value = "testing_action";
   factory.registerNodeType<NavigationTemp>("NavigationTemp", params);
   factory.registerNodeType<LocalizationTemp>("LocalizationTemp", node);

@@ -54,30 +54,6 @@ BT::NodeStatus Testing::onStart()
   return BT::NodeStatus::RUNNING;
 }
 
-void Testing::UpdateRobotPose() {
-
-  geometry_msgs::msg::TransformStamped transformStamped;
-
-  try {
-    transformStamped = tf_buffer_.lookupTransform(
-      "robot/map" /* Parent frame - map */, 
-      "robot/base_footprint" /* Child frame - base */,
-      rclcpp::Time()
-    );
-
-    /* Extract (x, y, theta) from the transformed stamped */
-    robot_pose_.twist.linear.x = transformStamped.transform.translation.x;
-    robot_pose_.twist.linear.y = transformStamped.transform.translation.y;
-    double theta;
-    tf2::Quaternion q;
-    tf2::fromMsg(transformStamped.transform.rotation, q);
-    robot_pose_.twist.angular.z = tf2::impl::getYaw(q);
-  }
-  catch (tf2::TransformException &ex) {
-    // RCLCPP_WARN_STREAM(node->get_logger(), "[Kernel::UpdateRobotPose]: line " << __LINE__ << " " << ex.what());
-  }
-}
-
 BT::NodeStatus Testing::onRunning()
 {
   tick_count++;
@@ -88,8 +64,6 @@ BT::NodeStatus Testing::onRunning()
   if(tick_count == 10)
   {
     tick_count = 0;
-    UpdateRobotPose();
-    std::cout << "robot_pose_:(" << robot_pose_.twist.linear.x << ", " << robot_pose_.twist.linear.y << ")\n";
     // Set the output port
     setOutput("output", input);
 
@@ -112,51 +86,28 @@ void Testing::onHalted()
 }
 
 PortsList TopicSubTest::providedPorts() {
-  return {
-    BT::InputPort<std::string>("topic_name"), 
-    BT::OutputPort<int>("output") 
-  };
-}
-
-bool TopicSubTest::latchLastMessage() const {
-  return true;
-}
-
-NodeStatus TopicSubTest::onTick(const std::shared_ptr<std_msgs::msg::Int32>& last_msg) {
-  while (!last_msg) { // Check if the pointer is not null
-    std::cout << "No message received!" << std::endl;
-    return BT::NodeStatus::SUCCESS;
-  }
-  std::cout << "Received data: " << last_msg->data << std::endl;
-  // else {
-  
-  //   return BT::NodeStatus::FAILURE;
-  // }
-}
-
-PortsList TopicSubTest1::providedPorts() {
   return { 
     BT::OutputPort<int>("output") 
   };
 }
 
-void TopicSubTest1::topic_callback(const std_msgs::msg::Int32::SharedPtr msg) {
+void TopicSubTest::topic_callback(const std_msgs::msg::Int32::SharedPtr msg) {
   number = msg->data;
   RCLCPP_INFO(node_->get_logger(), "I heard: '%d'", msg->data);
 }
 
-BT::NodeStatus TopicSubTest1::onStart() {
+BT::NodeStatus TopicSubTest::onStart() {
   RCLCPP_INFO(node_->get_logger(), "Node start");
   return BT::NodeStatus::RUNNING;
 }
 
-BT::NodeStatus TopicSubTest1::onRunning() {
+BT::NodeStatus TopicSubTest::onRunning() {
   setOutput("output", number);
   RCLCPP_INFO(node_->get_logger(), "Testing Node running");
   return BT::NodeStatus::SUCCESS;
 }
 
-void TopicSubTest1::onHalted() {
+void TopicSubTest::onHalted() {
   // Reset the output port
   setOutput("output", 0);
   RCLCPP_INFO(node_->get_logger(), "Testing Node halted");

@@ -78,11 +78,7 @@
         <Decorator ID="TimerChecker">
             <input_port name="timer" type="int"/>
         </Decorator>
-        <Condition ID="TopicSubTest">
-            <output_port name="output" type="int"/>
-            <input_port name="topic_name" type="std::string"/>
-        </Condition>
-        <Action ID="TopicSubTest1">
+        <Action ID="TopicSubTest">
             <output_port name="output" type="int"/>
         </Action>
     </TreeNodesModel>
