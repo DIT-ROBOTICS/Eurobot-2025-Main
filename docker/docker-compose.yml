@@ -1,4 +1,5 @@
 version: '3'
+name: eurobot-main
 services:
   main-ws:
     build:
