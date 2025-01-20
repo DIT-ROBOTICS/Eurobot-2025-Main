@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root BTCPP_format="4">
+  <BehaviorTree ID="MainTree">
+    <Sequence>
+      <TopicSubTest1 output="{POINT}"/>
+      <Sleep msec="10"/>
+    </Sequence>
+  </BehaviorTree>
+
+  <!-- Description of Node Models (used by Groot) -->
+  <TreeNodesModel>
+    <Decorator ID="ElapseTimeCheck">
+      <input_port name="max_time_count"
+                  type="double"/>
+    </Decorator>
+    <Decorator ID="RaceTimeCheck">
+      <input_port name="max_time_count"
+                  type="double"/>
+    </Decorator>
+    <Action ID="StartRace">
+      <output_port name="output"
+                   type="std::string"/>
+    </Action>
+    <Action ID="Testing">
+      <output_port name="output"
+                   type="std::string"/>
+      <input_port name="input"
+                  type="std::string"/>
+    </Action>
+    <Action ID="TopicSubTest1">
+      <output_port name="output"
+                   type="int"/>
+    </Action>
+  </TreeNodesModel>
+
+</root>

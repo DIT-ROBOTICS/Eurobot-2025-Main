@@ -35,46 +35,82 @@ template <> inline std::deque<int> BT::convertFromString(StringView str) {
     return output;
 }
 
-BT::PortsList Navigation::providedPorts() {
+PortsList LocReceiver::providedPorts() {
     return { 
-        BT::InputPort<geometry_msgs::msg::TwistStamped>("goal"),
-        BT::InputPort<int>("type"),
-        BT::OutputPort<geometry_msgs::msg::TwistStamped>("result")
+        BT::OutputPort<geometry_msgs::msg::TwistStamped>("output") 
+        BT::OutputPort<geometry_msgs::msg::TwistStamped>("output") 
     };
 }
 
-bool Navigation::setGoal(RosActionNode::Goal& goal) {
-    goal_ = getInput<geometry_msgs::msg::TwistStamped>("goal").value();
-    nav_type_ = getInput<int>("type").value();
-    goal.nav_goal = goal_;
-    goal.nav_goal.twist.angular.x = nav_type_;
-
-    RCLCPP_INFO(logger(), "Sending Goal (%f, %f), Navigation Type: %.f", goal.nav_goal.twist.linear.x, goal.nav_goal.twist.linear.y, goal.nav_goal.twist.angular.x);
-    nav_finished_ = false;
-
-    return true;
+NodeStatus LocReceiver::onStart() {
+    return BT::NodeStatus::RUNNING;
 }
 
-NodeStatus Navigation::onFeedback(const std::shared_ptr<const Feedback> feedback) {
-    auto feedback_ = feedback->progress;
-    return NodeStatus::RUNNING;
+NodeStatus LocReceiver::onRunning() {
+    UpdateRobotPose();
+    std::cout << "robot_pose_:(" << robot_pose_.twist.linear.x << ", " << robot_pose_.twist.linear.y << ")\n";
+    // Set the output port
+    setOutput("output", robot_pose_);
+
+    return BT::NodeStatus::SUCCESS;
 }
 
-NodeStatus Navigation::onResultReceived(const WrappedResult& wr) {
-    auto result_ = wr.result->outcome;
-    nav_finished_ = true;
-    setOutput<geometry_msgs::msg::TwistStamped>("result", goal_);
-    return NodeStatus::SUCCESS;
+void LocReceiver::UpdateRobotPose() {
+    geometry_msgs::msg::TransformStamped transformStamped;
+
+    try {
+        transformStamped = tf_buffer_.lookupTransform(
+        "robot/map" /* Parent frame - map */, 
+        "robot/base_footprint" /* Child frame - base */,
+        rclcpp::Time()
+        );
+
+        /* Extract (x, y, theta) from the transformed stamped */
+        robot_pose_.twist.linear.x = transformStamped.transform.translation.x;
+        robot_pose_.twist.linear.y = transformStamped.transform.translation.y;
+        double theta;
+        tf2::Quaternion q;
+        tf2::fromMsg(transformStamped.transform.rotation, q);
+        robot_pose_.twist.angular.z = tf2::impl::getYaw(q);
+    }
+    catch (tf2::TransformException &ex) {
+        // RCLCPP_WARN_STREAM(node->get_logger(), "[Kernel::UpdateRobotPose]: line " << __LINE__ << " " << ex.what());
+    }
 }
 
-NodeStatus Navigation::onFailure(ActionNodeErrorCode error) {
-    nav_error_ = true;
-    setOutput<geometry_msgs::msg::TwistStamped>("result", goal_);
-    RCLCPP_ERROR(logger(), "[BT]: Navigation error");
-    return NodeStatus::FAILURE;
+void LocReceiver::UpdateRivalPose() {
+    geometry_msgs::msg::TransformStamped transformStamped;
+
+    try {
+        transformStamped = tf_buffer_.lookupTransform(
+        "robot/map" /* Parent frame - map */, 
+        "robot/base_footprint" /* Child frame - base */,
+        rclcpp::Time()
+        );
+
+        /* Extract (x, y, theta) from the transformed stamped */
+        robot_pose_.twist.linear.x = transformStamped.transform.translation.x;
+        robot_pose_.twist.linear.y = transformStamped.transform.translation.y;
+        double theta;
+        tf2::Quaternion q;
+        tf2::fromMsg(transformStamped.transform.rotation, q);
+        robot_pose_.twist.angular.z = tf2::impl::getYaw(q);
+    }
+    catch (tf2::TransformException &ex) {
+        // RCLCPP_WARN_STREAM(node->get_logger(), "[Kernel::UpdateRobotPose]: line " << __LINE__ << " " << ex.what());
+    }
 }
 
-BT::PortsList Docking::providedPorts() {
+void LocReceiver::onHalted() {
+    // Reset the output port
+    setOutput("output", robot_pose_);
+
+    std::cout << "LocalizationTemp Node halted" << std::endl;
+
+    return;
+}
+
+PortsList Docking::providedPorts() {
     return { 
         BT::InputPort<geometry_msgs::msg::TwistStamped>("base"),
         BT::InputPort<geometry_msgs::msg::TwistStamped>("offset"),
