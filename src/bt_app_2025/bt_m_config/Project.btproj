@@ -1,4 +1,8 @@
-<root BTCPP_format="4">
+<?xml version="1.0" encoding="UTF-8"?>
+<root BTCPP_format="4" project_name="Project">
+    <include path="src/bt_app_2025/bt_m_config/bt_m_tree_node_model.xml"/>
+    <include path="src/bt_app_2025/bt_m_config/bt_plan_a.xml"/>
+    <!-- Description of Node Models (used by Groot) -->
     <TreeNodesModel>
         <Action ID="BTMission">
             <output_port name="result" type="int"/>
@@ -46,6 +50,9 @@
             <input_port name="goal" type="geometry_msgs::msg::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
         </Action>
         <Action ID="SIMAactivate"/>
+        <Decorator ID="TickFlow" editable="true">
+            <input_port name="max_tick_count"/>
+        </Decorator>
         <Decorator ID="TimerChecker">
             <input_port name="timer" type="int"/>
         </Decorator>
