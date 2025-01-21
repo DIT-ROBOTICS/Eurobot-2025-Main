@@ -105,6 +105,7 @@ int main(int argc, char** argv) {
     factory.registerNodeType<Comparator>("Comparator", node); // decorator
     factory.registerNodeType<TimerChecker>("TimerChecker"); // decorator
     // factory.registerNodeType<RivalStart>("RivalStart", team);
+    factory.registerNodeType<PointProvider>("PointProvider");
 
     // Service Client
     auto client = node->create_client<std_srvs::srv::SetBool>("/robot/objects/ladybug_activate");

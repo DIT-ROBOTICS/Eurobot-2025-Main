@@ -45,6 +45,11 @@
             <input_port name="type" type="int"/>
             <input_port name="goal" type="geometry_msgs::msg::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
         </Action>
+        <Action ID="PointProvider">
+            <output_port name="point_out2" type="geometry_msgs::msg::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+            <output_port name="point_out1" type="geometry_msgs::msg::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+            <input_port name="point_in" type="geometry_msgs::msg::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+        </Action>
         <Action ID="SIMAactivate"/>
         <Decorator ID="TimerChecker">
             <input_port name="timer" type="int"/>

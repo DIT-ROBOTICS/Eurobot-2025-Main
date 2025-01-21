@@ -43,6 +43,24 @@ namespace BT {
 /******************************/
 /* BTStarter - Start the tree */
 /******************************/
+class PointProvider : public BT::SyncActionNode {
+
+public:
+    PointProvider(const std::string& name, const BT::NodeConfig& config)
+        : BT::SyncActionNode(name, config)
+    {}
+
+    /* Node remapping function */
+    static BT::PortsList providedPorts();
+
+    /* Start and running function */
+    BT::NodeStatus tick() override;
+private:
+    geometry_msgs::msg::TwistStamped point;
+};
+/******************************/
+/* BTStarter - Start the tree */
+/******************************/
 class BTStarter : public BT::SyncActionNode {
 
 public:
