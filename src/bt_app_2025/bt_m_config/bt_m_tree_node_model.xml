@@ -1,0 +1,53 @@
+<root BTCPP_format="4">
+    <TreeNodesModel>
+        <Action ID="BTMission">
+            <output_port name="result" type="int"/>
+            <input_port name="description" type="std::string"/>
+            <input_port name="mission_sub_type" type="std::deque&lt;int, std::allocator&lt;int&gt; &gt;"/>
+            <input_port name="mission_type" type="std::deque&lt;int, std::allocator&lt;int&gt; &gt;"/>
+        </Action>
+        <Action ID="BTStarter">
+            <output_port name="result" type="int"/>
+        </Action>
+        <Action ID="CamReceiver"/>
+        <Action ID="CollectFinisher">
+            <output_port name="has_garbage" type="bool"/>
+            <output_port name="has_one_level" type="bool"/>
+            <output_port name="has_raw_material" type="bool"/>
+            <input_port name="step_results" type="std::deque&lt;int, std::allocator&lt;int&gt; &gt;"/>
+        </Action>
+        <Condition ID="Comparator">
+            <input_port name="game_status" type="int"/>
+            <input_port name="mission_sub_type" type="int"/>
+            <input_port name="mission_type" type="int"/>
+            <input_port name="compare_point" type="geometry_msgs::msg::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+        </Condition>
+        <Action ID="ConstructFinisher">
+            <output_port name="on_robot_materials" type="int"/>
+            <output_port name="has_garbage" type="bool"/>
+            <output_port name="failed_levels" type="int"/>
+            <output_port name="success_levels" type="int"/>
+            <input_port name="step_results" type="std::deque&lt;int, std::allocator&lt;int&gt; &gt;"/>
+        </Action>
+        <Action ID="Docking">
+            <input_port name="mission_type" type="int"/>
+            <output_port name="result" type="geometry_msgs::msg::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+            <input_port name="offset" type="geometry_msgs::msg::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+            <input_port name="base" type="geometry_msgs::msg::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+        </Action>
+        <Action ID="LocReceiver">
+            <output_port name="rival_pose" type="geometry_msgs::msg::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+            <output_port name="robot_pose" type="geometry_msgs::msg::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+        </Action>
+        <Action ID="NavReceiver"/>
+        <Action ID="Navigation">
+            <output_port name="result" type="geometry_msgs::msg::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+            <input_port name="type" type="int"/>
+            <input_port name="goal" type="geometry_msgs::msg::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+        </Action>
+        <Action ID="SIMAactivate"/>
+        <Decorator ID="TimerChecker">
+            <input_port name="timer" type="int"/>
+        </Decorator>
+    </TreeNodesModel>
+</root>

@@ -3,7 +3,7 @@ int32 mission_type
 int32 mission_sub_type
 ---
 # result
-std_msgs/Bool outcome
+int32 outcome
 ---
 # feedback
 std_msgs/Char progress

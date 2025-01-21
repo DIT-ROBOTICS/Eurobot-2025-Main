@@ -36,6 +36,6 @@
     </node>
 
     <!-- Include the communication -->
-    <include file="$(find bt_app_2025)/launch/comm.launch"/>
+    <!-- <include file="$(find bt_app_2025)/launch/comm.launch"/> -->
 
 </launch>

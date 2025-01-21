@@ -32,7 +32,10 @@ include_directories(
 
 add_executable(bt_m src/bt_m.cpp)
 target_link_libraries(bt_m
-  BTNODE
+  BTNODE_RECEIVER
+  BTNODE_FIRMWARE
+  BTNODE_NAVIGATION
+  BTNODE_OTHERS
   ${ARMADILLO_LIBRARIES})
 ament_target_dependencies(bt_m
   ${THIS_PACKAGE_DEPS}
@@ -42,17 +45,68 @@ ament_target_dependencies(bt_m
   "rclcpp"
   "rclcpp_action"
   "rclcpp_components"
+  "std_srvs"
+  "std_msgs"
 )
 install(TARGETS
   bt_m
   DESTINATION lib/${PROJECT_NAME}
 )
 
-add_library(BTNODE src/bt_nodes.cpp)
-target_link_libraries(BTNODE  
+add_library(BTNODE_RECEIVER src/bt_nodes_receiver.cpp)
+target_link_libraries(BTNODE_RECEIVER  
   ${ARMADILLO_LIBRARIES})
-ament_target_dependencies(BTNODE
+ament_target_dependencies(BTNODE_RECEIVER
+  "behaviortree_ros2"
+  "behaviortree_cpp"
+  "std_msgs"
+  "std_srvs"
+  "tf2"
+  "tf2_ros"
+  "tf2_geometry_msgs"
+  "geometry_msgs"
+  "rclcpp"
+  "rclcpp_action"
+  "rclcpp_components"
+  ${THIS_PACKAGE_DEPS}
+)
+
+add_library(BTNODE_FIRMWARE src/bt_nodes_firmware.cpp)
+target_link_libraries(BTNODE_FIRMWARE  
+  ${ARMADILLO_LIBRARIES})
+ament_target_dependencies(BTNODE_FIRMWARE
   "btcpp_ros2_interfaces"
+  "behaviortree_ros2"
+  "behaviortree_cpp"
+  "std_msgs"
+  "std_srvs"
+  "geometry_msgs"
+  "rclcpp"
+  "rclcpp_action"
+  "rclcpp_components"
+  ${THIS_PACKAGE_DEPS}
+)
+
+add_library(BTNODE_NAVIGATION src/bt_nodes_navigation.cpp)
+target_link_libraries(BTNODE_NAVIGATION  
+  ${ARMADILLO_LIBRARIES})
+ament_target_dependencies(BTNODE_NAVIGATION
+  "btcpp_ros2_interfaces"
+  "behaviortree_ros2"
+  "behaviortree_cpp"
+  "std_msgs"
+  "std_srvs"
+  "geometry_msgs"
+  "rclcpp"
+  "rclcpp_action"
+  "rclcpp_components"
+  ${THIS_PACKAGE_DEPS}
+)
+
+add_library(BTNODE_OTHERS src/bt_nodes_others.cpp)
+target_link_libraries(BTNODE_OTHERS 
+  ${ARMADILLO_LIBRARIES})
+ament_target_dependencies(BTNODE_OTHERS
   "behaviortree_ros2"
   "behaviortree_cpp"
   "std_msgs"
@@ -62,7 +116,6 @@ ament_target_dependencies(BTNODE
   "tf2_geometry_msgs"
   "nav_msgs"
   "geometry_msgs"
-  "nav_msgs"
   "rclcpp"
   "rclcpp_action"
   "rclcpp_components"
@@ -71,7 +124,7 @@ ament_target_dependencies(BTNODE
 
 install(DIRECTORY
   bt_m_config
-  # launch
+#  launch
   DESTINATION share/${PROJECT_NAME}/
 )
 

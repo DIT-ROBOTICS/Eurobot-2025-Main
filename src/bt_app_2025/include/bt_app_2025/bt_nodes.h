@@ -96,36 +96,36 @@ private:
 /*******************************/
 /* Recovery mode using docking */
 /*******************************/
-class Recovery : public BT::RosActionNode<btcpp_ros2_interfaces::action::NavMission> {
+// class Recovery : public BT::RosActionNode<btcpp_ros2_interfaces::action::NavMission> {
 
-public:
-    // Recovery(const std::string& name, const BT::NodeConfig& config, std::shared_ptr<Kernel> kernel, bool use_docking, bool mec_callback)
-    //     : BT::StatefulActionNode(name, config), kernel_(kernel), use_docking_(use_docking), mec_callback_(mec_callback) {}
-    Recovery(const std::string& name, const NodeConfig& conf, const RosNodeParams& params)
-        : RosActionNode<btcpp_ros2_interfaces::action::NavMission>(name, conf, params), tf_buffer_(params.nh.lock()->get_clock()), listener_(tf_buffer_)
-    {}
+// public:
+//     // Recovery(const std::string& name, const BT::NodeConfig& config, std::shared_ptr<Kernel> kernel, bool use_docking, bool mec_callback)
+//     //     : BT::StatefulActionNode(name, config), kernel_(kernel), use_docking_(use_docking), mec_callback_(mec_callback) {}
+//     Recovery(const std::string& name, const NodeConfig& conf, const RosNodeParams& params)
+//         : RosActionNode<btcpp_ros2_interfaces::action::NavMission>(name, conf, params), tf_buffer_(params.nh.lock()->get_clock()), listener_(tf_buffer_)
+//     {}
 
-    /* Node remapping function */
-    static PortsList providedPorts();
-    bool setGoal(RosActionNode::Goal& goal) override;
-    NodeStatus onResultReceived(const WrappedResult& wr) override;
-    virtual NodeStatus onFailure(ActionNodeErrorCode error) override;
-    NodeStatus onFeedback(const std::shared_ptr<const Feedback> feedback);
+//     /* Node remapping function */
+//     static PortsList providedPorts();
+//     bool setGoal(RosActionNode::Goal& goal) override;
+//     NodeStatus onResultReceived(const WrappedResult& wr) override;
+//     virtual NodeStatus onFailure(ActionNodeErrorCode error) override;
+//     NodeStatus onFeedback(const std::shared_ptr<const Feedback> feedback);
 
-private:
-    geometry_msgs::msg::TwistStamped UpdateRobotPose();
-    geometry_msgs::msg::TwistStamped UpdateRivalPose();
+// private:
+//     geometry_msgs::msg::TwistStamped UpdateRobotPose();
+//     geometry_msgs::msg::TwistStamped UpdateRivalPose();
 
-    double distance_ = 0.2;
-    bool nav_finished_ = false;
-    bool nav_error_ = false;
-    int mission_type_ = 0;
-    bool start_mission_ = false;
-    geometry_msgs::msg::TwistStamped base_;
+//     double distance_ = 0.2;
+//     bool nav_finished_ = false;
+//     bool nav_error_ = false;
+//     int mission_type_ = 0;
+//     bool start_mission_ = false;
+//     geometry_msgs::msg::TwistStamped base_;
 
-    tf2_ros::Buffer tf_buffer_;
-    tf2_ros::TransformListener listener_;
-};
+//     tf2_ros::Buffer tf_buffer_;
+//     tf2_ros::TransformListener listener_;
+// };
 
 /*****************************************/
 /* Comparator to check the state is safe */

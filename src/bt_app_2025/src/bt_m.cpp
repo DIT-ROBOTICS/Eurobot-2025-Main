@@ -1,19 +1,21 @@
 // BT 
 #include "behaviortree_ros2/bt_action_node.hpp"
 
-// #include "behaviortree_cpp/bt_factory.h"
-// #include "behaviortree_cpp/decorators/loop_node.h"
+#include "behaviortree_cpp/bt_factory.h"
+#include "behaviortree_cpp/decorators/loop_node.h"
 #include "behaviortree_cpp/xml_parsing.h"
-// #include "behaviortree_cpp/loggers/groot2_publisher.h"
-// #include "behaviortree_cpp/decorators/loop_node.h"
+#include "behaviortree_cpp/loggers/groot2_publisher.h"
 // ROS
 #include "rclcpp/rclcpp.hpp"
-// #include "rclcpp/executors.hpp"
+#include "rclcpp/executors.hpp"
 // ros message
 #include "std_srvs/srv/set_bool.hpp"
 #include "std_msgs/msg/float32.hpp"
 // BTaction nodes
-#include "bt_app_2025/bt_nodes.h"
+#include "bt_app_2025/bt_nodes_firmware.h"
+#include "bt_app_2025/bt_nodes_navigation.h"
+#include "bt_app_2025/bt_nodes_others.h"
+#include "bt_app_2025/bt_nodes_receiver.h"
 // C++
 #include <memory>
 #include <string>
@@ -50,91 +52,96 @@ void timeCallback(const std_msgs::msg::Float32::SharedPtr msg) {
 int main(int argc, char** argv) {
     rclcpp::init(argc, argv);
     auto node = std::make_shared<rclcpp::Node>("bt_app_2025");
+    rclcpp::executors::MultiThreadedExecutor executor;
 
     // Parameters
-    bool use_docking = false;
-    bool mec_callback = true;
     std::string groot_xml_config_directory;
-    std::string nav_action_name;
-    std::string blue_filename, yellow_filename, score_filepath;
-    double avoidance_distance;
+    std::string bt_tree_node_model;
+    std::string blue_filename, yellow_filename, planA_filename, score_filepath;
 
     // Read parameters
-    node->declare_parameter("groot_xml_config_directory", "/");
-    node->declare_parameter("use_docking", false);
-    node->declare_parameter("mec_callback", true);
-    node->declare_parameter("nav_action_name", "/robot1/navigation_main");
+    node->declare_parameter<std::string>("groot_xml_config_directory", "/home/user/Eurobot-2025-Main-ws/src/bt_app_2025/bt_m_config/");
+    node->declare_parameter<std::string>("tree_node_model_config_file", "/home/user/Eurobot-2025-Main-ws/src/bt_app_2025/bt_m_config/bt_m_tree_node_model.xml");
     node->declare_parameter("groot_xml_blue_config_file", "bt_blue.xml");
     node->declare_parameter("groot_xml_yellow_config_file", "bt_yellow.xml");
+    node->declare_parameter<std::string>("planA_config_file", "bt_plan_a.xml");
     node->declare_parameter("score_filepath", "score.json");
-    node->declare_parameter("avoidance_distance", 0.2);
 
     node->get_parameter("groot_xml_config_directory", groot_xml_config_directory);
-    node->get_parameter("use_docking", use_docking);
-    node->get_parameter("mec_callback", mec_callback);
-    node->get_parameter("nav_action_name", nav_action_name);
+    node->get_parameter("tree_node_model_config_file", bt_tree_node_model);
     node->get_parameter("groot_xml_blue_config_file", blue_filename);
     node->get_parameter("groot_xml_yellow_config_file", yellow_filename);
+    node->get_parameter("planA_config_file", planA_filename);
     node->get_parameter("score_filepath", score_filepath);
-    node->get_parameter("avoidance_distance", avoidance_distance);
 
-    // Kernel
-    // auto kernel = std::make_shared<Kernel>(node, nav_action_name);
+    // Create a shared blackboard
+    auto blackboard = BT::Blackboard::create();
+    // Store a persistent parameter
+    blackboard->set<std::string>("global_param", "Persistent Value");
 
     // Behavior Tree Factory
     BT::BehaviorTreeFactory factory;
     BT::RosNodeParams params;
+    int team = 0;
     params.nh = node;
-    factory.registerNodeType<Comparator>("Comparator", node);
+    // action nodes
+    /* receiver */
+    factory.registerNodeType<LocReceiver>("LocReceiver", node);
+    factory.registerNodeType<NavReceiver>("NavReceiver", node);
+    factory.registerNodeType<CamReceiver>("CamReceiver", node);
+    /* navigation */
+    // factory.registerNodeType<DynamicAdjustment>("DynamicAdjustment");
     factory.registerNodeType<Navigation>("Navigation", params);
-    // factory.registerNodeType<BTMission>("BTMission", kernel, mec_callback);
-    // factory.registerNodeType<Docking>("Docking", kernel, use_docking, mec_callback);
-    // factory.registerNodeType<Recovery>("Recovery", kernel, use_docking, avoidance_distance);
-    factory.registerNodeType<BTMission>("BTMission", params);
     factory.registerNodeType<Docking>("Docking", params);
-    factory.registerNodeType<Recovery>("Recovery", params);
-    factory.registerNodeType<BTStarter>("BTStarter");
-    factory.registerNodeType<TimerChecker>("TimerChecker");
-    // factory.registerNodeType<LadybugActivate>("LadybugActivate");
+    // /* firmware */
+    factory.registerNodeType<BTMission>("BTMission", params);
+    factory.registerNodeType<SIMAactivate>("SIMAactivate", node);
+    // factory.registerNodeType<BannerMission>("BannerMission", params);
+    factory.registerNodeType<ConstructFinisher>("ConstructFinisher");
+    factory.registerNodeType<CollectFinisher>("CollectFinisher");
+    /* others */
+    factory.registerNodeType<BTStarter>("BTStarter", node);
+    // factory.registerNodeType<BTFinisher>("BTFinisher", score_filepath, team, node);
+    factory.registerNodeType<Comparator>("Comparator", node); // decorator
+    factory.registerNodeType<TimerChecker>("TimerChecker"); // decorator
+    // factory.registerNodeType<RivalStart>("RivalStart", team);
 
     // Service Client
     auto client = node->create_client<std_srvs::srv::SetBool>("/robot/objects/ladybug_activate");
     // Subscriber
     auto time_sub = node->create_subscription<std_msgs::msg::Float32>("/robot/startup/time", 2, timeCallback);
 
-    int team = 0;
-    // To do: get team
-    // factory.registerNodeType<RivalStart>("RivalStart", team);
-    factory.registerNodeType<BTFinisher>("BTFinisher", score_filepath, team, node);
-
-    std::string groot_filename;
-    groot_xml_config_directory = "/home/user/groot_ws/groot_ws/src/bt_app_2025/bt_m_config/";
-    // select tree
-    if (team == 0) {
-        groot_filename = groot_xml_config_directory + "/" + "bt_blue.xml";
-        RCLCPP_INFO(node->get_logger(), "[BT Application]: Blue team is running!");
-    } else {
-        groot_filename = groot_xml_config_directory + "/" + "bt_yellow.xml";
-        RCLCPP_INFO(node->get_logger(), "[BT Application]: Yellow team is running!");
-    }
-
     // generate the tree in xml and safe the xml into a file
     std::string xml_models = BT::writeTreeNodesModelXML(factory);
-    std::ofstream file("/home/user/groot_ws/groot_ws/src/bt_app_2025/bt_m_config/bt_tree_node_model.xml");
+    std::ofstream file(bt_tree_node_model);
+    // std::ofstream file("/home/user/groot_ws/groot_ws/src/bt_app_2025/bt_m_config/bt_tree_node_model.xml");
     file << xml_models;
     file.close();
 
+    std::string groot_filename;
+    // select tree
+    // if (team == 0) {
+    //     groot_filename = groot_xml_config_directory + "/" + "bt_blue.xml";
+    //     RCLCPP_INFO(node->get_logger(), "[BT Application]: Blue team is running!");
+    // } else {
+    //     groot_filename = groot_xml_config_directory + "/" + "bt_yellow.xml";
+    //     RCLCPP_INFO(node->get_logger(), "[BT Application]: Yellow team is running!");
+    // }
+    groot_filename = groot_xml_config_directory + "/" + planA_filename;
     factory.registerBehaviorTreeFromFile(groot_filename);
 
     auto tree = factory.createTree("MainTree");
+    BT::Groot2Publisher publisher(tree, 2227);
 
     BT::NodeStatus status = BT::NodeStatus::RUNNING;
 
     RCLCPP_INFO(node->get_logger(), "[BT Application]: Behavior Tree start running!");
-
+    
     rclcpp::Rate rate(100);
+    executor.add_node(node);
     while (rclcpp::ok() && status == BT::NodeStatus::RUNNING) {
-        rclcpp::spin_some(node);
+        // rclcpp::spin_some(node);
+        executor.spin_some();
         rate.sleep();
         status = tree.rootNode()->executeTick();
     }
