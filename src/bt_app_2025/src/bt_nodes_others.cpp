@@ -1,4 +1,4 @@
-#include "bt_app_2025/bt_nodes.h"
+#include "bt_app_2025/bt_nodes_others.h"
 
 using namespace BT;
 using namespace std;
@@ -35,418 +35,29 @@ template <> inline std::deque<int> BT::convertFromString(StringView str) {
     return output;
 }
 
-BT::PortsList Navigation::providedPorts() {
-    return { 
-        BT::InputPort<geometry_msgs::msg::TwistStamped>("goal"),
-        BT::InputPort<int>("type"),
-        BT::OutputPort<geometry_msgs::msg::TwistStamped>("result")
-    };
-}
-
-bool Navigation::setGoal(RosActionNode::Goal& goal) {
-    goal_ = getInput<geometry_msgs::msg::TwistStamped>("goal").value();
-    nav_type_ = getInput<int>("type").value();
-    goal.nav_goal = goal_;
-    goal.nav_goal.twist.angular.x = nav_type_;
-
-    RCLCPP_INFO(logger(), "Sending Goal (%f, %f), Navigation Type: %.f", goal.nav_goal.twist.linear.x, goal.nav_goal.twist.linear.y, goal.nav_goal.twist.angular.x);
-    nav_finished_ = false;
-
-    return true;
-}
-
-NodeStatus Navigation::onFeedback(const std::shared_ptr<const Feedback> feedback) {
-    auto feedback_ = feedback->progress;
-    return NodeStatus::RUNNING;
-}
-
-NodeStatus Navigation::onResultReceived(const WrappedResult& wr) {
-    auto result_ = wr.result->outcome;
-    nav_finished_ = true;
-    setOutput<geometry_msgs::msg::TwistStamped>("result", goal_);
-    return NodeStatus::SUCCESS;
-}
-
-NodeStatus Navigation::onFailure(ActionNodeErrorCode error) {
-    nav_error_ = true;
-    setOutput<geometry_msgs::msg::TwistStamped>("result", goal_);
-    RCLCPP_ERROR(logger(), "[BT]: Navigation error");
-    return NodeStatus::FAILURE;
-}
-
-BT::PortsList Docking::providedPorts() {
-    return { 
-        BT::InputPort<geometry_msgs::msg::TwistStamped>("base"),
-        BT::InputPort<geometry_msgs::msg::TwistStamped>("offset"),
-        BT::OutputPort<geometry_msgs::msg::TwistStamped>("result"),
-        BT::InputPort<int>("mission_type")
-    };
-}
-
-bool Docking::setGoal(RosActionNode::Goal& goal) {
-    auto m = getInput<geometry_msgs::msg::TwistStamped>("base");
-    auto offset = getInput<geometry_msgs::msg::TwistStamped>("offset");
-    mission_type_ = getInput<int>("mission_type").value();
-    goal_.twist.linear = m.value().twist.linear;
-    goal_.twist.linear.x += offset.value().twist.linear.x;
-    goal_.twist.linear.y += offset.value().twist.linear.y;
-    goal_.twist.linear.z += offset.value().twist.linear.z;
-    goal.nav_goal = goal_;
-    goal.nav_goal.twist.angular.x = mission_type_;
-
-    nav_finished_ = false;
-    nav_error_ = false;
-    start_mission_ = true;
-
-    return true;
-}
-
-NodeStatus Docking::onFeedback(const std::shared_ptr<const Feedback> feedback) {
-    auto feedback_ = feedback->progress;
-    return NodeStatus::RUNNING;
-}
-
-NodeStatus Docking::onResultReceived(const WrappedResult& wr) {
-    auto result_ = wr.result->outcome;
-    nav_finished_ = true;
-    start_mission_ = false;
-    setOutput<geometry_msgs::msg::TwistStamped>("result", goal_);
-    return NodeStatus::SUCCESS;
-}
-
-NodeStatus Docking::onFailure(ActionNodeErrorCode error) {
-    nav_error_ = true;
-    start_mission_ = false;
-    setOutput<geometry_msgs::msg::TwistStamped>("result", goal_);
-    RCLCPP_ERROR(logger(), "[BT]: Navigation error");
-    return NodeStatus::FAILURE;
-}
-
-// BT::PortsList Recovery::providedPorts() {
-//     return {
-//         BT::InputPort<geometry_msgs::msg::TwistStamped>("base"),
-//         BT::OutputPort<geometry_msgs::msg::TwistStamped>("result"),
-//         BT::InputPort<int>("mission_type")
-//     };
-// }
-
-// geometry_msgs::msg::TwistStamped Recovery::UpdateRobotPose() {
-
-//     geometry_msgs::msg::TwistStamped robot_pose_;
-//     geometry_msgs::msg::TransformStamped transformStamped;
-
-//     try {
-//         transformStamped = tf_buffer_.lookupTransform(
-//         "robot/map" /* Parent frame - map */, 
-//         "robot/base_footprint" /* Child frame - base */,
-//         rclcpp::Time()
-//         );
-
-//         /* Extract (x, y, theta) from the transformed stamped */
-//         robot_pose_.twist.linear.x = transformStamped.transform.translation.x;
-//         robot_pose_.twist.linear.y = transformStamped.transform.translation.y;
-//         double theta;
-//         tf2::Quaternion q;
-//         tf2::fromMsg(transformStamped.transform.rotation, q);
-//         robot_pose_.twist.angular.z = tf2::impl::getYaw(q);
-//     }
-//     catch (tf2::TransformException &ex) {
-//         // RCLCPP_WARN_STREAM(node->get_logger(), "[Kernel::UpdateRobotPose]: line " << __LINE__ << " " << ex.what());
-//     }
-//     return robot_pose_;
-// }
-
-// geometry_msgs::msg::TwistStamped Recovery::UpdateRivalPose() {
-
-//     geometry_msgs::msg::TwistStamped rival_pose_;
-//     geometry_msgs::msg::TransformStamped transformStamped;
-
-//     try {
-//         transformStamped = tf_buffer_.lookupTransform(
-//         "rival/map" /* Parent frame - map */, 
-//         "rival/base_footprint" /* Child frame - base */,
-//         rclcpp::Time()
-//         );
-
-//         /* Extract (x, y, theta) from the transformed stamped */
-//         rival_pose_.twist.linear.x = transformStamped.transform.translation.x;
-//         rival_pose_.twist.linear.y = transformStamped.transform.translation.y;
-//         double theta;
-//         tf2::Quaternion q;
-//         tf2::fromMsg(transformStamped.transform.rotation, q);
-//         rival_pose_.twist.angular.z = tf2::impl::getYaw(q);
-//     }
-//     catch (tf2::TransformException &ex) {
-//         // RCLCPP_WARN_STREAM(node->get_logger(), "[Kernel::UpdateRobotPose]: line " << __LINE__ << " " << ex.what());
-//     }
-//     return rival_pose_;
-// }
-
-// bool Recovery::setGoal(RosActionNode::Goal& goal) {
-
-//     auto m = getInput<geometry_msgs::msg::TwistStamped>("base");
-//     geometry_msgs::msg::TwistStamped robot_pose = UpdateRobotPose();
-//     geometry_msgs::msg::TwistStamped rival_pose = UpdateRivalPose();
-//     mission_type_ = getInput<int>("mission_type").value();
-//     base_.twist.linear = m.value().twist.linear;
-
-//     nav_finished_ = false;
-
-//     // Get current vector by robot yaw
-//     geometry_msgs::msg::TwistStamped normal_vector;
-//     normal_vector.twist.linear.x = cos(robot_pose.twist.angular.z);
-//     normal_vector.twist.linear.y = sin(robot_pose.twist.angular.z);
-//     normal_vector.twist.linear.z = robot_pose.twist.angular.z;
-
-//     // Transform rival pose to robot frame
-//     geometry_msgs::msg::TwistStamped rival_pose_robot_frame;
-//     rival_pose_robot_frame.twist.linear.x = rival_pose.twist.linear.x - robot_pose.twist.linear.x;
-//     rival_pose_robot_frame.twist.linear.y = rival_pose.twist.linear.y - robot_pose.twist.linear.y;
-
-//     // Dot product
-//     double dot_product = robot_pose.twist.linear.x * rival_pose_robot_frame.twist.linear.x + \
-//                          robot_pose.twist.linear.y * rival_pose_robot_frame.twist.linear.y;
-
-//     // If the rival is in front of the robot -> backward
-//     if (dot_product > 0) {
-//         base_.twist.linear.x = robot_pose.twist.linear.x - distance_ * normal_vector.twist.linear.x;
-//         base_.twist.linear.y = robot_pose.twist.linear.y - distance_ * normal_vector.twist.linear.y;
-//         base_.twist.linear.z = robot_pose.twist.angular.z;
-//     }
-//     else {
-//         base_.twist.linear.x = robot_pose.twist.linear.x + distance_ * normal_vector.twist.linear.x;
-//         base_.twist.linear.y = robot_pose.twist.linear.y + distance_ * normal_vector.twist.linear.y;
-//         base_.twist.linear.z = robot_pose.twist.angular.z;
-//     }
-
-//     // Log the normal vector and rival pose
-//     RCLCPP_INFO_STREAM(rclcpp::get_logger("rclcpp"), "[Recovery]: Normal vector: " << normal_vector.twist.linear.x << " " << normal_vector.twist.linear.y << " " << normal_vector.twist.linear.z);
-//     RCLCPP_INFO_STREAM(rclcpp::get_logger("rclcpp"), "[Recovery]: Robot pose: " << robot_pose.twist.linear.x << " " << robot_pose.twist.linear.y);
-//     RCLCPP_INFO_STREAM(rclcpp::get_logger("rclcpp"), "[Recovery]: Rival pose: " << rival_pose.twist.linear.x << " " << rival_pose.twist.linear.y);
-//     RCLCPP_INFO_STREAM(rclcpp::get_logger("rclcpp"), "[Recovery]: Dot product: " << dot_product);
-
-//     // Clip x to [0.15, 2.85], y to [0.15, 1.85]
-//     base_.twist.linear.x = std::max(0.15, std::min(2.85, base_.twist.linear.x));
-//     base_.twist.linear.y = std::max(0.15, std::min(1.85, base_.twist.linear.y));
-
-//     goal.nav_goal = base_;
-//     goal.nav_goal.twist.angular.x = mission_type_;
-
-//     // RCLCPP_INFO(logger(), "[Recovery]: Send base pose: " << base_.twist.linear.x << " " << base_.twist.linear.y);
-//     cout << "[Recovery]: Send base pose: " << base_.twist.linear.x << " " << base_.twist.linear.y << endl;
-//     return true;
-// }
-
-// NodeStatus Recovery::onFeedback(const std::shared_ptr<const Feedback> feedback) {
-//     auto feedback_ = feedback->progress;
-//     return NodeStatus::RUNNING;
-// }
-
-// NodeStatus Recovery::onResultReceived(const WrappedResult& wr) {
-//     auto result_ = wr.result->outcome;
-//     nav_finished_ = true;
-//     start_mission_ = false;
-//     setOutput<geometry_msgs::msg::TwistStamped>("result", base_);
-//     return NodeStatus::SUCCESS;
-// }
-
-// NodeStatus Recovery::onFailure(ActionNodeErrorCode error) {
-//     nav_error_ = true;
-//     start_mission_ = false;
-//     setOutput<geometry_msgs::msg::TwistStamped>("result", base_);
-//     RCLCPP_ERROR(logger(), "[BT]: Navigation error");
-//     return NodeStatus::FAILURE;
-// }
-
-BT::PortsList Comparator::providedPorts() {
-    return { 
-        BT::InputPort<geometry_msgs::msg::TwistStamped>("compare_point"),
-        BT::InputPort<int>("mission_type"),
-        BT::InputPort<int>("mission_sub_type"),
-        BT::InputPort<int>("game_status")
-    };
-}
-
-BT::NodeStatus Comparator::tick() {
-
-    int mission_type = getInput<int>("mission_type").value();
-    int mission_sub_type = getInput<int>("mission_sub_type").value();
-
-    auto mi = getInput<geometry_msgs::msg::TwistStamped>("compare_point");
-    mission_.twist.linear = mi.value().twist.linear;
-
-    // Get current mission mask
-    int mission_mask = 1 << mission_sub_type;
-
-    // Check if the mission is finished
-    int game_status = getInput<int>("game_status").value();
-    if (mission_type == 0 && (game_status & mission_mask) != 0) {
-        return BT::NodeStatus::FAILURE;
-    }
-
-    if (mission_type == 0 && CheckRivalInThreshold(mission_, 0.2, 0.6)) {
-        return BT::NodeStatus::SUCCESS;
-    }
-    else if (mission_type != 0 && CheckRivalInRange(mission_, 0.5)) {
-        return BT::NodeStatus::SUCCESS;
-    }
-    else {
-        return BT::NodeStatus::FAILURE;
-    }
-}
-
-geometry_msgs::msg::TwistStamped Comparator::UpdateRobotPose() {
-
-    geometry_msgs::msg::TwistStamped robot_pose_;
-    geometry_msgs::msg::TransformStamped transformStamped;
-
-    try {
-        transformStamped = tf_buffer_.lookupTransform(
-        "robot/map" /* Parent frame - map */, 
-        "robot/base_footprint" /* Child frame - base */,
-        rclcpp::Time()
-        );
-
-        /* Extract (x, y, theta) from the transformed stamped */
-        robot_pose_.twist.linear.x = transformStamped.transform.translation.x;
-        robot_pose_.twist.linear.y = transformStamped.transform.translation.y;
-        double theta;
-        tf2::Quaternion q;
-        tf2::fromMsg(transformStamped.transform.rotation, q);
-        robot_pose_.twist.angular.z = tf2::impl::getYaw(q);
-    }
-    catch (tf2::TransformException &ex) {
-        // RCLCPP_WARN_STREAM(node->get_logger(), "[Kernel::UpdateRobotPose]: line " << __LINE__ << " " << ex.what());
-    }
-    return robot_pose_;
-}
-
-geometry_msgs::msg::TwistStamped Comparator::UpdateRivalPose() {
-
-    geometry_msgs::msg::TwistStamped rival_pose_;
-    geometry_msgs::msg::TransformStamped transformStamped;
-
-    try {
-        transformStamped = tf_buffer_.lookupTransform(
-        "rival/map" /* Parent frame - map */, 
-        "rival/base_footprint" /* Child frame - base */,
-        rclcpp::Time()
-        );
-
-        /* Extract (x, y, theta) from the transformed stamped */
-        rival_pose_.twist.linear.x = transformStamped.transform.translation.x;
-        rival_pose_.twist.linear.y = transformStamped.transform.translation.y;
-        double theta;
-        tf2::Quaternion q;
-        tf2::fromMsg(transformStamped.transform.rotation, q);
-        rival_pose_.twist.angular.z = tf2::impl::getYaw(q);
-    }
-    catch (tf2::TransformException &ex) {
-        // RCLCPP_WARN_STREAM(node->get_logger(), "[Kernel::UpdateRobotPose]: line " << __LINE__ << " " << ex.what());
-    }
-    return rival_pose_;
-}
-
-bool Comparator::CheckRivalInThreshold(geometry_msgs::msg::TwistStamped pose, double threshold, double range) {
-
-    geometry_msgs::msg::TwistStamped robot_pose = UpdateRobotPose();
-    geometry_msgs::msg::TwistStamped rival_pose = UpdateRivalPose();
-
-    RCLCPP_INFO_STREAM(rclcpp::get_logger("rclcpp"), "Robot pose: " << robot_pose.twist.linear.x << " " << robot_pose.twist.linear.y);
-    RCLCPP_INFO_STREAM(rclcpp::get_logger("rclcpp"), "Rival pose: " << rival_pose.twist.linear.x << " " << rival_pose.twist.linear.y);
-
-    if (Distance(pose, robot_pose) < Distance(pose, rival_pose)) {
-        // Log the distance
-        RCLCPP_INFO_STREAM(rclcpp::get_logger("rclcpp"), "Distance: " << Distance(pose, robot_pose) << " " << Distance(pose, rival_pose));
-
-        return true;
-    }
-    else if (abs(Distance(pose, robot_pose) - Distance(pose, rival_pose)) < threshold && Distance(pose, rival_pose) > range) {
-
-        // Log the distance
-        RCLCPP_INFO_STREAM(rclcpp::get_logger("rclcpp"), "Distance: " << Distance(pose, robot_pose) << " " << Distance(pose, rival_pose));
-
-        return true;
-    }
-    else {
-        return false;
-    }
-}
-
-bool Comparator::CheckRivalInRange(geometry_msgs::msg::TwistStamped pose, double range) {
-
-    geometry_msgs::msg::TwistStamped robot_pose = UpdateRobotPose();
-    geometry_msgs::msg::TwistStamped rival_pose = UpdateRivalPose();
-
-    RCLCPP_INFO_STREAM(rclcpp::get_logger("rclcpp"), "Robot pose: " << robot_pose.twist.linear.x << " " << robot_pose.twist.linear.y);
-    RCLCPP_INFO_STREAM(rclcpp::get_logger("rclcpp"), "Rival pose: " << rival_pose.twist.linear.x << " " << rival_pose.twist.linear.y);
-
-    if (Distance(pose, rival_pose) > range) {
-        return true;
-    }
-    else {
-        return false;
-    }
-}
-
-double Comparator::Distance(geometry_msgs::msg::TwistStamped pose1, geometry_msgs::msg::TwistStamped pose2) {
-    return sqrt(pow(pose1.twist.linear.x - pose2.twist.linear.x, 2) + pow(pose1.twist.linear.y - pose2.twist.linear.y, 2));
-}
-
-BT::PortsList BTMission::providedPorts() {
-    return { 
-        BT::InputPort<std::deque<int>>("mission_type"),
-        BT::InputPort<std::deque<int>>("mission_sub_type"),
-        BT::InputPort<std::string>("description"),
-        BT::OutputPort<int>("result")
-    };
-}
-bool BTMission::setGoal(RosActionNode::Goal& goal) {
-    mission_type_ = getInput<std::deque<int>>("mission_type").value();
-    mission_sub_type_ = getInput<std::deque<int>>("mission_sub_type").value();
-
-    goal.mission_type = mission_type_.front();
-    goal.mission_sub_type = mission_sub_type_.front();
-
-    mission_finished_ = false;
-    mission_failed_ = false;
-
-    // blackboard()->set<std::string>("global_param", "Updated Value");
-    // blackboard()->get("global_param", value);
-    // std::cout << "Global parameter: " << value << std::endl;
-
-    return true;
-}
-NodeStatus BTMission::onResultReceived(const WrappedResult& wr) {
-    auto result_ = wr.result->outcome;
-    mission_finished_ = true;
-    mission_failed_ = false;
-    setOutput<int>("result", mission_type_.front());
-    return NodeStatus::SUCCESS;
-}
-NodeStatus BTMission::onFailure(ActionNodeErrorCode error) {
-    mission_failed_ = true;
-    setOutput<int>("result", mission_type_.front());
-    RCLCPP_ERROR(logger(), "[BT]: Navigation error");
-    return NodeStatus::FAILURE;
-}
-NodeStatus BTMission::onFeedback(const std::shared_ptr<const Feedback> feedback) {
-    auto feedback_ = feedback->progress;
-    return NodeStatus::RUNNING;
-}
-
+/*************/
+/* BTStarter */
+/*************/
 BT::PortsList BTStarter::providedPorts() {
     return { BT::OutputPort<int>("result") };
 }
 
 BT::NodeStatus BTStarter::tick() {
-
+    subscription_ = node_->create_subscription<std_msgs::msg::Float32>("/robot/startup/time", 10, std::bind(&BTStarter::topic_callback, this, std::placeholders::_1));
     int game_status = 0;
     setOutput<int>("result", game_status);
 
     return BT::NodeStatus::SUCCESS;
 }
 
+void BTStarter::topic_callback(const std_msgs::msg::Float32::SharedPtr msg) {
+    current_time_ = msg->data;
+    // To Do: set to black board
+}
+
+/**************/
+/* BTFinisher */
+/**************/
 BT::PortsList BTFinisher::providedPorts() {
     return { 
         BT::InputPort<int>("game_status"),
@@ -641,12 +252,153 @@ BT::NodeStatus BTFinisher::tick() {
     return BT::NodeStatus::SUCCESS;
 }
 
+/**************/
+/* Comparator */
+/**************/
+BT::PortsList Comparator::providedPorts() {
+    return { 
+        BT::InputPort<geometry_msgs::msg::TwistStamped>("compare_point"),
+        BT::InputPort<int>("mission_type"),
+        BT::InputPort<int>("mission_sub_type"),
+        BT::InputPort<int>("game_status")
+    };
+}
+
+BT::NodeStatus Comparator::tick() {
+
+    int mission_type = getInput<int>("mission_type").value();
+    int mission_sub_type = getInput<int>("mission_sub_type").value();
+
+    auto mi = getInput<geometry_msgs::msg::TwistStamped>("compare_point");
+    mission_.twist.linear = mi.value().twist.linear;
+
+    // Get current mission mask
+    int mission_mask = 1 << mission_sub_type;
+
+    // Check if the mission is finished
+    int game_status = getInput<int>("game_status").value();
+    if (mission_type == 0 && (game_status & mission_mask) != 0) {
+        return BT::NodeStatus::FAILURE;
+    }
+
+    if (mission_type == 0 && CheckRivalInThreshold(mission_, 0.2, 0.6)) {
+        return BT::NodeStatus::SUCCESS;
+    }
+    else if (mission_type != 0 && CheckRivalInRange(mission_, 0.5)) {
+        return BT::NodeStatus::SUCCESS;
+    }
+    else {
+        return BT::NodeStatus::FAILURE;
+    }
+}
+
+geometry_msgs::msg::TwistStamped Comparator::UpdateRobotPose() {
+
+    geometry_msgs::msg::TwistStamped robot_pose_;
+    geometry_msgs::msg::TransformStamped transformStamped;
+
+    try {
+        transformStamped = tf_buffer_.lookupTransform(
+        "robot/map" /* Parent frame - map */, 
+        "robot/base_footprint" /* Child frame - base */,
+        rclcpp::Time()
+        );
+
+        /* Extract (x, y, theta) from the transformed stamped */
+        robot_pose_.twist.linear.x = transformStamped.transform.translation.x;
+        robot_pose_.twist.linear.y = transformStamped.transform.translation.y;
+        double theta;
+        tf2::Quaternion q;
+        tf2::fromMsg(transformStamped.transform.rotation, q);
+        robot_pose_.twist.angular.z = tf2::impl::getYaw(q);
+    }
+    catch (tf2::TransformException &ex) {
+        // RCLCPP_WARN_STREAM(node->get_logger(), "[Kernel::UpdateRobotPose]: line " << __LINE__ << " " << ex.what());
+    }
+    return robot_pose_;
+}
+
+geometry_msgs::msg::TwistStamped Comparator::UpdateRivalPose() {
+
+    geometry_msgs::msg::TwistStamped rival_pose_;
+    geometry_msgs::msg::TransformStamped transformStamped;
+
+    try {
+        transformStamped = tf_buffer_.lookupTransform(
+        "rival/map" /* Parent frame - map */, 
+        "rival/base_footprint" /* Child frame - base */,
+        rclcpp::Time()
+        );
+
+        /* Extract (x, y, theta) from the transformed stamped */
+        rival_pose_.twist.linear.x = transformStamped.transform.translation.x;
+        rival_pose_.twist.linear.y = transformStamped.transform.translation.y;
+        double theta;
+        tf2::Quaternion q;
+        tf2::fromMsg(transformStamped.transform.rotation, q);
+        rival_pose_.twist.angular.z = tf2::impl::getYaw(q);
+    }
+    catch (tf2::TransformException &ex) {
+        // RCLCPP_WARN_STREAM(node->get_logger(), "[Kernel::UpdateRobotPose]: line " << __LINE__ << " " << ex.what());
+    }
+    return rival_pose_;
+}
+
+bool Comparator::CheckRivalInThreshold(geometry_msgs::msg::TwistStamped pose, double threshold, double range) {
+
+    geometry_msgs::msg::TwistStamped robot_pose = UpdateRobotPose();
+    geometry_msgs::msg::TwistStamped rival_pose = UpdateRivalPose();
+
+    RCLCPP_INFO_STREAM(rclcpp::get_logger("rclcpp"), "Robot pose: " << robot_pose.twist.linear.x << " " << robot_pose.twist.linear.y);
+    RCLCPP_INFO_STREAM(rclcpp::get_logger("rclcpp"), "Rival pose: " << rival_pose.twist.linear.x << " " << rival_pose.twist.linear.y);
+
+    if (Distance(pose, robot_pose) < Distance(pose, rival_pose)) {
+        // Log the distance
+        RCLCPP_INFO_STREAM(rclcpp::get_logger("rclcpp"), "Distance: " << Distance(pose, robot_pose) << " " << Distance(pose, rival_pose));
+
+        return true;
+    }
+    else if (abs(Distance(pose, robot_pose) - Distance(pose, rival_pose)) < threshold && Distance(pose, rival_pose) > range) {
+
+        // Log the distance
+        RCLCPP_INFO_STREAM(rclcpp::get_logger("rclcpp"), "Distance: " << Distance(pose, robot_pose) << " " << Distance(pose, rival_pose));
+
+        return true;
+    }
+    else {
+        return false;
+    }
+}
+
+bool Comparator::CheckRivalInRange(geometry_msgs::msg::TwistStamped pose, double range) {
+
+    geometry_msgs::msg::TwistStamped robot_pose = UpdateRobotPose();
+    geometry_msgs::msg::TwistStamped rival_pose = UpdateRivalPose();
+
+    RCLCPP_INFO_STREAM(rclcpp::get_logger("rclcpp"), "Robot pose: " << robot_pose.twist.linear.x << " " << robot_pose.twist.linear.y);
+    RCLCPP_INFO_STREAM(rclcpp::get_logger("rclcpp"), "Rival pose: " << rival_pose.twist.linear.x << " " << rival_pose.twist.linear.y);
+
+    if (Distance(pose, rival_pose) > range) {
+        return true;
+    }
+    else {
+        return false;
+    }
+}
+
+double Comparator::Distance(geometry_msgs::msg::TwistStamped pose1, geometry_msgs::msg::TwistStamped pose2) {
+    return sqrt(pow(pose1.twist.linear.x - pose2.twist.linear.x, 2) + pow(pose1.twist.linear.y - pose2.twist.linear.y, 2));
+}
+
 BT::PortsList TimerChecker::providedPorts() {
     return { 
         BT::InputPort<int>("timer")
     };
 }
 
+/****************************/
+/* TimerChecker - Decorator */
+/****************************/
 BT::NodeStatus TimerChecker::tick() {
 
     int timer = getInput<int>("timer").value();
@@ -692,19 +444,9 @@ BT::NodeStatus TimerChecker::tick() {
     }
 }
 
-// BT::NodeStatus LadybugActivate::tick() {
-//     // if (this->kernel_ == nullptr) {
-//     //     RCLCPP_ERROR(logger(), "[LadybugActivate]: Kernel is null");
-//     //     return BT::NodeStatus::FAILURE;
-//     // }
-
-//     // kernel_->ActivateLadybug();
-
-//     RCLCPP_ERROR(logger(), "[LadybugActivate]: Activate ladybug");
-
-//     return BT::NodeStatus::SUCCESS;
-// }
-
+// /****************************************************/
+// /* Simple Node for finding the rival start position */
+// /****************************************************/
 // BT::PortsList RivalStart::providedPorts() {
 //     return { 
 //         BT::InputPort<int>("start_type")

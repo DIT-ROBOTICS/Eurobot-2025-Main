@@ -8,6 +8,8 @@
 
 // Use behavior tree
 #include <behaviortree_ros2/bt_action_node.hpp>
+#include <behaviortree_cpp/bt_factory.h>
+#include <behaviortree_cpp/behavior_tree.h>
 
 // Use ROS
 #include <rclcpp/rclcpp.hpp>
@@ -28,8 +30,6 @@
 #include <tf2/exceptions.h>
 
 // Use self define message
-#include "btcpp_ros2_interfaces/action/nav_mission.hpp"
-#include "btcpp_ros2_interfaces/action/firmware_mission.hpp"
 
 using namespace BT;
 
@@ -42,56 +42,45 @@ namespace BT {
 /***************/
 /* LocReceiver */
 /***************/
-class LocReceiver : public BT::StatefulActionNode
+class LocReceiver : public BT::SyncActionNode
 {
 public:
   LocReceiver(const std::string& name, const BT::NodeConfig& config, std::shared_ptr<rclcpp::Node> node)
-    : BT::StatefulActionNode(name, config), node_(node), tf_buffer_(node_->get_clock()), listener_(tf_buffer_)
+    : BT::SyncActionNode(name, config), node_(node), tf_buffer_(node_->get_clock()), listener_(tf_buffer_)
   {}
 
   /* Node remapping function */
   static BT::PortsList providedPorts();
 
   /* Start and running function */
-  BT::NodeStatus onStart() override;
-  BT::NodeStatus onRunning() override;
-  void UpdateRobotPose();
-  void UpdateRivalPose();
-
-  /* Halt function */
-  void onHalted() override;
+  BT::NodeStatus tick() override;
 
 private:
-  int tick_count = 0;
+  bool UpdateRobotPose();
+  bool UpdateRivalPose();
+
   geometry_msgs::msg::TwistStamped robot_pose_;
   geometry_msgs::msg::TwistStamped rival_pose_;
   std::shared_ptr<rclcpp::Node> node_;
   tf2_ros::Buffer tf_buffer_;
   tf2_ros::TransformListener listener_;
-
-  std::string input;
 };
 
 /***************/
 /* NavReceiver */
 /***************/
-class NavReceiver : public BT::StatefulActionNode
+class NavReceiver : public BT::SyncActionNode
 {
 public:
   NavReceiver(const std::string& name, const BT::NodeConfig& config, std::shared_ptr<rclcpp::Node> node)
-    : BT::StatefulActionNode(name, config), node_(node) {
-    subscription_ = node_->create_subscription<geometry_msgs::msg::TwistStamped>("rival/predict_goal", 10, std::bind(&NavReceiver::topic_callback, this, std::placeholders::_1));
-  }
+    : BT::SyncActionNode(name, config), node_(node) 
+  {}
 
   /* Node remapping function */
   static BT::PortsList providedPorts();
 
   /* Start and running function */
-  BT::NodeStatus onStart() override;
-  BT::NodeStatus onRunning() override;
-
-  /* Halt function */
-  void onHalted() override;
+  BT::NodeStatus tick() override;
 
 private:
   void topic_callback(const geometry_msgs::msg::TwistStamped::SharedPtr msg);
@@ -104,25 +93,18 @@ private:
 /***************/
 /* CamReceiver */
 /***************/
-class CamReceiver : public BT::StatefulActionNode
+class CamReceiver : public BT::SyncActionNode
 {
 public:
-  LocReceiver(const std::string& name, const BT::NodeConfig& config, std::shared_ptr<rclcpp::Node> node)
-    : BT::StatefulActionNode(name, config), node_(node) {
-    sub_global_info_ = node_->create_subscription<std_msgs::msg::Float32MultiArray>("/robot/objects/global_info", 10, std::bind(&CamReceiver::global_info_callback, this, std::placeholders::_1));
-    sub_banner_info_ = node_->create_subscription<std_msgs::msg::Float32MultiArray>("/robot/objects/global_info_banner", 10, std::bind(&CamReceiver::banner_info_callback, this, std::placeholders::_1));
-    sub_local_info_ = node_->create_subscription<geometry_msgs::msg::PoseArray>("/robot/objects/local_info", 10, std::bind(&CamReceiver::local_info_callback, this, std::placeholders::_1));
-  }
+  CamReceiver(const std::string& name, const BT::NodeConfig& config, std::shared_ptr<rclcpp::Node> node)
+    : BT::SyncActionNode(name, config), node_(node) 
+  {}
 
   /* Node remapping function */
   static BT::PortsList providedPorts();
 
   /* Start and running function */
-  BT::NodeStatus onStart() override;
-  BT::NodeStatus onRunning() override;
-
-  /* Halt function */
-  void onHalted() override;
+  BT::NodeStatus tick() override;
 
 private:
   void global_info_callback(const std_msgs::msg::Float32MultiArray::SharedPtr msg);
@@ -132,6 +114,10 @@ private:
   rclcpp::Subscription<std_msgs::msg::Float32MultiArray>::SharedPtr sub_global_info_;
   rclcpp::Subscription<std_msgs::msg::Float32MultiArray>::SharedPtr sub_banner_info_;
   rclcpp::Subscription<geometry_msgs::msg::PoseArray>::SharedPtr sub_local_info_;
+
+  std_msgs::msg::Float32MultiArray global_info_;
+  std_msgs::msg::Float32MultiArray banner_info_;
+  geometry_msgs::msg::PoseArray local_info_;
+
   std::shared_ptr<rclcpp::Node> node_;
-  int number = 0;
 };

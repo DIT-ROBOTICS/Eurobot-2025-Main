@@ -7,7 +7,9 @@
 #include <bitset>
 
 // Use behavior tree
-#include <behaviortree_ros2/bt_action_node.hpp>
+#include <behaviortree_cpp/decorators/loop_node.h>
+#include <behaviortree_cpp/bt_factory.h>
+#include <behaviortree_cpp/behavior_tree.h>
 
 // Use ROS
 #include <rclcpp/rclcpp.hpp>
@@ -16,6 +18,8 @@
 // Use ros message
 #include "std_srvs/srv/set_bool.hpp"
 #include "std_msgs/msg/float32.hpp"
+#include "geometry_msgs/msg/twist_stamped.hpp"
+#include "geometry_msgs/msg/pose_array.hpp"
 
 // tf2 
 #include <tf2/LinearMath/Quaternion.h>
@@ -26,10 +30,7 @@
 #include <tf2/exceptions.h>
 
 // Use self define message
-#include "btcpp_ros2_interfaces/action/nav_mission.hpp"
-#include "btcpp_ros2_interfaces/action/firmware_mission.hpp"
 
-// using std_srvs::SetBool;
 
 using namespace BT;
 
@@ -45,10 +46,9 @@ namespace BT {
 class BTStarter : public BT::SyncActionNode {
 
 public:
-    BTStarter(const std::string& name, const BT::NodeConfig& config)
-        : BT::SyncActionNode(name, config), node_(node) {
-        subscription_ = node_->create_subscription<std_msgs::msg::Float32>("/robot/startup/time", 10, std::bind(&BTStarter::topic_callback, this, std::placeholders::_1));
-    }
+    BTStarter(const std::string& name, const BT::NodeConfig& config, std::shared_ptr<rclcpp::Node> node)
+        : BT::SyncActionNode(name, config), node_(node) 
+    {}
 
     /* Node remapping function */
     static BT::PortsList providedPorts();

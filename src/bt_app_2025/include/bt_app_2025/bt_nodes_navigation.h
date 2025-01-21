@@ -8,6 +8,8 @@
 
 // Use behavior tree
 #include <behaviortree_ros2/bt_action_node.hpp>
+#include <behaviortree_cpp/bt_factory.h>
+#include <behaviortree_cpp/behavior_tree.h>
 
 // Use ROS
 #include <rclcpp/rclcpp.hpp>
@@ -16,20 +18,19 @@
 // Use ros message
 #include "std_srvs/srv/set_bool.hpp"
 #include "std_msgs/msg/float32.hpp"
+#include "geometry_msgs/msg/twist_stamped.hpp"
+#include "geometry_msgs/msg/pose_array.hpp"
 
 // tf2 
-#include <tf2/LinearMath/Quaternion.h>
-#include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
-#include <tf2/impl/utils.h>
-#include <tf2_ros/transform_listener.h>
-#include <tf2_ros/buffer.h>
-#include <tf2/exceptions.h>
+// #include <tf2/LinearMath/Quaternion.h>
+// #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
+// #include <tf2/impl/utils.h>
+// #include <tf2_ros/transform_listener.h>
+// #include <tf2_ros/buffer.h>
+// #include <tf2/exceptions.h>
 
 // Use self define message
 #include "btcpp_ros2_interfaces/action/nav_mission.hpp"
-#include "btcpp_ros2_interfaces/action/firmware_mission.hpp"
-
-// using std_srvs::SetBool;
 
 using namespace BT;
 
@@ -72,7 +73,11 @@ class Docking : public BT::RosActionNode<btcpp_ros2_interfaces::action::NavMissi
 public:
     Docking(const std::string& name, const NodeConfig& conf, const RosNodeParams& params)
         : RosActionNode<btcpp_ros2_interfaces::action::NavMission>(name, conf, params)
-    {}
+    {
+        nav_finished_ = false;
+        nav_error_ = false;
+        mission_type_ = 0;
+    }
 
     /* Node remapping function */
     static PortsList providedPorts();
@@ -83,8 +88,9 @@ public:
 
 private:
 
-    bool nav_finished_ = false;
-    bool nav_error_ = false;
+    bool nav_finished_;
+    bool nav_error_;
+    int mission_type_;
     geometry_msgs::msg::TwistStamped goal_;
 };
 
