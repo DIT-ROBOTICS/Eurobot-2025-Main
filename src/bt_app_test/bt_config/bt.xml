@@ -65,8 +65,9 @@
   <BehaviorTree ID="MainTree">
     <Sequence>
       <TopicSubTest output="{POINT}"/>
-      <TopicSubTest output="{POINT1}"/>
       <TopicSubTest output="{POINT2}"/>
+      <NavigationTemp goal="2.3, 1.3, 0"/>
+      <NavigationTemp goal="2.3, 0.46, 0"/>
       <Sleep msec="100"/>
     </Sequence>
   </BehaviorTree>
@@ -124,21 +125,29 @@
                input="{TEST}"/>
     </Sequence>
   </BehaviorTree>
-<!-- 
-  <BehaviorTree ID="test">
-    <BTStarter result=""/>
-  </BehaviorTree> -->
 
   <!-- Description of Node Models (used by Groot) -->
   <TreeNodesModel>
-    <Action ID="BTStarter">
+    <Action ID="Docking">
       <output_port name="result"
-                   type="int"/>
+                   type="geometry_msgs::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+      <input_port name="offset"
+                  type="geometry_msgs::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+      <input_port name="base"
+                  type="geometry_msgs::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+      <input_port name="mission_type"
+                  type="int"/>
     </Action>
     <Decorator ID="ElapseTimeCheck">
       <input_port name="max_time_count"
                   type="double"/>
     </Decorator>
+    <Action ID="Navigation">
+      <output_port name="result"
+                   type="geometry_msgs::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+      <input_port name="goal"
+                  type="geometry_msgs::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+    </Action>
     <Decorator ID="RaceTimeCheck">
       <input_port name="max_time_count"
                   type="double"/>
@@ -153,7 +162,7 @@
       <input_port name="input"
                   type="std::string"/>
     </Action>
-    <Action ID="TopicSubTest1">
+    <Action ID="TopicSubTest">
       <output_port name="output"
                    type="int"/>
     </Action>

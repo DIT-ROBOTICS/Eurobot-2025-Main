@@ -58,7 +58,7 @@ class TopicSubTest : public BT::StatefulActionNode
 public:
   TopicSubTest(const std::string& name, const BT::NodeConfig& config, std::shared_ptr<rclcpp::Node> node)
     : BT::StatefulActionNode(name, config), node_(node) {
-    subscription_ = node_->create_subscription<std_msgs::msg::Int32>("number", 10, std::bind(&TopicSubTest1::topic_callback, this, std::placeholders::_1));
+    subscription_ = node_->create_subscription<std_msgs::msg::Int32>("number", 10, std::bind(&TopicSubTest::topic_callback, this, std::placeholders::_1));
   }
 
   /* Node remapping function */
