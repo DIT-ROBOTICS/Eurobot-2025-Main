@@ -19,6 +19,7 @@
 #include "std_srvs/srv/set_bool.hpp"
 #include "std_msgs/msg/float32.hpp"
 #include "geometry_msgs/msg/twist_stamped.hpp"
+#include "geometry_msgs/msg/pose_stamped.hpp"
 #include "geometry_msgs/msg/pose_array.hpp"
 
 // tf2 
@@ -35,7 +36,7 @@
 using namespace BT;
 
 namespace BT {
-    template <> inline geometry_msgs::msg::TwistStamped convertFromString(StringView str);
+    template <> inline geometry_msgs::msg::PoseStamped convertFromString(StringView str);
     template <> inline int convertFromString(StringView str);
     template <> inline std::deque<int> convertFromString(StringView str);
 }
@@ -56,7 +57,7 @@ public:
     /* Start and running function */
     BT::NodeStatus tick() override;
 private:
-    geometry_msgs::msg::TwistStamped point;
+    geometry_msgs::msg::PoseStamped point;
 };
 /******************************/
 /* BTStarter - Start the tree */

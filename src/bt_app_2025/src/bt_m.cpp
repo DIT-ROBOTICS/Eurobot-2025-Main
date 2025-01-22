@@ -91,9 +91,11 @@ int main(int argc, char** argv) {
     factory.registerNodeType<CamReceiver>("CamReceiver", node);
     /* navigation */
     // factory.registerNodeType<DynamicAdjustment>("DynamicAdjustment");
+    params.default_port_value = "navigate_to_pose";
     factory.registerNodeType<Navigation>("Navigation", params);
     factory.registerNodeType<Docking>("Docking", params);
     // /* firmware */
+    params.default_port_value = "firmware_mission";
     factory.registerNodeType<BTMission>("BTMission", params);
     factory.registerNodeType<SIMAactivate>("SIMAactivate", node);
     // factory.registerNodeType<BannerMission>("BannerMission", params);
@@ -132,6 +134,7 @@ int main(int argc, char** argv) {
     factory.registerBehaviorTreeFromFile(groot_filename);
 
     auto tree = factory.createTree("MainTree");
+    // auto tree = factory.createTree("NavTest");
     BT::Groot2Publisher publisher(tree, 2227);
 
     BT::NodeStatus status = BT::NodeStatus::RUNNING;

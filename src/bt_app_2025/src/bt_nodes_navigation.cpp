@@ -3,17 +3,17 @@
 using namespace BT;
 using namespace std;
 
-template <> inline geometry_msgs::msg::TwistStamped BT::convertFromString(StringView str) {
+template <> inline geometry_msgs::msg::PoseStamped BT::convertFromString(StringView str) {
 
     auto parts = splitString(str, ',');
     if (parts.size() != 3) {
         throw RuntimeError("invalid input)");
     }
     else {
-        geometry_msgs::msg::TwistStamped output;
-        output.twist.linear.x = convertFromString<double>(parts[0]);
-        output.twist.linear.y = convertFromString<double>(parts[1]);
-        output.twist.linear.z = convertFromString<double>(parts[2]);
+        geometry_msgs::msg::PoseStamped output;
+        output.pose.position.x = convertFromString<double>(parts[0]);
+        output.pose.position.y = convertFromString<double>(parts[1]);
+        output.pose.position.z = convertFromString<double>(parts[2]);
         return output;
     }
 }
@@ -37,63 +37,86 @@ template <> inline std::deque<int> BT::convertFromString(StringView str) {
 
 BT::PortsList Navigation::providedPorts() {
     return { 
-        BT::InputPort<geometry_msgs::msg::TwistStamped>("goal"),
+        BT::InputPort<geometry_msgs::msg::PoseStamped>("goal"),
         BT::InputPort<int>("type"),
-        BT::OutputPort<geometry_msgs::msg::TwistStamped>("result")
+        BT::OutputPort<geometry_msgs::msg::PoseStamped>("final_pose")
     };
 }
 
 bool Navigation::setGoal(RosActionNode::Goal& goal) {
-    goal_ = getInput<geometry_msgs::msg::TwistStamped>("goal").value();
+    auto m = getInput<geometry_msgs::msg::PoseStamped>("goal");
     nav_type_ = getInput<int>("type").value();
-    goal.nav_goal = goal_;
-    goal.nav_goal.twist.angular.x = nav_type_;
+    // goal_.pose.position = m.value().pose.position;
+    rclcpp::Time now = this->now();
+    goal_.header.stamp = now;
+    goal_.header.frame_id = "map";
+    goal_.pose.position.x = m.value().pose.position.x;
+    goal_.pose.position.y = m.value().pose.position.y;
+    goal_.pose.position.z = m.value().pose.position.z;
+    tf2::Quaternion q;
+    q.setRPY(0, 0, goal_.pose.position.z);
+    goal_.pose.orientation.x = q.x();
+    goal_.pose.orientation.y = q.y();
+    goal_.pose.orientation.z = q.z();
+    goal_.pose.orientation.w = q.w();
+    // goal.nav_goal.pose.angular.x = nav_type_;
+    goal.pose = goal_;
 
-    RCLCPP_INFO(logger(), "Sending Goal (%f, %f), Navigation Type: %.f", goal.nav_goal.twist.linear.x, goal.nav_goal.twist.linear.y, goal.nav_goal.twist.angular.x);
+    RCLCPP_INFO(logger(), "Start Nav (%f, %f)", goal.pose.pose.position.x, goal.pose.pose.position.y);
+    current_pose_ = goal_;
     nav_finished_ = false;
 
     return true;
 }
 
 NodeStatus Navigation::onFeedback(const std::shared_ptr<const Feedback> feedback) {
-    auto feedback_ = feedback->progress;
+    current_pose_ = feedback->current_pose;
+    // RCLCPP_INFO_STREAM(logger(), "current_pose: " << current_pose_.pose.position.x << ", " << current_pose_.pose.position.y);
     return NodeStatus::RUNNING;
 }
 
 NodeStatus Navigation::onResultReceived(const WrappedResult& wr) {
-    auto result_ = wr.result->outcome;
+    // auto result_ = wr.result->outcome;
     nav_finished_ = true;
-    setOutput<geometry_msgs::msg::TwistStamped>("result", goal_);
+    setOutput<geometry_msgs::msg::PoseStamped>("final_pose", current_pose_);
+    RCLCPP_INFO_STREAM(logger(), "final_pose: " << current_pose_.pose.position.x << ", " << current_pose_.pose.position.y);
     return NodeStatus::SUCCESS;
 }
 
 NodeStatus Navigation::onFailure(ActionNodeErrorCode error) {
     nav_error_ = true;
-    setOutput<geometry_msgs::msg::TwistStamped>("result", goal_);
+    setOutput<geometry_msgs::msg::PoseStamped>("final_pose", current_pose_);
     RCLCPP_ERROR(logger(), "[BT]: Navigation error");
     return NodeStatus::FAILURE;
 }
 
 BT::PortsList Docking::providedPorts() {
     return { 
-        BT::InputPort<geometry_msgs::msg::TwistStamped>("base"),
-        BT::InputPort<geometry_msgs::msg::TwistStamped>("offset"),
-        BT::OutputPort<geometry_msgs::msg::TwistStamped>("result"),
+        BT::InputPort<geometry_msgs::msg::PoseStamped>("base"),
+        BT::InputPort<geometry_msgs::msg::PoseStamped>("offset"),
+        BT::OutputPort<geometry_msgs::msg::PoseStamped>("final_pose"),
         BT::InputPort<int>("mission_type")
     };
 }
 
 bool Docking::setGoal(RosActionNode::Goal& goal) {
-    auto m = getInput<geometry_msgs::msg::TwistStamped>("base");
-    auto offset = getInput<geometry_msgs::msg::TwistStamped>("offset");
+    auto m = getInput<geometry_msgs::msg::PoseStamped>("base");
+    auto offset = getInput<geometry_msgs::msg::PoseStamped>("offset");
     mission_type_ = getInput<int>("mission_type").value();
-    goal_.twist.linear = m.value().twist.linear;
-    goal_.twist.linear.x += offset.value().twist.linear.x;
-    goal_.twist.linear.y += offset.value().twist.linear.y;
-    goal_.twist.linear.z += offset.value().twist.linear.z;
-    goal.nav_goal = goal_;
-    goal.nav_goal.twist.angular.x = mission_type_;
 
+    goal_.pose.position = m.value().pose.position;
+    rclcpp::Time now = this->now();
+    goal_.header.stamp = now;
+    goal_.header.frame_id = "map";
+    goal_.pose.position.x += offset.value().pose.position.x;
+    goal_.pose.position.y += offset.value().pose.position.y;
+    goal_.pose.position.z += offset.value().pose.position.z;
+    // goal.nav_goal.pose.angular.x = nav_type_;
+    goal.pose = goal_;
+
+    RCLCPP_INFO(logger(), "Start Docking (%f, %f)", goal.pose.pose.position.x, goal.pose.pose.position.y);
+
+    current_pose_ = goal_;
     nav_finished_ = false;
     nav_error_ = false;
 
@@ -101,20 +124,22 @@ bool Docking::setGoal(RosActionNode::Goal& goal) {
 }
 
 NodeStatus Docking::onFeedback(const std::shared_ptr<const Feedback> feedback) {
-    auto feedback_ = feedback->progress;
+    current_pose_ = feedback->current_pose;
+    // RCLCPP_INFO_STREAM(logger(), "current_pose: " << current_pose_.pose.position.x << ", " << current_pose_.pose.position.y);
     return NodeStatus::RUNNING;
 }
 
 NodeStatus Docking::onResultReceived(const WrappedResult& wr) {
-    auto result_ = wr.result->outcome;
+    // auto result_ = wr.result->outcome;
     nav_finished_ = true;
-    setOutput<geometry_msgs::msg::TwistStamped>("result", goal_);
+    setOutput<geometry_msgs::msg::PoseStamped>("final_pose", current_pose_);
+    RCLCPP_INFO_STREAM(logger(), "final_pose: " << current_pose_.pose.position.x << ", " << current_pose_.pose.position.y);
     return NodeStatus::SUCCESS;
 }
 
 NodeStatus Docking::onFailure(ActionNodeErrorCode error) {
     nav_error_ = true;
-    setOutput<geometry_msgs::msg::TwistStamped>("result", goal_);
+    setOutput<geometry_msgs::msg::PoseStamped>("final_pose", current_pose_);
     RCLCPP_ERROR(logger(), "[BT]: Navigation error");
     return NodeStatus::FAILURE;
 }

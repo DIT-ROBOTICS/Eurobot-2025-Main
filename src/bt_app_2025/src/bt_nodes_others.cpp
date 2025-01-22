@@ -3,17 +3,17 @@
 using namespace BT;
 using namespace std;
 
-template <> inline geometry_msgs::msg::TwistStamped BT::convertFromString(StringView str) {
+template <> inline geometry_msgs::msg::PoseStamped BT::convertFromString(StringView str) {
 
     auto parts = splitString(str, ',');
     if (parts.size() != 3) {
         throw RuntimeError("invalid input)");
     }
     else {
-        geometry_msgs::msg::TwistStamped output;
-        output.twist.linear.x = convertFromString<double>(parts[0]);
-        output.twist.linear.y = convertFromString<double>(parts[1]);
-        output.twist.linear.z = convertFromString<double>(parts[2]);
+        geometry_msgs::msg::PoseStamped output;
+        output.pose.position.x = convertFromString<double>(parts[0]);
+        output.pose.position.y = convertFromString<double>(parts[1]);
+        output.pose.position.z = convertFromString<double>(parts[2]);
         return output;
     }
 }
@@ -37,18 +37,18 @@ template <> inline std::deque<int> BT::convertFromString(StringView str) {
 
 BT::PortsList PointProvider::providedPorts() {
     return { 
-        BT::InputPort<geometry_msgs::msg::TwistStamped>("point_in"),
-        BT::OutputPort<geometry_msgs::msg::TwistStamped>("point_out1"),
-        BT::OutputPort<geometry_msgs::msg::TwistStamped>("point_out2") 
+        BT::InputPort<geometry_msgs::msg::PoseStamped>("point_in"),
+        BT::OutputPort<geometry_msgs::msg::PoseStamped>("point_out1"),
+        BT::OutputPort<geometry_msgs::msg::PoseStamped>("point_out2") 
     };
 }
 
 BT::NodeStatus PointProvider::tick() {
-    point = getInput<geometry_msgs::msg::TwistStamped>("point_in").value();
-    setOutput<geometry_msgs::msg::TwistStamped>("point_out1", point);
-    point.twist.linear.x *= -1;
-    point.twist.linear.y *= -1;
-    setOutput<geometry_msgs::msg::TwistStamped>("point_out2", point);
+    point = getInput<geometry_msgs::msg::PoseStamped>("point_in").value();
+    setOutput<geometry_msgs::msg::PoseStamped>("point_out1", point);
+    point.pose.position.x *= -1;
+    point.pose.position.y *= -1;
+    setOutput<geometry_msgs::msg::PoseStamped>("point_out2", point);
 
     return BT::NodeStatus::SUCCESS;
 }
