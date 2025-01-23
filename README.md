@@ -6,7 +6,12 @@
 <!-- - `git checkout devel` -->
 ### Build Docker Environment
 - `$ cd /docker`
-- `$ docker compose up -d --build`
+- If you haven't build image
+    - If Windows: `$ docker-compose -f docker-compose-win.yml up -d --build`
+    - If Linux: `$ docker-compose -f docker-compose-lin.yml up -d --build`
+- Already have image
+    - If Windows: `$ docker-compose -f docker-compose-win.yml up`
+    - If Linux: `$ docker-compose -f docker-compose-lin.yml up`
 - `$ docker start main-ws`
 ### Open Work Space
 - Attach Visual Studio Code
@@ -41,7 +46,7 @@
         to create tree
     - `$ ros2 run bt_app_test bt_ros2` to execute the tree
 
-- Work flow to add new nodes and tree
+- Steps to add new nodes and tree
     1. write new nodes in `bt_action_node_lib` or `decorator_node_lib`
     2. register the nodes in `bt_ros2`
     3. `$ colcon build --packages-select bt_app_test` to build the package
