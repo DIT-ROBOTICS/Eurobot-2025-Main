@@ -70,7 +70,8 @@ BT::NodeStatus BTStarter::tick() {
 
 void BTStarter::topic_callback(const std_msgs::msg::Float32::SharedPtr msg) {
     current_time_ = msg->data;
-    // To Do: set to black board
+    // blackboard_ = BT::Blackboard::create();
+    blackboard_->set<double>("current_time", current_time_);
 }
 
 /**************/
@@ -410,7 +411,7 @@ double Comparator::Distance(geometry_msgs::msg::TwistStamped pose1, geometry_msg
 
 BT::PortsList TimerChecker::providedPorts() {
     return { 
-        BT::InputPort<int>("timer")
+        BT::InputPort<int>("timer_sec")
     };
 }
 
@@ -419,18 +420,12 @@ BT::PortsList TimerChecker::providedPorts() {
 /****************************/
 BT::NodeStatus TimerChecker::tick() {
 
-    int timer = getInput<int>("timer").value();
+    int timer = getInput<int>("timer_sec").value();
 
-    double current_time;
-    // kernel_->GetTime(current_time);
+    blackboard_->get("current_time", current_time_);
 
-    // static first_log = true;
-
-    // log
-    // RCLCPP_INFO(logger(), "[TimerChecker]: Current time: " << current_time << ", Check Timeout: " << timer);
     if (first_log_) {
-        // RCLCPP_INFO(logger(), "[TimerChecker]: Current time: " << current_time << ", Check Timeout: " << timer);
-        cout << "[TimerChecker]: Current time: " << current_time << ", Check Timeout: " << timer << endl;
+        RCLCPP_INFO_STREAM(rclcpp::get_logger("rclcpp"), "[TimerChecker]: Current time: " << current_time_ << ", Check Timeout: " << timer);
         first_log_ = false;
     }
 
@@ -440,24 +435,11 @@ BT::NodeStatus TimerChecker::tick() {
         resetChild();
     }
 
-    if (current_time < timer) {
-        
-        switch (status) {
-            case BT::NodeStatus::SUCCESS:
-                return BT::NodeStatus::SUCCESS;
-            case BT::NodeStatus::FAILURE:
-                return BT::NodeStatus::FAILURE;
-            case BT::NodeStatus::RUNNING:
-                return BT::NodeStatus::RUNNING;
-            default:
-                return BT::NodeStatus::IDLE;
-        }
+    if (current_time_ < timer) {
+        return status;
     }
     else {
-
-        // RCLCPP_ERROR(logger(), "[TimerChecker]: Timeout" << timer);
-        cout << "[TimerChecker]: Timeout" << timer << endl;
-
+        RCLCPP_ERROR_STREAM(rclcpp::get_logger("rclcpp"), "[TimerChecker]: Timeout" << timer);
         return BT::NodeStatus::FAILURE;
     }
 }

@@ -15,6 +15,22 @@
 
   <BehaviorTree ID="MainTree">
     <Sequence>
+      <Sequence>
+        <BTStarter result="{STATUS}"/>
+        <CamReceiver/>
+        <NavReceiver/>
+        <SIMAactivate/>
+      </Sequence>
+      <Navigation final_pose="{PrevGoal}"
+                  type="0"
+                  goal="2.55, 1.3, 3.14"/>
+      <Docking mission_type="0"
+               final_pose="{PrevGoal}"
+               offset="0.05, 0, 0"
+               base="{PrevGoal}"/>
+      <Navigation final_pose="{PrevGoal}"
+                  type="0"
+                  goal="2.6, 0.4, 0"/>
       <ForceSuccess>
         <SubTree ID="MissionPointOne"
                  _autoremap="true"/>
@@ -29,23 +45,23 @@
       </ForceSuccess>
       <Navigation final_pose="{PrevGoal}"
                   type="0"
-                  goal="800, 1700, 0"/>
+                  goal="0.8, 1.7, 4.71"/>
     </Sequence>
   </BehaviorTree>
 
   <BehaviorTree ID="MissionPointFour">
     <Sequence>
       <Navigation final_pose="{PrevGoal}"
-                  type="1"
-                  goal="0.8, 0.5, 0"/>
+                  type="0"
+                  goal="0.8, 0.5, 1.57"/>
       <Docking mission_type="0"
                final_pose="{PrevGoal}"
                offset="0, -0.1, 0"
                base="{PrevGoal}"/>
       <Sleep msec="1000"/>
       <Navigation final_pose="{PrevGoal}"
-                  type="1"
-                  goal="0.8, 0.3, 0"/>
+                  type="0"
+                  goal="0.8, 0.4, 4.71"/>
       <Docking mission_type="0"
                final_pose="{PrevGoal}"
                offset="0, -0.1, 0"
@@ -64,16 +80,8 @@
   <BehaviorTree ID="MissionPointOne">
     <Sequence>
       <Navigation final_pose="{PrevGoal}"
-                  type="1"
-                  goal="2.6, 1.3, 0"/>
-      <Docking mission_type="0"
-               final_pose="{PrevGoal}"
-               offset="0.1, 0, 0"
-               base="{PrevGoal}"/>
-      <Sleep msec="1000"/>
-      <Navigation final_pose="{PrevGoal}"
-                  type="1"
-                  goal="2.6, 0.35, 0"/>
+                  type="0"
+                  goal="2.6, 0.4, 0"/>
       <Docking mission_type="0"
                final_pose="{PrevGoal}"
                offset="0.1, 0, 0"
@@ -87,8 +95,8 @@
                PrevGoal="{PrevGoal}"
                _autoremap="true"/>
       <Navigation final_pose="{PrevGoal}"
-                  type="1"
-                  goal="2.6, 0.9, 0"/>
+                  type="0"
+                  goal="2.55, 0.9, 0"/>
       <Docking mission_type="0"
                final_pose="{PrevGoal}"
                offset="0.1, 0, 0"
@@ -104,16 +112,16 @@
   <BehaviorTree ID="MissionPointThree">
     <Sequence>
       <Navigation final_pose="{PrevGoal}"
-                  type="1"
-                  goal="2, 0.9, 0"/>
+                  type="0"
+                  goal="1.9, 0.7, 4.71"/>
       <Docking mission_type="0"
                final_pose="{PrevGoal}"
-               offset="-0.1, 0, 0"
+               offset="0, 0.1, 0"
                base="{PrevGoal}"/>
       <Sleep msec="1000"/>
       <Navigation final_pose="{PrevGoal}"
-                  type="1"
-                  goal="2.3, 0.5, 0"/>
+                  type="0"
+                  goal="2.2, 0.5, 4.71"/>
       <Docking mission_type="0"
                final_pose="{PrevGoal}"
                offset="0, -0.1, 0"
@@ -127,8 +135,8 @@
                PrevGoal="{PrevGoal}"
                _autoremap="true"/>
       <Navigation final_pose="{PrevGoal}"
-                  type="1"
-                  goal="1.25, 0.3, 0"/>
+                  type="0"
+                  goal="1.25, 0.5, 4.71"/>
       <Docking mission_type="0"
                final_pose="{PrevGoal}"
                offset="0, -0.1, 0"
@@ -145,24 +153,25 @@
     <Sequence>
       <Navigation final_pose="{PrevGoal}"
                   type="0"
-                  goal="2.3, 1.3, 0"/>
+                  goal="2.6, 1.3, 0"/>
+      <Navigation final_pose="{PrevGoal}"
+                  type="0"
+                  goal="2.6, 0.4, 1.57"/>
       <Sleep msec="1000"/>
       <Docking mission_type="0"
                final_pose="{PrevGoal}"
                offset="0.1, 0, 0"
                base="{PrevGoal}"/>
       <Sleep msec="1000"/>
-      <Docking mission_type="0"
-               final_pose="{PrevGoal}"
-               offset="-0.1, 0, 0"
-               base="{PrevGoal}"/>
       <Navigation final_pose="{PrevGoal}"
                   type="0"
-                  goal="2.3, 0.4, 0"/>
-      <Docking mission_type="0"
-               final_pose="{PrevGoal}"
-               offset="-0.1, 0, 0"
-               base="{PrevGoal}"/>
+                  goal="2, 1, 3.14"/>
+      <Navigation final_pose="{PrevGoal}"
+                  type="0"
+                  goal="2, 1, 4.71"/>
+      <Navigation final_pose="{PrevGoal}"
+                  type="0"
+                  goal="2, 1, 3.14"/>
     </Sequence>
   </BehaviorTree>
 
@@ -242,6 +251,11 @@
 
   <!-- Description of Node Models (used by Groot) -->
   <TreeNodesModel>
+    <Action ID="BTStarter">
+      <output_port name="result"
+                   type="int"/>
+    </Action>
+    <Action ID="CamReceiver"/>
     <Action ID="Docking">
       <input_port name="mission_type"
                   type="int"/>
@@ -252,6 +266,7 @@
       <input_port name="base"
                   type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
     </Action>
+    <Action ID="NavReceiver"/>
     <Action ID="Navigation">
       <output_port name="final_pose"
                    type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
@@ -268,6 +283,7 @@
       <input_port name="point_in"
                   type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
     </Action>
+    <Action ID="SIMAactivate"/>
   </TreeNodesModel>
 
 </root>

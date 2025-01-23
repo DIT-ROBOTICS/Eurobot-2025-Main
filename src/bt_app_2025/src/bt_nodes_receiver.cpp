@@ -59,9 +59,11 @@ bool LocReceiver::UpdateRobotPose() {
 
     try {
         transformStamped = tf_buffer_.lookupTransform(
-        "robot/map" /* Parent frame - map */, 
-        "robot/base_footprint" /* Child frame - base */,
-        rclcpp::Time()
+            // "robot/map" /* Parent frame - map */, 
+            // "robot/base_footprint" /* Child frame - base */,
+            "map", 
+            "base_link",
+            rclcpp::Time()
         );
 
         /* Extract (x, y, theta) from the transformed stamped */
@@ -86,9 +88,9 @@ bool LocReceiver::UpdateRivalPose() {
 
     try {
         transformStamped = tf_buffer_.lookupTransform(
-        "rival/map" /* Parent frame - map */, 
-        "rival/base_footprint" /* Child frame - base */,
-        rclcpp::Time()
+            "rival/map" /* Parent frame - map */, 
+            "rival/base_footprint" /* Child frame - base */,
+            rclcpp::Time()
         );
 
         /* Extract (x, y, theta) from the transformed stamped */
