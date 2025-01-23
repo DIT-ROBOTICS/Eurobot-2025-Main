@@ -114,6 +114,26 @@ void TopicSubTest::onHalted() {
   return;
 }
 
+PortsList StandardTopicSub::providedPorts() {
+  return {
+    BT::InputPort<std::string>("topic_name"), 
+    BT::OutputPort<int>("output") 
+  };
+}
+bool StandardTopicSub::latchLastMessage() const {
+  return true;
+}
+NodeStatus StandardTopicSub::onTick(const std::shared_ptr<std_msgs::msg::Int32>& last_msg) {
+  if (last_msg) { // Check if the pointer is not null
+    std::cout << "Received data: " << last_msg->data << std::endl;
+    return BT::NodeStatus::SUCCESS;
+  }
+  else {
+    std::cout << "No message received!" << std::endl;
+    return BT::NodeStatus::FAILURE;
+  }
+}
+
 PortsList LocalizationTemp::providedPorts() {
   return { 
     BT::InputPort<std::string>("input"), 

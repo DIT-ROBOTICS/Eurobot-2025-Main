@@ -82,6 +82,20 @@ private:
   int number = 0;
 };
 
+class StandardTopicSub : public BT::RosTopicSubNode<std_msgs::msg::Int32>
+{
+public:
+  explicit StandardTopicSub(const std::string& name, const BT::NodeConfig& conf, const RosNodeParams& params)
+    : RosTopicSubNode<std_msgs::msg::Int32>(name, conf, params)
+  {}
+  /* Node remapping function */
+  static BT::PortsList providedPorts();
+  /* Start and running function */
+  NodeStatus onTick(const std::shared_ptr<std_msgs::msg::Int32>& last_msg) override;
+  bool latchLastMessage() const override;
+private:
+};
+
 class LocalizationTemp : public BT::StatefulActionNode
 {
 public:
