@@ -64,4 +64,4 @@ RUN mkdir -p /home/$USERNAME/groot_ws/groot
 COPY .bashrc /home/$USERNAME/.bashrc.conf
 RUN cat /home/$USERNAME/.bashrc.conf >> /home/$USERNAME/.bashrc
 
-CMD ["/bin/bash"]
+CMD ["/bin/bash", "-c"]
