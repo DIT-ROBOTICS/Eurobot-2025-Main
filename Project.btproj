@@ -56,7 +56,7 @@
         </Action>
         <Action ID="SIMAactivate"/>
         <Decorator ID="TimerChecker">
-            <input_port name="timer" type="int"/>
+            <input_port name="timer_sec" type="int"/>
         </Decorator>
     </TreeNodesModel>
 </root>
