@@ -63,7 +63,7 @@ bool BTMission::setGoal(RosActionNode::Goal& goal) {
     return true;
 }
 NodeStatus BTMission::onResultReceived(const WrappedResult& wr) {
-    result_ = wr.result->outcome.data;
+    // result_ = wr.result->outcome.data;
     mission_finished_ = true;
     mission_failed_ = false;
     setOutput<int>("result", mission_type_.front());

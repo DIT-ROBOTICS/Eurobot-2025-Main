@@ -2,5 +2,4 @@
 /build
 /install
 /log
-/src/simulation_tools
 *.AppImage

@@ -26,6 +26,8 @@ int main(int argc, char** argv)
   params.nh = node;
   factory.registerNodeType<Testing>("Testing");
   factory.registerNodeType<TopicSubTest>("TopicSubTest", node);
+  params.default_port_value = "number";
+  factory.registerNodeType<StandardTopicSub>("StandardTopicSub", node);
   params.default_port_value = "testing_action";
   factory.registerNodeType<NavigationTemp>("NavigationTemp", params);
   factory.registerNodeType<LocalizationTemp>("LocalizationTemp", node);

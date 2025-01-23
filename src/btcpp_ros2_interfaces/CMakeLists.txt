@@ -10,17 +10,20 @@ find_package(rclcpp_action REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(action_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
+find_package(builtin_interfaces REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
 
 rosidl_generate_interfaces(btcpp_ros2_interfaces
     "msg/NodeStatus.msg"
     "msg/Localization.msg"
+    "srv/StartUpSrv.srv"
     "action/ExecuteTree.action"
     "action/Sleep.action"
     "action/Navigation.action"
     "action/NavMission.action"
+    "action/NavigateToPose.action"
     "action/FirmwareMission.action"
-    DEPENDENCIES geometry_msgs action_msgs std_msgs
+    DEPENDENCIES geometry_msgs action_msgs std_msgs builtin_interfaces
 )
 
 ament_export_dependencies(rosidl_default_runtime)

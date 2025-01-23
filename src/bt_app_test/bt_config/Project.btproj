@@ -81,5 +81,8 @@
         <Action ID="TopicSubTest">
             <output_port name="output" type="int"/>
         </Action>
+        <Action ID="TopicSubTest1">
+            <output_port name="output" type="int"/>
+        </Action>
     </TreeNodesModel>
 </root>

@@ -7,9 +7,11 @@
 #include <bitset>
 
 // Use behavior tree
-#include <behaviortree_cpp/decorators/loop_node.h>
-#include <behaviortree_cpp/bt_factory.h>
-#include <behaviortree_cpp/behavior_tree.h>
+#include "behaviortree_cpp/decorators/loop_node.h"
+#include "behaviortree_cpp/bt_factory.h"
+#include "behaviortree_cpp/behavior_tree.h"
+#include "behaviortree_cpp/utils/shared_library.h"
+#include "behaviortree_cpp/blackboard.h"
 
 // Use ROS
 #include <rclcpp/rclcpp.hpp>
@@ -19,6 +21,7 @@
 #include "std_srvs/srv/set_bool.hpp"
 #include "std_msgs/msg/float32.hpp"
 #include "geometry_msgs/msg/twist_stamped.hpp"
+#include "geometry_msgs/msg/pose_stamped.hpp"
 #include "geometry_msgs/msg/pose_array.hpp"
 
 // tf2 
@@ -35,7 +38,7 @@
 using namespace BT;
 
 namespace BT {
-    template <> inline geometry_msgs::msg::TwistStamped convertFromString(StringView str);
+    template <> inline geometry_msgs::msg::PoseStamped convertFromString(StringView str);
     template <> inline int convertFromString(StringView str);
     template <> inline std::deque<int> convertFromString(StringView str);
 }
@@ -56,7 +59,7 @@ public:
     /* Start and running function */
     BT::NodeStatus tick() override;
 private:
-    geometry_msgs::msg::TwistStamped point;
+    geometry_msgs::msg::PoseStamped point;
 };
 /******************************/
 /* BTStarter - Start the tree */
@@ -64,8 +67,8 @@ private:
 class BTStarter : public BT::SyncActionNode {
 
 public:
-    BTStarter(const std::string& name, const BT::NodeConfig& config, std::shared_ptr<rclcpp::Node> node)
-        : BT::SyncActionNode(name, config), node_(node) 
+    BTStarter(const std::string& name, const BT::NodeConfig& config, std::shared_ptr<rclcpp::Node> node, BT::Blackboard::Ptr blackboard)
+        : BT::SyncActionNode(name, config), node_(node), blackboard_(blackboard)
     {}
 
     /* Node remapping function */
@@ -78,6 +81,7 @@ private:
 
     rclcpp::Subscription<std_msgs::msg::Float32>::SharedPtr subscription_;
     std::shared_ptr<rclcpp::Node> node_;
+    BT::Blackboard::Ptr blackboard_;
 
     float current_time_;
 };
@@ -138,8 +142,8 @@ private:
 class TimerChecker : public BT::DecoratorNode {
 
 public:
-    TimerChecker(const std::string& name, const NodeConfig& config)
-        : BT::DecoratorNode(name, config) {}
+    TimerChecker(const std::string& name, const NodeConfig& config, BT::Blackboard::Ptr blackboard)
+        : BT::DecoratorNode(name, config), blackboard_(blackboard) {}
 
     /* Node remapping function */
     static BT::PortsList providedPorts();
@@ -148,10 +152,12 @@ public:
     BT::NodeStatus tick() override;
 
 private:
+    BT::Blackboard::Ptr blackboard_;
 
     double timeout_ = 0.0;
     double start_time_ = 0.0;
-    bool first_log_ = true;
+    double current_time_;
+    bool first_log_;
 };
 
 

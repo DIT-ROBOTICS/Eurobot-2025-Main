@@ -3,17 +3,17 @@
 using namespace BT;
 using namespace std;
 
-template <> inline geometry_msgs::msg::TwistStamped BT::convertFromString(StringView str) {
+template <> inline geometry_msgs::msg::PoseStamped BT::convertFromString(StringView str) {
 
     auto parts = splitString(str, ',');
     if (parts.size() != 3) {
         throw RuntimeError("invalid input)");
     }
     else {
-        geometry_msgs::msg::TwistStamped output;
-        output.twist.linear.x = convertFromString<double>(parts[0]);
-        output.twist.linear.y = convertFromString<double>(parts[1]);
-        output.twist.linear.z = convertFromString<double>(parts[2]);
+        geometry_msgs::msg::PoseStamped output;
+        output.pose.position.x = convertFromString<double>(parts[0]);
+        output.pose.position.y = convertFromString<double>(parts[1]);
+        output.pose.position.z = convertFromString<double>(parts[2]);
         return output;
     }
 }
@@ -37,18 +37,18 @@ template <> inline std::deque<int> BT::convertFromString(StringView str) {
 
 BT::PortsList PointProvider::providedPorts() {
     return { 
-        BT::InputPort<geometry_msgs::msg::TwistStamped>("point_in"),
-        BT::OutputPort<geometry_msgs::msg::TwistStamped>("point_out1"),
-        BT::OutputPort<geometry_msgs::msg::TwistStamped>("point_out2") 
+        BT::InputPort<geometry_msgs::msg::PoseStamped>("point_in"),
+        BT::OutputPort<geometry_msgs::msg::PoseStamped>("point_out1"),
+        BT::OutputPort<geometry_msgs::msg::PoseStamped>("point_out2") 
     };
 }
 
 BT::NodeStatus PointProvider::tick() {
-    point = getInput<geometry_msgs::msg::TwistStamped>("point_in").value();
-    setOutput<geometry_msgs::msg::TwistStamped>("point_out1", point);
-    point.twist.linear.x *= -1;
-    point.twist.linear.y *= -1;
-    setOutput<geometry_msgs::msg::TwistStamped>("point_out2", point);
+    point = getInput<geometry_msgs::msg::PoseStamped>("point_in").value();
+    setOutput<geometry_msgs::msg::PoseStamped>("point_out1", point);
+    point.pose.position.x *= -1;
+    point.pose.position.y *= -1;
+    setOutput<geometry_msgs::msg::PoseStamped>("point_out2", point);
 
     return BT::NodeStatus::SUCCESS;
 }
@@ -70,7 +70,8 @@ BT::NodeStatus BTStarter::tick() {
 
 void BTStarter::topic_callback(const std_msgs::msg::Float32::SharedPtr msg) {
     current_time_ = msg->data;
-    // To Do: set to black board
+    // blackboard_ = BT::Blackboard::create();
+    blackboard_->set<double>("current_time", current_time_);
 }
 
 /**************/
@@ -410,7 +411,7 @@ double Comparator::Distance(geometry_msgs::msg::TwistStamped pose1, geometry_msg
 
 BT::PortsList TimerChecker::providedPorts() {
     return { 
-        BT::InputPort<int>("timer")
+        BT::InputPort<int>("timer_sec")
     };
 }
 
@@ -419,18 +420,12 @@ BT::PortsList TimerChecker::providedPorts() {
 /****************************/
 BT::NodeStatus TimerChecker::tick() {
 
-    int timer = getInput<int>("timer").value();
+    int timer = getInput<int>("timer_sec").value();
 
-    double current_time;
-    // kernel_->GetTime(current_time);
+    blackboard_->get("current_time", current_time_);
 
-    // static first_log = true;
-
-    // log
-    // RCLCPP_INFO(logger(), "[TimerChecker]: Current time: " << current_time << ", Check Timeout: " << timer);
     if (first_log_) {
-        // RCLCPP_INFO(logger(), "[TimerChecker]: Current time: " << current_time << ", Check Timeout: " << timer);
-        cout << "[TimerChecker]: Current time: " << current_time << ", Check Timeout: " << timer << endl;
+        RCLCPP_INFO_STREAM(rclcpp::get_logger("rclcpp"), "[TimerChecker]: Current time: " << current_time_ << ", Check Timeout: " << timer);
         first_log_ = false;
     }
 
@@ -440,24 +435,11 @@ BT::NodeStatus TimerChecker::tick() {
         resetChild();
     }
 
-    if (current_time < timer) {
-        
-        switch (status) {
-            case BT::NodeStatus::SUCCESS:
-                return BT::NodeStatus::SUCCESS;
-            case BT::NodeStatus::FAILURE:
-                return BT::NodeStatus::FAILURE;
-            case BT::NodeStatus::RUNNING:
-                return BT::NodeStatus::RUNNING;
-            default:
-                return BT::NodeStatus::IDLE;
-        }
+    if (current_time_ < timer) {
+        return status;
     }
     else {
-
-        // RCLCPP_ERROR(logger(), "[TimerChecker]: Timeout" << timer);
-        cout << "[TimerChecker]: Timeout" << timer << endl;
-
+        RCLCPP_ERROR_STREAM(rclcpp::get_logger("rclcpp"), "[TimerChecker]: Timeout" << timer);
         return BT::NodeStatus::FAILURE;
     }
 }

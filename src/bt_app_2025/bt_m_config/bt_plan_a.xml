@@ -2,11 +2,11 @@
 <root BTCPP_format="4">
   <BehaviorTree ID="BannerMission">
     <Sequence>
-      <Navigation result=""
+      <Navigation final_pose=""
                   type=""
                   goal=""/>
       <Docking mission_type=""
-               result=""
+               final_pose=""
                offset=""
                base=""/>
       <Sleep msec=""/>
@@ -15,6 +15,22 @@
 
   <BehaviorTree ID="MainTree">
     <Sequence>
+      <Sequence>
+        <BTStarter result="{STATUS}"/>
+        <CamReceiver/>
+        <NavReceiver/>
+        <SIMAactivate/>
+      </Sequence>
+      <Navigation final_pose="{PrevGoal}"
+                  type="0"
+                  goal="2.55, 1.3, 3.14"/>
+      <Docking mission_type="0"
+               final_pose="{PrevGoal}"
+               offset="0.05, 0, 0"
+               base="{PrevGoal}"/>
+      <Navigation final_pose="{PrevGoal}"
+                  type="0"
+                  goal="2.6, 0.4, 0"/>
       <ForceSuccess>
         <SubTree ID="MissionPointOne"
                  _autoremap="true"/>
@@ -27,112 +43,135 @@
         <SubTree ID="MissionPointFour"
                  _autoremap="true"/>
       </ForceSuccess>
-      <Navigation result="{PrevGoal}"
+      <Navigation final_pose="{PrevGoal}"
                   type="0"
-                  goal="800, 1700, 0"/>
+                  goal="0.8, 1.7, 4.71"/>
     </Sequence>
   </BehaviorTree>
 
   <BehaviorTree ID="MissionPointFour">
     <Sequence>
-      <Navigation result="{PrevGoal}"
-                  type="1"
-                  goal="800, 500, 0"/>
+      <Navigation final_pose="{PrevGoal}"
+                  type="0"
+                  goal="0.8, 0.5, 1.57"/>
       <Docking mission_type="0"
-               result="{PrevGoal}"
-               offset="0, -100, 0"
+               final_pose="{PrevGoal}"
+               offset="0, -0.1, 0"
                base="{PrevGoal}"/>
       <Sleep msec="1000"/>
-      <Navigation result="{PrevGoal}"
-                  type="1"
-                  goal="800, 200, 0"/>
+      <Navigation final_pose="{PrevGoal}"
+                  type="0"
+                  goal="0.8, 0.4, 4.71"/>
       <Docking mission_type="0"
-               result="{PrevGoal}"
-               offset="0, -100, 0"
+               final_pose="{PrevGoal}"
+               offset="0, -0.1, 0"
                base="{PrevGoal}"/>
       <PointProvider point_out2="{DISTANCE1}"
                      point_out1="{DISTANCE}"
-                     point_in="0, -100, 0"/>
+                     point_in="0, -0.1, 0"/>
       <SubTree ID="PutTwoLevels"
                DISTANCE="{DISTANCE}"
                DISTANCE1="{DISTANCE1}"
+               PrevGoal="{PrevGoal}"
                _autoremap="true"/>
     </Sequence>
   </BehaviorTree>
 
   <BehaviorTree ID="MissionPointOne">
     <Sequence>
-      <Navigation result="{PrevGoal}"
-                  type="1"
-                  goal="2800, 1300, 0"/>
+      <Navigation final_pose="{PrevGoal}"
+                  type="0"
+                  goal="2.6, 0.4, 0"/>
       <Docking mission_type="0"
-               result="{PrevGoal}"
-               offset="100, 0, 0"
-               base="{PrevGoal}"/>
-      <Sleep msec="1000"/>
-      <Navigation result="{PrevGoal}"
-                  type="1"
-                  goal="2800, 300, 0"/>
-      <Docking mission_type="0"
-               result="{PrevGoal}"
-               offset="100, 0, 0"
+               final_pose="{PrevGoal}"
+               offset="0.1, 0, 0"
                base="{PrevGoal}"/>
       <PointProvider point_out2="{DISTANCE1}"
                      point_out1="{DISTANCE}"
-                     point_in="100, 0, 0"/>
+                     point_in="0.1, 0, 0"/>
       <SubTree ID="TakeOneLevel"
                DISTANCE="{DISTANCE}"
                DISTANCE1="{DISTANCE1}"
+               PrevGoal="{PrevGoal}"
                _autoremap="true"/>
-      <Navigation result="{PrevGoal}"
-                  type="1"
-                  goal="2700, 900, 0"/>
+      <Navigation final_pose="{PrevGoal}"
+                  type="0"
+                  goal="2.55, 0.9, 0"/>
       <Docking mission_type="0"
-               result="{PrevGoal}"
-               offset="100, 0, 0"
+               final_pose="{PrevGoal}"
+               offset="0.1, 0, 0"
                base="{PrevGoal}"/>
       <SubTree ID="PutThreeLevels"
                DISTANCE="{DISTANCE}"
                DISTANCE1="{DISTANCE1}"
+               PrevGoal="{PrevGoal}"
                _autoremap="true"/>
     </Sequence>
   </BehaviorTree>
 
   <BehaviorTree ID="MissionPointThree">
     <Sequence>
-      <Navigation result="{PrevGoal}"
-                  type="1"
-                  goal="2000, 900, 0"/>
+      <Navigation final_pose="{PrevGoal}"
+                  type="0"
+                  goal="1.9, 0.7, 4.71"/>
       <Docking mission_type="0"
-               result="{PrevGoal}"
-               offset="-100, 0, 0"
+               final_pose="{PrevGoal}"
+               offset="0, 0.1, 0"
                base="{PrevGoal}"/>
       <Sleep msec="1000"/>
-      <Navigation result="{PrevGoal}"
-                  type="1"
-                  goal="2300, 500, 0"/>
+      <Navigation final_pose="{PrevGoal}"
+                  type="0"
+                  goal="2.2, 0.5, 4.71"/>
       <Docking mission_type="0"
-               result="{PrevGoal}"
-               offset="0, -100, 0"
+               final_pose="{PrevGoal}"
+               offset="0, -0.1, 0"
                base="{PrevGoal}"/>
       <PointProvider point_out2="{DISTANCE1}"
                      point_out1="{DISTANCE}"
-                     point_in="0, -100, 0"/>
+                     point_in="0, -0.1, 0"/>
       <SubTree ID="TakeOneLevel"
                DISTANCE="{DISTANCE}"
                DISTANCE1="{DISTANCE1}"
+               PrevGoal="{PrevGoal}"
                _autoremap="true"/>
-      <Navigation result="{PrevGoal}"
-                  type="1"
-                  goal="1250, 200, 0"/>
+      <Navigation final_pose="{PrevGoal}"
+                  type="0"
+                  goal="1.25, 0.5, 4.71"/>
       <Docking mission_type="0"
-               result="{PrevGoal}"
-               offset="0, -100, 0"
+               final_pose="{PrevGoal}"
+               offset="0, -0.1, 0"
                base="{PrevGoal}"/>
       <SubTree ID="PutThreeLevels"
                DISTANCE="{DISTANCE}"
                DISTANCE1="{DISTANCE1}"
+               PrevGoal="{PrevGoal}"
                _autoremap="true"/>
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="NavTest">
+    <Sequence>
+      <Navigation final_pose="{PrevGoal}"
+                  type="0"
+                  goal="2.6, 1.3, 0"/>
+      <Navigation final_pose="{PrevGoal}"
+                  type="0"
+                  goal="2.6, 0.4, 1.57"/>
+      <Sleep msec="1000"/>
+      <Docking mission_type="0"
+               final_pose="{PrevGoal}"
+               offset="0.1, 0, 0"
+               base="{PrevGoal}"/>
+      <Sleep msec="1000"/>
+      <Navigation final_pose="{PrevGoal}"
+                  type="0"
+                  goal="2, 1, 3.14"/>
+      <Navigation final_pose="{PrevGoal}"
+                  type="0"
+                  goal="2, 1, 4.71"/>
+      <Navigation final_pose="{PrevGoal}"
+                  type="0"
+                  goal="2, 1, 3.14"/>
     </Sequence>
   </BehaviorTree>
 
@@ -140,10 +179,10 @@
     <Sequence>
       <Sleep msec="1000"/>
       <Docking mission_type="0"
-               result="{PrevGoal}"
+               final_pose="{PrevGoal}"
                offset="{DISTANCE1}"
                base="{PrevGoal}"/>
-      <Navigation result="{PrevGoal}"
+      <Navigation final_pose="{PrevGoal}"
                   type="0"
                   goal="0, 0, 3.14"/>
       <SubTree ID="PutTwoLevels"
@@ -151,12 +190,12 @@
                DISTANCE1="{DISTANCE1}"
                _autoremap="true"/>
       <Docking mission_type="0"
-               result="{PrevGoal}"
+               final_pose="{PrevGoal}"
                offset="{DISTANCE1}"
                base="{PrevGoal}"/>
       <Sleep msec="1000"/>
       <Docking mission_type="0"
-               result="{PrevGoal}"
+               final_pose="{PrevGoal}"
                offset="{DISTANCE}"
                base="{PrevGoal}"/>
       <Sleep msec="1000"/>
@@ -167,14 +206,14 @@
     <Sequence>
       <Sleep msec="1000"/>
       <Docking mission_type="0"
-               result="{PrevGoal}"
+               final_pose="{PrevGoal}"
                offset="{DISTANCE}"
                base="{PrevGoal}"/>
-      <Navigation result="{PrevGoal}"
+      <Navigation final_pose="{PrevGoal}"
                   type="0"
                   goal="0, 0, 3.14"/>
       <Docking mission_type="0"
-               result="{PrevGoal}"
+               final_pose="{PrevGoal}"
                offset="{DISTANCE1}"
                base="{PrevGoal}"/>
       <SubTree ID="TakeOneLevel"
@@ -182,7 +221,7 @@
                DISTANCE1="{DISTANCE1}"
                _autoremap="true"/>
       <Docking mission_type="0"
-               result="{PrevGoal}"
+               final_pose="{PrevGoal}"
                offset="{DISTANCE}"
                base="{PrevGoal}"/>
       <Sleep msec="1000"/>
@@ -193,18 +232,18 @@
     <Sequence>
       <Sleep msec="1000"/>
       <Docking mission_type="0"
-               result="{PrevGoal}"
-               offset="{DISTANCE}"
-               base="{PrevGoal}"/>
-      <Sleep msec="1000"/>
-      <Docking mission_type="0"
-               result="{PrevGoal}"
+               final_pose="{PrevGoal}"
                offset="{DISTANCE1}"
                base="{PrevGoal}"/>
       <Sleep msec="1000"/>
       <Docking mission_type="0"
-               result="{PrevGoal}"
+               final_pose="{PrevGoal}"
                offset="{DISTANCE}"
+               base="{PrevGoal}"/>
+      <Sleep msec="1000"/>
+      <Docking mission_type="0"
+               final_pose="{PrevGoal}"
+               offset="{DISTANCE1}"
                base="{PrevGoal}"/>
       <Sleep msec="1000"/>
     </Sequence>
@@ -212,32 +251,39 @@
 
   <!-- Description of Node Models (used by Groot) -->
   <TreeNodesModel>
+    <Action ID="BTStarter">
+      <output_port name="result"
+                   type="int"/>
+    </Action>
+    <Action ID="CamReceiver"/>
     <Action ID="Docking">
       <input_port name="mission_type"
                   type="int"/>
-      <output_port name="result"
-                   type="geometry_msgs::msg::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+      <output_port name="final_pose"
+                   type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
       <input_port name="offset"
-                  type="geometry_msgs::msg::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+                  type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
       <input_port name="base"
-                  type="geometry_msgs::msg::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+                  type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
     </Action>
+    <Action ID="NavReceiver"/>
     <Action ID="Navigation">
-      <output_port name="result"
-                   type="geometry_msgs::msg::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+      <output_port name="final_pose"
+                   type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
       <input_port name="type"
                   type="int"/>
       <input_port name="goal"
-                  type="geometry_msgs::msg::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+                  type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
     </Action>
     <Action ID="PointProvider">
       <output_port name="point_out2"
-                   type="geometry_msgs::msg::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+                   type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
       <output_port name="point_out1"
-                   type="geometry_msgs::msg::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+                   type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
       <input_port name="point_in"
-                  type="geometry_msgs::msg::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+                  type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
     </Action>
+    <Action ID="SIMAactivate"/>
   </TreeNodesModel>
 
 </root>
