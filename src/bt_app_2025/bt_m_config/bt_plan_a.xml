@@ -21,16 +21,6 @@
         <NavReceiver/>
         <SIMAactivate/>
       </Sequence>
-      <Navigation final_pose="{PrevGoal}"
-                  type="0"
-                  goal="2.55, 1.3, 3.14"/>
-      <Docking mission_type="0"
-               final_pose="{PrevGoal}"
-               offset="0.05, 0, 0"
-               base="{PrevGoal}"/>
-      <Navigation final_pose="{PrevGoal}"
-                  type="0"
-                  goal="2.6, 0.4, 0"/>
       <ForceSuccess>
         <SubTree ID="MissionPointOne"
                  _autoremap="true"/>
@@ -79,13 +69,34 @@
 
   <BehaviorTree ID="MissionPointOne">
     <Sequence>
-      <Navigation final_pose="{PrevGoal}"
-                  type="0"
-                  goal="2.6, 0.4, 0"/>
-      <Docking mission_type="0"
-               final_pose="{PrevGoal}"
-               offset="0.1, 0, 0"
-               base="{PrevGoal}"/>
+      <Fallback>
+        <Sequence>
+          <Navigation final_pose="{PrevGoal}"
+                      type="0"
+                      goal="2.6, 1.3, 3.14"/>
+          <Docking mission_type="0"
+                   final_pose="{PrevGoal}"
+                   offset="0.1, 0, 0"
+                   base="{PrevGoal}"/>
+        </Sequence>
+        <Navigation final_pose="{PrevGoal}"
+                    type="0"
+                    goal="2.7, 1.3, 3.14"/>
+      </Fallback>
+      <Fallback>
+        <Sequence>
+          <Navigation final_pose="{PrevGoal}"
+                      type="0"
+                      goal="2.6, 0.4, 0"/>
+          <Docking mission_type="0"
+                   final_pose="{PrevGoal}"
+                   offset="0.1, 0, 0"
+                   base="{PrevGoal}"/>
+        </Sequence>
+        <Navigation final_pose="{PrevGoal}"
+                    type="0"
+                    goal="2.7, 0.4, 0"/>
+      </Fallback>
       <PointProvider point_out2="{DISTANCE1}"
                      point_out1="{DISTANCE}"
                      point_in="0.1, 0, 0"/>
@@ -94,13 +105,20 @@
                DISTANCE1="{DISTANCE1}"
                PrevGoal="{PrevGoal}"
                _autoremap="true"/>
-      <Navigation final_pose="{PrevGoal}"
-                  type="0"
-                  goal="2.55, 0.9, 0"/>
-      <Docking mission_type="0"
-               final_pose="{PrevGoal}"
-               offset="0.1, 0, 0"
-               base="{PrevGoal}"/>
+      <Fallback>
+        <Sequence>
+          <Navigation final_pose="{PrevGoal}"
+                      type="0"
+                      goal="2.6, 0.9, 0"/>
+          <Docking mission_type="0"
+                   final_pose="{PrevGoal}"
+                   offset="0.1, 0, 0"
+                   base="{PrevGoal}"/>
+        </Sequence>
+        <Navigation final_pose="{PrevGoal}"
+                    type="0"
+                    goal="2.7, 0.9, 0"/>
+      </Fallback>
       <SubTree ID="PutThreeLevels"
                DISTANCE="{DISTANCE}"
                DISTANCE1="{DISTANCE1}"
