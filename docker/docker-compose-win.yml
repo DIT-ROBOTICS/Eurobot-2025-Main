@@ -6,7 +6,7 @@ services:
       context: .
       args:
         USERNAME: user
-    image: tedwang/main-ws:latest
+    image: tedwang2/main-ws:latest
     container_name: main-ws
     stdin_open: true
     tty: true
