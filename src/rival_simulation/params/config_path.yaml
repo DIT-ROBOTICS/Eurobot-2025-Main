@@ -1,0 +1,35 @@
+rival_simulation:
+  ros__parameters:
+    script_file_directory: "/home/user/Eurobot-2025-Main-ws/src/rival_simulation/rival_main_config/bt_rival_script.xml"
+    tree_node_model_config_file: "/home/user/Eurobot-2025-Main-ws/src/rival_simulation/rival_main_config/bt_m_tree_node_model.xml"
+    tree_name: "MainTree"
+    waypoint1: [1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0]
+    waypoint2: [1.0, 2.0, 0.0, 0.0, 0.0, 0.0, 1.0]
+    waypoint3: [1.0, 2.0, 0.0, 0.0, 0.0, 0.0, 1.0]
+    waypoint4: [1.0, 2.0, 0.0, 0.0, 0.0, 0.0, 1.0]
+    waypoint5: [1.0, 2.0, 0.0, 0.0, 0.0, 0.0, 1.0]
+    waypoint6: [1.0, 2.0, 0.0, 0.0, 0.0, 0.0, 1.0]
+    waypoint7: [1.0, 2.0, 0.0, 0.0, 0.0, 0.0, 1.0]
+    waypoint8: [1.0, 2.0, 0.0, 0.0, 0.0, 0.0, 1.0]
+    waypoint9: [1.0, 2.0, 0.0, 0.0, 0.0, 0.0, 1.0]
+    waypoint10: [1.0, 2.0, 0.0, 0.0, 0.0, 0.0, 1.0]
+
+      
+    # garbage_points:
+    #   - header:
+    #       frame_id: "map"
+    #     pose:
+    #       position: {x: 1.0, y: 2.0, z: 0.0}
+    #       orientation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}
+
+    #   - header:
+    #       frame_id: "map"
+    #     pose:
+    #       position: {x: 3.5, y: -1.2, z: 0.0}
+    #       orientation: {x: 0.0, y: 0.0, z: 0.707, w: 0.707}
+
+    #   - header:
+    #       frame_id: "map"
+    #     pose:
+    #       position: {x: -2.0, y: 4.5, z: 0.0}
+    #       orientation: {x: 0.0, y: 0.0, z: 1.0, w: 0.0}
