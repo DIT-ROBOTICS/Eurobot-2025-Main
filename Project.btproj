@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <root BTCPP_format="4" project_name="Project">
-    <include path="src/bt_app_2025/bt_m_config/bt_m_tree_node_model.xml"/>
-    <include path="src/bt_app_2025/bt_m_config/bt_plan_a.xml"/>
+    <include path="src/rival_simulation/rival_main_config/bt_m_tree_node_model.xml"/>
+    <include path="src/rival_simulation/rival_main_config/bt_rival_script.xml"/>
     <!-- Description of Node Models (used by Groot) -->
     <TreeNodesModel>
         <Action ID="BTMission">
@@ -43,6 +43,11 @@
             <output_port name="rival_pose" type="geometry_msgs::msg::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
             <output_port name="robot_pose" type="geometry_msgs::msg::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
         </Action>
+        <Decorator ID="LoopWayPoint">
+            <output_port name="value" type="geometry_msgs::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+            <input_port name="if_empty" default="SUCCESS" type="BT::NodeStatus">Status to return if queue is empty: SUCCESS, FAILURE, SKIPPED</input_port>
+            <inout_port name="queue" type="std::shared_ptr&lt;std::deque&lt;geometry_msgs::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;, std::allocator&lt;geometry_msgs::TwistStamped_&lt;std::allocator&lt;void&gt; &gt; &gt; &gt; &gt;"/>
+        </Decorator>
         <Action ID="NavReceiver"/>
         <Action ID="Navigation">
             <output_port name="final_pose" type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
@@ -53,6 +58,11 @@
             <output_port name="point_out2" type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
             <output_port name="point_out1" type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
             <input_port name="point_in" type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+        </Action>
+        <Action ID="Rotation">
+            <output_port name="final_pose" type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+            <input_port name="degree" type="double"/>
+            <input_port name="base" type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
         </Action>
         <Action ID="SIMAactivate"/>
         <Decorator ID="TimerChecker">
