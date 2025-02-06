@@ -72,8 +72,8 @@ private:
 class NavReceiver : public BT::SyncActionNode
 {
 public:
-  NavReceiver(const std::string& name, const BT::NodeConfig& config, std::shared_ptr<rclcpp::Node> node)
-    : BT::SyncActionNode(name, config), node_(node) 
+  NavReceiver(const std::string& name, const BT::NodeConfig& config, std::shared_ptr<rclcpp::Node> node, BT::Blackboard::Ptr blackboard)
+    : BT::SyncActionNode(name, config), node_(node), blackboard_(blackboard)
   {}
 
   /* Node remapping function */
@@ -83,11 +83,12 @@ public:
   BT::NodeStatus tick() override;
 
 private:
-  void topic_callback(const geometry_msgs::msg::TwistStamped::SharedPtr msg);
+  void topic_callback(const geometry_msgs::msg::PoseStamped::SharedPtr msg);
 
-  rclcpp::Subscription<geometry_msgs::msg::TwistStamped>::SharedPtr subscription_;
+  rclcpp::Subscription<geometry_msgs::msg::PoseStamped>::SharedPtr subscription_;
   std::shared_ptr<rclcpp::Node> node_;
-  geometry_msgs::msg::TwistStamped rival_predict_goal_;
+  BT::Blackboard::Ptr blackboard_;
+  geometry_msgs::msg::PoseStamped rival_predict_goal_;
 };
 
 /***************/
@@ -96,8 +97,8 @@ private:
 class CamReceiver : public BT::SyncActionNode
 {
 public:
-  CamReceiver(const std::string& name, const BT::NodeConfig& config, std::shared_ptr<rclcpp::Node> node)
-    : BT::SyncActionNode(name, config), node_(node) 
+  CamReceiver(const std::string& name, const BT::NodeConfig& config, std::shared_ptr<rclcpp::Node> node, BT::Blackboard::Ptr blackboard)
+    : BT::SyncActionNode(name, config), node_(node), blackboard_(blackboard)
   {}
 
   /* Node remapping function */
@@ -120,4 +121,5 @@ private:
   geometry_msgs::msg::PoseArray local_info_;
 
   std::shared_ptr<rclcpp::Node> node_;
+  BT::Blackboard::Ptr blackboard_;
 };

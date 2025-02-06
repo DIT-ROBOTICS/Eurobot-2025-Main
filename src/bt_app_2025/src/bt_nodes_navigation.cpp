@@ -35,6 +35,22 @@ template <> inline std::deque<int> BT::convertFromString(StringView str) {
     return output;
 }
 
+double inline calculateDistance(const geometry_msgs::msg::Pose &pose1, const geometry_msgs::msg::Pose &pose2) {
+    tf2::Vector3 position1(pose1.position.x, pose1.position.y, 0);
+    tf2::Vector3 position2(pose2.position.x, pose2.position.y, 0);
+    return position1.distance(position2);
+}
+
+double inline calculateAngleDifference(const geometry_msgs::msg::Pose &pose1, const geometry_msgs::msg::Pose &pose2)
+{
+    tf2::Quaternion orientation1, orientation2;
+    tf2::fromMsg(pose1.orientation, orientation1);
+    tf2::fromMsg(pose2.orientation, orientation2);
+    double yaw1 = tf2::impl::getYaw(orientation1);
+    double yaw2 = tf2::impl::getYaw(orientation2);
+    return std::fabs(yaw1 - yaw2);
+}
+
 BT::PortsList Navigation::providedPorts() {
     return { 
         BT::InputPort<geometry_msgs::msg::PoseStamped>("goal"),
@@ -46,20 +62,17 @@ BT::PortsList Navigation::providedPorts() {
 bool Navigation::setGoal(RosActionNode::Goal& goal) {
     auto m = getInput<geometry_msgs::msg::PoseStamped>("goal");
     nav_type_ = getInput<int>("type").value();
-    // goal_.pose.position = m.value().pose.position;
     rclcpp::Time now = this->now();
     goal_.header.stamp = now;
     goal_.header.frame_id = "map";
     goal_.pose.position.x = m.value().pose.position.x;
     goal_.pose.position.y = m.value().pose.position.y;
-    goal_.pose.position.z = m.value().pose.position.z;
     tf2::Quaternion q;
-    q.setRPY(0, 0, goal_.pose.position.z);
+    q.setRPY(0, 0, m.value().pose.position.z);
     goal_.pose.orientation.x = q.x();
     goal_.pose.orientation.y = q.y();
     goal_.pose.orientation.z = q.z();
     goal_.pose.orientation.w = q.w();
-    // goal.nav_goal.pose.angular.x = nav_type_;
     goal.pose = goal_;
 
     RCLCPP_INFO(logger(), "Start Nav (%f, %f)", goal.pose.pose.position.x, goal.pose.pose.position.y);
@@ -76,17 +89,24 @@ NodeStatus Navigation::onFeedback(const std::shared_ptr<const Feedback> feedback
 }
 
 NodeStatus Navigation::onResultReceived(const WrappedResult& wr) {
-    // auto result_ = wr.result->outcome;
-    nav_finished_ = true;
+    // set output
     setOutput<geometry_msgs::msg::PoseStamped>("final_pose", current_pose_);
-    RCLCPP_INFO_STREAM(logger(), "final_pose: " << current_pose_.pose.position.x << ", " << current_pose_.pose.position.y);
-    return NodeStatus::SUCCESS;
+    // check if mission success
+    if (calculateDistance(current_pose_.pose, goal_.pose) < 0.03 && calculateAngleDifference(current_pose_.pose, goal_.pose) < 0.4) {
+        nav_finished_ = true;
+        RCLCPP_INFO_STREAM(logger(), "success! final_pose: " << current_pose_.pose.position.x << ", " << current_pose_.pose.position.y);
+        return NodeStatus::SUCCESS;
+    } else {
+        nav_error_ = true;
+        RCLCPP_INFO_STREAM(logger(), "fail! final_pose: " << current_pose_.pose.position.x << ", " << current_pose_.pose.position.y);
+        return NodeStatus::SUCCESS;
+    }
 }
 
 NodeStatus Navigation::onFailure(ActionNodeErrorCode error) {
     nav_error_ = true;
     setOutput<geometry_msgs::msg::PoseStamped>("final_pose", current_pose_);
-    RCLCPP_ERROR(logger(), "[BT]: Navigation error");
+    RCLCPP_INFO_STREAM(logger(), "fail! final_pose: " << current_pose_.pose.position.x << ", " << current_pose_.pose.position.y);
     return NodeStatus::FAILURE;
 }
 
@@ -104,14 +124,12 @@ bool Docking::setGoal(RosActionNode::Goal& goal) {
     auto offset = getInput<geometry_msgs::msg::PoseStamped>("offset");
     mission_type_ = getInput<int>("mission_type").value();
 
-    goal_.pose.position = m.value().pose.position;
+    goal_.pose = m.value().pose;
     rclcpp::Time now = this->now();
     goal_.header.stamp = now;
     goal_.header.frame_id = "map";
     goal_.pose.position.x += offset.value().pose.position.x;
     goal_.pose.position.y += offset.value().pose.position.y;
-    goal_.pose.position.z += offset.value().pose.position.z;
-    // goal.nav_goal.pose.angular.x = nav_type_;
     goal.pose = goal_;
 
     RCLCPP_INFO(logger(), "Start Docking (%f, %f)", goal.pose.pose.position.x, goal.pose.pose.position.y);
@@ -125,25 +143,93 @@ bool Docking::setGoal(RosActionNode::Goal& goal) {
 
 NodeStatus Docking::onFeedback(const std::shared_ptr<const Feedback> feedback) {
     current_pose_ = feedback->current_pose;
-    // RCLCPP_INFO_STREAM(logger(), "current_pose: " << current_pose_.pose.position.x << ", " << current_pose_.pose.position.y);
     return NodeStatus::RUNNING;
 }
 
 NodeStatus Docking::onResultReceived(const WrappedResult& wr) {
-    // auto result_ = wr.result->outcome;
-    nav_finished_ = true;
+    // set output
     setOutput<geometry_msgs::msg::PoseStamped>("final_pose", current_pose_);
-    RCLCPP_INFO_STREAM(logger(), "final_pose: " << current_pose_.pose.position.x << ", " << current_pose_.pose.position.y);
-    return NodeStatus::SUCCESS;
+    // check if mission success
+    if (calculateDistance(current_pose_.pose, goal_.pose) < 0.03 && calculateAngleDifference(current_pose_.pose, goal_.pose) < 0.4) {
+        nav_finished_ = true;
+        RCLCPP_INFO_STREAM(logger(), "success! final_pose: " << current_pose_.pose.position.x << ", " << current_pose_.pose.position.y);
+        return NodeStatus::SUCCESS;
+    } else {
+        nav_error_ = true;
+        RCLCPP_INFO_STREAM(logger(), "fail! final_pose: " << current_pose_.pose.position.x << ", " << current_pose_.pose.position.y);
+        return NodeStatus::SUCCESS;
+    }
 }
 
 NodeStatus Docking::onFailure(ActionNodeErrorCode error) {
     nav_error_ = true;
     setOutput<geometry_msgs::msg::PoseStamped>("final_pose", current_pose_);
-    RCLCPP_ERROR(logger(), "[BT]: Navigation error");
+    RCLCPP_INFO_STREAM(logger(), "fail! final_pose: " << current_pose_.pose.position.x << ", " << current_pose_.pose.position.y);
     return NodeStatus::FAILURE;
 }
 
+BT::PortsList Rotation::providedPorts() {
+    return { 
+        BT::InputPort<geometry_msgs::msg::PoseStamped>("base"),
+        BT::InputPort<double>("degree"),
+        BT::OutputPort<geometry_msgs::msg::PoseStamped>("final_pose")
+    };
+}
+
+bool Rotation::setGoal(RosActionNode::Goal& goal) {
+    auto m = getInput<geometry_msgs::msg::PoseStamped>("base");
+    double rad = getInput<double>("degree").value() * PI / 180;
+    double rad_base = acos(m.value().pose.orientation.w) * 2;
+    rad += rad_base;
+
+    rclcpp::Time now = this->now();
+    goal_.header.stamp = now;
+    goal_.header.frame_id = "map";
+
+    goal_.pose = m.value().pose;
+    tf2::Quaternion q;
+    q.setRPY(0, 0, rad);
+    goal_.pose.orientation.x = q.x();
+    goal_.pose.orientation.y = q.y();
+    goal_.pose.orientation.z = q.z();
+    goal_.pose.orientation.w = q.w();
+    goal.pose = goal_;
+
+    RCLCPP_INFO(logger(), "Start Rotating (%f, %f)", goal_.pose.orientation.z, goal_.pose.orientation.w);
+
+    current_pose_ = goal_;
+    nav_finished_ = false;
+    nav_error_ = false;
+
+    return true;
+}
+
+NodeStatus Rotation::onFeedback(const std::shared_ptr<const Feedback> feedback) {
+    current_pose_ = feedback->current_pose;
+    return NodeStatus::RUNNING;
+}
+
+NodeStatus Rotation::onResultReceived(const WrappedResult& wr) {
+    // set output
+    setOutput<geometry_msgs::msg::PoseStamped>("final_pose", current_pose_);
+    // check if mission success
+    if (calculateDistance(current_pose_.pose, goal_.pose) < 0.03 && calculateAngleDifference(current_pose_.pose, goal_.pose) < 0.4) {
+        nav_finished_ = true;
+        RCLCPP_INFO(logger(), "success! final_direction: (%f, %f)", current_pose_.pose.orientation.z, current_pose_.pose.orientation.w);
+        return NodeStatus::SUCCESS;
+    } else {
+        nav_error_ = true;
+        RCLCPP_INFO(logger(), "fail! final_direction: (%f, %f)", current_pose_.pose.orientation.z, current_pose_.pose.orientation.w);
+        return NodeStatus::SUCCESS;
+    }
+}
+
+NodeStatus Rotation::onFailure(ActionNodeErrorCode error) {
+    nav_error_ = true;
+    setOutput<geometry_msgs::msg::PoseStamped>("final_pose", current_pose_);
+    RCLCPP_ERROR(logger(), "[BT]: Navigation error");
+    return NodeStatus::FAILURE;
+}
 // BT::PortsList DynamicAdjustment::providedPorts() {
 //     return {
 //         // To Do: 

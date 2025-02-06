@@ -6,6 +6,7 @@
 #include <deque>
 #include <bitset>
 #include <chrono>
+#include <cmath>
 
 // Use behavior tree
 #include <behaviortree_ros2/bt_action_node.hpp>
@@ -21,9 +22,11 @@
 #include "std_msgs/msg/float32.hpp"
 #include "geometry_msgs/msg/pose_stamped.hpp"
 #include "geometry_msgs/msg/pose_array.hpp"
+#include "geometry_msgs/msg/pose.hpp"
 
 // tf2 
 #include <tf2/LinearMath/Quaternion.h>
+#include <tf2/LinearMath/Vector3.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 #include <tf2/impl/utils.h>
 #include <tf2_ros/transform_listener.h>
@@ -32,6 +35,8 @@
 
 // Use self define message
 #include "nav2_msgs/action/navigate_to_pose.hpp"
+
+#define PI 3.1415926
 
 using namespace BT;
 
@@ -93,6 +98,31 @@ private:
     bool nav_finished_;
     bool nav_error_;
     int mission_type_;
+    geometry_msgs::msg::PoseStamped goal_;
+    geometry_msgs::msg::PoseStamped current_pose_;
+};
+
+class Rotation : public BT::RosActionNode<nav2_msgs::action::NavigateToPose> {
+
+public:
+    Rotation(const std::string& name, const NodeConfig& conf, const RosNodeParams& params)
+        : RosActionNode<nav2_msgs::action::NavigateToPose>(name, conf, params)
+    {
+        nav_finished_ = false;
+        nav_error_ = false;
+    }
+
+    /* Node remapping function */
+    static PortsList providedPorts();
+    bool setGoal(RosActionNode::Goal& goal) override;
+    NodeStatus onResultReceived(const WrappedResult& wr) override;
+    virtual NodeStatus onFailure(ActionNodeErrorCode error) override;
+    NodeStatus onFeedback(const std::shared_ptr<const Feedback> feedback);
+
+private:
+
+    bool nav_finished_;
+    bool nav_error_;
     geometry_msgs::msg::PoseStamped goal_;
     geometry_msgs::msg::PoseStamped current_pose_;
 };
