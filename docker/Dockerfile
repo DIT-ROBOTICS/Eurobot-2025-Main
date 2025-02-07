@@ -26,6 +26,9 @@ RUN groupadd --gid $USER_GID $USERNAME \
     usbutils \
     python3-pip \
     bash-completion \
+    # read keybow
+    libncurses5-dev \
+    # ros2
     ros-humble-ament-cmake \
     ros-humble-rqt-plot\
     ros-humble-rqt-tf-tree\

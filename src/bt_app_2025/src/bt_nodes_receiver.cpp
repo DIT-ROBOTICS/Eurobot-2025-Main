@@ -18,6 +18,21 @@ template <> inline geometry_msgs::msg::TwistStamped BT::convertFromString(String
     }
 }
 
+template <> inline geometry_msgs::msg::PoseStamped BT::convertFromString(StringView str) {
+
+    auto parts = splitString(str, ',');
+    if (parts.size() != 3) {
+        throw RuntimeError("invalid input)");
+    }
+    else {
+        geometry_msgs::msg::PoseStamped output;
+        output.pose.position.x = convertFromString<double>(parts[0]);
+        output.pose.position.y = convertFromString<double>(parts[1]);
+        output.pose.position.z = convertFromString<double>(parts[2]);
+        return output;
+    }
+}
+
 template <> inline int BT::convertFromString(StringView str) {
     auto value = convertFromString<double>(str);
     return (int) value;
@@ -114,14 +129,14 @@ PortsList NavReceiver::providedPorts() {
     return {};
 }
 
-void NavReceiver::topic_callback(const geometry_msgs::msg::TwistStamped::SharedPtr msg) {
+void NavReceiver::topic_callback(const geometry_msgs::msg::PoseStamped::SharedPtr msg) {
     rival_predict_goal_ = *msg;
-    // To Do: set to black board
+    blackboard_->set<geometry_msgs::msg::PoseStamped>("rival_predict_goal", rival_predict_goal_);
 }
 
 BT::NodeStatus NavReceiver::tick() {
     RCLCPP_INFO(node_->get_logger(), "Node start");
-    subscription_ = node_->create_subscription<geometry_msgs::msg::TwistStamped>("rival/predict_goal", 10, std::bind(&NavReceiver::topic_callback, this, std::placeholders::_1));
+    subscription_ = node_->create_subscription<geometry_msgs::msg::PoseStamped>("rival/predict_goal", 10, std::bind(&NavReceiver::topic_callback, this, std::placeholders::_1));
     
     return BT::NodeStatus::SUCCESS;
 }
@@ -130,25 +145,28 @@ PortsList CamReceiver::providedPorts() {
     return {};
 }
 
-void CamReceiver::global_info_callback(const std_msgs::msg::Float32MultiArray::SharedPtr msg) {
+void CamReceiver::global_info_callback(const geometry_msgs::msg::PoseArray msg) {
     global_info_ = *msg;
-    // To Do: set to black board
+    // blackboard_->set<double>("global_info", global_info_);
+    // To Do: modify message type
 }
 void CamReceiver::banner_info_callback(const std_msgs::msg::Float32MultiArray::SharedPtr msg) {
     banner_info_ = *msg;
-    // To Do: set to black board
+    // blackboard_->set<double>("banner_info", banner_info_);
+    // To Do: modify message type
 }
 void CamReceiver::local_info_callback(const geometry_msgs::msg::PoseArray::SharedPtr msg) {
     local_info_ = *msg;
-    // To Do: set to black board
+    // blackboard_->set<double>("local_info", local_info_);
+    // To Do: modify message type
     // To Do: generate materials_info_ & garbage_points_
 }
 
 BT::NodeStatus CamReceiver::tick() {
     RCLCPP_INFO(node_->get_logger(), "Node start");
-    sub_global_info_ = node_->create_subscription<std_msgs::msg::Float32MultiArray>("/robot/objects/global_info", 10, std::bind(&CamReceiver::global_info_callback, this, std::placeholders::_1));
+    sub_global_info_ = node_->create_subscription<geometry_msgs::msg::PoseArray>("/robot/objects/materials_info", 10, std::bind(&CamReceiver::global_info_callback, this, std::placeholders::_1));
     sub_banner_info_ = node_->create_subscription<std_msgs::msg::Float32MultiArray>("/robot/objects/global_info_banner", 10, std::bind(&CamReceiver::banner_info_callback, this, std::placeholders::_1));
-    sub_local_info_ = node_->create_subscription<geometry_msgs::msg::PoseArray>("/robot/objects/local_info", 10, std::bind(&CamReceiver::local_info_callback, this, std::placeholders::_1));
+    sub_local_info_ = node_->create_subscription<geometry_msgs::msg::PoseArray>("/robot/objects/obstacles_info", 10, std::bind(&CamReceiver::local_info_callback, this, std::placeholders::_1));
     
     return BT::NodeStatus::SUCCESS;
 }

@@ -70,7 +70,6 @@ BT::NodeStatus BTStarter::tick() {
 
 void BTStarter::topic_callback(const std_msgs::msg::Float32::SharedPtr msg) {
     current_time_ = msg->data;
-    // blackboard_ = BT::Blackboard::create();
     blackboard_->set<double>("current_time", current_time_);
 }
 

@@ -72,8 +72,8 @@ private:
 class NavReceiver : public BT::SyncActionNode
 {
 public:
-  NavReceiver(const std::string& name, const BT::NodeConfig& config, std::shared_ptr<rclcpp::Node> node)
-    : BT::SyncActionNode(name, config), node_(node) 
+  NavReceiver(const std::string& name, const BT::NodeConfig& config, std::shared_ptr<rclcpp::Node> node, BT::Blackboard::Ptr blackboard)
+    : BT::SyncActionNode(name, config), node_(node), blackboard_(blackboard)
   {}
 
   /* Node remapping function */
@@ -83,11 +83,12 @@ public:
   BT::NodeStatus tick() override;
 
 private:
-  void topic_callback(const geometry_msgs::msg::TwistStamped::SharedPtr msg);
+  void topic_callback(const geometry_msgs::msg::PoseStamped::SharedPtr msg);
 
-  rclcpp::Subscription<geometry_msgs::msg::TwistStamped>::SharedPtr subscription_;
+  rclcpp::Subscription<geometry_msgs::msg::PoseStamped>::SharedPtr subscription_;
   std::shared_ptr<rclcpp::Node> node_;
-  geometry_msgs::msg::TwistStamped rival_predict_goal_;
+  BT::Blackboard::Ptr blackboard_;
+  geometry_msgs::msg::PoseStamped rival_predict_goal_;
 };
 
 /***************/
@@ -96,8 +97,8 @@ private:
 class CamReceiver : public BT::SyncActionNode
 {
 public:
-  CamReceiver(const std::string& name, const BT::NodeConfig& config, std::shared_ptr<rclcpp::Node> node)
-    : BT::SyncActionNode(name, config), node_(node) 
+  CamReceiver(const std::string& name, const BT::NodeConfig& config, std::shared_ptr<rclcpp::Node> node, BT::Blackboard::Ptr blackboard)
+    : BT::SyncActionNode(name, config), node_(node), blackboard_(blackboard)
   {}
 
   /* Node remapping function */
@@ -107,17 +108,18 @@ public:
   BT::NodeStatus tick() override;
 
 private:
-  void global_info_callback(const std_msgs::msg::Float32MultiArray::SharedPtr msg);
+  void global_info_callback(const geometry_msgs::msg::PoseArray::SharedPtr msg);
   void banner_info_callback(const std_msgs::msg::Float32MultiArray::SharedPtr msg);
   void local_info_callback(const geometry_msgs::msg::PoseArray::SharedPtr msg);
 
-  rclcpp::Subscription<std_msgs::msg::Float32MultiArray>::SharedPtr sub_global_info_;
+  rclcpp::Subscription<geometry_msgs::msg::PoseArray>::SharedPtr sub_global_info_;
   rclcpp::Subscription<std_msgs::msg::Float32MultiArray>::SharedPtr sub_banner_info_;
   rclcpp::Subscription<geometry_msgs::msg::PoseArray>::SharedPtr sub_local_info_;
 
-  std_msgs::msg::Float32MultiArray global_info_;
+  geometry_msgs::msg::PoseArray global_info_;
   std_msgs::msg::Float32MultiArray banner_info_;
   geometry_msgs::msg::PoseArray local_info_;
 
   std::shared_ptr<rclcpp::Node> node_;
+  BT::Blackboard::Ptr blackboard_;
 };

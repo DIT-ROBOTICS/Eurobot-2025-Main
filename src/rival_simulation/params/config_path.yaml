@@ -1,0 +1,4 @@
+rival_simulation:
+  ros__parameters:
+    script_file_directory: "/home/user/Eurobot-2025-Main-ws/src/rival_simulation/rival_main_config/bt_rival_script.xml"
+    tree_node_model_config_file: "/home/user/Eurobot-2025-Main-ws/src/rival_simulation/rival_main_config/bt_m_tree_node_model.xml"

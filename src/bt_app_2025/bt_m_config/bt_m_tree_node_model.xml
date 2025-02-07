@@ -50,6 +50,11 @@
             <output_port name="point_out1" type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
             <input_port name="point_in" type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
         </Action>
+        <Action ID="Rotation">
+            <output_port name="final_pose" type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+            <input_port name="degree" type="double"/>
+            <input_port name="base" type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+        </Action>
         <Action ID="SIMAactivate"/>
         <Decorator ID="TimerChecker">
             <input_port name="timer_sec" type="int"/>

@@ -116,7 +116,7 @@ public:
         static bool is_published = false;
         static bool time_check = false;
 
-        if (msg.data >= 90 && !is_published) {
+        if (msg.data >= 85 && !is_published) {
             // RCLCPP_INFO(this->get_logger(), "[StartUp Program]: Send the ladybug!");
 
             // Use system call the ladybug script

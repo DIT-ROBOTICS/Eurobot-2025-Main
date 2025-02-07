@@ -45,11 +45,11 @@ using namespace BT;
 //     }
 // }
 
-// double starting_time = 0.0;
+double game_time = 0.0;
 
-// void timeCallback(const std_msgs::msg::Float32::SharedPtr msg) {
-//     starting_time = msg->data;
-// }
+void timeCallback(const std_msgs::msg::Float32::SharedPtr msg) {
+    game_time = msg->data;
+}
 
 int main(int argc, char** argv) {
     rclcpp::init(argc, argv);
@@ -67,23 +67,19 @@ int main(int argc, char** argv) {
     // Parameters
     std::string groot_xml_config_directory;
     std::string bt_tree_node_model;
-    std::string blue_filename, yellow_filename, planA_filename, score_filepath, tree_name;
+    std::string planA_yellow_file, score_filepath, tree_name;
 
     // Read parameters
     node->declare_parameter<std::string>("groot_xml_config_directory", "/home/user/Eurobot-2025-Main-ws/src/bt_app_2025/bt_m_config/");
     node->declare_parameter<std::string>("tree_node_model_config_file", "/home/user/Eurobot-2025-Main-ws/src/bt_app_2025/bt_m_config/bt_m_tree_node_model.xml");
     node->declare_parameter<std::string>("tree_name", "NavTest");
-    node->declare_parameter("groot_xml_blue_config_file", "bt_blue.xml");
-    node->declare_parameter("groot_xml_yellow_config_file", "bt_yellow.xml");
-    node->declare_parameter<std::string>("planA_config_file", "bt_plan_a.xml");
+    node->declare_parameter<std::string>("planA_yellow_config", "bt_plan_a.xml");
     node->declare_parameter("score_filepath", "score.json");
 
     node->get_parameter("groot_xml_config_directory", groot_xml_config_directory);
     node->get_parameter("tree_node_model_config_file", bt_tree_node_model);
     node->get_parameter("tree_name", tree_name);
-    node->get_parameter("groot_xml_blue_config_file", blue_filename);
-    node->get_parameter("groot_xml_yellow_config_file", yellow_filename);
-    node->get_parameter("planA_config_file", planA_filename);
+    node->get_parameter("planA_yellow_config", planA_yellow_file);
     node->get_parameter("score_filepath", score_filepath);
 
     // Behavior Tree Factory
@@ -94,13 +90,14 @@ int main(int argc, char** argv) {
     // action nodes
     /* receiver */
     factory.registerNodeType<LocReceiver>("LocReceiver", node);
-    factory.registerNodeType<NavReceiver>("NavReceiver", node);
-    factory.registerNodeType<CamReceiver>("CamReceiver", node);
+    factory.registerNodeType<NavReceiver>("NavReceiver", node, blackboard);
+    factory.registerNodeType<CamReceiver>("CamReceiver", node, blackboard);
     /* navigation */
     // factory.registerNodeType<DynamicAdjustment>("DynamicAdjustment");
     params.default_port_value = "navigate_to_pose";
     factory.registerNodeType<Navigation>("Navigation", params);
     factory.registerNodeType<Docking>("Docking", params);
+    factory.registerNodeType<Rotation>("Rotation", params);
     // /* firmware */
     params.default_port_value = "firmware_mission";
     factory.registerNodeType<BTMission>("BTMission", params);
@@ -119,12 +116,11 @@ int main(int argc, char** argv) {
     // Service Client
     // auto client = node->create_client<std_srvs::srv::SetBool>("/robot/objects/ladybug_activate");
     // Subscriber
-    // auto time_sub = node->create_subscription<std_msgs::msg::Float32>("/robot/startup/time", 2, timeCallback);
+    auto time_sub = node->create_subscription<std_msgs::msg::Float32>("/robot/startup/time", 2, timeCallback);
 
     // generate the tree in xml and safe the xml into a file
     std::string xml_models = BT::writeTreeNodesModelXML(factory);
     std::ofstream file(bt_tree_node_model);
-    // std::ofstream file("/home/user/groot_ws/groot_ws/src/bt_app_2025/bt_m_config/bt_tree_node_model.xml");
     file << xml_models;
     file.close();
 
@@ -137,11 +133,10 @@ int main(int argc, char** argv) {
     //     groot_filename = groot_xml_config_directory + "/" + "bt_yellow.xml";
     //     RCLCPP_INFO(node->get_logger(), "[BT Application]: Yellow team is running!");
     // }
-    groot_filename = groot_xml_config_directory + "/" + planA_filename;
+    groot_filename = groot_xml_config_directory + "/" + planA_yellow_file;
     factory.registerBehaviorTreeFromFile(groot_filename);
 
     auto tree = factory.createTree(tree_name, blackboard);
-    // auto tree = factory.createTree("TimeOutTest", blackboard);
     BT::Groot2Publisher publisher(tree, 2227);
 
     BT::NodeStatus status = BT::NodeStatus::RUNNING;
@@ -150,12 +145,12 @@ int main(int argc, char** argv) {
     
     rclcpp::Rate rate(100);
     executor.add_node(node);
-    while (rclcpp::ok() && status == BT::NodeStatus::RUNNING) {
-        // rclcpp::spin_some(node);
+    while (rclcpp::ok() && status == BT::NodeStatus::RUNNING /* && game_time <= 95 */) {
         executor.spin_some();
         rate.sleep();
         status = tree.rootNode()->executeTick();
     }
+    // To Do: tick go home tree
 
     rclcpp::shutdown();
     return 0;
