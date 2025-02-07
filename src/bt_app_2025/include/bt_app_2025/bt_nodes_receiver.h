@@ -108,15 +108,15 @@ public:
   BT::NodeStatus tick() override;
 
 private:
-  void global_info_callback(const std_msgs::msg::Float32MultiArray::SharedPtr msg);
+  void global_info_callback(const geometry_msgs::msg::PoseArray::SharedPtr msg);
   void banner_info_callback(const std_msgs::msg::Float32MultiArray::SharedPtr msg);
   void local_info_callback(const geometry_msgs::msg::PoseArray::SharedPtr msg);
 
-  rclcpp::Subscription<std_msgs::msg::Float32MultiArray>::SharedPtr sub_global_info_;
+  rclcpp::Subscription<geometry_msgs::msg::PoseArray>::SharedPtr sub_global_info_;
   rclcpp::Subscription<std_msgs::msg::Float32MultiArray>::SharedPtr sub_banner_info_;
   rclcpp::Subscription<geometry_msgs::msg::PoseArray>::SharedPtr sub_local_info_;
 
-  std_msgs::msg::Float32MultiArray global_info_;
+  geometry_msgs::msg::PoseArray global_info_;
   std_msgs::msg::Float32MultiArray banner_info_;
   geometry_msgs::msg::PoseArray local_info_;
 

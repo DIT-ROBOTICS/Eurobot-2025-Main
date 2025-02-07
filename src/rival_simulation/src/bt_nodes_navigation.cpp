@@ -80,12 +80,12 @@ BT::PortsList Navigation::providedPorts() {
 // Start function for the SimpleNavigation node
 BT::NodeStatus Navigation::onStart() {
     getInput<geometry_msgs::msg::PoseStamped>("goal", goal_);
-    getInput<geometry_msgs::msg::PoseStamped>("start_pose", start_pose_);
+    current_pose_.pose.pose = getInput<geometry_msgs::msg::PoseStamped>("start_pose").value().pose;
     broadcaster_ = std::make_shared<tf2_ros::TransformBroadcaster>(node_);
-    rival_pub_ = node_->create_publisher<geometry_msgs::msg::PoseWithCovarianceStamped>("/rival_pose", 20);
-    predict_goal_pub_ = node_->create_publisher<geometry_msgs::msg::PoseStamped>("rival/predict_goal", 20);
+    // rival_pub_ = node_->create_publisher<geometry_msgs::msg::PoseWithCovarianceStamped>("/rival_pose", 20);
+    // predict_goal_pub_ = node_->create_publisher<geometry_msgs::msg::PoseStamped>("rival/predict_goal", 20);
 
-    current_pose_ = geometry_msgs::msg::PoseWithCovarianceStamped();
+    RCLCPP_INFO(node_->get_logger(), "Start Nav");
     return BT::NodeStatus::RUNNING;
 }
 
@@ -114,18 +114,24 @@ void Navigation::broadcastTransform(const geometry_msgs::msg::Pose &pose) {
 
 // Running function for the SimpleNavigation node
 BT::NodeStatus Navigation::onRunning() {
-    double distance = calculateDistance(start_pose_.pose, goal_.pose);
-    move_x_ = rival_velocity * (goal_.pose.position.x - start_pose_.pose.position.x) / distance;
-    move_y_ = rival_velocity * (goal_.pose.position.y - start_pose_.pose.position.y) / distance;
-    rclcpp::Rate rate(100);
+    double distance = calculateDistance(current_pose_.pose.pose, goal_.pose);
+    move_x_ = rival_velocity * (goal_.pose.position.x - current_pose_.pose.pose.position.x) / distance;
+    move_y_ = rival_velocity * (goal_.pose.position.y - current_pose_.pose.pose.position.y) / distance;
+    rclcpp::Rate rate(20);
     while (calculateDistance(current_pose_.pose.pose, goal_.pose) >= 0.3) {
+        current_pose_.header.stamp = node_->now();
+        current_pose_.header.frame_id = "map";
         current_pose_.pose.pose.position.x += move_x_;
         current_pose_.pose.pose.position.y += move_y_;
-        predict_goal_pub_->publish(goal_);
+        // predict_goal_pub_->publish(goal_);
         broadcastTransform(current_pose_.pose.pose);
         rival_pub_->publish(current_pose_);
+        RCLCPP_INFO(node_->get_logger(), "Navigating");
         rate.sleep();
     }
+    // predict_goal_pub_.reset();
+    rival_pub_.reset();
+    RCLCPP_INFO(node_->get_logger(), "Nav finish");
     return BT::NodeStatus::SUCCESS;
 }
 
@@ -294,65 +300,108 @@ NodeStatus Rotation::onFailure(ActionNodeErrorCode error) {
 //     return BT::NodeStatus::SUCCESS;
 // }
 
-BT::PortsList initGarbagePoints::providedPorts() {
+BT::PortsList initPoints::providedPorts() {
     return {
-        BT::OutputPort<BT::SharedQueue<geometry_msgs::msg::PoseStamped>>("garbage_points")
+        BT::OutputPort<BT::SharedQueue<geometry_msgs::msg::PoseStamped>>("garbage_points"),
+        BT::OutputPort<BT::SharedQueue<geometry_msgs::msg::PoseStamped>>("material_points")
     };
 }
 
-BT::NodeStatus initGarbagePoints::tick() {
-    auto shared_queue = std::make_shared<std::deque<geometry_msgs::msg::PoseStamped>>();
-    setOutput("garbage_points", shared_queue);
+BT::NodeStatus initPoints::tick() {
+    auto garbage_shared_queue = std::make_shared<std::deque<geometry_msgs::msg::PoseStamped>>();
+    auto material_shared_queue = std::make_shared<std::deque<geometry_msgs::msg::PoseStamped>>();
+    std::vector<std::string> points_name_ = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"};
+    node_->declare_parameter<std::vector<double>>(points_name_[0], {2.1, 1.7, 0.0, 0.0, 0.0, 0.707, 0.707});
+    node_->declare_parameter<std::vector<double>>(points_name_[1], {2.7, 1.3, 0.0, 0.0, 0.0, 0.0, 1.0});
+    node_->declare_parameter<std::vector<double>>(points_name_[2], {2.7, 0.4, 0.0, 0.0, 0.0, 0.0, 1.0});
+    node_->declare_parameter<std::vector<double>>(points_name_[3], {1.9, 0.8, 0.0, 0.0, 0.0, 0.707, 0.707});
+    node_->declare_parameter<std::vector<double>>(points_name_[4], {2.2, 0.4, 0.0, 0.0, 0.0, -0.707, 0.707});
+    node_->declare_parameter<std::vector<double>>(points_name_[5], {1.1, 0.8, 0.0, 0.0, 0.0, 0.707, 0.707});
+    node_->declare_parameter<std::vector<double>>(points_name_[6], {0.8, 0.4, 0.0, 0.0, 0.0, -0.707, 0.707});
+    node_->declare_parameter<std::vector<double>>(points_name_[7], {0.3, 1.3, 0.0, 0.0, 0.0, 1.0, 0.0});
+    node_->declare_parameter<std::vector<double>>(points_name_[8], {0.3, 0.4, 0.0, 0.0, 0.0, 1.0, 0.0});
+    node_->declare_parameter<std::vector<double>>(points_name_[9], {0.8, 1.7, 0.0, 0.0, 0.0, 0.707, 0.707});
+    for (const auto &point_name_ : points_name_) {
+        std::vector<double> param;
+        node_->get_parameter(point_name_, param);
+        geometry_msgs::msg::PoseStamped path_point;
+        path_point.pose.position.x = param[0];
+        path_point.pose.position.y = param[1];
+        path_point.pose.position.z = param[2];
+        path_point.pose.orientation.x = param[3];
+        path_point.pose.orientation.y = param[4];
+        path_point.pose.orientation.z = param[5];
+        path_point.pose.orientation.w = param[6];
+        // Store in shared_queue
+        material_shared_queue->push_back(path_point);
+    }
+    setOutput("garbage_points", garbage_shared_queue);
+    setOutput("material_points", material_shared_queue);
+
+    RCLCPP_INFO(node_->get_logger(), "Init points");
 
     return BT::NodeStatus::SUCCESS;
 }
 
 BT::PortsList StateUpdater::providedPorts() {
     return {
-        BT::InputPort<geometry_msgs::msg::PoseStamped>("changed_position"),
-        BT::InputPort<int>("changed_point_num"),
+        BT::InputPort<geometry_msgs::msg::PoseStamped>("changed_point_position"),
+        BT::InputPort<int>("changed_point_code"),
         BT::InputPort<int>("point_status"),
         BT::InputPort<geometry_msgs::msg::PoseStamped>("new_garbage_position"),
-        BT::InputPort<BT::SharedQueue<geometry_msgs::msg::PoseStamped>>("materials_info"),
-        BT::OutputPort<BT::SharedQueue<geometry_msgs::msg::PoseStamped>>("materials_info"),
-        BT::InputPort<BT::SharedQueue<geometry_msgs::msg::PoseStamped>>("garbage_points"),
-        BT::OutputPort<BT::SharedQueue<geometry_msgs::msg::PoseStamped>>("garbage_points")
+        BT::InputPort<BT::SharedQueue<geometry_msgs::msg::PoseStamped>>("materials_in"),
+        BT::OutputPort<BT::SharedQueue<geometry_msgs::msg::PoseStamped>>("materials_out"),
+        BT::InputPort<BT::SharedQueue<geometry_msgs::msg::PoseStamped>>("garbages_in"),
+        BT::OutputPort<BT::SharedQueue<geometry_msgs::msg::PoseStamped>>("garbages_out")
     };
 }
 
 BT::NodeStatus StateUpdater::onStart() {
-    geometry_msgs::msg::PoseStamped position = getInput<geometry_msgs::msg::PoseStamped>("changed_position").value();
-    geometry_msgs::msg::PoseStamped garbage = getInput<geometry_msgs::msg::PoseStamped>("new_garbage_position").value();
-    int pt_num_ = getInput<int>("changed_point_num").value();
+    RCLCPP_INFO(node_->get_logger(), "Start update state");
+    geometry_msgs::msg::PoseStamped position = getInput<geometry_msgs::msg::PoseStamped>("changed_point_position").value();
+    int pt_num_ = getInput<int>("changed_point_code").value();
     int status_ = getInput<int>("point_status").value();
-    materials_info_deque = *getInput<BT::SharedQueue<geometry_msgs::msg::PoseStamped>>("materials_info").value();
-    garbage_points_deque = *getInput<BT::SharedQueue<geometry_msgs::msg::PoseStamped>>("garbage_points").value();
-    
-    materials_info_deque[pt_num_] = position;
-    materials_info_deque[pt_num_].pose.position.z = (double)status_;
-    garbage_points_deque.push_back(garbage);
+    materials_info_deque = *getInput<BT::SharedQueue<geometry_msgs::msg::PoseStamped>>("materials_in").value();
+    garbage_points_deque = *getInput<BT::SharedQueue<geometry_msgs::msg::PoseStamped>>("garbages_in").value();
 
+    materials_pub_ = node_->create_publisher<geometry_msgs::msg::PoseArray>("/robot/objects/materials_info", 10);
+    garbages_pub_ = node_->create_publisher<geometry_msgs::msg::PoseArray>("/robot/objects/obstacles_info", 10);
+
+    double rad = position.pose.position.z * PI / 180;
+    tf2::Quaternion q;
+    q.setRPY(0, 0, rad);
+    materials_info_deque[pt_num_] = position;
+    materials_info_deque[pt_num_].pose.orientation.x = q.x();
+    materials_info_deque[pt_num_].pose.orientation.y = q.y();
+    materials_info_deque[pt_num_].pose.orientation.z = q.z();
+    materials_info_deque[pt_num_].pose.orientation.w = q.w();
+    materials_info_deque[pt_num_].pose.position.z = (double)status_;
+
+    if (getInput<geometry_msgs::msg::PoseStamped>("new_garbage_position").value().pose.position.z != -1) {
+        geometry_msgs::msg::PoseStamped garbage = getInput<geometry_msgs::msg::PoseStamped>("new_garbage_position").value();
+        garbage_points_deque.push_back(garbage);
+    }
+    for (const auto &param : materials_info_deque) 
+        materials_info_.poses.push_back(param.pose);
+    for (const auto &param : garbage_points_deque)
+        garbage_points_.poses.push_back(param.pose);
     return NodeStatus::RUNNING;
 }
 
 BT::NodeStatus StateUpdater::onRunning() {
-    for (const auto &param : materials_info_deque) {
-        materials_info_.poses.push_back(param.pose);
+    pub_count++;
+    materials_pub_->publish(materials_info_);
+    garbages_pub_->publish(garbage_points_);
+    if (pub_count == 100) {
+        std::shared_ptr<std::deque<geometry_msgs::msg::PoseStamped>> shared_queue = std::make_shared<std::deque<geometry_msgs::msg::PoseStamped>>(materials_info_deque);
+        setOutput("materials_out", shared_queue);
+        shared_queue = std::make_shared<std::deque<geometry_msgs::msg::PoseStamped>>(garbage_points_deque);
+        setOutput("garbages_out", shared_queue);
+
+        RCLCPP_INFO(node_->get_logger(), "Finish update state");
+        return BT::NodeStatus::SUCCESS;
     }
-    for (const auto &param : garbage_points_deque) {
-        garbage_points_.poses.push_back(param.pose);
-    }
-    rclcpp::Rate rate(100);
-    for (int i = 0; i < 100; i++) {
-        materials_pub_->publish(materials_info_);
-        garbages_pub_->publish(garbage_points_);
-        rate.sleep();
-    }
-    std::shared_ptr<std::deque<geometry_msgs::msg::PoseStamped>> shared_queue = std::make_shared<std::deque<geometry_msgs::msg::PoseStamped>>(materials_info_deque);
-    setOutput("materials_info", shared_queue);
-    shared_queue = std::make_shared<std::deque<geometry_msgs::msg::PoseStamped>>(garbage_points_deque);
-    setOutput("garbage_points", shared_queue);
-    return BT::NodeStatus::SUCCESS;
+    return NodeStatus::RUNNING;
 }
 
 void StateUpdater::onHalted() {

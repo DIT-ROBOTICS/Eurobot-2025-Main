@@ -12,20 +12,19 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.actions import DeclareLaunchArgument, LogInfo
 from launch.substitutions import LaunchConfiguration
 
+from ament_index_python.packages import get_package_share_directory
+
 def generate_launch_description():
+    params = os.path.join(
+        get_package_share_directory('rival_simulation'),
+        'params',
+        'config_path.yaml'
+    )
     return LaunchDescription([
-        # params = os.path.join(
-        #     get_package_share_directory('rival_simulation'),
-        #     'params',
-        #     'config_path.yaml'
-        # ),
         Node(
-            # parameters=[LaunchConfiguration('param_file')],
-            parameters=[{"tree_name": "MainTree"}],
             package = 'rival_simulation',
             executable = 'rival_main',
             name = 'rival_main',
-            parameters = ["../params/config_path.yaml"],
-            # parameters = [params]
+            parameters = [params, {"tree_name": "NavTest"}]
         )
     ])

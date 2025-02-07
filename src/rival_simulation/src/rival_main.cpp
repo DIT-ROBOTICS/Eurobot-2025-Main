@@ -11,6 +11,7 @@
 #include "rclcpp/executors.hpp"
 // ros message
 #include "std_msgs/msg/float32.hpp"
+#include "geometry_msgs/msg/pose_with_covariance_stamped.hpp"
 // BTaction node
 #include "rival_simulation/bt_nodes_navigation.h"
 // C++
@@ -24,6 +25,9 @@ int main(int argc, char** argv) {
     rclcpp::init(argc, argv);
     auto node = std::make_shared<rclcpp::Node>("rival_simulation");
     rclcpp::executors::MultiThreadedExecutor executor;
+
+    rclcpp::Publisher<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr rival_pub_;
+    rival_pub_ = node->create_publisher<geometry_msgs::msg::PoseWithCovarianceStamped>("/rival_pose", 20);
 
     // Parameters
     std::string groot_xml_config_directory;
@@ -44,12 +48,12 @@ int main(int argc, char** argv) {
     params.nh = node;
     // action nodes
     params.default_port_value = "navigate_to_pose";
-    factory.registerNodeType<Navigation>("Navigation", node);
+    factory.registerNodeType<Navigation>("Navigation", node, rival_pub_);
     factory.registerNodeType<Docking>("Docking", params);
     factory.registerNodeType<Rotation>("Rotation", params);
     factory.registerNodeType<PointProvider>("PointProvider");
     // factory.registerNodeType<GeneratePathPoint>("GeneratePathPoint", node);
-    factory.registerNodeType<initGarbagePoints>("initGarbagePoints");
+    factory.registerNodeType<initPoints>("initPoints", node);
     factory.registerNodeType<StateUpdater>("StateUpdater", node);
 
     // generate the tree in xml and safe the xml into a file

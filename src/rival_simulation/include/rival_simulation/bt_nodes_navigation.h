@@ -69,8 +69,8 @@ class Navigation : public BT::StatefulActionNode {
 
 public:
 
-    Navigation(const std::string& name, const BT::NodeConfig& config, std::shared_ptr<rclcpp::Node> node)
-        : BT::StatefulActionNode(name, config), node_(node)
+    Navigation(const std::string& name, const BT::NodeConfig& config, std::shared_ptr<rclcpp::Node> node, rclcpp::Publisher<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr rival_pub)
+        : BT::StatefulActionNode(name, config), node_(node), rival_pub_(rival_pub)
     {}
 
     /* Node remapping function */
@@ -90,14 +90,13 @@ private:
     std::shared_ptr<rclcpp::Node> node_;
 
     rclcpp::Publisher<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr rival_pub_;
-    rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr predict_goal_pub_;
+    // rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr predict_goal_pub_;
     std::shared_ptr<tf2_ros::TransformBroadcaster> broadcaster_;
     double move_x_;
     double move_y_;
     double rival_velocity = 0.01;
 
     bool finished_ = false;
-    geometry_msgs::msg::PoseStamped start_pose_;
     geometry_msgs::msg::PoseStamped goal_;
     geometry_msgs::msg::PoseWithCovarianceStamped current_pose_;
     geometry_msgs::msg::PoseStamped rival_predict_goal_;
@@ -172,11 +171,11 @@ private:
 //     std::shared_ptr<rclcpp::Node> node_;
 // };
 
-class initGarbagePoints : public BT::SyncActionNode {
+class initPoints : public BT::SyncActionNode {
 
 public: 
-    initGarbagePoints(const std::string& name, const BT::NodeConfiguration& config) 
-        : BT::SyncActionNode(name, config) {}
+    initPoints(const std::string& name, const BT::NodeConfiguration& config, std::shared_ptr<rclcpp::Node> node) 
+        : BT::SyncActionNode(name, config), node_(node) {}
 
     static BT::PortsList providedPorts();
 
@@ -208,6 +207,7 @@ private:
 
     rclcpp::Publisher<geometry_msgs::msg::PoseArray>::SharedPtr materials_pub_;
     rclcpp::Publisher<geometry_msgs::msg::PoseArray>::SharedPtr garbages_pub_;
+    int pub_count = 0;
     
     geometry_msgs::msg::PoseArray materials_info_;
     geometry_msgs::msg::PoseArray garbage_points_;
