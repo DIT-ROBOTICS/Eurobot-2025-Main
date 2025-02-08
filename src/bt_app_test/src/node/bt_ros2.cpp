@@ -15,10 +15,9 @@ int main(int argc, char** argv)
   BehaviorTreeFactory factory;
   auto node = std::make_shared<rclcpp::Node>("bt_node");
 
-  node->declare_parameter<string>("bt_tree_node_model", "/home/user/Eurobot-2025-Main-ws/src/bt_app_test/bt_config/"
-                     "bt_tree_node_model.xml");
-  node->declare_parameter<string>("groot_xml_config_directory", "/home/user/Eurobot-2025-Main-ws/src/bt_app_test/"
-                                           "bt_config/");
+  node->declare_parameter<string>("bt_tree_node_model", "/home/user/Eurobot-2025-Main-ws/src/bt_app_test/bt_config/bt_tree_node_model.xml");
+  node->declare_parameter<string>("groot_xml_config_directory", "/home/user/Eurobot-2025-Main-ws/src/bt_app_test/bt_config/");
+  node->declare_parameter<std::string>("tree_name", "MainTree");
 
   // Register the custom node
   // TODO: Add the custom node
@@ -26,8 +25,11 @@ int main(int argc, char** argv)
   params.nh = node;
   factory.registerNodeType<Testing>("Testing");
   factory.registerNodeType<TopicSubTest>("TopicSubTest", node);
+  factory.registerNodeType<TopicPubTest>("TopicPubTest", node);
   params.default_port_value = "number";
-  factory.registerNodeType<StandardTopicSub>("StandardTopicSub", node);
+  factory.registerNodeType<StandardTopicPub>("StandardTopicPub", params);
+  params.default_port_value = "number";
+  factory.registerNodeType<StandardTopicSub>("StandardTopicSub", params);
   params.default_port_value = "testing_action";
   factory.registerNodeType<NavigationTemp>("NavigationTemp", params);
   factory.registerNodeType<LocalizationTemp>("LocalizationTemp", node);
@@ -62,7 +64,9 @@ int main(int argc, char** argv)
 
   // Create the tree
   // auto tree = factory.createTree("Waypoint-Demo");
-  auto tree = factory.createTree("MainTree");
+  std::string tree_name;
+  node->get_parameter("tree_name", tree_name);
+  auto tree = factory.createTree(tree_name);
 
   BT::Groot2Publisher publisher(tree, 2227);
 
