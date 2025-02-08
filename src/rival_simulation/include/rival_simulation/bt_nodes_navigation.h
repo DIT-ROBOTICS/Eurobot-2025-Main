@@ -69,8 +69,8 @@ class Navigation : public BT::StatefulActionNode {
 
 public:
 
-    Navigation(const std::string& name, const BT::NodeConfig& config, std::shared_ptr<rclcpp::Node> node, rclcpp::Publisher<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr rival_pub)
-        : BT::StatefulActionNode(name, config), node_(node), rival_pub_(rival_pub)
+    Navigation(const std::string& name, const BT::NodeConfig& config, const RosNodeParams& params)
+        : BT::StatefulActionNode(name, config), node_(params.nh)
     {}
 
     /* Node remapping function */
@@ -90,7 +90,7 @@ private:
     std::shared_ptr<rclcpp::Node> node_;
 
     rclcpp::Publisher<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr rival_pub_;
-    // rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr predict_goal_pub_;
+    rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr predict_goal_pub_;
     std::shared_ptr<tf2_ros::TransformBroadcaster> broadcaster_;
     double move_x_;
     double move_y_;
@@ -98,6 +98,7 @@ private:
 
     bool finished_ = false;
     geometry_msgs::msg::PoseStamped goal_;
+    geometry_msgs::msg::PoseStamped start_pose_;
     geometry_msgs::msg::PoseWithCovarianceStamped current_pose_;
     geometry_msgs::msg::PoseStamped rival_predict_goal_;
 };

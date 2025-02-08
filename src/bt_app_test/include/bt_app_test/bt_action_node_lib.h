@@ -3,6 +3,7 @@
 // BT
 #include <behaviortree_ros2/bt_action_node.hpp>
 #include <behaviortree_ros2/bt_topic_sub_node.hpp>
+#include <behaviortree_ros2/bt_topic_pub_node.hpp>
 // ROS
 #include <rclcpp/rclcpp.hpp>
 #include <rclcpp/logger.hpp>
@@ -53,6 +54,34 @@ private:
   std::string input;
 };
 
+class TopicPubTest : public BT::StatefulActionNode
+{
+public:
+  TopicPubTest(const std::string& name, const BT::NodeConfig& config, std::shared_ptr<rclcpp::Node> node)
+    : BT::StatefulActionNode(name, config), node_(node) {
+    publisher_ = node_->create_publisher<std_msgs::msg::Int32>("number", 10);
+  }
+
+  /* Node remapping function */
+  static BT::PortsList providedPorts();
+
+  /* Start and running function */
+  BT::NodeStatus onStart() override;
+  BT::NodeStatus onRunning() override;
+
+  /* Halt function */
+  void onHalted() override;
+
+private:
+  std::shared_ptr<rclcpp::Node> node_;
+
+  rclcpp::Publisher<std_msgs::msg::Int32>::SharedPtr publisher_;
+  std_msgs::msg::Int32 number;
+
+  int a = 0;
+  int b = 0;
+};
+
 class TopicSubTest : public BT::StatefulActionNode
 {
 public:
@@ -80,6 +109,20 @@ private:
   rclcpp::Subscription<std_msgs::msg::Int32>::SharedPtr subscription_;
   std::shared_ptr<rclcpp::Node> node_;
   int number = 0;
+};
+
+class StandardTopicPub : public RosTopicPubNode<std_msgs::msg::Int32>
+{
+public:
+  explicit StandardTopicPub(const std::string& name, const BT::NodeConfig& conf, const RosNodeParams& params)
+    : RosTopicPubNode<std_msgs::msg::Int32>(name, conf, params)
+  {}
+  /* Node remapping function */
+  static BT::PortsList providedPorts();
+  /* Start and running function */
+  bool setMessage(std_msgs::msg::Int32& msg);
+
+private:
 };
 
 class StandardTopicSub : public BT::RosTopicSubNode<std_msgs::msg::Int32>
