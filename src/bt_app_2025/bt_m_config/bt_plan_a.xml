@@ -178,8 +178,10 @@
 
   <BehaviorTree ID="NavTest">
     <Sequence>
-      <SubTree ID="MissionPointOne"
-               _autoremap="true"/>
+      <LocReceiver rival_pose="{Test}"
+                   robot_pose="{Test1}"/>
+      <LocReceiver rival_pose="{Test2}"
+                   robot_pose="{Test3}"/>
     </Sequence>
   </BehaviorTree>
 
@@ -273,6 +275,12 @@
                   type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
       <input_port name="base"
                   type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+    </Action>
+    <Action ID="LocReceiver">
+      <output_port name="rival_pose"
+                   type="geometry_msgs::msg::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+      <output_port name="robot_pose"
+                   type="geometry_msgs::msg::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
     </Action>
     <Action ID="NavReceiver"/>
     <Action ID="Navigation">
