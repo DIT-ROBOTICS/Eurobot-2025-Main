@@ -80,11 +80,12 @@ BT::PortsList Navigation::providedPorts() {
 // Start function for the SimpleNavigation node
 BT::NodeStatus Navigation::onStart() {
     getInput<geometry_msgs::msg::PoseStamped>("goal", goal_);
-    current_pose_.pose.pose = getInput<geometry_msgs::msg::PoseStamped>("start_pose").value().pose;
+    getInput<geometry_msgs::msg::PoseStamped>("start_pose", start_pose_);
     broadcaster_ = std::make_shared<tf2_ros::TransformBroadcaster>(node_);
-    // rival_pub_ = node_->create_publisher<geometry_msgs::msg::PoseWithCovarianceStamped>("/rival_pose", 20);
-    // predict_goal_pub_ = node_->create_publisher<geometry_msgs::msg::PoseStamped>("rival/predict_goal", 20);
+    rival_pub_ = node_->create_publisher<geometry_msgs::msg::PoseWithCovarianceStamped>("/rival_pose", 20);
+    predict_goal_pub_ = node_->create_publisher<geometry_msgs::msg::PoseStamped>("rival/predict_goal", 20);
 
+    current_pose_.pose.pose.position = start_pose_.pose.position;
     RCLCPP_INFO(node_->get_logger(), "Start Nav");
     return BT::NodeStatus::RUNNING;
 }
@@ -123,21 +124,22 @@ BT::NodeStatus Navigation::onRunning() {
         current_pose_.header.frame_id = "map";
         current_pose_.pose.pose.position.x += move_x_;
         current_pose_.pose.pose.position.y += move_y_;
-        // predict_goal_pub_->publish(goal_);
+        predict_goal_pub_->publish(goal_);
         broadcastTransform(current_pose_.pose.pose);
         rival_pub_->publish(current_pose_);
         RCLCPP_INFO(node_->get_logger(), "Navigating");
         rate.sleep();
     }
-    // predict_goal_pub_.reset();
-    rival_pub_.reset();
+    geometry_msgs::msg::PoseStamped final_pose_;
+    final_pose_.pose = current_pose_.pose.pose;
+    setOutput<geometry_msgs::msg::PoseStamped>("final_pose", final_pose_);
     RCLCPP_INFO(node_->get_logger(), "Nav finish");
     return BT::NodeStatus::SUCCESS;
 }
 
 // Halted function for the SimpleNavigation node
 void Navigation::onHalted() {
-    // ROS_INFO_STREAM("Node halted");
+    RCLCPP_INFO(node_->get_logger(), "Node halted");
     return;
 }
 

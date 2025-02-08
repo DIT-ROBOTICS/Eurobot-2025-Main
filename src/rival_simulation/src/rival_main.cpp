@@ -48,7 +48,7 @@ int main(int argc, char** argv) {
     params.nh = node;
     // action nodes
     params.default_port_value = "navigate_to_pose";
-    factory.registerNodeType<Navigation>("Navigation", node, rival_pub_);
+    factory.registerNodeType<Navigation>("Navigation", params);
     factory.registerNodeType<Docking>("Docking", params);
     factory.registerNodeType<Rotation>("Rotation", params);
     factory.registerNodeType<PointProvider>("PointProvider");
