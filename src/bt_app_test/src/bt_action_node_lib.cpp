@@ -216,3 +216,175 @@ BT::NodeStatus NavigationTemp::onFailure(ActionNodeErrorCode error) {
 BT::NodeStatus NavigationTemp::onFeedback(const std::shared_ptr<const Feedback> feedback) {
   return BT::NodeStatus::RUNNING;
 }
+
+
+PortsList count_5::providedPorts() {
+  return { 
+    BT::InputPort<std::string>("input"),
+    BT::OutputPort<std::string>("output") 
+  };
+}
+
+BT::NodeStatus count_5::onStart()
+{
+  if(!getInput<std::string>("input", input))
+  {
+    throw BT::RuntimeError("[count_5]: Missing required input: ", input);
+  }
+
+  std::cout << "count_5 Node received input: " << input << std::endl;
+
+  return BT::NodeStatus::RUNNING;
+}
+
+BT::NodeStatus count_5::onRunning()
+{
+  tick_count++;
+
+  std::cout << "count_5: " << tick_count << std::endl;
+
+  if(tick_count == 5)
+  {
+    tick_count = 0;
+
+    return BT::NodeStatus::SUCCESS;
+  }
+  else
+    return BT::NodeStatus::RUNNING;
+}
+
+void count_5::onHalted()
+{
+  tick_count = 0;
+
+  std::cout << "count_5 Node halted" << std::endl;
+
+  return;
+}
+
+PortsList count_10::providedPorts() {
+  return { 
+    BT::InputPort<std::string>("input"),
+    BT::OutputPort<std::string>("output") 
+  };
+}
+
+BT::NodeStatus count_10::onStart()
+{
+  if(!getInput<std::string>("input", input))
+  {
+    throw BT::RuntimeError("[count_10]: Missing required input: ", input);
+  }
+
+  std::cout << "count_10 Node received input: " << input << std::endl;
+
+  return BT::NodeStatus::RUNNING;
+}
+
+BT::NodeStatus count_10::onRunning()
+{
+  tick_count++;
+
+  std::cout << "count_10: " << tick_count << std::endl;
+
+  if(tick_count == 10)
+  {
+    tick_count = 0;
+
+    return BT::NodeStatus::SUCCESS;
+  }
+  else if(tick_count >= 6)
+  {
+    return BT::NodeStatus::FAILURE;
+  }
+  else
+    return BT::NodeStatus::RUNNING;
+}
+
+void count_10::onHalted()
+{
+  tick_count = 0;
+
+  std::cout << "count_10 Node halted" << std::endl;
+
+  return;
+}
+
+PortsList count_15::providedPorts() {
+  return { 
+    BT::InputPort<std::string>("input"),
+    BT::OutputPort<std::string>("output") 
+  };
+}
+
+BT::NodeStatus count_15::onStart()
+{
+  if(!getInput<std::string>("input", input))
+  {
+    throw BT::RuntimeError("[count_15]: Missing required input: ", input);
+  }
+
+  std::cout << "count_15 Node received input: " << input << std::endl;
+
+  return BT::NodeStatus::RUNNING;
+}
+
+BT::NodeStatus count_15::onRunning()
+{
+  tick_count++;
+
+  std::cout << "count_15: " << tick_count << std::endl;
+
+  if(tick_count == 15)
+  {
+    tick_count = 0;
+
+    return BT::NodeStatus::SUCCESS;
+  }
+  // else if(tick_count >= 11)
+  //   return BT::NodeStatus::FAILURE;
+  else
+    return BT::NodeStatus::RUNNING;
+}
+
+void count_15::onHalted()
+{
+  tick_count = 0;
+
+  std::cout << "count_15 Node halted" << std::endl;
+
+  return;
+}
+
+PortsList Parallel_check::providedPorts() {
+  return { 
+    BT::InputPort<std::string>("input"),
+    BT::OutputPort<std::string>("output") 
+  };
+}
+
+BT::NodeStatus Parallel_check::onStart()
+{
+  if(!getInput<std::string>("input", input))
+  {
+    throw BT::RuntimeError("[Parallel_check]: Missing required input: ", input);
+  }
+
+  std::cout << "Parallel_check Node received input: " << input << std::endl;
+
+  return BT::NodeStatus::RUNNING;
+}
+
+BT::NodeStatus Parallel_check::onRunning()
+{
+  std::cout << "Parallel_check" << std::endl;
+
+  return BT::NodeStatus::SUCCESS;
+}
+
+void Parallel_check::onHalted()
+{
+  std::cout << "Parallel_check Node halted" << std::endl;
+
+  return;
+}

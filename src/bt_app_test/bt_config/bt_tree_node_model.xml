@@ -19,9 +19,17 @@
             <input_port name="goal" type="geometry_msgs::msg::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
             <input_port name="action_name" type="std::string" default="">Action server name</input_port>
         </Action>
+        <Action ID="Parallel_check">
+            <output_port name="output" type="std::string"/>
+            <input_port name="input" type="std::string"/>
+        </Action>
         <Decorator ID="RaceTimeCheck">
             <input_port name="max_time_count" type="double"/>
         </Decorator>
+        <Condition ID="StandardTopicSub">
+            <output_port name="output" type="int"/>
+            <input_port name="topic_name" type="std::string"/>
+        </Condition>
         <Action ID="StartRace">
             <output_port name="output" type="std::string"/>
         </Action>
@@ -34,6 +42,18 @@
         </Decorator>
         <Action ID="TopicSubTest">
             <output_port name="output" type="int"/>
+        </Action>
+        <Action ID="count_10">
+            <output_port name="output" type="std::string"/>
+            <input_port name="input" type="std::string"/>
+        </Action>
+        <Action ID="count_15">
+            <output_port name="output" type="std::string"/>
+            <input_port name="input" type="std::string"/>
+        </Action>
+        <Action ID="count_5">
+            <output_port name="output" type="std::string"/>
+            <input_port name="input" type="std::string"/>
         </Action>
     </TreeNodesModel>
 </root>

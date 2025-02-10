@@ -37,6 +37,10 @@ int main(int argc, char** argv)
   factory.registerNodeType<ElapseTimeCheck>("ElapseTimeCheck");
   factory.registerNodeType<StartRace>("StartRace");
   factory.registerNodeType<RaceTimeCheck>("RaceTimeCheck");
+  factory.registerNodeType<count_5>("count_5");
+  factory.registerNodeType<count_10>("count_10");
+  factory.registerNodeType<count_15>("count_15");
+  factory.registerNodeType<Parallel_check>("Parallel_check");
 
   // Write tree nodes model
   std::string xml_tree_model = BT::writeTreeNodesModelXML(factory);
@@ -62,7 +66,8 @@ int main(int argc, char** argv)
 
   // Create the tree
   // auto tree = factory.createTree("Waypoint-Demo");
-  auto tree = factory.createTree("MainTree");
+  auto tree = factory.createTree("ParallelTree");
+  // auto tree = factory.createTree("MainTree");
 
   BT::Groot2Publisher publisher(tree, 2227);
 
