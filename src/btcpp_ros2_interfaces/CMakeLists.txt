@@ -19,6 +19,7 @@ rosidl_generate_interfaces(btcpp_ros2_interfaces
     "action/ExecuteTree.action"
     "action/Navigation.action"
     "action/FirmwareMission.action"
+    "action/Fibonacci.action"
     DEPENDENCIES geometry_msgs action_msgs std_msgs builtin_interfaces
 )
 
