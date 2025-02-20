@@ -52,7 +52,7 @@ double inline calculateAngleDifference(const geometry_msgs::msg::Pose &pose1, co
 }
 
 BT::PortsList Navigation::providedPorts() {
-    return { 
+    return {
         BT::InputPort<geometry_msgs::msg::PoseStamped>("goal"),
         BT::InputPort<int>("type"),
         BT::OutputPort<geometry_msgs::msg::PoseStamped>("final_pose")
@@ -230,20 +230,23 @@ NodeStatus Rotation::onFailure(ActionNodeErrorCode error) {
     RCLCPP_ERROR(logger(), "[BT]: Navigation error");
     return NodeStatus::FAILURE;
 }
-// BT::PortsList DynamicAdjustment::providedPorts() {
-//     return {
-//         // To Do: 
-//     }
-// }
+BT::PortsList DynamicAdjustment::providedPorts() {
+    return {
+        BT::InputPort<geometry_msgs::msg::TwistStamped>("robot_pose"),
+        BT::InputPort<geometry_msgs::msg::TwistStamped>("rival_pose")
+        // To Do: 
+    }
+}
 
-// BT::NodeStatus DynamicAdjustment::onStart() {
-//     // To Do: 
-// }
+BT::NodeStatus DynamicAdjustment::onStart() {
+    // To Do: 
+}
 
-// BT::NodeStatus DynamicAdjustment::onRunning() {
-//     // To Do: 
-// }
+BT::NodeStatus DynamicAdjustment::onRunning() {
+    // To Do: 
+}
 
-// void DynamicAdjustment::onHalted() {
-//     // To Do: 
-// }
+void DynamicAdjustment::onHalted() {
+    // To Do: 
+    return;
+}

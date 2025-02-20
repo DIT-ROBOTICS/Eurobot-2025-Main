@@ -145,28 +145,28 @@ PortsList CamReceiver::providedPorts() {
     return {};
 }
 
-void CamReceiver::global_info_callback(const geometry_msgs::msg::PoseArray msg) {
-    global_info_ = *msg;
-    // blackboard_->set<double>("global_info", global_info_);
+void CamReceiver::materials_info_callback(const geometry_msgs::msg::PoseArray msg) {
+    materials_info_ = *msg;
+    // blackboard_->set<double>("global_info", materials_info_);
     // To Do: modify message type
 }
-void CamReceiver::banner_info_callback(const std_msgs::msg::Float32MultiArray::SharedPtr msg) {
+void CamReceiver::banner_info_callback(const std_msgs::msg::Int32::SharedPtr msg) {
     banner_info_ = *msg;
     // blackboard_->set<double>("banner_info", banner_info_);
     // To Do: modify message type
 }
-void CamReceiver::local_info_callback(const geometry_msgs::msg::PoseArray::SharedPtr msg) {
-    local_info_ = *msg;
-    // blackboard_->set<double>("local_info", local_info_);
+void CamReceiver::obstacles_info_callback(const geometry_msgs::msg::PoseArray::SharedPtr msg) {
+    obstacles_info_ = *msg;
+    // blackboard_->set<double>("local_info", obstacles_info_);
     // To Do: modify message type
     // To Do: generate materials_info_ & garbage_points_
 }
 
 BT::NodeStatus CamReceiver::tick() {
     RCLCPP_INFO(node_->get_logger(), "Node start");
-    sub_global_info_ = node_->create_subscription<geometry_msgs::msg::PoseArray>("/robot/objects/materials_info", 10, std::bind(&CamReceiver::global_info_callback, this, std::placeholders::_1));
-    sub_banner_info_ = node_->create_subscription<std_msgs::msg::Float32MultiArray>("/robot/objects/global_info_banner", 10, std::bind(&CamReceiver::banner_info_callback, this, std::placeholders::_1));
-    sub_local_info_ = node_->create_subscription<geometry_msgs::msg::PoseArray>("/robot/objects/obstacles_info", 10, std::bind(&CamReceiver::local_info_callback, this, std::placeholders::_1));
+    sub_materials_info_ = node_->create_subscription<geometry_msgs::msg::PoseArray>("/robot/objects/materials_info", 10, std::bind(&CamReceiver::materials_info_callback, this, std::placeholders::_1));
+    sub_banner_info_ = node_->create_subscription<std_msgs::msg::Int32>("/robot/objects/banner_info", 10, std::bind(&CamReceiver::banner_info_callback, this, std::placeholders::_1));
+    sub_obstacles_info_ = node_->create_subscription<geometry_msgs::msg::PoseArray>("/robot/objects/obstacles_info", 10, std::bind(&CamReceiver::obstacles_info_callback, this, std::placeholders::_1));
     
     return BT::NodeStatus::SUCCESS;
 }

@@ -152,5 +152,7 @@ private:
     std::deque<geometry_msgs::msg::PoseStamped> materials_info_;
     std::deque<geometry_msgs::msg::PoseStamped> garbage_points_;
 
+    std::deque<geometry_msgs::msg::PoseStamped> goal_canditate_;
+
     geometry_msgs::msg::PoseStamped goal_;
 };
