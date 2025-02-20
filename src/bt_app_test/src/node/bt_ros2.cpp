@@ -39,6 +39,8 @@ int main(int argc, char** argv)
   factory.registerNodeType<ElapseTimeCheck>("ElapseTimeCheck");
   factory.registerNodeType<StartRace>("StartRace");
   factory.registerNodeType<RaceTimeCheck>("RaceTimeCheck");
+  params.default_port_value = "fibonacci";
+  factory.registerNodeType<BTMission>("BTMission", params);
 
   // Write tree nodes model
   std::string xml_tree_model = BT::writeTreeNodesModelXML(factory);

@@ -1,5 +1,10 @@
 <root BTCPP_format="4">
     <TreeNodesModel>
+        <Action ID="BTMission">
+            <input_port name="action_name" type="std::string"/>
+            <output_port name="sequence" type="std::deque&lt;int, std::allocator&lt;int&gt; &gt;"/>
+            <input_port name="order" type="int"/>
+        </Action>
         <Decorator ID="ElapseTimeCheck">
             <input_port name="max_time_count" type="double"/>
         </Decorator>

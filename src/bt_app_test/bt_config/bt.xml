@@ -64,15 +64,9 @@
 
   <BehaviorTree ID="MainTree">
     <Sequence>
-      <TopicSubTest output="{OUT}"/>
-      <TopicPubTest add_number="1"
-                    base_number="2"
-                    total_number="{OUT3}"
-                    topic_name="number"/>
-      <TopicPubTest add_number="2"
-                    base_number="3"
-                    total_number="{OUT4}"
-                    topic_name="number"/>
+      <BTMission action_name="/fibonacci"
+                 sequence="{SEQ}"
+                 order="5"/>
     </Sequence>
   </BehaviorTree>
 
@@ -132,6 +126,14 @@
 
   <!-- Description of Node Models (used by Groot) -->
   <TreeNodesModel>
+    <Action ID="BTMission">
+      <input_port name="action_name"
+                  type="std::string"/>
+      <output_port name="sequence"
+                   type="std::deque&lt;int, std::allocator&lt;int&gt; &gt;"/>
+      <input_port name="order"
+                  type="int"/>
+    </Action>
     <Decorator ID="ElapseTimeCheck">
       <input_port name="max_time_count"
                   type="double"/>
@@ -149,20 +151,6 @@
                    type="std::string"/>
       <input_port name="input"
                   type="std::string"/>
-    </Action>
-    <Action ID="TopicPubTest">
-      <input_port name="add_number"
-                  type="int"/>
-      <input_port name="base_number"
-                  type="int"/>
-      <output_port name="total_number"
-                   type="int"/>
-      <input_port name="topic_name"
-                  type="std::string"/>
-    </Action>
-    <Action ID="TopicSubTest">
-      <output_port name="output"
-                   type="int"/>
     </Action>
   </TreeNodesModel>
 
