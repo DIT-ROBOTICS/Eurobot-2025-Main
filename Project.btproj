@@ -1,43 +1,64 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <root BTCPP_format="4" project_name="Project">
-    <include path="src/rival_simulation/rival_main_config/bt_m_tree_node_model.xml"/>
-    <include path="src/rival_simulation/rival_main_config/bt_rival_script.xml"/>
+    <include path="src/bt_app_test/bt_config/bt.xml"/>
+    <include path="src/bt_app_test/bt_config/bt_tree_node_model.xml"/>
     <!-- Description of Node Models (used by Groot) -->
     <TreeNodesModel>
-        <Action ID="Docking">
-            <input_port name="mission_type" type="int"/>
-            <output_port name="final_pose" type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
-            <input_port name="offset" type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
-            <input_port name="base" type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+        <Action ID="BTMission">
+            <input_port name="action_name" type="std::string"/>
+            <output_port name="sequence" type="std::deque&lt;int, std::allocator&lt;int&gt; &gt;"/>
+            <input_port name="order" type="int"/>
         </Action>
-        <Action ID="Navigation">
-            <output_port name="final_pose" type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
-            <input_port name="goal" type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
-            <input_port name="start_pose" type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+        <Decorator ID="ElapseTimeCheck">
+            <input_port name="max_time_count" type="double"/>
+        </Decorator>
+        <Action ID="GeneratePathPoint">
+            <output_port name="path_point" type="std::shared_ptr&lt;std::deque&lt;geometry_msgs::msg::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;, std::allocator&lt;geometry_msgs::msg::TwistStamped_&lt;std::allocator&lt;void&gt; &gt; &gt; &gt; &gt;"/>
         </Action>
-        <Action ID="PointProvider">
-            <output_port name="point_out2" type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
-            <output_port name="point_out1" type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
-            <input_port name="point_in" type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+        <Action ID="LocalizationTemp">
+            <output_port name="output" type="geometry_msgs::msg::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+            <input_port name="input" type="std::string"/>
         </Action>
-        <Action ID="Rotation">
-            <output_port name="final_pose" type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
-            <input_port name="degree" type="double"/>
-            <input_port name="base" type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+        <Decorator ID="LoopWayPoint">
+            <output_port name="value" type="geometry_msgs::msg::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+            <input_port name="if_empty" default="SUCCESS" type="BT::NodeStatus">Status to return if queue is empty: SUCCESS, FAILURE, SKIPPED</input_port>
+            <inout_port name="queue" type="std::shared_ptr&lt;std::deque&lt;geometry_msgs::msg::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;, std::allocator&lt;geometry_msgs::msg::TwistStamped_&lt;std::allocator&lt;void&gt; &gt; &gt; &gt; &gt;"/>
+        </Decorator>
+        <Action ID="NavigationTemp">
+            <input_port name="goal" type="geometry_msgs::msg::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+            <input_port name="action_name" type="std::string">Action server name</input_port>
         </Action>
-        <Action ID="StateUpdater">
-            <output_port name="garbages_out" type="std::shared_ptr&lt;std::deque&lt;geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;, std::allocator&lt;geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt; &gt; &gt; &gt;"/>
-            <input_port name="garbages_in" type="std::shared_ptr&lt;std::deque&lt;geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;, std::allocator&lt;geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt; &gt; &gt; &gt;"/>
-            <output_port name="materials_out" type="std::shared_ptr&lt;std::deque&lt;geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;, std::allocator&lt;geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt; &gt; &gt; &gt;"/>
-            <input_port name="materials_in" type="std::shared_ptr&lt;std::deque&lt;geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;, std::allocator&lt;geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt; &gt; &gt; &gt;"/>
-            <input_port name="new_garbage_position" type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
-            <input_port name="changed_point_code" type="int"/>
-            <input_port name="point_status" type="int"/>
-            <input_port name="changed_point_position" type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+        <Decorator ID="RaceTimeCheck">
+            <input_port name="max_time_count" type="double"/>
+        </Decorator>
+        <Condition ID="StandardTopicPub">
+            <input_port name="add_number" type="int"/>
+            <input_port name="base_number" type="int"/>
+            <output_port name="total_number" type="int"/>
+            <input_port name="topic_name" type="std::string"/>
+        </Condition>
+        <Condition ID="StandardTopicSub">
+            <output_port name="output" type="int"/>
+            <input_port name="topic_name" type="std::string"/>
+        </Condition>
+        <Action ID="StartRace">
+            <output_port name="output" type="std::string"/>
         </Action>
-        <Action ID="initPoints">
-            <output_port name="material_points" type="std::shared_ptr&lt;std::deque&lt;geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;, std::allocator&lt;geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt; &gt; &gt; &gt;"/>
-            <output_port name="garbage_points" type="std::shared_ptr&lt;std::deque&lt;geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;, std::allocator&lt;geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt; &gt; &gt; &gt;"/>
+        <Action ID="Testing">
+            <output_port name="output" type="std::string"/>
+            <input_port name="input" type="std::string"/>
+        </Action>
+        <Decorator ID="TickFlow">
+            <input_port name="max_tick_count" type="int"/>
+        </Decorator>
+        <Action ID="TopicPubTest">
+            <input_port name="add_number" type="int"/>
+            <input_port name="base_number" type="int"/>
+            <output_port name="total_number" type="int"/>
+            <input_port name="topic_name" type="std::string"/>
+        </Action>
+        <Action ID="TopicSubTest">
+            <output_port name="output" type="int"/>
         </Action>
     </TreeNodesModel>
 </root>
