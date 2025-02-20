@@ -82,7 +82,7 @@ BT::NodeStatus Navigation::onStart() {
     getInput<geometry_msgs::msg::PoseStamped>("goal", goal_);
     getInput<geometry_msgs::msg::PoseStamped>("start_pose", start_pose_);
     broadcaster_ = std::make_shared<tf2_ros::TransformBroadcaster>(node_);
-    rival_pub_ = node_->create_publisher<geometry_msgs::msg::PoseWithCovarianceStamped>("/rival_pose", 20);
+    // rival_pub_ = node_->create_publisher<geometry_msgs::msg::PoseWithCovarianceStamped>("/rival_pose", 20);
     predict_goal_pub_ = node_->create_publisher<geometry_msgs::msg::PoseStamped>("rival/predict_goal", 20);
 
     current_pose_.pose.pose.position = start_pose_.pose.position;
@@ -126,7 +126,8 @@ BT::NodeStatus Navigation::onRunning() {
         current_pose_.pose.pose.position.y += move_y_;
         predict_goal_pub_->publish(goal_);
         broadcastTransform(current_pose_.pose.pose);
-        rival_pub_->publish(current_pose_);
+        // rival_pub_->publish(current_pose_);
+        blackboard_->set<geometry_msgs::msg::PoseWithCovarianceStamped>("current_pose", current_pose_);
         RCLCPP_INFO(node_->get_logger(), "Navigating");
         rate.sleep();
     }
@@ -409,4 +410,33 @@ BT::NodeStatus StateUpdater::onRunning() {
 void StateUpdater::onHalted() {
     // ROS_INFO_STREAM("Node halted");
     return;
+}
+
+PortsList PublishPose::providedPorts() {
+    return {};
+}
+
+void PublishPose::timer_publisher() {
+    rclcpp::Rate rate(100);
+    while (rclcpp::ok()) { 
+        blackboard_->get("current_pose", current_pose_);
+        RCLCPP_INFO_STREAM(node_->get_logger(), current_pose_.pose.pose.position.x << ", " << current_pose_.pose.pose.position.y);
+        rival_pub_->publish(current_pose_);
+        rate.sleep();
+    }
+}
+
+BT::NodeStatus PublishPose::tick() {
+    rival_pub_ = node_->create_publisher<geometry_msgs::msg::PoseWithCovarianceStamped>("/rival_pose", 20);
+    current_pose_.pose.pose.position.x = 0;
+    current_pose_.pose.pose.position.y = 0;
+    blackboard_->set<geometry_msgs::msg::PoseWithCovarianceStamped>("current_pose", current_pose_);
+
+    // timer_ = node_->create_wall_timer(
+    //     std::chrono::milliseconds(50), 
+    //     std::bind(&PublishPose::timer_publisher, this)
+    // );
+    std::thread{std::bind(&PublishPose::timer_publisher, this)}.detach();
+    
+    return BT::NodeStatus::SUCCESS;
 }

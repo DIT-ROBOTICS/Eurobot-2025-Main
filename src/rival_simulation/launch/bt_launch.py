@@ -25,6 +25,6 @@ def generate_launch_description():
             package = 'rival_simulation',
             executable = 'rival_main',
             name = 'rival_main',
-            parameters = [params, {"tree_name": "NavTest"}]
+            parameters = [params, {"tree_name": "MainTree"}]
         )
     ])
