@@ -145,7 +145,7 @@ PortsList CamReceiver::providedPorts() {
     return {};
 }
 
-void CamReceiver::materials_info_callback(const geometry_msgs::msg::PoseArray msg) {
+void CamReceiver::materials_info_callback(const geometry_msgs::msg::PoseArray::SharedPtr msg) {
     materials_info_ = *msg;
     // blackboard_->set<double>("global_info", materials_info_);
     // To Do: modify message type

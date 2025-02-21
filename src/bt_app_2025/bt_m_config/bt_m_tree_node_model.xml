@@ -35,6 +35,10 @@
             <input_port name="offset" type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
             <input_port name="base" type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
         </Action>
+        <Action ID="DynamicAdjustment">
+            <input_port name="rival_pose" type="geometry_msgs::msg::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+            <input_port name="robot_pose" type="geometry_msgs::msg::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+        </Action>
         <Action ID="LocReceiver">
             <output_port name="rival_pose" type="geometry_msgs::msg::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
             <output_port name="robot_pose" type="geometry_msgs::msg::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
