@@ -24,6 +24,9 @@ RUN groupadd --gid $USER_GID $USERNAME \
     usbutils \
     python3-pip \
     bash-completion \
+    # ssh
+    ssh \
+    openssh-server \
     # read keybow
     libncurses5-dev \
     # ros2
