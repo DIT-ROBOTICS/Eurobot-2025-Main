@@ -8,6 +8,7 @@
 #include <bitset>
 #include <chrono>
 #include <cmath>
+#include <thread>
 
 // Use behavior tree
 #include <behaviortree_ros2/bt_action_node.hpp>
@@ -69,8 +70,8 @@ class Navigation : public BT::StatefulActionNode {
 
 public:
 
-    Navigation(const std::string& name, const BT::NodeConfig& config, const RosNodeParams& params)
-        : BT::StatefulActionNode(name, config), node_(params.nh)
+    Navigation(const std::string& name, const BT::NodeConfig& config, const RosNodeParams& params, BT::Blackboard::Ptr blackboard)
+        : BT::StatefulActionNode(name, config), node_(params.nh), blackboard_(blackboard)
     {}
 
     /* Node remapping function */
@@ -88,8 +89,9 @@ private:
     void broadcastTransform(const geometry_msgs::msg::Pose &pose);
 
     std::shared_ptr<rclcpp::Node> node_;
+    BT::Blackboard::Ptr blackboard_;
 
-    rclcpp::Publisher<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr rival_pub_;
+    // rclcpp::Publisher<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr rival_pub_;
     rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr predict_goal_pub_;
     std::shared_ptr<tf2_ros::TransformBroadcaster> broadcaster_;
     double move_x_;
@@ -214,4 +216,28 @@ private:
     geometry_msgs::msg::PoseArray garbage_points_;
     std::deque<geometry_msgs::msg::PoseStamped> materials_info_deque;
     std::deque<geometry_msgs::msg::PoseStamped> garbage_points_deque;
+};
+
+class PublishPose : public BT::SyncActionNode
+{
+public:
+    PublishPose(const std::string& name, const BT::NodeConfig& config, std::shared_ptr<rclcpp::Node> node, BT::Blackboard::Ptr blackboard)
+        : BT::SyncActionNode(name, config), node_(node), blackboard_(blackboard)
+    {}
+
+    /* Node remapping function */
+    static BT::PortsList providedPorts();
+
+    /* Start and running function */
+    BT::NodeStatus tick() override;
+
+private:
+    void timer_publisher();
+
+    std::shared_ptr<rclcpp::Node> node_;
+    BT::Blackboard::Ptr blackboard_;
+    rclcpp::TimerBase::SharedPtr timer_;
+
+    rclcpp::Publisher<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr rival_pub_;
+    geometry_msgs::msg::PoseWithCovarianceStamped current_pose_;
 };

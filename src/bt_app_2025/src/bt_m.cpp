@@ -93,7 +93,7 @@ int main(int argc, char** argv) {
     factory.registerNodeType<NavReceiver>("NavReceiver", node, blackboard);
     factory.registerNodeType<CamReceiver>("CamReceiver", node, blackboard);
     /* navigation */
-    // factory.registerNodeType<DynamicAdjustment>("DynamicAdjustment");
+    factory.registerNodeType<DynamicAdjustment>("DynamicAdjustment");
     params.default_port_value = "navigate_to_pose";
     factory.registerNodeType<Navigation>("Navigation", params);
     factory.registerNodeType<Docking>("Docking", params);

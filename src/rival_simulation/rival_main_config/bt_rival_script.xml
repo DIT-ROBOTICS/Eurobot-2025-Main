@@ -2,6 +2,7 @@
 <root BTCPP_format="4">
   <BehaviorTree ID="MainTree">
     <Sequence>
+      <PublishPose/>
       <initPoints material_points="{Materials}"
                   garbage_points="{OBS}"/>
       <Navigation final_pose="{PrevGoal}"
@@ -87,6 +88,7 @@
       <input_port name="start_pose"
                   type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
     </Action>
+    <Action ID="PublishPose"/>
     <Action ID="StateUpdater">
       <output_port name="garbages_out"
                    type="std::shared_ptr&lt;std::deque&lt;geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;, std::allocator&lt;geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt; &gt; &gt; &gt;"/>

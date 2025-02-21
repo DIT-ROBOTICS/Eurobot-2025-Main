@@ -9,6 +9,7 @@
 #include <rclcpp/logger.hpp>
 // self defined message
 #include "btcpp_ros2_interfaces/action/navigation.hpp"
+#include "btcpp_ros2_interfaces/action/fibonacci.hpp"
 //message
 #include <geometry_msgs/msg/transform_stamped.hpp>
 #include <geometry_msgs/msg/pose_stamped.hpp>
@@ -184,4 +185,28 @@ public:
   NodeStatus onFeedback(const std::shared_ptr<const Feedback> feedback);
 
 private:
+};
+
+class BTMission : public BT::RosActionNode<btcpp_ros2_interfaces::action::Fibonacci> {
+
+public:
+  BTMission(const std::string& name, const NodeConfig& conf, const RosNodeParams& params)
+    : RosActionNode<btcpp_ros2_interfaces::action::Fibonacci>(name, conf, params)
+  {}
+
+  /* Node remapping function */
+  static PortsList providedPorts();
+  bool setGoal(RosActionNode::Goal& goal) override;
+  NodeStatus onResultReceived(const WrappedResult& wr) override;
+  virtual NodeStatus onFailure(ActionNodeErrorCode error) override;
+  NodeStatus onFeedback(const std::shared_ptr<const Feedback> feedback);
+
+private:
+
+  bool mission_finished_ = false;
+  bool mission_failed_ = false;
+
+  int order_;
+  std::deque<int> sequence_;
+  std::deque<int> partial_sequence_;
 };

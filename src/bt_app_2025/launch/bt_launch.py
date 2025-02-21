@@ -12,18 +12,18 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.actions import DeclareLaunchArgument, LogInfo
 from launch.substitutions import LaunchConfiguration
 
+from ament_index_python.packages import get_package_share_directory
+
 def generate_launch_description():
+    params = os.path.join(
+        get_package_share_directory('bt_app_2025'),
+        'params',
+        'config_path.yaml'
+    )
     return LaunchDescription([
-        DeclareLaunchArgument(
-            'param_file',
-            default_value=os.path.join(
-                os.path.dirname(__file__), '../params/config_path.yaml'
-            ),
-            description='Path to the parameter file'
-        ),
         Node(
             # parameters=[LaunchConfiguration('param_file')],
-            parameters=[{"tree_name": "NavTest"}],
+            parameters=[params, {"tree_name": "MainTree"}],
             package = 'bt_app_2025',
             executable = 'bt_m',
             name = 'bt_m'

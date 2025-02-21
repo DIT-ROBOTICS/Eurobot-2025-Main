@@ -265,3 +265,41 @@ BT::NodeStatus NavigationTemp::onFailure(ActionNodeErrorCode error) {
 BT::NodeStatus NavigationTemp::onFeedback(const std::shared_ptr<const Feedback> feedback) {
   return BT::NodeStatus::RUNNING;
 }
+
+BT::PortsList BTMission::providedPorts() {
+  return { 
+      BT::InputPort<int>("order"),
+      BT::InputPort<std::string>("action_name"),
+      BT::OutputPort<std::deque<int>>("sequence")
+  };
+}
+bool BTMission::setGoal(RosActionNode::Goal& goal) {
+  order_ = getInput<int>("order").value();
+
+  goal.order = order_;
+  return true;
+}
+NodeStatus BTMission::onResultReceived(const WrappedResult& wr) {
+  // while(wr.result->sequence)
+  // sequence_ = wr.result->sequence;
+  RCLCPP_INFO_STREAM(rclcpp::get_logger("rclcpp"), "\n result: ");
+  for (int i = 0; i < wr.result->sequence.size(); i++) {
+    sequence_.push_back(wr.result->sequence[i]);
+    RCLCPP_INFO_STREAM(rclcpp::get_logger("rclcpp"), sequence_[i] << ", ");
+  }
+  setOutput<std::deque<int>>("result", sequence_);
+  return NodeStatus::SUCCESS;
+}
+NodeStatus BTMission::onFailure(ActionNodeErrorCode error) {
+  setOutput<std::deque<int>>("result", sequence_);
+  RCLCPP_ERROR(logger(), "[BT]: Navigation error");
+  return NodeStatus::FAILURE;
+}
+NodeStatus BTMission::onFeedback(const std::shared_ptr<const Feedback> feedback) {
+  for (int i = 0; i < feedback->partial_sequence.size(); i++) {
+    partial_sequence_.push_back(feedback->partial_sequence[i]);
+    RCLCPP_INFO_STREAM(rclcpp::get_logger("rclcpp"), partial_sequence_[i] << ", ");
+  }
+  partial_sequence_.clear();
+  return NodeStatus::RUNNING;
+}

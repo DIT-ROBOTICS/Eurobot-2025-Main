@@ -20,6 +20,7 @@
 // Use ros message
 #include "std_srvs/srv/set_bool.hpp"
 #include "std_msgs/msg/float32.hpp"
+#include "geometry_msgs/msg/twist_stamped.hpp"
 #include "geometry_msgs/msg/pose_stamped.hpp"
 #include "geometry_msgs/msg/pose_array.hpp"
 #include "geometry_msgs/msg/pose.hpp"
@@ -151,6 +152,8 @@ private:
     std::deque<int> stage_info_;
     std::deque<geometry_msgs::msg::PoseStamped> materials_info_;
     std::deque<geometry_msgs::msg::PoseStamped> garbage_points_;
+
+    std::deque<geometry_msgs::msg::PoseStamped> goal_canditate_;
 
     geometry_msgs::msg::PoseStamped goal_;
 };

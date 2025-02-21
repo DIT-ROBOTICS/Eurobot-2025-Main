@@ -25,9 +25,7 @@ int main(int argc, char** argv) {
     rclcpp::init(argc, argv);
     auto node = std::make_shared<rclcpp::Node>("rival_simulation");
     rclcpp::executors::MultiThreadedExecutor executor;
-
-    rclcpp::Publisher<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr rival_pub_;
-    rival_pub_ = node->create_publisher<geometry_msgs::msg::PoseWithCovarianceStamped>("/rival_pose", 20);
+    auto blackboard = BT::Blackboard::create();
 
     // Parameters
     std::string groot_xml_config_directory;
@@ -48,13 +46,14 @@ int main(int argc, char** argv) {
     params.nh = node;
     // action nodes
     params.default_port_value = "navigate_to_pose";
-    factory.registerNodeType<Navigation>("Navigation", params);
+    factory.registerNodeType<Navigation>("Navigation", params, blackboard);
     factory.registerNodeType<Docking>("Docking", params);
     factory.registerNodeType<Rotation>("Rotation", params);
     factory.registerNodeType<PointProvider>("PointProvider");
     // factory.registerNodeType<GeneratePathPoint>("GeneratePathPoint", node);
     factory.registerNodeType<initPoints>("initPoints", node);
     factory.registerNodeType<StateUpdater>("StateUpdater", node);
+    factory.registerNodeType<PublishPose>("PublishPose", node, blackboard);
 
     // generate the tree in xml and safe the xml into a file
     std::string xml_models = BT::writeTreeNodesModelXML(factory);
@@ -69,10 +68,10 @@ int main(int argc, char** argv) {
     BT::NodeStatus status = BT::NodeStatus::RUNNING;
 
     RCLCPP_INFO(node->get_logger(), "Rival BT start running!");
-    
+
     rclcpp::Rate rate(100);
     executor.add_node(node);
-    while (rclcpp::ok() && status == BT::NodeStatus::RUNNING) {
+    while (rclcpp::ok() && status == BT::NodeStatus::RUNNING) {        
         executor.spin_some();
         rate.sleep();
         status = tree.rootNode()->executeTick();
