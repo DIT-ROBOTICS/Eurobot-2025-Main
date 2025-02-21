@@ -10,10 +10,8 @@ ARG USER_GID=$USER_UID
 RUN groupadd --gid $USER_GID $USERNAME \
     && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME \
     && apt-get update \
-    # && apt-get install -y sudo \
-    # && echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME \
-    # && chmod 0440 /etc/sudoers.d/$USERNAME \
     && apt-get install -y \
+    sudo \
     curl \
     git \
     git-extras \
@@ -40,9 +38,18 @@ RUN groupadd --gid $USER_GID $USERNAME \
     # foxglove
     ros-humble-rosbridge-server \
     ros-humble-foxglove-bridge \
-    # source
-    && echo "source /opt/ros/humble/setup.bash" >> /etc/bash.bashrc \ 
+    # DDS
+    ros-humble-rmw-cyclonedds-cpp \
+    && echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME \
+    && chmod 0440 /etc/sudoers.d/$USERNAME
+
+RUN apt-get update \
+    && git clone -b humble https://github.com/micro-ROS/micro_ros_setup.git src/micro_ros_setup \
+    # bashrc
+    && echo "source /opt/ros/humble/setup.bash" >> /etc/bash.bashrc \
     && echo "source /home/user/Eurobot-2025-Main-ws/install/setup.bash" >> /etc/bash.bashrc \
+    && echo "export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp" >> /etc/bash.bashrc \
+    && echo "source /home/user/Eurobot-2025-Main-ws/install/local_setup.bash" >> /etc/bash.bashrc \
     && apt-get dist-upgrade -y \
     && apt-get autoremove -y \
     && apt-get autoclean -y \
