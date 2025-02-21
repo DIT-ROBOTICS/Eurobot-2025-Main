@@ -82,9 +82,10 @@
     ├── bt_nodes_others.cpp
     └── bt_nodes_receiver.cpp
 ```
-(因為比較緊急&我懶，所以就用中文寫了)
 - bt_m_config: behavior tree config xml files
-- launch: launch files
+- launch: 
+    - modify parameter `tree_name` as `NavTest` or `MainTree`
+    - `ros2 launch bt_app_2025 bt_launch.py`
 - params: yaml param files
 - `bt_nodes_firmware`: 
     - `BTMission`:與韌體溝通的 action node
