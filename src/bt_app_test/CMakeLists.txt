@@ -23,6 +23,7 @@ find_package(tf2_geometry_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
 find_package(btcpp_ros2_interfaces REQUIRED)
+find_package(example_interfaces REQUIRED)
 
 # Include directories
 include_directories(
@@ -98,24 +99,32 @@ rclcpp_components_register_node(localizationServer PLUGIN "bt_app_test::TestLocS
 
 add_library(actionServer SHARED
   src/test_server/actionServer.cpp)
-# target_include_directories(actionServer PRIVATE
-#   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-#   $<INSTALL_INTERFACE:include>)
-# target_compile_definitions(actionServer
-#   PRIVATE "ACTION_TUTORIALS_CPP_BUILDING_DLL")
 ament_target_dependencies(actionServer
   "btcpp_ros2_interfaces"
+  "example_interfaces"
   "std_msgs"
   "rclcpp"
   "rclcpp_action"
   "rclcpp_components")
 rclcpp_components_register_node(actionServer PLUGIN "FibonacciActionServer" EXECUTABLE example_action_server)
 
+add_library(actionClient SHARED
+  src/test_server/actionClient.cpp)
+ament_target_dependencies(actionClient
+  "btcpp_ros2_interfaces"
+  "example_interfaces"
+  "std_msgs"
+  "rclcpp"
+  "rclcpp_action"
+  "rclcpp_components")
+rclcpp_components_register_node(actionClient PLUGIN "FibonacciActionClient" EXECUTABLE example_action_client)
+
 add_library(BT_ACTION_NODE src/bt_action_node_lib.cpp)
 target_link_libraries(BT_ACTION_NODE 
   ${ARMADILLO_LIBRARIES})
 ament_target_dependencies(BT_ACTION_NODE 
   "btcpp_ros2_interfaces"
+  "example_interfaces"
   "behaviortree_ros2"
   "behaviortree_cpp"
   "tf2"
@@ -151,6 +160,7 @@ install(TARGETS
   navigationServer
   localizationServer
   actionServer
+  actionClient
   topicPubServer
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib

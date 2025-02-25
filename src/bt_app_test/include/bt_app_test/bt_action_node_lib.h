@@ -9,7 +9,7 @@
 #include <rclcpp/logger.hpp>
 // self defined message
 #include "btcpp_ros2_interfaces/action/navigation.hpp"
-#include "btcpp_ros2_interfaces/action/fibonacci.hpp"
+#include "example_interfaces/action/fibonacci.hpp"
 //message
 #include <geometry_msgs/msg/transform_stamped.hpp>
 #include <geometry_msgs/msg/pose_stamped.hpp>
@@ -187,11 +187,11 @@ public:
 private:
 };
 
-class BTMission : public BT::RosActionNode<btcpp_ros2_interfaces::action::Fibonacci> {
+class BTMission : public BT::RosActionNode<example_interfaces::action::Fibonacci> {
 
 public:
   BTMission(const std::string& name, const NodeConfig& conf, const RosNodeParams& params)
-    : RosActionNode<btcpp_ros2_interfaces::action::Fibonacci>(name, conf, params)
+    : RosActionNode<example_interfaces::action::Fibonacci>(name, conf, params)
   {}
 
   /* Node remapping function */
