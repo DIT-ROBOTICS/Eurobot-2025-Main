@@ -15,14 +15,11 @@ find_package(rosidl_default_generators REQUIRED)
 
 rosidl_generate_interfaces(btcpp_ros2_interfaces
     "msg/NodeStatus.msg"
-    "msg/Localization.msg"
     "srv/StartUpSrv.srv"
     "action/ExecuteTree.action"
-    "action/Sleep.action"
     "action/Navigation.action"
-    "action/NavMission.action"
-    "action/NavigateToPose.action"
     "action/FirmwareMission.action"
+    "action/Fibonacci.action"
     DEPENDENCIES geometry_msgs action_msgs std_msgs builtin_interfaces
 )
 

@@ -1,6 +1,6 @@
 bt_app_2025:
   ros__parameters:
-    planA_config_file: "bt_plan_a.xml"
+    planA_yellow_config: "bt_plan_a.xml"
     tree_node_model_config_file: "/home/user/Eurobot-2025-Main-ws/src/bt_app_2025/bt_m_config/bt_m_tree_node_model.xml"
     groot_xml_config_directory: "/home/user/Eurobot-2025-Main-ws/src/bt_app_2025/bt_m_config/"
     tree_name: "MainTree"

@@ -16,29 +16,15 @@ from ament_index_python.packages import get_package_share_directory
 
 def generate_launch_description():
     params = os.path.join(
-        get_package_share_directory('bt_app_2025'),
+        get_package_share_directory('rival_simulation'),
         'params',
         'config_path.yaml'
     )
     return LaunchDescription([
         Node(
-            # parameters=[LaunchConfiguration('param_file')],
-            parameters=[params, {"tree_name": "MainTree"}],
-            package = 'bt_app_2025',
-            executable = 'bt_m',
-            name = 'bt_m'
-        ),
-        Node(
-            package = 'startup',
-            executable = 'startup',
-            name = 'startup'
+            package = 'rival_simulation',
+            executable = 'rival_main',
+            name = 'rival_main',
+            parameters = [params, {"tree_name": "MainTree"}]
         )
-        # TimerAction(
-        #     period = 1.0,
-        #     actions = [Node(
-        #         package = 'bt_app_test',
-        #         executable = 'bt_ros2',
-        #         name = 'bt_ros2',
-        #     )],
-        # )
     ])

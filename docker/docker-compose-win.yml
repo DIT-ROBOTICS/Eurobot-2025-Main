@@ -6,7 +6,7 @@ services:
       context: .
       args:
         USERNAME: user
-    image: tedwang/main-ws:latest
+    image: tedwang2/main-ws:1.1
     container_name: main-ws
     stdin_open: true
     tty: true
@@ -33,3 +33,7 @@ services:
       - "8765:8765"
 
     command: /bin/bash
+    # command: >
+    #   /bin/bash -c "source /opt/ros/foxy/setup.bash 
+    #   && source /home/user/Eurobot-2025-Main-ws/install/setup.bash 
+    #   && ros2 launch bt_app_2025 bt_launch.py"

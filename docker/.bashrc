@@ -3,7 +3,7 @@
 source /opt/ros/humble/setup.bash
 # Source workspace environment
 # Note: If you have not built your workspace yet, the following command will fail
-source $ROS_WS/install/setup.bash
+source /home/user/Eurobot-2025-Main-ws/install/setup.bash
 
 # ========== Groot ==========
 # Check if the AppImage is exist
