@@ -2,7 +2,7 @@
 #include <memory>
 #include <thread>
 
-#include "btcpp_ros2_interfaces/action/fibonacci.hpp"
+#include "example_interfaces/action/fibonacci.hpp"
 
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_action/rclcpp_action.hpp"
@@ -11,7 +11,7 @@
 class FibonacciActionServer : public rclcpp::Node
 {
 public:
-  using Fibonacci = btcpp_ros2_interfaces::action::Fibonacci;
+  using Fibonacci = example_interfaces::action::Fibonacci;
   using GoalHandleFibonacci = rclcpp_action::ServerGoalHandle<Fibonacci>;
 
   // ACTION_TUTORIALS_CPP_PUBLIC

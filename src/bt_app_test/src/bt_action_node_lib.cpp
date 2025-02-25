@@ -296,6 +296,7 @@ NodeStatus BTMission::onFailure(ActionNodeErrorCode error) {
   return NodeStatus::FAILURE;
 }
 NodeStatus BTMission::onFeedback(const std::shared_ptr<const Feedback> feedback) {
+  RCLCPP_INFO_STREAM(rclcpp::get_logger("rclcpp"), "size: " << feedback->partial_sequence.size());
   for (int i = 0; i < feedback->partial_sequence.size(); i++) {
     partial_sequence_.push_back(feedback->partial_sequence[i]);
     RCLCPP_INFO_STREAM(rclcpp::get_logger("rclcpp"), partial_sequence_[i] << ", ");
