@@ -65,7 +65,7 @@ BT::NodeStatus Testing::onRunning()
   {
     tick_count = 0;
     // Set the output port
-    setOutput("output", input);
+    setOutput<std::string>("output", input);
 
     return BT::NodeStatus::SUCCESS;
   }
@@ -78,10 +78,41 @@ void Testing::onHalted()
   tick_count = 0;
 
   // Reset the output port
-  setOutput("output", "hey");
+  setOutput<std::string>("output", "hey");
 
   std::cout << "Testing Node halted" << std::endl;
 
+  return;
+}
+
+PortsList TopicPubTest::providedPorts() {
+  return { 
+    BT::InputPort<std::string>("topic_name"), 
+    BT::InputPort<int>("base_number"),
+    BT::InputPort<int>("add_number"),
+    BT::OutputPort<int>("total_number") 
+  };
+}
+
+BT::NodeStatus TopicPubTest::onStart() {
+  RCLCPP_INFO(node_->get_logger(), "Node start");
+  getInput<int>("base_number", a);
+  getInput<int>("add_number", b);
+  return BT::NodeStatus::RUNNING;
+}
+
+BT::NodeStatus TopicPubTest::onRunning() {
+  RCLCPP_INFO(node_->get_logger(), "Testing Node running");
+  number.data = a + b;
+  std::cout << a << " + " << b << " = " << number.data << std::endl;
+  setOutput<int>("total_number", number.data); 
+  return BT::NodeStatus::SUCCESS;
+}
+
+void TopicPubTest::onHalted() {
+  // Reset the output port
+  setOutput<int>("total_number", 0);
+  RCLCPP_INFO(node_->get_logger(), "Testing Node halted");
   return;
 }
 
@@ -102,16 +133,34 @@ BT::NodeStatus TopicSubTest::onStart() {
 }
 
 BT::NodeStatus TopicSubTest::onRunning() {
-  setOutput("output", number);
+  setOutput<int>("output", number);
   RCLCPP_INFO(node_->get_logger(), "Testing Node running");
   return BT::NodeStatus::SUCCESS;
 }
 
 void TopicSubTest::onHalted() {
   // Reset the output port
-  setOutput("output", 0);
+  setOutput<int>("output", 0);
   RCLCPP_INFO(node_->get_logger(), "Testing Node halted");
   return;
+}
+
+PortsList StandardTopicPub::providedPorts() {
+  return {
+    BT::InputPort<std::string>("topic_name"), 
+    BT::InputPort<int>("base_number"),
+    BT::InputPort<int>("add_number"),
+    BT::OutputPort<int>("total_number") 
+  };
+}
+
+bool StandardTopicPub::setMessage(std_msgs::msg::Int32& msg) {
+  int a = getInput<int>("base_number").value();
+  int b = getInput<int>("add_number").value();
+  msg.data = a + b;
+  std::cout << a << " + " << b << " = " << msg.data << std::endl;
+  setOutput<int>("total_number", msg.data); 
+  return true;
 }
 
 PortsList StandardTopicSub::providedPorts() {
@@ -177,7 +226,7 @@ BT::NodeStatus LocalizationTemp::onRunning() {
   UpdateRobotPose();
   std::cout << "robot_pose_:(" << robot_pose_.twist.linear.x << ", " << robot_pose_.twist.linear.y << ")\n";
   // Set the output port
-  setOutput("output", robot_pose_);
+  setOutput<geometry_msgs::msg::TwistStamped>("output", robot_pose_);
 
   return BT::NodeStatus::SUCCESS;
 }
@@ -186,7 +235,7 @@ void LocalizationTemp::onHalted() {
   tick_count = 0;
 
   // Reset the output port
-  setOutput("output", robot_pose_);
+  setOutput<geometry_msgs::msg::TwistStamped>("output", robot_pose_);
 
   std::cout << "LocalizationTemp Node halted" << std::endl;
 
@@ -217,6 +266,43 @@ BT::NodeStatus NavigationTemp::onFeedback(const std::shared_ptr<const Feedback> 
   return BT::NodeStatus::RUNNING;
 }
 
+BT::PortsList BTMission::providedPorts() {
+  return { 
+      BT::InputPort<int>("order"),
+      BT::InputPort<std::string>("action_name"),
+      BT::OutputPort<std::deque<int>>("sequence")
+  };
+}
+bool BTMission::setGoal(RosActionNode::Goal& goal) {
+  order_ = getInput<int>("order").value();
+
+  goal.order = order_;
+  return true;
+}
+NodeStatus BTMission::onResultReceived(const WrappedResult& wr) {
+  // while(wr.result->sequence)
+  // sequence_ = wr.result->sequence;
+  RCLCPP_INFO_STREAM(rclcpp::get_logger("rclcpp"), "\n result: ");
+  for (int i = 0; i < wr.result->sequence.size(); i++) {
+    sequence_.push_back(wr.result->sequence[i]);
+    RCLCPP_INFO_STREAM(rclcpp::get_logger("rclcpp"), sequence_[i] << ", ");
+  }
+  setOutput<std::deque<int>>("result", sequence_);
+  return NodeStatus::SUCCESS;
+}
+NodeStatus BTMission::onFailure(ActionNodeErrorCode error) {
+  setOutput<std::deque<int>>("result", sequence_);
+  RCLCPP_ERROR(logger(), "[BT]: Navigation error");
+  return NodeStatus::FAILURE;
+}
+NodeStatus BTMission::onFeedback(const std::shared_ptr<const Feedback> feedback) {
+  for (int i = 0; i < feedback->partial_sequence.size(); i++) {
+    partial_sequence_.push_back(feedback->partial_sequence[i]);
+    RCLCPP_INFO_STREAM(rclcpp::get_logger("rclcpp"), partial_sequence_[i] << ", ");
+  }
+  partial_sequence_.clear();
+  return NodeStatus::RUNNING;
+}
 
 PortsList count_5::providedPorts() {
   return { 
