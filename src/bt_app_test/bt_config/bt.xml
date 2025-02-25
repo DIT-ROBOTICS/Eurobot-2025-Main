@@ -64,7 +64,7 @@
 
   <BehaviorTree ID="MainTree">
     <Sequence>
-      <BTMission action_name="/fibonacci"
+      <BTMission action_name="fibonacci"
                  sequence="{SEQ}"
                  order="5"/>
     </Sequence>
