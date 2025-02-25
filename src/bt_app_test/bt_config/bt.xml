@@ -70,6 +70,24 @@
     </Sequence>
   </BehaviorTree>
 
+  <BehaviorTree ID="ParallelTree">
+    <Sequence>
+      <Parallel_check output="start"
+                      input="start"/>
+      <Parallel failure_count="3"
+                success_count="2">
+        <count_5 output="a"
+                 input="a"/>
+        <count_10 output="b"
+                  input="b"/>
+        <count_15 output="c"
+                  input="c"/>
+      </Parallel>
+      <Parallel_check output="end"
+                      input="end"/>
+    </Sequence>
+  </BehaviorTree>
+
   <BehaviorTree ID="Port-Remapping-Demo">
     <Sequence>
       <Testing output="{TEST_OUTPUT}"
@@ -138,6 +156,12 @@
       <input_port name="max_time_count"
                   type="double"/>
     </Decorator>
+    <Action ID="Parallel_check">
+      <output_port name="output"
+                   type="std::string"/>
+      <input_port name="input"
+                  type="std::string"/>
+    </Action>
     <Decorator ID="RaceTimeCheck">
       <input_port name="max_time_count"
                   type="double"/>
@@ -147,6 +171,28 @@
                    type="std::string"/>
     </Action>
     <Action ID="Testing">
+      <output_port name="output"
+                   type="std::string"/>
+      <input_port name="input"
+                  type="std::string"/>
+    </Action>
+    <Action ID="TopicSubTest">
+      <output_port name="output"
+                   type="int"/>
+    </Action>
+    <Action ID="count_10">
+      <output_port name="output"
+                   type="std::string"/>
+      <input_port name="input"
+                  type="std::string"/>
+    </Action>
+    <Action ID="count_15">
+      <output_port name="output"
+                   type="std::string"/>
+      <input_port name="input"
+                  type="std::string"/>
+    </Action>
+    <Action ID="count_5">
       <output_port name="output"
                    type="std::string"/>
       <input_port name="input"
