@@ -33,6 +33,7 @@ RUN groupadd --gid $USER_GID $USERNAME \
     ros-humble-ament-cmake \
     ros-humble-rqt-plot\
     ros-humble-rqt-tf-tree\
+    ros-humble-nav2-msgs\
     # Groot
     libfuse2 \
     fuse3 \
