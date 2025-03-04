@@ -23,7 +23,7 @@ def generate_launch_description():
     return LaunchDescription([
         Node(
             # parameters=[LaunchConfiguration('param_file')],
-            parameters=[params, {"tree_name": "MainTree"}],
+            parameters=[params, {"tree_name": "NavTest"}],
             package = 'bt_app_2025',
             executable = 'bt_m',
             name = 'bt_m'
