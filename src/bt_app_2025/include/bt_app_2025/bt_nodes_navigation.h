@@ -66,6 +66,7 @@ public:
 
 private:
 
+    // rclcpp_action::ResultCode code;
     bool nav_finished_ = false;
     bool nav_error_ = false;
     int nav_type_;

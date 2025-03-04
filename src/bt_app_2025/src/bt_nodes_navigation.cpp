@@ -92,6 +92,19 @@ NodeStatus Navigation::onFeedback(const std::shared_ptr<const Feedback> feedback
 
 NodeStatus Navigation::onResultReceived(const WrappedResult& wr) {
     // set output
+    switch (wr.code) {
+    case rclcpp_action::ResultCode::SUCCEEDED:
+        break;
+    case rclcpp_action::ResultCode::ABORTED:
+        RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Goal was aborted");
+        return NodeStatus::SUCCESS;
+    case rclcpp_action::ResultCode::CANCELED:
+        RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Goal was canceled");
+        return NodeStatus::SUCCESS;
+    default:
+        RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Unknown result code");
+        return NodeStatus::SUCCESS;
+    }
     setOutput<geometry_msgs::msg::PoseStamped>("final_pose", current_pose_);
     // check if mission success
     if (calculateDistance(current_pose_.pose, goal_.pose) < 0.03 && calculateAngleDifference(current_pose_.pose, goal_.pose) < 0.4) {
@@ -150,6 +163,19 @@ NodeStatus Docking::onFeedback(const std::shared_ptr<const Feedback> feedback) {
 
 NodeStatus Docking::onResultReceived(const WrappedResult& wr) {
     // set output
+    switch (wr.code) {
+    case rclcpp_action::ResultCode::SUCCEEDED:
+        break;
+    case rclcpp_action::ResultCode::ABORTED:
+        RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Goal was aborted");
+        return NodeStatus::SUCCESS;
+    case rclcpp_action::ResultCode::CANCELED:
+        RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Goal was canceled");
+        return NodeStatus::SUCCESS;
+    default:
+        RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Unknown result code");
+        return NodeStatus::SUCCESS;
+    }
     setOutput<geometry_msgs::msg::PoseStamped>("final_pose", current_pose_);
     // check if mission success
     if (calculateDistance(current_pose_.pose, goal_.pose) < 0.03 && calculateAngleDifference(current_pose_.pose, goal_.pose) < 0.4) {
