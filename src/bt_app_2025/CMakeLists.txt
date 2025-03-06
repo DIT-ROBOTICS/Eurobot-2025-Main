@@ -25,6 +25,7 @@ find_package(geometry_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
 find_package(nav2_msgs REQUIRED)
 find_package(btcpp_ros2_interfaces REQUIRED)
+find_package(opennav_docking_msgs REQUIRED)
 
 # Include directories
 include_directories(
@@ -78,10 +79,12 @@ target_link_libraries(BTNODE_FIRMWARE
   ${ARMADILLO_LIBRARIES})
 ament_target_dependencies(BTNODE_FIRMWARE
   "btcpp_ros2_interfaces"
+  "nav2_msgs"
   "behaviortree_ros2"
   "behaviortree_cpp"
   "std_msgs"
   "std_srvs"
+  "tf2_ros"
   "geometry_msgs"
   "rclcpp"
   "rclcpp_action"
@@ -94,6 +97,7 @@ target_link_libraries(BTNODE_NAVIGATION
   ${ARMADILLO_LIBRARIES})
 ament_target_dependencies(BTNODE_NAVIGATION
   "btcpp_ros2_interfaces"
+  "opennav_docking_msgs"
   "nav2_msgs"
   "behaviortree_ros2"
   "behaviortree_cpp"
