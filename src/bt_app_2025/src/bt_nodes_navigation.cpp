@@ -213,6 +213,7 @@ NodeStatus Docking::onResultReceived(const WrappedResult& wr) {
     RCLCPP_INFO_STREAM(logger(), wr.result->error_code);
     setOutput<geometry_msgs::msg::PoseStamped>("final_pose", robot_pose_);
     RCLCPP_INFO_STREAM(logger(), "success! final_pose: " << robot_pose_.pose.position.x << ", " << robot_pose_.pose.position.y);
+    return NodeStatus::SUCCESS;
 }
 
 NodeStatus Docking::onFailure(ActionNodeErrorCode error) {
@@ -230,9 +231,10 @@ bool Docking::UpdateRobotPose() {
     try {
         transformStamped = tf_buffer_.lookupTransform(
             "map", 
-            "odom",
+            "base_link",
             rclcpp::Time()
         );
+        RCLCPP_INFO_STREAM(rclcpp::get_logger("bt_m"), "(" << transformStamped.transform.translation.x << ", " << transformStamped.transform.translation.y << ")");
         robot_pose_.pose.position.x = transformStamped.transform.translation.x;
         robot_pose_.pose.position.y = transformStamped.transform.translation.y;
         robot_pose_.pose.orientation = transformStamped.transform.rotation;
