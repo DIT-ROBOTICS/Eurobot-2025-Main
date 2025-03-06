@@ -5,6 +5,7 @@
 #include <fstream>
 #include <deque>
 #include <bitset>
+#include <math.h>
 
 // Use behavior tree
 #include "behaviortree_cpp/decorators/loop_node.h"
@@ -59,7 +60,7 @@ public:
     /* Start and running function */
     BT::NodeStatus tick() override;
 private:
-    geometry_msgs::msg::PoseStamped point;
+    double point;
 };
 /******************************/
 /* BTStarter - Start the tree */

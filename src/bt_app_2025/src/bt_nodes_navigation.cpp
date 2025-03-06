@@ -128,28 +128,50 @@ NodeStatus Navigation::onFailure(ActionNodeErrorCode error) {
 BT::PortsList Docking::providedPorts() {
     return { 
         BT::InputPort<geometry_msgs::msg::PoseStamped>("base"),
-        BT::InputPort<geometry_msgs::msg::PoseStamped>("offset"),
-        BT::OutputPort<geometry_msgs::msg::PoseStamped>("final_pose"),
-        BT::InputPort<int>("mission_type")
+        BT::InputPort<double>("offset"),
+        BT::InputPort<bool>("useDocking"),
+        BT::OutputPort<geometry_msgs::msg::PoseStamped>("final_pose")
     };
 }
 
 bool Docking::setGoal(RosActionNode::Goal& goal) {
     auto m = getInput<geometry_msgs::msg::PoseStamped>("base");
-    auto offset = getInput<geometry_msgs::msg::PoseStamped>("offset");
-    mission_type_ = getInput<int>("mission_type").value();
+    double offset = getInput<double>("offset").value();
+    getInput<bool>("useDocking", useDocking_);
 
-    goal_.pose = m.value().pose;
-    rclcpp::Time now = this->now();
-    goal_.header.stamp = now;
-    goal_.header.frame_id = "map";
-    goal_.pose.position.x += offset.value().pose.position.x;
-    goal_.pose.position.y += offset.value().pose.position.y;
-    goal.pose = goal_;
+    double offset_x = 0;
+    double offset_y = 0;
+    if ((int)offset == 0) {
+        offset_x = offset - (int)offset;
+    } else if ((int)offset == 1 || (int)offset == -1) {
+        offset_y = offset - (int)offset;
+    } else {
+        RCLCPP_ERROR(logger(), "Invalid offset value");
+        return false;
+    }
 
-    RCLCPP_INFO(logger(), "Start Docking (%f, %f)", goal.pose.pose.position.x, goal.pose.pose.position.y);
+    goal.use_dock_id = false; // set use dock id
+    goal_.pose = m.value().pose; // calculate goal pose
+    tf2::Quaternion q; // declare Quaternion
+    q.setRPY(0, 0, m.value().pose.position.z); // change degree-z into Quaternion
+    rclcpp::Time now = this->now(); // get current time
+    goal_.header.stamp = now; // set header time
+    goal_.header.frame_id = "map";  // set header frame
+    goal_.pose.position.x += offset_x; // set offset
+    goal_.pose.position.y += offset_y; // set offset
+    goal_.pose.position.z = 0; // set offset
+    goal_.pose.orientation.x = q.x();
+    goal_.pose.orientation.y = q.y();
+    goal_.pose.orientation.z = q.z();
+    goal_.pose.orientation.w = q.w();
+    goal.dock_pose = goal_; // set goal pose
+    goal.dock_type = "mission_dock";    // set dock type
+    goal.max_staging_time = 1000.0; // set max staging time
+    goal.navigate_to_staging_pose = !useDocking_;  // is use docking
+    RCLCPP_INFO_STREAM(logger(), offset_x << offset_y << !useDocking_);
 
-    current_pose_ = goal_;
+    RCLCPP_INFO(logger(), "Start Docking (%f, %f)", goal.dock_pose.pose.position.x, goal.dock_pose.pose.position.y);
+
     nav_finished_ = false;
     nav_error_ = false;
 
@@ -157,43 +179,75 @@ bool Docking::setGoal(RosActionNode::Goal& goal) {
 }
 
 NodeStatus Docking::onFeedback(const std::shared_ptr<const Feedback> feedback) {
-    current_pose_ = feedback->current_pose;
+    // current_pose_ = feedback->current_pose;
     return NodeStatus::RUNNING;
 }
 
 NodeStatus Docking::onResultReceived(const WrappedResult& wr) {
     // set output
-    switch (wr.code) {
-    case rclcpp_action::ResultCode::SUCCEEDED:
+    switch (wr.result->success) {
+    case true:
+        RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Goal was succeeded");
         break;
-    case rclcpp_action::ResultCode::ABORTED:
+    case false:
         RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Goal was aborted");
-        return NodeStatus::SUCCESS;
-    case rclcpp_action::ResultCode::CANCELED:
-        RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Goal was canceled");
-        return NodeStatus::SUCCESS;
+        return NodeStatus::FAILURE;
     default:
         RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Unknown result code");
-        return NodeStatus::SUCCESS;
+        return NodeStatus::FAILURE;
     }
-    setOutput<geometry_msgs::msg::PoseStamped>("final_pose", current_pose_);
-    // check if mission success
-    if (calculateDistance(current_pose_.pose, goal_.pose) < 0.03 && calculateAngleDifference(current_pose_.pose, goal_.pose) < 0.4) {
-        nav_finished_ = true;
-        RCLCPP_INFO_STREAM(logger(), "success! final_pose: " << current_pose_.pose.position.x << ", " << current_pose_.pose.position.y);
-        return NodeStatus::SUCCESS;
-    } else {
-        nav_error_ = true;
-        RCLCPP_INFO_STREAM(logger(), "fail! final_pose: " << current_pose_.pose.position.x << ", " << current_pose_.pose.position.y);
-        return NodeStatus::SUCCESS;
-    }
+    // switch (wr.code) {
+    //     case rclcpp_action::ResultCode::SUCCEEDED:
+    //         break;
+    //     case rclcpp_action::ResultCode::ABORTED:
+    //         RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Goal was aborted");
+    //         return NodeStatus::SUCCESS;
+    //     case rclcpp_action::ResultCode::CANCELED:
+    //         RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Goal was canceled");
+    //         return NodeStatus::SUCCESS;
+    //     default:
+    //         RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Unknown result code");
+    //         return NodeStatus::SUCCESS;
+    // }
+    UpdateRobotPose();
+    RCLCPP_INFO_STREAM(logger(), wr.result->error_code);
+    setOutput<geometry_msgs::msg::PoseStamped>("final_pose", robot_pose_);
+    RCLCPP_INFO_STREAM(logger(), "success! final_pose: " << robot_pose_.pose.position.x << ", " << robot_pose_.pose.position.y);
 }
 
 NodeStatus Docking::onFailure(ActionNodeErrorCode error) {
     nav_error_ = true;
-    setOutput<geometry_msgs::msg::PoseStamped>("final_pose", current_pose_);
-    RCLCPP_INFO_STREAM(logger(), "fail! final_pose: " << current_pose_.pose.position.x << ", " << current_pose_.pose.position.y);
+    RCLCPP_INFO_STREAM(logger(), error);
+    UpdateRobotPose();
+    setOutput<geometry_msgs::msg::PoseStamped>("final_pose", robot_pose_);
+    RCLCPP_INFO_STREAM(logger(), "fail! final_pose: " << robot_pose_.pose.position.x << ", " << robot_pose_.pose.position.y);
     return NodeStatus::FAILURE;
+}
+
+bool Docking::UpdateRobotPose() {
+    geometry_msgs::msg::TransformStamped transformStamped;
+
+    try {
+        transformStamped = tf_buffer_.lookupTransform(
+            "map", 
+            "odom",
+            rclcpp::Time()
+        );
+        robot_pose_.pose.position.x = transformStamped.transform.translation.x;
+        robot_pose_.pose.position.y = transformStamped.transform.translation.y;
+        robot_pose_.pose.orientation = transformStamped.transform.rotation;
+        // double theta;
+        // tf2::Quaternion q;
+        // tf2::fromMsg(transformStamped.transform.rotation, q);
+        // robot_pose_.pose.angular.z = tf2::impl::getYaw(q);
+
+        return true;
+    }
+    catch (tf2::TransformException &ex) {
+        RCLCPP_WARN_STREAM(rclcpp::get_logger("docking"), "[Kernel::UpdateRobotPose]: line " << __LINE__ << " " << ex.what());
+
+        return false;
+    }
 }
 
 BT::PortsList Rotation::providedPorts() {
