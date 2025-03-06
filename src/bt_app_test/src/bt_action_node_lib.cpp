@@ -468,6 +468,10 @@ BT::NodeStatus NavAction::onRunning() {
 }
 
 void NavAction::onHalted() {
+
+  return;
+}
+
 PortsList count_5::providedPorts() {
   return { 
     BT::InputPort<std::string>("input"),
