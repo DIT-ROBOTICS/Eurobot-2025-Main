@@ -1,4 +1,11 @@
 #include "behaviortree_ros2/bt_action_node.hpp"
+#include "behaviortree_cpp/bt_factory.h"
+#include "behaviortree_cpp/decorators/loop_node.h"
+#include "behaviortree_cpp/xml_parsing.h"
+#include "behaviortree_cpp/loggers/groot2_publisher.h"
+#include "behaviortree_cpp/utils/shared_library.h"
+#include "behaviortree_cpp/blackboard.h"
+
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp/executors.hpp"
 
