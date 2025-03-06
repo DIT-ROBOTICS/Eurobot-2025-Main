@@ -238,6 +238,12 @@ public:
   // }
   NavAction(const std::string& name, const BT::NodeConfig& config, std::shared_ptr<rclcpp::Node> node)
     : BT::StatefulActionNode(name, config), node_(node), goal_done_(false)
+//Parallel Test node 1
+class count_5 : public BT::StatefulActionNode
+{
+public:
+  count_5(const std::string& name, const BT::NodeConfig& config)
+    : BT::StatefulActionNode(name, config)
   {}
 
   /* Node remapping function */
@@ -265,4 +271,83 @@ private:
   rclcpp_action::Client<NavigateToPose>::SharedPtr client_ptr_;
   rclcpp::TimerBase::SharedPtr timer_;
   bool goal_done_;
+
+  /* Halt function */
+  void onHalted() override;
+
+private:
+  int tick_count = 0;
+
+  std::string input;
+};
+
+//Parallel Test node 2
+class count_10 : public BT::StatefulActionNode
+{
+public:
+  count_10(const std::string& name, const BT::NodeConfig& config)
+    : BT::StatefulActionNode(name, config)
+  {}
+
+  /* Node remapping function */
+  static BT::PortsList providedPorts();
+
+  /* Start and running function */
+  BT::NodeStatus onStart() override;
+  BT::NodeStatus onRunning() override;
+
+  /* Halt function */
+  void onHalted() override;
+
+private:
+  int tick_count = 0;
+
+  std::string input;
+};
+
+//Parallel Test node 3
+class count_15 : public BT::StatefulActionNode
+{
+public:
+  count_15(const std::string& name, const BT::NodeConfig& config)
+    : BT::StatefulActionNode(name, config)
+  {}
+
+  /* Node remapping function */
+  static BT::PortsList providedPorts();
+
+  /* Start and running function */
+  BT::NodeStatus onStart() override;
+  BT::NodeStatus onRunning() override;
+
+  /* Halt function */
+  void onHalted() override;
+
+private:
+  int tick_count = 0;
+
+  std::string input;
+};
+
+//Parallel Test node 4
+class Parallel_check : public BT::StatefulActionNode
+{
+public:
+  Parallel_check(const std::string& name, const BT::NodeConfig& config)
+    : BT::StatefulActionNode(name, config)
+  {}
+
+  /* Node remapping function */
+  static BT::PortsList providedPorts();
+
+  /* Start and running function */
+  BT::NodeStatus onStart() override;
+  BT::NodeStatus onRunning() override;
+
+  /* Halt function */
+  void onHalted() override;
+
+private:
+
+  std::string input;
 };
