@@ -25,6 +25,7 @@ find_package(nav_msgs REQUIRED)
 find_package(nav2_msgs REQUIRED)
 find_package(btcpp_ros2_interfaces REQUIRED)
 find_package(example_interfaces REQUIRED)
+find_package(Curses REQUIRED)
 
 # Include directories
 include_directories(
@@ -64,6 +65,20 @@ target_link_libraries(main_script
 )
 install(TARGETS
   main_script
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+add_executable(game src/game.cpp)
+target_link_libraries(game
+  ncurses
+  ${ARMADILLO_LIBRARIES})
+ament_target_dependencies(game
+  "rclcpp"
+  "geometry_msgs"
+  ${THIS_PACKAGE_DEPS}
+)
+install(TARGETS
+  game
   DESTINATION lib/${PROJECT_NAME}
 )
 
