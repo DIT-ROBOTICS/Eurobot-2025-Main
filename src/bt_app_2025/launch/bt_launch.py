@@ -27,11 +27,11 @@ def generate_launch_description():
     )
     return LaunchDescription([
         Node(
-            parameters=[config_path, mission_set, {"tree_name": "NavTest"}],
+            parameters=[config_path, mission_set, {"tree_name": "FuncTest"}],
             remappings=[
                 ("/map", "robot/map"),
                 ("/base_link", "/robot/base_footprint")
-            ]
+            ],
             package = 'bt_app_2025',
             executable = 'bt_m',
             name = 'bt_m'
