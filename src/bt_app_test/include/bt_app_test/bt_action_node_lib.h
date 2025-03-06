@@ -1,20 +1,32 @@
 #pragma once
 
+#include <filesystem>
+#include <fstream>
+#include <deque>
+#include <bitset>
+#include <chrono>
+#include <cmath>
+
 // BT
-#include <behaviortree_ros2/bt_action_node.hpp>
-#include <behaviortree_ros2/bt_topic_sub_node.hpp>
-#include <behaviortree_ros2/bt_topic_pub_node.hpp>
+#include "behaviortree_ros2/bt_action_node.hpp"
+#include "behaviortree_ros2/bt_topic_sub_node.hpp"
+#include "behaviortree_ros2/bt_topic_pub_node.hpp"
 // ROS
-#include <rclcpp/rclcpp.hpp>
-#include <rclcpp/logger.hpp>
+#include "rclcpp/rclcpp.hpp"
+#include "rclcpp/logger.hpp"
+#include "rclcpp_action/rclcpp_action.hpp"
 // self defined message
 #include "btcpp_ros2_interfaces/action/navigation.hpp"
-#include "btcpp_ros2_interfaces/action/fibonacci.hpp"
+#include "example_interfaces/action/fibonacci.hpp"
 //message
-#include <geometry_msgs/msg/transform_stamped.hpp>
-#include <geometry_msgs/msg/pose_stamped.hpp>
-#include <geometry_msgs/msg/twist.hpp>
-#include <std_msgs/msg/int32.hpp>
+#include "std_msgs/msg/int32.hpp"
+#include "geometry_msgs/msg/transform_stamped.hpp"
+#include "geometry_msgs/msg/twist.hpp"
+#include "geometry_msgs/msg/twist_stamped.hpp"
+#include "geometry_msgs/msg/pose.hpp"
+#include "geometry_msgs/msg/pose_stamped.hpp"
+#include "geometry_msgs/msg/pose_array.hpp"
+#include "nav2_msgs/action/navigate_to_pose.hpp"
 // tf2 
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
@@ -23,9 +35,12 @@
 #include <tf2_ros/buffer.h>
 #include <tf2/exceptions.h>
 
+#define PI 3.1415926
+
 using namespace BT;
 
 namespace BT {
+  template <> inline geometry_msgs::msg::PoseStamped convertFromString(StringView str);
   template <> inline geometry_msgs::msg::TwistStamped convertFromString(StringView str);
   template <> inline int convertFromString(StringView str);
   template <> inline std::deque<int> convertFromString(StringView str);
@@ -187,11 +202,11 @@ public:
 private:
 };
 
-class BTMission : public BT::RosActionNode<btcpp_ros2_interfaces::action::Fibonacci> {
+class BTMission : public BT::RosActionNode<example_interfaces::action::Fibonacci> {
 
 public:
   BTMission(const std::string& name, const NodeConfig& conf, const RosNodeParams& params)
-    : RosActionNode<btcpp_ros2_interfaces::action::Fibonacci>(name, conf, params)
+    : RosActionNode<example_interfaces::action::Fibonacci>(name, conf, params)
   {}
 
   /* Node remapping function */
@@ -211,6 +226,18 @@ private:
   std::deque<int> partial_sequence_;
 };
 
+class NavAction : public BT::StatefulActionNode
+{
+public:
+  using NavigateToPose = nav2_msgs::action::NavigateToPose;
+  using GoalHandleNavigation = rclcpp_action::ClientGoalHandle<NavigateToPose>;
+  // NavAction(const std::string& name, const rclcpp::NodeOptions & node_options = rclcpp::NodeOptions(), std::shared_ptr<rclcpp::Node> node)
+  // : BT::StatefulActionNode(name, config), node_(node)
+  // {
+  //   goal_done_ = false;
+  // }
+  NavAction(const std::string& name, const BT::NodeConfig& config, std::shared_ptr<rclcpp::Node> node)
+    : BT::StatefulActionNode(name, config), node_(node), goal_done_(false)
 //Parallel Test node 1
 class count_5 : public BT::StatefulActionNode
 {
@@ -225,6 +252,25 @@ public:
   /* Start and running function */
   BT::NodeStatus onStart() override;
   BT::NodeStatus onRunning() override;
+  void onHalted() override;
+  void send_goal();
+  void goal_response_callback(GoalHandleNavigation::SharedPtr goal_handle);
+  void feedback_callback(
+    GoalHandleNavigation::SharedPtr,
+    const std::shared_ptr<const NavigateToPose::Feedback> feedback);
+  BT::NodeStatus result_callback(const GoalHandleNavigation::WrappedResult & result);
+
+private:
+  std::shared_ptr<rclcpp::Node> node_;
+  // rclcpp::NodeOptions& node_options;
+  bool nav_finished_ = false;
+  bool nav_error_ = false;
+  geometry_msgs::msg::PoseStamped goal_;
+  geometry_msgs::msg::PoseStamped current_pose_;
+
+  rclcpp_action::Client<NavigateToPose>::SharedPtr client_ptr_;
+  rclcpp::TimerBase::SharedPtr timer_;
+  bool goal_done_;
 
   /* Halt function */
   void onHalted() override;

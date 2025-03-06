@@ -147,17 +147,17 @@ PortsList CamReceiver::providedPorts() {
 
 void CamReceiver::materials_info_callback(const geometry_msgs::msg::PoseArray::SharedPtr msg) {
     materials_info_ = *msg;
-    // blackboard_->set<double>("global_info", materials_info_);
+    blackboard_->set<geometry_msgs::msg::PoseArray>("materials_info", materials_info_);
     // To Do: modify message type
 }
 void CamReceiver::banner_info_callback(const std_msgs::msg::Int32::SharedPtr msg) {
     banner_info_ = *msg;
-    // blackboard_->set<double>("banner_info", banner_info_);
+    blackboard_->set<std_msgs::msg::Int32>("banner_info", banner_info_);
     // To Do: modify message type
 }
 void CamReceiver::obstacles_info_callback(const geometry_msgs::msg::PoseArray::SharedPtr msg) {
     obstacles_info_ = *msg;
-    // blackboard_->set<double>("local_info", obstacles_info_);
+    blackboard_->set<geometry_msgs::msg::PoseArray>("obstacles_info", obstacles_info_);
     // To Do: modify message type
     // To Do: generate materials_info_ & garbage_points_
 }

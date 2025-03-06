@@ -41,6 +41,7 @@ int main(int argc, char** argv)
   factory.registerNodeType<RaceTimeCheck>("RaceTimeCheck");
   params.default_port_value = "fibonacci";
   factory.registerNodeType<BTMission>("BTMission", params);
+  factory.registerNodeType<NavAction>("NavAction", node);
   factory.registerNodeType<count_5>("count_5");
   factory.registerNodeType<count_10>("count_10");
   factory.registerNodeType<count_15>("count_15");
@@ -76,13 +77,14 @@ int main(int argc, char** argv)
 
   BT::Groot2Publisher publisher(tree, 2227);
 
-  rclcpp::Rate rate(1);
+  rclcpp::Rate rate(100);
   BT::NodeStatus status = BT::NodeStatus::RUNNING;
+
+  RCLCPP_INFO(node->get_logger(), "[BT Application]: Behavior Tree start running!");
 
   while(rclcpp::ok() && status == BT::NodeStatus::RUNNING)
   {
     status = tree.rootNode()->executeTick();
-
     // Spinonce
     rclcpp::spin_some(node);
     rate.sleep();

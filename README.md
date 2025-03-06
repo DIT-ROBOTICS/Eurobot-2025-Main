@@ -138,3 +138,6 @@
 > 有一棵 BT 可以寫腳本規劃敵機如何移動
 - `$ ros2 launch rival_simulation bt_launch.py`
 > 之後可以用來測試動態調整的效果
+### firmware connection
+- `$ use dmesg -w to search device location`
+- `$ ros2 run micro_ros_agent micro_ros_agent serial -b 115200 -D <your device location>`

@@ -18,6 +18,8 @@ services:
       - XAUTHORITY=/root/.Xauthority
       - ROS_WS=/home/user/Eurobot-2025-Main-ws
       - GROOT_APPIMAGE=/home/user/Eurobot-2025-Main-ws/groot/groot.AppImage
+      - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+      - ROS_DOMAIN_ID=${ROS_DOMAIN_ID}
     volumes:
       # Mount local timezone into container. ( Readonly )
       # Reference: https://stackoverflow.com/questions/57607381/how-do-i-change-timezone-in-a-docker-container

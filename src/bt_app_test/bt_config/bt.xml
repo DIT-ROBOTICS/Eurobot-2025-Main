@@ -64,9 +64,46 @@
 
   <BehaviorTree ID="MainTree">
     <Sequence>
-      <BTMission action_name="/fibonacci"
-                 sequence="{SEQ}"
-                 order="5"/>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.5, 1.3, 3.14"/>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.6, 1.3, 3.14"/>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.5, 0.4, 0"/>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.6, 0.4, 0"/>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.5, 0.4, 0"/>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.6, 0.4, 0"/>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.5, 0.4, 0"/>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.5, 0.9, 0"/>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.6, 0.9, 0"/>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.5, 0.9, 0"/>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.5, 0.9, 3.14"/>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.6, 0.9, 3.14"/>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.6, 0.9, 0"/>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.5, 0.9, 0"/>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.4, 0.9, 0"/>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.5, 0.9, 0"/>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.4, 0.9, 0"/>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.5, 0.9, 0"/>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.4, 0.9, 0"/>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.5, 0.9, 0"/>
     </Sequence>
   </BehaviorTree>
 
@@ -142,20 +179,96 @@
     </Sequence>
   </BehaviorTree>
 
+  <BehaviorTree ID="nav_test_0">
+    <Sequence>
+      <Sequence>
+        <NavAction final_pose="{NavGoal}"
+                   goal="2.5, 1.3, 3.14"/>
+        <NavAction final_pose="{NavGoal}"
+                   goal="2.6, 1.3, 3.14"/>
+      </Sequence>
+      <Sequence>
+        <NavAction final_pose="{NavGoal}"
+                   goal="2.5, 0.4, 0"/>
+        <NavAction final_pose="{NavGoal}"
+                   goal="2.6, 0.4, 0"/>
+      </Sequence>
+      <SubTree ID="nav_test_1"
+               _autoremap="true"/>
+      <Sequence>
+        <NavAction final_pose="{NavGoal}"
+                   goal="2.5, 0.9, 0"/>
+        <NavAction final_pose="{NavGoal}"
+                   goal="2.6, 0.9, 0"/>
+      </Sequence>
+      <SubTree ID="nav_test_2"
+               _autoremap="true"/>
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="nav_test_1">
+    <Sequence>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.5, 0.4, 0"/>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.6, 0.4, 0"/>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.5, 0.4, 0"/>
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="nav_test_2">
+    <Sequence>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.5, 0.9, 0"/>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.5, 0.9, 3.14"/>
+      <SubTree ID="nav_test_3"
+               _autoremap="true"/>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.4, 0.9, 0"/>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.5, 0.9, 0"/>
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="nav_test_3">
+    <Sequence>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.6, 0.9, 3.14"/>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.6, 0.9, 0"/>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.5, 0.9, 0"/>
+      <SubTree ID="nav_test_4"
+               _autoremap="true"/>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.5, 0.9, 0"/>
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="nav_test_4">
+    <Sequence>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.4, 0.9, 0"/>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.5, 0.9, 0"/>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.4, 0.9, 0"/>
+    </Sequence>
+  </BehaviorTree>
+
   <!-- Description of Node Models (used by Groot) -->
   <TreeNodesModel>
-    <Action ID="BTMission">
-      <input_port name="action_name"
-                  type="std::string"/>
-      <output_port name="sequence"
-                   type="std::deque&lt;int, std::allocator&lt;int&gt; &gt;"/>
-      <input_port name="order"
-                  type="int"/>
-    </Action>
     <Decorator ID="ElapseTimeCheck">
       <input_port name="max_time_count"
                   type="double"/>
     </Decorator>
+    <Action ID="NavAction">
+      <output_port name="final_pose"
+                   type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+      <input_port name="goal"
+                  type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
     <Action ID="Parallel_check">
       <output_port name="output"
                    type="std::string"/>

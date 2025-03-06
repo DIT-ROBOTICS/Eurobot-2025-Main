@@ -5,11 +5,20 @@
       <Navigation final_pose=""
                   type=""
                   goal=""/>
-      <Docking mission_type=""
-               final_pose=""
+      <Docking final_pose=""
+               useDocking=""
                offset=""
                base=""/>
       <Sleep msec=""/>
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="FuncTest">
+    <Sequence>
+      <Docking final_pose="{PrevGoal}"
+               useDocking="0"
+               offset="-0.1"
+               base="2.6, 1.3, 0"/>
     </Sequence>
   </BehaviorTree>
 
@@ -40,25 +49,22 @@
 
   <BehaviorTree ID="MissionPointFour">
     <Sequence>
-      <Navigation final_pose="{PrevGoal}"
-                  type="0"
-                  goal="0.8, 0.5, 1.57"/>
-      <Docking mission_type="0"
-               final_pose="{PrevGoal}"
-               offset="0, -0.1, 0"
-               base="{PrevGoal}"/>
+      <Docking final_pose="{PrevGoal}"
+               useDocking="0"
+               offset="-1.1"
+               base="0.8, 0.6, 1.57"/>
       <Sleep msec="3000"/>
       <Rotation final_pose="{PrevGoal}"
                 degree="180"
                 base="{PrevGoal}"/>
       <Sleep msec="500"/>
-      <Docking mission_type="0"
-               final_pose="{PrevGoal}"
-               offset="0, -0.1, 0"
+      <Docking final_pose="{PrevGoal}"
+               useDocking="1"
+               offset="-1.1"
                base="{PrevGoal}"/>
       <PointProvider point_out2="{DISTANCE1}"
                      point_out1="{DISTANCE}"
-                     point_in="0, -0.1, 0"/>
+                     point_in="-1.1"/>
       <SubTree ID="PutTwoLevels"
                DISTANCE="{DISTANCE}"
                DISTANCE1="{DISTANCE1}"
@@ -71,63 +77,51 @@
     <Sequence>
       <Fallback>
         <Sequence>
+          <Docking final_pose="{PrevGoal}"
+                   useDocking="0"
+                   offset="0.1"
+                   base="2.5, 1.3, 3.14"/>
+        </Sequence>
+        <Sequence>
+          <Sleep msec="100"/>
           <Navigation final_pose="{PrevGoal}"
                       type="0"
                       goal="2.6, 1.3, 3.14"/>
-          <Docking mission_type="0"
-                   final_pose="{PrevGoal}"
-                   offset="0.1, 0, 0"
-                   base="{PrevGoal}"/>
-        </Sequence>
-        <Sequence>
-          <Sleep msec="3000"/>
-          <Navigation final_pose="{PrevGoal}"
-                      type="0"
-                      goal="2.7, 1.3, 3.14"/>
         </Sequence>
       </Fallback>
+      <Sleep msec="1000"/>
       <Fallback>
         <Sequence>
+          <Docking final_pose="{PrevGoal}"
+                   useDocking="0"
+                   offset="0.1"
+                   base="2.5, 0.4, 0"/>
+        </Sequence>
+        <Sequence>
+          <Sleep msec="100"/>
           <Navigation final_pose="{PrevGoal}"
                       type="0"
                       goal="2.6, 0.4, 0"/>
-          <Docking mission_type="0"
-                   final_pose="{PrevGoal}"
-                   offset="0.1, 0, 0"
-                   base="{PrevGoal}"/>
+        </Sequence>
+      </Fallback>
+      <Sleep msec="1000"/>
+      <Fallback>
+        <Sequence>
+          <Docking final_pose="{PrevGoal}"
+                   useDocking="0"
+                   offset="0.1"
+                   base="2.5, 0.9, 0"/>
         </Sequence>
         <Sequence>
-          <Sleep msec="1000"/>
+          <Sleep msec="100"/>
           <Navigation final_pose="{PrevGoal}"
                       type="0"
-                      goal="2.7, 0.4, 0"/>
+                      goal="2.6, 0.9, 0"/>
         </Sequence>
       </Fallback>
       <PointProvider point_out2="{DISTANCE1}"
                      point_out1="{DISTANCE}"
-                     point_in="0.1, 0, 0"/>
-      <SubTree ID="TakeOneLevel"
-               DISTANCE="{DISTANCE}"
-               DISTANCE1="{DISTANCE1}"
-               PrevGoal="{PrevGoal}"
-               _autoremap="true"/>
-      <Fallback>
-        <Sequence>
-          <Navigation final_pose="{PrevGoal}"
-                      type="0"
-                      goal="2.6, 0.9, 0"/>
-          <Docking mission_type="0"
-                   final_pose="{PrevGoal}"
-                   offset="0.1, 0, 0"
-                   base="{PrevGoal}"/>
-        </Sequence>
-        <Sequence>
-          <Sleep msec="1000"/>
-          <Navigation final_pose="{PrevGoal}"
-                      type="0"
-                      goal="2.7, 0.9, 0"/>
-        </Sequence>
-      </Fallback>
+                     point_in="0.1"/>
       <SubTree ID="PutThreeLevels"
                DISTANCE="{DISTANCE}"
                DISTANCE1="{DISTANCE1}"
@@ -141,21 +135,21 @@
       <Navigation final_pose="{PrevGoal}"
                   type="0"
                   goal="1.9, 0.7, 4.71"/>
-      <Docking mission_type="0"
-               final_pose="{PrevGoal}"
-               offset="0, 0.1, 0"
+      <Docking final_pose="{PrevGoal}"
+               useDocking="1"
+               offset="1.1"
                base="{PrevGoal}"/>
       <Sleep msec="1000"/>
       <Navigation final_pose="{PrevGoal}"
                   type="0"
                   goal="2.2, 0.5, 4.71"/>
-      <Docking mission_type="0"
-               final_pose="{PrevGoal}"
-               offset="0, -0.1, 0"
+      <Docking final_pose="{PrevGoal}"
+               useDocking="1"
+               offset="-1.1"
                base="{PrevGoal}"/>
       <PointProvider point_out2="{DISTANCE1}"
                      point_out1="{DISTANCE}"
-                     point_in="0, -0.1, 0"/>
+                     point_in="-1.1"/>
       <SubTree ID="TakeOneLevel"
                DISTANCE="{DISTANCE}"
                DISTANCE1="{DISTANCE1}"
@@ -164,9 +158,9 @@
       <Navigation final_pose="{PrevGoal}"
                   type="0"
                   goal="1.25, 0.5, 4.71"/>
-      <Docking mission_type="0"
-               final_pose="{PrevGoal}"
-               offset="0, -0.1, 0"
+      <Docking final_pose="{PrevGoal}"
+               useDocking="1"
+               offset="-1.1"
                base="{PrevGoal}"/>
       <SubTree ID="PutThreeLevels"
                DISTANCE="{DISTANCE}"
@@ -178,17 +172,24 @@
 
   <BehaviorTree ID="NavTest">
     <Sequence>
-      <SubTree ID="MissionPointOne"/>
+      <SubTree ID="MissionPointOne"
+               _autoremap="true"/>
     </Sequence>
   </BehaviorTree>
 
   <BehaviorTree ID="PutThreeLevels">
     <Sequence>
-      <Sleep msec="3000"/>
-      <Docking mission_type="0"
-               final_pose="{PrevGoal}"
+      <Timeout msec="1000">
+        <Sleep msec="1000"/>
+      </Timeout>
+      <Docking final_pose="{PrevGoal}"
+               useDocking="1"
                offset="{DISTANCE1}"
                base="{PrevGoal}"/>
+      <Rotation final_pose="{PrevGoal}"
+                degree="180"
+                base="{PrevGoal}"/>
+      <Sleep msec="1000"/>
       <Rotation final_pose="{PrevGoal}"
                 degree="180"
                 base="{PrevGoal}"/>
@@ -196,60 +197,58 @@
                DISTANCE="{DISTANCE}"
                DISTANCE1="{DISTANCE1}"
                _autoremap="true"/>
-      <Docking mission_type="0"
-               final_pose="{PrevGoal}"
-               offset="{DISTANCE1}"
-               base="{PrevGoal}"/>
-      <Sleep msec="3000"/>
-      <Docking mission_type="0"
-               final_pose="{PrevGoal}"
+      <Docking final_pose="{PrevGoal}"
+               useDocking="1"
                offset="{DISTANCE}"
                base="{PrevGoal}"/>
-      <Sleep msec="3000"/>
+      <Sleep msec="1000"/>
+      <Docking final_pose="{PrevGoal}"
+               useDocking="1"
+               offset="{DISTANCE}"
+               base="{PrevGoal}"/>
+      <Sleep msec="1000"/>
     </Sequence>
   </BehaviorTree>
 
   <BehaviorTree ID="PutTwoLevels">
     <Sequence>
-      <Sleep msec="3000"/>
-      <Docking mission_type="0"
-               final_pose="{PrevGoal}"
-               offset="{DISTANCE}"
-               base="{PrevGoal}"/>
-      <Rotation final_pose="{PrevGoal}"
-                degree="180"
-                base="{PrevGoal}"/>
-      <Docking mission_type="0"
-               final_pose="{PrevGoal}"
+      <Sleep msec="1000"/>
+      <Docking final_pose="{PrevGoal}"
+               useDocking="1"
                offset="{DISTANCE1}"
                base="{PrevGoal}"/>
-      <SubTree ID="TakeOneLevel"
-               DISTANCE="{DISTANCE}"
-               DISTANCE1="{DISTANCE1}"
-               _autoremap="true"/>
-      <Docking mission_type="0"
-               final_pose="{PrevGoal}"
+      <Sleep msec="1000"/>
+      <Docking final_pose="{PrevGoal}"
+               useDocking="1"
                offset="{DISTANCE}"
                base="{PrevGoal}"/>
-      <Sleep msec="3000"/>
+      <Sleep msec="1000"/>
+      <Docking final_pose="{PrevGoal}"
+               useDocking="1"
+               offset="{DISTANCE1}"
+               base="{PrevGoal}"/>
+      <Sleep msec="1000"/>
+      <Docking final_pose="{PrevGoal}"
+               useDocking="1"
+               offset="{DISTANCE}"
+               base="{PrevGoal}"/>
+      <Sleep msec="1000"/>
+      <Docking final_pose="{PrevGoal}"
+               useDocking="1"
+               offset="{DISTANCE1}"
+               base="{PrevGoal}"/>
     </Sequence>
   </BehaviorTree>
 
   <BehaviorTree ID="TakeOneLevel">
     <Sequence>
-      <Sleep msec="3000"/>
-      <Docking mission_type="0"
-               final_pose="{PrevGoal}"
+      <Docking final_pose="{PrevGoal}"
+               useDocking="1"
                offset="{DISTANCE1}"
                base="{PrevGoal}"/>
       <Sleep msec="3000"/>
-      <Docking mission_type="0"
-               final_pose="{PrevGoal}"
-               offset="{DISTANCE}"
-               base="{PrevGoal}"/>
-      <Sleep msec="3000"/>
-      <Docking mission_type="0"
-               final_pose="{PrevGoal}"
+      <Docking final_pose="{PrevGoal}"
+               useDocking="1"
                offset="{DISTANCE1}"
                base="{PrevGoal}"/>
       <Sleep msec="3000"/>
@@ -264,12 +263,12 @@
     </Action>
     <Action ID="CamReceiver"/>
     <Action ID="Docking">
-      <input_port name="mission_type"
-                  type="int"/>
       <output_port name="final_pose"
                    type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+      <input_port name="useDocking"
+                  type="bool"/>
       <input_port name="offset"
-                  type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+                  type="double"/>
       <input_port name="base"
                   type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
     </Action>

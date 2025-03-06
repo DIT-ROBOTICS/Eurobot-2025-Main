@@ -2,6 +2,21 @@
 
 using namespace BT;
 
+template <> inline geometry_msgs::msg::PoseStamped BT::convertFromString(StringView str) {
+
+  auto parts = splitString(str, ',');
+  if (parts.size() != 3) {
+      throw RuntimeError("invalid input)");
+  }
+  else {
+      geometry_msgs::msg::PoseStamped output;
+      output.pose.position.x = convertFromString<double>(parts[0]);
+      output.pose.position.y = convertFromString<double>(parts[1]);
+      output.pose.position.z = convertFromString<double>(parts[2]);
+      return output;
+  }
+}
+
 template <> inline geometry_msgs::msg::TwistStamped BT::convertFromString(StringView str) {
 
   auto parts = splitString(str, ',');
@@ -34,6 +49,23 @@ template <> inline std::deque<int> BT::convertFromString(StringView str) {
   return output;
 }
 
+double inline calculateDistance(const geometry_msgs::msg::Pose &pose1, const geometry_msgs::msg::Pose &pose2) {
+  tf2::Vector3 position1(pose1.position.x, pose1.position.y, 0);
+  tf2::Vector3 position2(pose2.position.x, pose2.position.y, 0);
+  double dist = position1.distance(position2);
+  RCLCPP_INFO_STREAM(rclcpp::get_logger("rclcpp"), "distance: " << dist);
+  return dist;
+}
+
+double inline calculateAngleDifference(const geometry_msgs::msg::Pose &pose1, const geometry_msgs::msg::Pose &pose2)
+{
+  tf2::Quaternion orientation1, orientation2;
+  tf2::fromMsg(pose1.orientation, orientation1);
+  tf2::fromMsg(pose2.orientation, orientation2);
+  double yaw1 = tf2::impl::getYaw(orientation1);
+  double yaw2 = tf2::impl::getYaw(orientation2);
+  return std::fabs(yaw1 - yaw2);
+}
 
 PortsList Testing::providedPorts() {
   return { 
@@ -296,6 +328,7 @@ NodeStatus BTMission::onFailure(ActionNodeErrorCode error) {
   return NodeStatus::FAILURE;
 }
 NodeStatus BTMission::onFeedback(const std::shared_ptr<const Feedback> feedback) {
+  RCLCPP_INFO_STREAM(rclcpp::get_logger("rclcpp"), "size: " << feedback->partial_sequence.size());
   for (int i = 0; i < feedback->partial_sequence.size(); i++) {
     partial_sequence_.push_back(feedback->partial_sequence[i]);
     RCLCPP_INFO_STREAM(rclcpp::get_logger("rclcpp"), partial_sequence_[i] << ", ");
@@ -304,6 +337,137 @@ NodeStatus BTMission::onFeedback(const std::shared_ptr<const Feedback> feedback)
   return NodeStatus::RUNNING;
 }
 
+PortsList NavAction::providedPorts() {
+  return { 
+    BT::InputPort<geometry_msgs::msg::PoseStamped>("goal"),
+    BT::OutputPort<geometry_msgs::msg::PoseStamped>("final_pose")
+  };
+}
+
+BT::NodeStatus NavAction::onStart() {
+  this->client_ptr_ = rclcpp_action::create_client<NavigateToPose>(
+    node_->get_node_base_interface(),
+    node_->get_node_graph_interface(),
+    node_->get_node_logging_interface(),
+    node_->get_node_waitables_interface(),
+    "navigate_to_pose"
+  );
+
+  this->timer_ = node_->create_wall_timer(
+    std::chrono::milliseconds(500),
+    std::bind(&NavAction::send_goal, this)
+  );
+  return BT::NodeStatus::RUNNING;
+}
+
+void NavAction::send_goal()
+{
+  using namespace std::placeholders;
+  this->timer_->cancel();
+  this->goal_done_ = false;
+
+  if (!this->client_ptr_) {
+    RCLCPP_ERROR(node_->get_logger(), "Action client not initialized");
+  }
+  if (!this->client_ptr_->wait_for_action_server(std::chrono::seconds(10))) {
+    RCLCPP_ERROR(node_->get_logger(), "Action server not available after waiting");
+    this->goal_done_ = true;
+    return;
+  }
+
+  auto m = getInput<geometry_msgs::msg::PoseStamped>("goal");
+  rclcpp::Time now = node_->now();
+  goal_.header.stamp = now;
+  goal_.header.frame_id = "map";
+  goal_.pose.position.x = m.value().pose.position.x;
+  goal_.pose.position.y = m.value().pose.position.y;
+  tf2::Quaternion q;
+  q.setRPY(0, 0, m.value().pose.position.z);
+  goal_.pose.orientation.x = q.x();
+  goal_.pose.orientation.y = q.y();
+  goal_.pose.orientation.z = q.z();
+  goal_.pose.orientation.w = q.w();
+
+  RCLCPP_INFO(node_->get_logger(), "Start Nav (%f, %f)", goal_.pose.position.x, goal_.pose.position.y);
+  nav_finished_ = false;
+  
+  auto goal_msg = NavigateToPose::Goal();
+  goal_msg.pose = goal_;
+
+  RCLCPP_INFO(node_->get_logger(), "Sending goal");
+
+  auto send_goal_options = rclcpp_action::Client<NavigateToPose>::SendGoalOptions();
+  send_goal_options.goal_response_callback =
+    std::bind(&NavAction::goal_response_callback, this, _1);
+  send_goal_options.feedback_callback =
+    std::bind(&NavAction::feedback_callback, this, _1, _2);
+  send_goal_options.result_callback =
+    std::bind(&NavAction::result_callback, this, _1);
+  auto goal_handle_future = this->client_ptr_->async_send_goal(goal_msg, send_goal_options);
+}
+
+void NavAction::goal_response_callback(GoalHandleNavigation::SharedPtr goal_handle)
+{
+  if (!goal_handle) {
+    RCLCPP_ERROR(node_->get_logger(), "Goal was rejected by server");
+  } else {
+    RCLCPP_INFO(node_->get_logger(), "Goal accepted by server, waiting for result");
+  }
+}
+
+void NavAction::feedback_callback(
+  GoalHandleNavigation::SharedPtr,
+  const std::shared_ptr<const NavigateToPose::Feedback> feedback)
+{
+  current_pose_ = feedback->current_pose;
+}
+
+BT::NodeStatus NavAction::result_callback(const GoalHandleNavigation::WrappedResult & result)
+{
+  RCLCPP_INFO_STREAM(node_->get_logger(), "current_pose: " << current_pose_.pose.position.x << ", " << current_pose_.pose.position.y);
+  this->goal_done_ = true;
+  switch (result.code) {
+    case rclcpp_action::ResultCode::SUCCEEDED:
+      RCLCPP_INFO(node_->get_logger(), "Result received");
+      break;
+    case rclcpp_action::ResultCode::ABORTED:
+      RCLCPP_ERROR(node_->get_logger(), "Goal was aborted");
+      return BT::NodeStatus::FAILURE;
+    case rclcpp_action::ResultCode::CANCELED:
+      RCLCPP_ERROR(node_->get_logger(), "Goal was canceled");
+      return BT::NodeStatus::FAILURE;
+    default:
+      RCLCPP_ERROR(node_->get_logger(), "Unknown result code");
+      return BT::NodeStatus::FAILURE;
+  }
+  // check if mission success
+  if (calculateDistance(current_pose_.pose, goal_.pose) < 0.03 && calculateAngleDifference(current_pose_.pose, goal_.pose) < 0.4) {
+    nav_finished_ = true;
+    RCLCPP_INFO_STREAM(node_->get_logger(), "success! final_pose: " << current_pose_.pose.position.x << ", " << current_pose_.pose.position.y);
+    setOutput<geometry_msgs::msg::PoseStamped>("final_pose", current_pose_);
+    return NodeStatus::SUCCESS;
+  } else {
+    nav_error_ = true;
+    RCLCPP_INFO_STREAM(node_->get_logger(), "fail! final_pose: " << current_pose_.pose.position.x << ", " << current_pose_.pose.position.y);
+    setOutput<geometry_msgs::msg::PoseStamped>("final_pose", goal_);
+    return NodeStatus::SUCCESS;
+  }
+}
+
+BT::NodeStatus NavAction::onRunning() {
+  if (nav_finished_) {
+    RCLCPP_INFO_STREAM(node_->get_logger(), "SUCCESS");
+    return NodeStatus::SUCCESS;
+  } else if (nav_error_) {
+    RCLCPP_INFO_STREAM(node_->get_logger(), "FAILURE");
+    return NodeStatus::SUCCESS;
+  } else {
+    // RCLCPP_INFO_STREAM(node_->get_logger(), "RUNNING");
+    return NodeStatus::RUNNING;
+  }
+}
+
+void NavAction::onHalted() {
 PortsList count_5::providedPorts() {
   return { 
     BT::InputPort<std::string>("input"),

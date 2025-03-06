@@ -58,11 +58,8 @@ int main(int argc, char** argv) {
 
     // Create a shared blackboard
     auto blackboard = BT::Blackboard::create();
-    // Store a persistent parameter example
-    // blackboard->set<std::string>("global_param", "Persistent Value");
-    // Get a parameter from blackboard example
-    // blackboard()->get("global_param", value);
     blackboard->set<double>("current_time", 0);
+    blackboard->set<int>("mission_progress", 0);
 
     // Parameters
     std::string groot_xml_config_directory;
@@ -101,10 +98,12 @@ int main(int argc, char** argv) {
     // /* firmware */
     params.default_port_value = "firmware_mission";
     factory.registerNodeType<BTMission>("BTMission", params);
+    factory.registerNodeType<FirmwareMission>("FirmwareMission", node, blackboard);
+    factory.registerNodeType<IntegratedMissionNode>("IntegratedMissionNode", node, blackboard);
     factory.registerNodeType<SIMAactivate>("SIMAactivate", node);
     // factory.registerNodeType<BannerMission>("BannerMission", params);
-    factory.registerNodeType<ConstructFinisher>("ConstructFinisher");
-    factory.registerNodeType<CollectFinisher>("CollectFinisher");
+    factory.registerNodeType<ConstructFinisher>("ConstructFinisher", blackboard);
+    factory.registerNodeType<CollectFinisher>("CollectFinisher", blackboard);
     /* others */
     factory.registerNodeType<BTStarter>("BTStarter", node, blackboard);
     // factory.registerNodeType<BTFinisher>("BTFinisher", score_filepath, team, node);
@@ -140,9 +139,7 @@ int main(int argc, char** argv) {
     BT::Groot2Publisher publisher(tree, 2227);
 
     BT::NodeStatus status = BT::NodeStatus::RUNNING;
-
     RCLCPP_INFO(node->get_logger(), "[BT Application]: Behavior Tree start running!");
-    
     rclcpp::Rate rate(100);
     executor.add_node(node);
     while (rclcpp::ok() && status == BT::NodeStatus::RUNNING /* && game_time <= 95 */) {
@@ -150,7 +147,6 @@ int main(int argc, char** argv) {
         rate.sleep();
         status = tree.rootNode()->executeTick();
     }
-    // To Do: tick go home tree
 
     rclcpp::shutdown();
     return 0;
