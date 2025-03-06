@@ -16,9 +16,12 @@
   <BehaviorTree ID="FuncTest">
     <Sequence>
       <Docking final_pose="{PrevGoal}"
-               useDocking="0"
+               useDocking="1"
                offset="-0.1"
                base="2.6, 1.3, 0"/>
+      <LocReceiver rival_pose="{Rival}"
+                   robot_pose="{Robot}"/>
+      <Sleep msec="30000"/>
     </Sequence>
   </BehaviorTree>
 
@@ -272,6 +275,12 @@
       <input_port name="base"
                   type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
     </Action>
+    <Action ID="LocReceiver">
+      <output_port name="rival_pose"
+                   type="geometry_msgs::msg::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+      <output_port name="robot_pose"
+                   type="geometry_msgs::msg::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+    </Action>
     <Action ID="NavReceiver"/>
     <Action ID="Navigation">
       <output_port name="final_pose"
@@ -283,11 +292,11 @@
     </Action>
     <Action ID="PointProvider">
       <output_port name="point_out2"
-                   type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+                   type="double"/>
       <output_port name="point_out1"
-                   type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+                   type="double"/>
       <input_port name="point_in"
-                  type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+                  type="double"/>
     </Action>
     <Action ID="Rotation">
       <output_port name="final_pose"

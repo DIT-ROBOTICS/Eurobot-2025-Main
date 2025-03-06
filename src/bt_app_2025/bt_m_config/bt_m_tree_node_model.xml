@@ -15,7 +15,7 @@
             <output_port name="has_one_level" type="bool"/>
             <output_port name="has_raw_material" type="bool"/>
             <input_port name="mission_status" type="int"/>
-            <input_port name="mission_code" type="int"/>
+            <input_port name="mission_set_name" type="int"/>
         </Action>
         <Condition ID="Comparator">
             <input_port name="game_status" type="int"/>
@@ -29,7 +29,7 @@
             <output_port name="failed_levels" type="int"/>
             <output_port name="success_levels" type="int"/>
             <input_port name="mission_status" type="int"/>
-            <input_port name="mission_code" type="int"/>
+            <input_port name="mission_set_name" type="int"/>
         </Action>
         <Action ID="Docking">
             <output_port name="final_pose" type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
@@ -44,6 +44,12 @@
         <Action ID="FirmwareMission">
             <output_port name="mission_status" type="int"/>
             <input_port name="mission_type" type="int"/>
+        </Action>
+        <Action ID="IntegratedMissionNode">
+            <output_port name="mission_progress" type="int"/>
+            <output_port name="mission_status" type="int"/>
+            <input_port name="base" type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+            <input_port name="mission_set_name" type="std::string"/>
         </Action>
         <Action ID="LocReceiver">
             <output_port name="rival_pose" type="geometry_msgs::msg::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
