@@ -58,8 +58,8 @@ PortsList LocReceiver::providedPorts() {
 }
 
 NodeStatus LocReceiver::tick() {
-    if (UpdateRobotPose() && UpdateRivalPose()) {
-        std::cout << "robot_pose_:(" << robot_pose_.twist.linear.x << ", " << robot_pose_.twist.linear.y << ")\n";
+    if (UpdateRobotPose() || UpdateRivalPose()) {
+        RCLCPP_INFO_STREAM(node_->get_logger(), "robot_pose_:(" << robot_pose_.twist.linear.x << ", " << robot_pose_.twist.linear.y << ")");
         // Set the output port
         setOutput("robot_pose", robot_pose_);
         setOutput("rival_pose", rival_pose_);

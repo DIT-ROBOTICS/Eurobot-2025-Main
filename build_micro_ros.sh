@@ -1,6 +1,9 @@
 #!/bin/bash
 
 # Exit immediately if a command fails
+
+chmod +x build_micro_ros.sh
+
 set -e
 
 rosdep update

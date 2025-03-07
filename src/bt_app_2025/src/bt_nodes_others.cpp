@@ -37,18 +37,17 @@ template <> inline std::deque<int> BT::convertFromString(StringView str) {
 
 BT::PortsList PointProvider::providedPorts() {
     return { 
-        BT::InputPort<geometry_msgs::msg::PoseStamped>("point_in"),
-        BT::OutputPort<geometry_msgs::msg::PoseStamped>("point_out1"),
-        BT::OutputPort<geometry_msgs::msg::PoseStamped>("point_out2") 
+        BT::InputPort<double>("point_in"),
+        BT::OutputPort<double>("point_out1"),
+        BT::OutputPort<double>("point_out2") 
     };
 }
 
 BT::NodeStatus PointProvider::tick() {
-    point = getInput<geometry_msgs::msg::PoseStamped>("point_in").value();
-    setOutput<geometry_msgs::msg::PoseStamped>("point_out1", point);
-    point.pose.position.x *= -1;
-    point.pose.position.y *= -1;
-    setOutput<geometry_msgs::msg::PoseStamped>("point_out2", point);
+    point = getInput<double>("point_in").value();
+    setOutput<double>("point_out1", point);
+    point *= -1;
+    setOutput<double>("point_out2", point);
 
     return BT::NodeStatus::SUCCESS;
 }
