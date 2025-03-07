@@ -269,6 +269,7 @@
                    type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
       <input_port name="goal"
                   type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+    </Action>
     <Action ID="Parallel_check">
       <output_port name="output"
                    type="std::string"/>

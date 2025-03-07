@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root BTCPP_format="4"
+      main_tree_to_execute="MainTree">
+  <BehaviorTree ID="MainTree">
+    <Sequence>
+      <BTMission mission_type="0"
+                 mission_sub_type="1"/>
+      <Sleep msec="3000"/>
+      <BTMission mission_type="0"
+                 mission_sub_type="2"/>
+    </Sequence>
+  </BehaviorTree>
+
+  <!-- Description of Node Models (used by Groot) -->
+  <TreeNodesModel>
+    <Action ID="BTMission">
+      <output_port name="mission_type"
+                   type="int"/>
+      <output_port name="mission_sub_type"
+                   type="int"/>
+    </Action>
+  </TreeNodesModel>
+
+</root>
