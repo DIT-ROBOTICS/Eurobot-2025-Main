@@ -49,11 +49,7 @@ RUN groupadd --gid $USER_GID $USERNAME \
 
 RUN apt-get update \
     && git clone -b humble https://github.com/micro-ROS/micro_ros_setup.git src/micro_ros_setup \
-    # bashrc
     && echo "source /opt/ros/humble/setup.bash" >> /etc/bash.bashrc \
-    && echo "source /home/user/Eurobot-2025-Main-ws/install/setup.bash" >> /etc/bash.bashrc \
-    && echo "export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp" >> /etc/bash.bashrc \
-    && echo "source /home/user/Eurobot-2025-Main-ws/install/local_setup.bash" >> /etc/bash.bashrc \
     && apt-get dist-upgrade -y \
     && apt-get autoremove -y \
     && apt-get autoclean -y \

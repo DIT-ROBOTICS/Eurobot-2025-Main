@@ -46,6 +46,10 @@ target_link_libraries(bt_ros2
   BT_DECORATOR_NODE 
   BT_UTILS_NODE_NODE 
 )
+install(TARGETS
+  bt_ros2
+  DESTINATION lib/${PROJECT_NAME}
+)
 
 add_executable(main_script
   src/main_script.cpp
@@ -180,7 +184,6 @@ ament_target_dependencies(BT_UTILS_NODE_NODE
   ${THIS_PACKAGE_DEPS})
 
 install(TARGETS
-  bt_ros2
   navigationServer
   localizationServer
   actionServer

@@ -57,17 +57,13 @@ public:
     Navigation(const std::string& name, const NodeConfig& conf, const RosNodeParams& params)
         : RosActionNode<nav2_msgs::action::NavigateToPose>(name, conf, params)
     {}
-
     /* Node remapping function */
     static PortsList providedPorts();
     bool setGoal(RosActionNode::Goal& goal) override;
     NodeStatus onResultReceived(const WrappedResult& wr) override;
     virtual NodeStatus onFailure(ActionNodeErrorCode error) override;
     NodeStatus onFeedback(const std::shared_ptr<const Feedback> feedback);
-
 private:
-
-    // rclcpp_action::ResultCode code;
     bool nav_finished_ = false;
     bool nav_error_ = false;
     int nav_type_;

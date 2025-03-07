@@ -93,6 +93,7 @@ int main(int argc, char** argv) {
     factory.registerNodeType<DynamicAdjustment>("DynamicAdjustment");
     params.default_port_value = "navigate_to_pose";
     factory.registerNodeType<Navigation>("Navigation", params);
+    params.default_port_value = "dock_robot";
     factory.registerNodeType<Docking>("Docking", params);
     factory.registerNodeType<Rotation>("Rotation", params);
     // /* firmware */

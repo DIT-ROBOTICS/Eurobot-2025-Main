@@ -39,6 +39,7 @@
 
 using namespace BT;
 
+// Convert string to message
 namespace BT {
   template <> inline geometry_msgs::msg::PoseStamped convertFromString(StringView str);
   template <> inline geometry_msgs::msg::TwistStamped convertFromString(StringView str);
@@ -53,23 +54,23 @@ public:
   Testing(const std::string& name, const BT::NodeConfig& config)
     : BT::StatefulActionNode(name, config)
   {}
-
   /* Node remapping function */
   static BT::PortsList providedPorts();
-
   /* Start and running function */
   BT::NodeStatus onStart() override;
   BT::NodeStatus onRunning() override;
-
   /* Halt function */
   void onHalted() override;
-
 private:
   int tick_count = 0;
-
   std::string input;
 };
 
+/*******************/
+/* Topic Publisher */
+/*******************/
+// A topic publisher node
+// Without API
 class TopicPubTest : public BT::StatefulActionNode
 {
 public:
@@ -77,27 +78,29 @@ public:
     : BT::StatefulActionNode(name, config), node_(node) {
     publisher_ = node_->create_publisher<std_msgs::msg::Int32>("number", 10);
   }
-
   /* Node remapping function */
   static BT::PortsList providedPorts();
-
   /* Start and running function */
   BT::NodeStatus onStart() override;
   BT::NodeStatus onRunning() override;
-
   /* Halt function */
   void onHalted() override;
-
 private:
+  // node
   std::shared_ptr<rclcpp::Node> node_;
-
+  // about msg
   rclcpp::Publisher<std_msgs::msg::Int32>::SharedPtr publisher_;
   std_msgs::msg::Int32 number;
-
+  // params
   int a = 0;
   int b = 0;
 };
 
+/********************/
+/* Topic Subscriber */
+/********************/
+// A topic subscriber node
+// Without API
 class TopicSubTest : public BT::StatefulActionNode
 {
 public:
@@ -105,25 +108,20 @@ public:
     : BT::StatefulActionNode(name, config), node_(node) {
     subscription_ = node_->create_subscription<std_msgs::msg::Int32>("number", 10, std::bind(&TopicSubTest::topic_callback, this, std::placeholders::_1));
   }
-
   /* Node remapping function */
   static BT::PortsList providedPorts();
-
   /* Start and running function */
   BT::NodeStatus onStart() override;
   BT::NodeStatus onRunning() override;
-
   /* Halt function */
   void onHalted() override;
-
 private:
-  // void execute() {
-  //   subscription_ = node_->create_subscription<std_msgs::msg::Int32>("number", 10, std::bind(&TopicSubTest1::topic_callback, this, std::placeholders::_1));
-  // }
+  // function
   void topic_callback(const std_msgs::msg::Int32::SharedPtr msg);
-
+  // node
   rclcpp::Subscription<std_msgs::msg::Int32>::SharedPtr subscription_;
   std::shared_ptr<rclcpp::Node> node_;
+  // params
   int number = 0;
 };
 
@@ -141,6 +139,11 @@ public:
 private:
 };
 
+/********************/
+/* Topic Subscriber */
+/********************/
+// Use API provided by package behaviortree_ros2
+// To create a topic subscriber node
 class StandardTopicSub : public BT::RosTopicSubNode<std_msgs::msg::Int32>
 {
 public:
@@ -155,6 +158,10 @@ public:
 private:
 };
 
+/************************/
+/* Location tf listener */
+/************************/
+// A BT node used to listen to the robot's pose from tf2
 class LocalizationTemp : public BT::StatefulActionNode
 {
 public:
@@ -183,7 +190,10 @@ private:
   std::string input;
 };
 
-// Simple navigation node
+/**************************/
+/* Simple navigation node */
+/**************************/
+// A BT node used to communicate with simple navigation server (btcpp_ros2_interfaces)
 class NavigationTemp : public BT::RosActionNode<btcpp_ros2_interfaces::action::Navigation>
 {
 public:
@@ -198,57 +208,51 @@ public:
   NodeStatus onResultReceived(const WrappedResult& wr) override;
   virtual NodeStatus onFailure(ActionNodeErrorCode error) override;
   NodeStatus onFeedback(const std::shared_ptr<const Feedback> feedback);
-
 private:
 };
 
-class BTMission : public BT::RosActionNode<example_interfaces::action::Fibonacci> {
-
+/*************************/
+/* Basic ROS Action node */
+/*************************/
+// A ROS action client using the API
+// Used to test the communication with the firmware
+class BTMission : public BT::RosActionNode<example_interfaces::action::Fibonacci> 
+{
 public:
   BTMission(const std::string& name, const NodeConfig& conf, const RosNodeParams& params)
     : RosActionNode<example_interfaces::action::Fibonacci>(name, conf, params)
   {}
-
   /* Node remapping function */
   static PortsList providedPorts();
   bool setGoal(RosActionNode::Goal& goal) override;
   NodeStatus onResultReceived(const WrappedResult& wr) override;
   virtual NodeStatus onFailure(ActionNodeErrorCode error) override;
   NodeStatus onFeedback(const std::shared_ptr<const Feedback> feedback);
-
 private:
-
+  // mission status
   bool mission_finished_ = false;
   bool mission_failed_ = false;
-
+  // message params
   int order_;
   std::deque<int> sequence_;
   std::deque<int> partial_sequence_;
 };
 
+/**************************/
+/* Navigation action node */
+/**************************/
+// Write an ROS action to communicate with navigation server (NavigateToPose) 
+// without using the API privided by package behaviortree_ros2
 class NavAction : public BT::StatefulActionNode
 {
 public:
   using NavigateToPose = nav2_msgs::action::NavigateToPose;
   using GoalHandleNavigation = rclcpp_action::ClientGoalHandle<NavigateToPose>;
-  // NavAction(const std::string& name, const rclcpp::NodeOptions & node_options = rclcpp::NodeOptions(), std::shared_ptr<rclcpp::Node> node)
-  // : BT::StatefulActionNode(name, config), node_(node)
-  // {
-  //   goal_done_ = false;
-  // }
   NavAction(const std::string& name, const BT::NodeConfig& config, std::shared_ptr<rclcpp::Node> node)
-    : BT::StatefulActionNode(name, config), node_(node), goal_done_(false)
-//Parallel Test node 1
-class count_5 : public BT::StatefulActionNode
-{
-public:
-  count_5(const std::string& name, const BT::NodeConfig& config)
-    : BT::StatefulActionNode(name, config)
+    : BT::StatefulActionNode(name, config), node_(node)
   {}
-
   /* Node remapping function */
   static BT::PortsList providedPorts();
-
   /* Start and running function */
   BT::NodeStatus onStart() override;
   BT::NodeStatus onRunning() override;
@@ -262,15 +266,32 @@ public:
 
 private:
   std::shared_ptr<rclcpp::Node> node_;
-  // rclcpp::NodeOptions& node_options;
-  bool nav_finished_ = false;
-  bool nav_error_ = false;
-  geometry_msgs::msg::PoseStamped goal_;
-  geometry_msgs::msg::PoseStamped current_pose_;
-
   rclcpp_action::Client<NavigateToPose>::SharedPtr client_ptr_;
   rclcpp::TimerBase::SharedPtr timer_;
-  bool goal_done_;
+  // nav status
+  bool nav_finished_ = false;
+  bool nav_error_ = false;
+  // bot pose
+  geometry_msgs::msg::PoseStamped goal_;
+  geometry_msgs::msg::PoseStamped current_pose_;
+};
+
+/************************/
+/* Parallel Test node 1 */
+/************************/
+class count_5 : public BT::StatefulActionNode
+{
+public:
+  count_5(const std::string& name, const BT::NodeConfig& config)
+    : BT::StatefulActionNode(name, config)
+  {}
+
+  /* Node remapping function */
+  static BT::PortsList providedPorts();
+
+  /* Start and running function */
+  BT::NodeStatus onStart() override;
+  BT::NodeStatus onRunning() override;
 
   /* Halt function */
   void onHalted() override;
@@ -280,8 +301,9 @@ private:
 
   std::string input;
 };
-
-//Parallel Test node 2
+/************************/
+/* Parallel Test node 2 */
+/************************/
 class count_10 : public BT::StatefulActionNode
 {
 public:
@@ -305,7 +327,9 @@ private:
   std::string input;
 };
 
-//Parallel Test node 3
+/************************/
+/* Parallel Test node 3 */
+/************************/
 class count_15 : public BT::StatefulActionNode
 {
 public:
@@ -329,7 +353,9 @@ private:
   std::string input;
 };
 
-//Parallel Test node 4
+/************************/
+/* Parallel Test node 4 */
+/************************/
 class Parallel_check : public BT::StatefulActionNode
 {
 public:

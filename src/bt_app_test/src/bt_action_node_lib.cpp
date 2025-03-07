@@ -364,14 +364,14 @@ void NavAction::send_goal()
 {
   using namespace std::placeholders;
   this->timer_->cancel();
-  this->goal_done_ = false;
+  nav_finished_ = false;
 
   if (!this->client_ptr_) {
     RCLCPP_ERROR(node_->get_logger(), "Action client not initialized");
   }
   if (!this->client_ptr_->wait_for_action_server(std::chrono::seconds(10))) {
     RCLCPP_ERROR(node_->get_logger(), "Action server not available after waiting");
-    this->goal_done_ = true;
+    nav_finished_ = true;
     return;
   }
 
@@ -389,7 +389,6 @@ void NavAction::send_goal()
   goal_.pose.orientation.w = q.w();
 
   RCLCPP_INFO(node_->get_logger(), "Start Nav (%f, %f)", goal_.pose.position.x, goal_.pose.position.y);
-  nav_finished_ = false;
   
   auto goal_msg = NavigateToPose::Goal();
   goal_msg.pose = goal_;
@@ -424,8 +423,7 @@ void NavAction::feedback_callback(
 
 BT::NodeStatus NavAction::result_callback(const GoalHandleNavigation::WrappedResult & result)
 {
-  RCLCPP_INFO_STREAM(node_->get_logger(), "current_pose: " << current_pose_.pose.position.x << ", " << current_pose_.pose.position.y);
-  this->goal_done_ = true;
+  nav_finished_ = true;
   switch (result.code) {
     case rclcpp_action::ResultCode::SUCCEEDED:
       RCLCPP_INFO(node_->get_logger(), "Result received");
@@ -440,9 +438,8 @@ BT::NodeStatus NavAction::result_callback(const GoalHandleNavigation::WrappedRes
       RCLCPP_ERROR(node_->get_logger(), "Unknown result code");
       return BT::NodeStatus::FAILURE;
   }
-  // check if mission success
+  // check the correctness of the final pose
   if (calculateDistance(current_pose_.pose, goal_.pose) < 0.03 && calculateAngleDifference(current_pose_.pose, goal_.pose) < 0.4) {
-    nav_finished_ = true;
     RCLCPP_INFO_STREAM(node_->get_logger(), "success! final_pose: " << current_pose_.pose.position.x << ", " << current_pose_.pose.position.y);
     setOutput<geometry_msgs::msg::PoseStamped>("final_pose", current_pose_);
     return NodeStatus::SUCCESS;
@@ -455,19 +452,18 @@ BT::NodeStatus NavAction::result_callback(const GoalHandleNavigation::WrappedRes
 }
 
 BT::NodeStatus NavAction::onRunning() {
-  if (nav_finished_) {
-    RCLCPP_INFO_STREAM(node_->get_logger(), "SUCCESS");
+  if (nav_finished_)
     return NodeStatus::SUCCESS;
-  } else if (nav_error_) {
-    RCLCPP_INFO_STREAM(node_->get_logger(), "FAILURE");
+  else if (nav_error_)
     return NodeStatus::SUCCESS;
-  } else {
-    // RCLCPP_INFO_STREAM(node_->get_logger(), "RUNNING");
+  else
     return NodeStatus::RUNNING;
-  }
 }
 
 void NavAction::onHalted() {
+  return;
+}
+
 PortsList count_5::providedPorts() {
   return { 
     BT::InputPort<std::string>("input"),

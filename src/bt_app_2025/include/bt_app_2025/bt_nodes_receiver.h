@@ -43,6 +43,7 @@ namespace BT {
 /***************/
 /* LocReceiver */
 /***************/
+// receive the robot pose and rival pose from localization team
 class LocReceiver : public BT::SyncActionNode
 {
 public:
@@ -70,6 +71,8 @@ private:
 /***************/
 /* NavReceiver */
 /***************/
+// Receive the rival goal predicted by navigation team
+// store the prediction to the BT blackboard
 class NavReceiver : public BT::SyncActionNode
 {
 public:
@@ -95,6 +98,10 @@ private:
 /***************/
 /* CamReceiver */
 /***************/
+// receive the vision data
+// reconstruct and organize to the message
+// that is useful for main team
+// and then store to the BT blackboard
 class CamReceiver : public BT::SyncActionNode
 {
 public:
