@@ -120,12 +120,11 @@ private:
   bool mission_finished_ = false;
 };
 
-
-class CollectFinisher : public BT::StatefulActionNode
+class Finisher : public BT::StatefulActionNode
 {
 public:
-  CollectFinisher(const std::string& name, const BT::NodeConfig& config, BT::Blackboard::Ptr blackboard)
-    : BT::StatefulActionNode(name, config), blackboard_(blackboard)
+  Finisher(const std::string& name, const BT::NodeConfig& config)
+    : BT::StatefulActionNode(name, config)
   {}
 
   /* Node remapping function */
@@ -139,37 +138,17 @@ public:
   void onHalted() override;
 
 private:
-  BT::Blackboard::Ptr blackboard_;
-  int mission_status_;
-  bool has_raw_material_;
-  bool has_one_level_;
-  bool has_garbage_;
-};
-
-class ConstructFinisher : public BT::StatefulActionNode
-{
-public:
-  ConstructFinisher(const std::string& name, const BT::NodeConfig& config, BT::Blackboard::Ptr blackboard)
-    : BT::StatefulActionNode(name, config), blackboard_(blackboard)
-  {}
-
-  /* Node remapping function */
-  static BT::PortsList providedPorts();
-
-  /* Start and running function */
-  BT::NodeStatus onStart() override;
-  BT::NodeStatus onRunning() override;
-
-  /* Halt function */
-  void onHalted() override;
-
-private:
-  BT::Blackboard::Ptr blackboard_;
-  int mission_status_;
+  // step_results_-> 1: front_collect 2: back_collect 3: construct_1 4: construct_2 5: construct_3
+  std::deque<int> step_results_;
+  // obot_type_-> 0: SpinArm 1: NotSpinArm
+  bool robot_type_;
   int success_levels_;
   int failed_levels_;
   bool has_garbage_;
   int on_robot_materials_;
+  bool has_raw_material_;
+  bool has_one_level_;
+  int mission_progress_;
 
   std::deque<int> stage_info_;
 };
