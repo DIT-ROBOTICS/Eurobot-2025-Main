@@ -125,79 +125,82 @@ bool SIMAactivate::wakeUpSIMA() {
         timer_.reset();
     return true;
 }
-/*******************/
-/* CollectFinisher */
-/*******************/
-PortsList CollectFinisher::providedPorts() {
+/*************/
+/* Finisher */
+/************/
+PortsList Finisher::providedPorts() {
     return { 
         BT::InputPort<std::deque<int>>("step_results"),
-        BT::OutputPort<bool>("has_raw_material"), 
-        BT::OutputPort<bool>("has_one_level"), 
-        BT::OutputPort<bool>("has_garbage")
-    };
-}
-
-BT::NodeStatus CollectFinisher::onStart()
-{
-    getInput<std::deque<int>>("step_results", step_results_);
-    return BT::NodeStatus::RUNNING;
-}
-
-BT::NodeStatus CollectFinisher::onRunning()
-{
-    // To Do: 
-    setOutput("has_raw_material", has_raw_material_); 
-    setOutput("has_one_level", has_one_level_); 
-    setOutput("has_garbage", has_garbage_);
-    return BT::NodeStatus::SUCCESS;
-}
-
-void CollectFinisher::onHalted()
-{
-    // Reset the output port
-    setOutput("has_raw_material", false); 
-    setOutput("has_one_level", false); 
-    setOutput("has_garbage", false);
-
-    RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Testing Node halted");
-    return;
-}
-/*********************/
-/* ConstructFinisher */
-/*********************/
-PortsList ConstructFinisher::providedPorts() {
-    return { 
-        BT::InputPort<std::deque<int>>("step_results"),
+        BT::InputPort<bool>("robot_type"),
+        //construct:
         BT::OutputPort<int>("success_levels"), 
         BT::OutputPort<int>("failed_levels"), 
-        BT::OutputPort<bool>("has_garbage"), 
-        BT::OutputPort<int>("on_robot_materials")
+        BT::OutputPort<int>("on_robot_materials"),
+        //collect:
+        BT::OutputPort<bool>("has_raw_material"), 
+        BT::OutputPort<bool>("has_one_level")
     };
 }
 
-BT::NodeStatus ConstructFinisher::onStart()
+BT::NodeStatus Finisher::onStart()
 {
     getInput<std::deque<int>>("step_results", step_results_);
+    getInput<bool>("robot_type", robot_type_);
+    blackboard_->get<int>("mission_progress", mission_progress_);
+    blackboard_->set<int>("mission_progress", 0);
     return BT::NodeStatus::RUNNING;
 }
 
-BT::NodeStatus ConstructFinisher::onRunning()
+BT::NodeStatus Finisher::onRunning()
 {
-    // To Do: 
+    switch(mission_progress_){
+
+        case 1:
+            break;
+        case 2:
+            break;
+        case 3:
+            break;
+        case 4:
+            if(robot_type_)
+            {
+
+            }
+            else
+            {
+
+            }
+            break;
+        case 5:
+            if(robot_type_)
+            {
+
+            }
+            else
+            {
+                
+            }
+            break;
+        default:
+            break;
+    }
+
     setOutput("success_levels", success_levels_); 
     setOutput("failed_levels", failed_levels_); 
-    setOutput("has_garbage", has_garbage_);
     setOutput("on_robot_materials", on_robot_materials_);
+    setOutput("has_raw_material", has_raw_material_); 
+    setOutput("has_one_level", has_one_level_);
     
     return BT::NodeStatus::SUCCESS;
 }
 
-void ConstructFinisher::onHalted()
+void Finisher::onHalted()
 {
     // Reset the output port
     setOutput("success_levels", 0); 
     setOutput("failed_levels", 0); 
-    setOutput("has_garbage", false);
+    setOutput("has_raw_material", false); 
+    setOutput("has_one_level", false);
     setOutput("on_robot_materials", 0);
 
     RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Testing Node halted");

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root BTCPP_format="4" project_name="Project">
+    <include path="src/bt_app_2025/bt_m_config/bt_plan_a.xml"/>
+    <!-- Description of Node Models (used by Groot) -->
+    <TreeNodesModel>
+        <Action ID="BTStarter">
+            <output_port name="result" type="int"/>
+        </Action>
+        <Action ID="CamReceiver"/>
+        <Action ID="Docking">
+            <input_port name="mission_type" type="int"/>
+            <output_port name="final_pose" type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+            <input_port name="offset" type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+            <input_port name="base" type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+        </Action>
+        <Action ID="NavReceiver"/>
+        <Action ID="Navigation">
+            <output_port name="final_pose" type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+            <input_port name="type" type="int"/>
+            <input_port name="goal" type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+        </Action>
+        <Action ID="PointProvider">
+            <output_port name="point_out2" type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+            <output_port name="point_out1" type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+            <input_port name="point_in" type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+        </Action>
+        <Action ID="Rotation">
+            <output_port name="final_pose" type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+            <input_port name="degree" type="double"/>
+            <input_port name="base" type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+        </Action>
+    </TreeNodesModel>
+</root>

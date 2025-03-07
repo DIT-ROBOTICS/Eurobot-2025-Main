@@ -97,10 +97,12 @@ NodeStatus Navigation::onResultReceived(const WrappedResult& wr) {
     if (calculateDistance(current_pose_.pose, goal_.pose) < 0.03 && calculateAngleDifference(current_pose_.pose, goal_.pose) < 0.4) {
         nav_finished_ = true;
         RCLCPP_INFO_STREAM(logger(), "success! final_pose: " << current_pose_.pose.position.x << ", " << current_pose_.pose.position.y);
+        RCLCPP_INFO_STREAM(logger(), "-----------------");
         return NodeStatus::SUCCESS;
     } else {
         nav_error_ = true;
         RCLCPP_INFO_STREAM(logger(), "fail! final_pose: " << current_pose_.pose.position.x << ", " << current_pose_.pose.position.y);
+        RCLCPP_INFO_STREAM(logger(), "-----------------");
         return NodeStatus::SUCCESS;
     }
 }
@@ -109,6 +111,7 @@ NodeStatus Navigation::onFailure(ActionNodeErrorCode error) {
     nav_error_ = true;
     setOutput<geometry_msgs::msg::PoseStamped>("final_pose", current_pose_);
     RCLCPP_INFO_STREAM(logger(), "fail! final_pose: " << current_pose_.pose.position.x << ", " << current_pose_.pose.position.y);
+    RCLCPP_INFO_STREAM(logger(), "-----------------");
     return NodeStatus::FAILURE;
 }
 
@@ -155,10 +158,12 @@ NodeStatus Docking::onResultReceived(const WrappedResult& wr) {
     if (calculateDistance(current_pose_.pose, goal_.pose) < 0.03 && calculateAngleDifference(current_pose_.pose, goal_.pose) < 0.4) {
         nav_finished_ = true;
         RCLCPP_INFO_STREAM(logger(), "success! final_pose: " << current_pose_.pose.position.x << ", " << current_pose_.pose.position.y);
+        RCLCPP_INFO_STREAM(logger(), "-----------------");
         return NodeStatus::SUCCESS;
     } else {
         nav_error_ = true;
         RCLCPP_INFO_STREAM(logger(), "fail! final_pose: " << current_pose_.pose.position.x << ", " << current_pose_.pose.position.y);
+        RCLCPP_INFO_STREAM(logger(), "-----------------");
         return NodeStatus::SUCCESS;
     }
 }
@@ -167,6 +172,7 @@ NodeStatus Docking::onFailure(ActionNodeErrorCode error) {
     nav_error_ = true;
     setOutput<geometry_msgs::msg::PoseStamped>("final_pose", current_pose_);
     RCLCPP_INFO_STREAM(logger(), "fail! final_pose: " << current_pose_.pose.position.x << ", " << current_pose_.pose.position.y);
+    RCLCPP_INFO_STREAM(logger(), "-----------------");
     return NodeStatus::FAILURE;
 }
 
@@ -218,10 +224,12 @@ NodeStatus Rotation::onResultReceived(const WrappedResult& wr) {
     if (calculateDistance(current_pose_.pose, goal_.pose) < 0.03 && calculateAngleDifference(current_pose_.pose, goal_.pose) < 0.4) {
         nav_finished_ = true;
         RCLCPP_INFO(logger(), "success! final_direction: (%f, %f)", current_pose_.pose.orientation.z, current_pose_.pose.orientation.w);
+        RCLCPP_INFO_STREAM(logger(), "-----------------");
         return NodeStatus::SUCCESS;
     } else {
         nav_error_ = true;
         RCLCPP_INFO(logger(), "fail! final_direction: (%f, %f)", current_pose_.pose.orientation.z, current_pose_.pose.orientation.w);
+        RCLCPP_INFO_STREAM(logger(), "-----------------");
         return NodeStatus::SUCCESS;
     }
 }
@@ -230,6 +238,7 @@ NodeStatus Rotation::onFailure(ActionNodeErrorCode error) {
     nav_error_ = true;
     setOutput<geometry_msgs::msg::PoseStamped>("final_pose", current_pose_);
     RCLCPP_ERROR(logger(), "[BT]: Navigation error");
+    RCLCPP_INFO_STREAM(logger(), "-----------------");
     return NodeStatus::FAILURE;
 }
 BT::PortsList DynamicAdjustment::providedPorts() {
