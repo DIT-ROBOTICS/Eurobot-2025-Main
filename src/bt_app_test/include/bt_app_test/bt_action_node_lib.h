@@ -280,25 +280,6 @@ public:
   /* Start and running function */
   BT::NodeStatus onStart() override;
   BT::NodeStatus onRunning() override;
-  void onHalted() override;
-  void send_goal();
-  void goal_response_callback(GoalHandleNavigation::SharedPtr goal_handle);
-  void feedback_callback(
-    GoalHandleNavigation::SharedPtr,
-    const std::shared_ptr<const NavigateToPose::Feedback> feedback);
-  BT::NodeStatus result_callback(const GoalHandleNavigation::WrappedResult & result);
-
-private:
-  std::shared_ptr<rclcpp::Node> node_;
-  // rclcpp::NodeOptions& node_options;
-  bool nav_finished_ = false;
-  bool nav_error_ = false;
-  geometry_msgs::msg::PoseStamped goal_;
-  geometry_msgs::msg::PoseStamped current_pose_;
-
-  rclcpp_action::Client<NavigateToPose>::SharedPtr client_ptr_;
-  rclcpp::TimerBase::SharedPtr timer_;
-  bool goal_done_;
 
   /* Halt function */
   void onHalted() override;
