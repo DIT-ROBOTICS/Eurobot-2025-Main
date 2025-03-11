@@ -97,6 +97,8 @@
 ### Navigation(導航組)
 - `$ ros2 launch navigation2_run sim_launch.py`
 - `$ rviz2`, and then open demo.rviz
+- Open the Foxglove connection program:
+    `ros2 launch foxglove_bridge foxglove_bridge_launch.xml port:=8765`
 ### Rival Sim(導航組)
 - `$ ros2 run rival_layer RivalSim --ros-args -p Rival_mode:=<rival mode>`
 ### rival_simulation(主程式)
