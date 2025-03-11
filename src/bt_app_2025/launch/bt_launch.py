@@ -27,7 +27,12 @@ def generate_launch_description():
     )
     return LaunchDescription([
         Node(
-            parameters=[config_path, mission_set, {"tree_name": "MainTree"}],
+            parameters=[
+                config_path, 
+                mission_set, 
+                {"tree_name": "MainTree"}, 
+                {"Robot_name": "Invisible"}  # Invisible or Tongue
+            ],
             remappings=[
                 ("/map", "/map"),
                 ("/base_link", "/final_pose")
