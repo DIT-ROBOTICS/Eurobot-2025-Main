@@ -5,6 +5,7 @@
 #include <fstream>
 #include <deque>
 #include <bitset>
+#include <math.h>
 
 // Use behavior tree
 #include "behaviortree_cpp/decorators/loop_node.h"
@@ -43,9 +44,11 @@ namespace BT {
     template <> inline std::deque<int> convertFromString(StringView str);
 }
 
-/******************************/
-/* BTStarter - Start the tree */
-/******************************/
+/*****************/
+/* PointProvider */
+/*****************/
+// convert a input message and output as two BT port parameter
+// each one represent the forward and backward distance
 class PointProvider : public BT::SyncActionNode {
 
 public:
@@ -59,11 +62,13 @@ public:
     /* Start and running function */
     BT::NodeStatus tick() override;
 private:
-    geometry_msgs::msg::PoseStamped point;
+    double point;
 };
+
 /******************************/
 /* BTStarter - Start the tree */
 /******************************/
+// continuous update the current time
 class BTStarter : public BT::SyncActionNode {
 
 public:
@@ -86,7 +91,10 @@ private:
     float current_time_;
 };
 
+/******************************/
 /* BTFinisher - Send mission type to kernel */
+/******************************/
+// No useage now
 class BTFinisher : public BT::SyncActionNode {
 
 public:
@@ -108,6 +116,7 @@ public:
 /*****************************************/
 /* Comparator to check the state is safe */
 /*****************************************/
+// No usage now
 class Comparator : public BT::ConditionNode {
 
 public:
@@ -139,6 +148,7 @@ private:
 /****************************/
 /* TimerChecker - Decorator */
 /****************************/
+// No usage now
 class TimerChecker : public BT::DecoratorNode {
 
 public:
