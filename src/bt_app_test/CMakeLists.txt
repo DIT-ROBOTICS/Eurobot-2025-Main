@@ -22,6 +22,7 @@ find_package(tf2_ros REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
+find_package(nav2_msgs REQUIRED)
 find_package(btcpp_ros2_interfaces REQUIRED)
 find_package(example_interfaces REQUIRED)
 
@@ -44,6 +45,30 @@ target_link_libraries(bt_ros2
   BT_ACTION_NODE 
   BT_DECORATOR_NODE 
   BT_UTILS_NODE_NODE 
+)
+install(TARGETS
+  bt_ros2
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+add_executable(main_script
+  src/main_script.cpp
+)
+ament_target_dependencies(main_script
+  ${THIS_PACKAGE_DEPS}
+  "tf2"
+  "tf2_geometry_msgs"
+  "nav2_msgs"
+  "geometry_msgs"
+  "rclcpp"
+  "rclcpp_action"
+)
+target_link_libraries(main_script
+  ${ARMADILLO_LIBRARIES}
+)
+install(TARGETS
+  main_script
+  DESTINATION lib/${PROJECT_NAME}
 )
 
 add_executable(topicPubServer src/test_server/topicPubServer.cpp)
@@ -125,8 +150,11 @@ target_link_libraries(BT_ACTION_NODE
 ament_target_dependencies(BT_ACTION_NODE 
   "btcpp_ros2_interfaces"
   "example_interfaces"
+  "nav2_msgs"
   "behaviortree_ros2"
   "behaviortree_cpp"
+  "std_msgs"
+  "geometry_msgs"
   "tf2"
   "tf2_ros"
   "tf2_geometry_msgs"
@@ -156,12 +184,12 @@ ament_target_dependencies(BT_UTILS_NODE_NODE
   ${THIS_PACKAGE_DEPS})
 
 install(TARGETS
-  bt_ros2
   navigationServer
   localizationServer
   actionServer
   actionClient
   topicPubServer
+  RUNTIME DESTINATION lib
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin)

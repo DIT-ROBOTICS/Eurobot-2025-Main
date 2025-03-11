@@ -7,6 +7,7 @@
 #include <bitset>
 #include <chrono>
 #include <cmath>
+#include <string.h>
 
 // Use behavior tree
 #include <behaviortree_ros2/bt_action_node.hpp>
@@ -34,8 +35,9 @@
 #include <tf2_ros/buffer.h>
 #include <tf2/exceptions.h>
 
-// Use self define message
+// Use action message
 #include "nav2_msgs/action/navigate_to_pose.hpp"
+#include "opennav_docking_msgs/action/dock_robot.hpp"
 
 #define PI 3.1415926
 
@@ -56,16 +58,13 @@ public:
     Navigation(const std::string& name, const NodeConfig& conf, const RosNodeParams& params)
         : RosActionNode<nav2_msgs::action::NavigateToPose>(name, conf, params)
     {}
-
     /* Node remapping function */
     static PortsList providedPorts();
     bool setGoal(RosActionNode::Goal& goal) override;
     NodeStatus onResultReceived(const WrappedResult& wr) override;
     virtual NodeStatus onFailure(ActionNodeErrorCode error) override;
     NodeStatus onFeedback(const std::shared_ptr<const Feedback> feedback);
-
 private:
-
     bool nav_finished_ = false;
     bool nav_error_ = false;
     int nav_type_;
@@ -76,15 +75,15 @@ private:
 /*****************/
 /* Docking state */
 /*****************/
-class Docking : public BT::RosActionNode<nav2_msgs::action::NavigateToPose> {
+class Docking : public BT::RosActionNode<opennav_docking_msgs::action::DockRobot> {
 
 public:
     Docking(const std::string& name, const NodeConfig& conf, const RosNodeParams& params)
-        : RosActionNode<nav2_msgs::action::NavigateToPose>(name, conf, params)
+        : RosActionNode<opennav_docking_msgs::action::DockRobot>(name, conf, params), tf_buffer_(params.nh.lock()->get_clock()), listener_(tf_buffer_)
     {
         nav_finished_ = false;
         nav_error_ = false;
-        mission_type_ = 0;
+        isPureDocking_ = true;
     }
 
     /* Node remapping function */
@@ -95,12 +94,17 @@ public:
     NodeStatus onFeedback(const std::shared_ptr<const Feedback> feedback);
 
 private:
+    bool UpdateRobotPose();
 
     bool nav_finished_;
     bool nav_error_;
-    int mission_type_;
+    bool isPureDocking_;
+    std::string dock_type_;
+    double offset_;
     geometry_msgs::msg::PoseStamped goal_;
-    geometry_msgs::msg::PoseStamped current_pose_;
+    geometry_msgs::msg::PoseStamped robot_pose_;
+    tf2_ros::Buffer tf_buffer_;
+    tf2_ros::TransformListener listener_;
 };
 
 class Rotation : public BT::RosActionNode<nav2_msgs::action::NavigateToPose> {

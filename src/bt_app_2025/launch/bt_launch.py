@@ -15,7 +15,7 @@ from launch.substitutions import LaunchConfiguration
 from ament_index_python.packages import get_package_share_directory
 
 def generate_launch_description():
-    params = os.path.join(
+    config_path = os.path.join(
         get_package_share_directory('bt_app_2025'),
         'params',
         'config_path.yaml'
@@ -23,10 +23,18 @@ def generate_launch_description():
         'params',
         'finisher.yaml'
     )
+    mission_set = os.path.join(
+        get_package_share_directory('bt_app_2025'),
+        'params',
+        'mission_set.yaml'
+    )
     return LaunchDescription([
         Node(
-            # parameters=[LaunchConfiguration('param_file')],
-            parameters=[params, {"tree_name": "MainTree"}],
+            parameters=[config_path, mission_set, {"tree_name": "MainTree"}],
+            remappings=[
+                ("/map", "/map"),
+                ("/base_link", "/final_pose")
+            ],
             package = 'bt_app_2025',
             executable = 'bt_m',
             name = 'bt_m'
