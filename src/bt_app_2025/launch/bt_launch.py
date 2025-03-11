@@ -19,6 +19,9 @@ def generate_launch_description():
         get_package_share_directory('bt_app_2025'),
         'params',
         'config_path.yaml'
+        get_package_share_directory('bt_app_2025'),
+        'params',
+        'finisher.yaml'
     )
     return LaunchDescription([
         Node(

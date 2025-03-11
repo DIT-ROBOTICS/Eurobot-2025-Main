@@ -63,6 +63,8 @@ int main(int argc, char** argv) {
     // Get a parameter from blackboard example
     // blackboard()->get("global_param", value);
     blackboard->set<double>("current_time", 0);
+    blackboard->set<double>("front_materials", 0);
+    blackboard->set<double>("back_materials", 0);
 
     // Parameters
     std::string groot_xml_config_directory;
@@ -103,8 +105,7 @@ int main(int argc, char** argv) {
     factory.registerNodeType<BTMission>("BTMission", params);
     factory.registerNodeType<SIMAactivate>("SIMAactivate", node);
     // factory.registerNodeType<BannerMission>("BannerMission", params);
-    factory.registerNodeType<ConstructFinisher>("ConstructFinisher");
-    factory.registerNodeType<CollectFinisher>("CollectFinisher");
+    factory.registerNodeType<MissionFinisher>("MissionFinisher", blackboard);
     /* others */
     factory.registerNodeType<BTStarter>("BTStarter", node, blackboard);
     // factory.registerNodeType<BTFinisher>("BTFinisher", score_filepath, team, node);
