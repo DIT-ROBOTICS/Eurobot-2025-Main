@@ -1,4 +1,6 @@
 #include "bt_app_2025/bt_nodes_navigation.h"
+#include "bt_app_2025/bt_nodes_receiver.h"
+#include "bt_app_2025/bt_nodes_util.h"
 
 using namespace BT;
 using namespace std;
@@ -200,7 +202,8 @@ NodeStatus Docking::onResultReceived(const WrappedResult& wr) {
         return NodeStatus::FAILURE;
     // set output
     }
-    UpdateRobotPose();
+    LocReceiver::UpdateRobotPose(robot_pose_, tf_buffer_);
+    // UpdateRobotPose();
     RCLCPP_INFO_STREAM(logger(), "success! final_pose: " << robot_pose_.pose.position.x << ", " << robot_pose_.pose.position.y << ", " << ConvertPoseFormat(robot_pose_).pose.position.z);
     RCLCPP_INFO_STREAM(logger(), "-----------------");
     setOutput<geometry_msgs::msg::PoseStamped>("final_pose", ConvertPoseFormat(robot_pose_));
@@ -210,7 +213,8 @@ NodeStatus Docking::onResultReceived(const WrappedResult& wr) {
 NodeStatus Docking::onFailure(ActionNodeErrorCode error) {
     nav_error_ = true;
     nav_finished_ = true;
-    UpdateRobotPose();
+    LocReceiver::UpdateRobotPose(robot_pose_, tf_buffer_);
+    // UpdateRobotPose();
     setOutput<geometry_msgs::msg::PoseStamped>("final_pose", ConvertPoseFormat(robot_pose_));
     RCLCPP_INFO_STREAM(logger(), "RETURN FAILURE! final_pose: " << robot_pose_.pose.position.x << ", " << robot_pose_.pose.position.y << ", " << robot_pose_.pose.position.z);
     RCLCPP_INFO_STREAM(logger(), "-----------------");
