@@ -34,35 +34,27 @@
 
 using namespace BT;
 
-namespace BT {
-    template <> inline geometry_msgs::msg::TwistStamped convertFromString(StringView str);
-    template <> inline int convertFromString(StringView str);
-    template <> inline std::deque<int> convertFromString(StringView str);
-}
+// namespace BT {
+//     template <> inline geometry_msgs::msg::TwistStamped convertFromString(StringView str);
+//     template <> inline int convertFromString(StringView str);
+//     template <> inline std::deque<int> convertFromString(StringView str);
+// }
 
 /***************/
 /* LocReceiver */
 /***************/
 // receive the robot pose and rival pose from localization team
-class LocReceiver : public BT::SyncActionNode
+class LocReceiver
 {
 public:
-  LocReceiver(const std::string& name, const BT::NodeConfig& config, std::shared_ptr<rclcpp::Node> node)
-    : BT::SyncActionNode(name, config), node_(node), tf_buffer_(node_->get_clock()), listener_(tf_buffer_)
+  LocReceiver(std::shared_ptr<rclcpp::Node> node)
+    : node_(node), tf_buffer_(node_->get_clock()), listener_(tf_buffer_)
   {}
-
-  /* Node remapping function */
-  static BT::PortsList providedPorts();
-
-  /* Start and running function */
-  BT::NodeStatus tick() override;
-
+  static bool UpdateRobotPose(geometry_msgs::msg::PoseStamped &robot_pose_, tf2_ros::Buffer &tf_buffer_);
+  static bool UpdateRivalPose(geometry_msgs::msg::PoseStamped &rival_pose_, tf2_ros::Buffer &tf_buffer_);
 private:
-  bool UpdateRobotPose();
-  bool UpdateRivalPose();
-
-  geometry_msgs::msg::TwistStamped robot_pose_;
-  geometry_msgs::msg::TwistStamped rival_pose_;
+  geometry_msgs::msg::PoseStamped robot_pose_;
+  geometry_msgs::msg::PoseStamped rival_pose_;
   std::shared_ptr<rclcpp::Node> node_;
   tf2_ros::Buffer tf_buffer_;
   tf2_ros::TransformListener listener_;
