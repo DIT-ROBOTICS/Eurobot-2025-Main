@@ -7,6 +7,7 @@
 #include <bitset>
 #include <chrono>
 #include <cmath>
+#include <string.h>
 
 // Use behavior tree
 #include <behaviortree_ros2/bt_action_node.hpp>
@@ -82,7 +83,7 @@ public:
     {
         nav_finished_ = false;
         nav_error_ = false;
-        useDocking_ = true;
+        isPureDocking_ = true;
     }
 
     /* Node remapping function */
@@ -97,7 +98,9 @@ private:
 
     bool nav_finished_;
     bool nav_error_;
-    bool useDocking_;
+    bool isPureDocking_;
+    std::string dock_type_;
+    double offset_;
     geometry_msgs::msg::PoseStamped goal_;
     geometry_msgs::msg::PoseStamped robot_pose_;
     tf2_ros::Buffer tf_buffer_;
