@@ -123,8 +123,8 @@ private:
 class Finisher : public BT::StatefulActionNode
 {
 public:
-  Finisher(const std::string& name, const BT::NodeConfig& config)
-    : BT::StatefulActionNode(name, config)
+  Finisher(const std::string& name, const BT::NodeConfig& config, BT::Blackboard::Ptr blackboard)
+    : BT::StatefulActionNode(name, config), blackboard_(blackboard)
   {}
 
   /* Node remapping function */
@@ -138,6 +138,7 @@ public:
   void onHalted() override;
 
 private:
+  BT::Blackboard::Ptr blackboard_;
   // step_results_-> 1: front_collect 2: back_collect 3: construct_1 4: construct_2 5: construct_3
   std::deque<int> step_results_;
   // obot_type_-> 0: SpinArm 1: NotSpinArm

@@ -93,9 +93,9 @@ int main(int argc, char** argv) {
     factory.registerNodeType<DynamicAdjustment>("DynamicAdjustment");
     params.default_port_value = "navigate_to_pose";
     factory.registerNodeType<Navigation>("Navigation", params);
+    factory.registerNodeType<Rotation>("Rotation", params);
     params.default_port_value = "dock_robot";
     factory.registerNodeType<Docking>("Docking", params);
-    factory.registerNodeType<Rotation>("Rotation", params);
     // /* firmware */
     params.default_port_value = "firmware_mission";
     factory.registerNodeType<BTMission>("BTMission", params);
@@ -103,8 +103,7 @@ int main(int argc, char** argv) {
     factory.registerNodeType<IntegratedMissionNode>("IntegratedMissionNode", node, blackboard);
     factory.registerNodeType<SIMAactivate>("SIMAactivate", node);
     // factory.registerNodeType<BannerMission>("BannerMission", params);
-    factory.registerNodeType<ConstructFinisher>("ConstructFinisher", blackboard);
-    factory.registerNodeType<CollectFinisher>("CollectFinisher", blackboard);
+    // factory.registerNodeType<Finisher>("Finisher", blackboard);
     /* others */
     factory.registerNodeType<BTStarter>("BTStarter", node, blackboard);
     // factory.registerNodeType<BTFinisher>("BTFinisher", score_filepath, team, node);
