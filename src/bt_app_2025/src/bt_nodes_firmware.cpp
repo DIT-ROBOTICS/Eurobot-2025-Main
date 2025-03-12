@@ -3,17 +3,17 @@
 using namespace BT;
 using namespace std;
 
-template <> inline geometry_msgs::msg::TwistStamped BT::convertFromString(StringView str) {
+template <> inline geometry_msgs::msg::PoseStamped BT::convertFromString(StringView str) {
 
     auto parts = splitString(str, ',');
     if (parts.size() != 3) {
         throw RuntimeError("invalid input)");
     }
     else {
-        geometry_msgs::msg::TwistStamped output;
-        output.twist.linear.x = convertFromString<double>(parts[0]);
-        output.twist.linear.y = convertFromString<double>(parts[1]);
-        output.twist.linear.z = convertFromString<double>(parts[2]);
+        geometry_msgs::msg::PoseStamped output;
+        output.pose.position.x = convertFromString<double>(parts[0]);
+        output.pose.position.y = convertFromString<double>(parts[1]);
+        output.pose.position.z = convertFromString<double>(parts[2]);
         return output;
     }
 }
