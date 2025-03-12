@@ -93,7 +93,6 @@ private:
   std_msgs::msg::Int32 number;
   // params
   int a = 0;
-  int b = 0;
 };
 
 /********************/

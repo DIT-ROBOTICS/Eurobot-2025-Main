@@ -51,6 +51,7 @@ ament_target_dependencies(bt_m
   "rclcpp_components"
   "std_srvs"
   "std_msgs"
+  "geometry_msgs"
 )
 install(TARGETS
   bt_m

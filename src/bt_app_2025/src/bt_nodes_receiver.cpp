@@ -1,8 +1,8 @@
 #include "bt_app_2025/bt_nodes_receiver.h"
-#include "bt_app_2025/bt_nodes_util.h"
+// #include "bt_app_2025/bt_nodes_util.h"
 
-// using namespace BT;
-// using namespace std;
+using namespace BT;
+using namespace std;
 
 // template <> inline geometry_msgs::msg::TwistStamped BT::convertFromString(StringView str) {
 
@@ -19,37 +19,37 @@
 //     }
 // }
 
-// template <> inline geometry_msgs::msg::PoseStamped BT::convertFromString(StringView str) {
+template <> inline geometry_msgs::msg::PoseStamped BT::convertFromString(StringView str) {
 
-//     auto parts = splitString(str, ',');
-//     if (parts.size() != 3) {
-//         throw RuntimeError("invalid input)");
-//     }
-//     else {
-//         geometry_msgs::msg::PoseStamped output;
-//         output.pose.position.x = convertFromString<double>(parts[0]);
-//         output.pose.position.y = convertFromString<double>(parts[1]);
-//         output.pose.position.z = convertFromString<double>(parts[2]);
-//         return output;
-//     }
-// }
+    auto parts = splitString(str, ',');
+    if (parts.size() != 3) {
+        throw RuntimeError("invalid input)");
+    }
+    else {
+        geometry_msgs::msg::PoseStamped output;
+        output.pose.position.x = convertFromString<double>(parts[0]);
+        output.pose.position.y = convertFromString<double>(parts[1]);
+        output.pose.position.z = convertFromString<double>(parts[2]);
+        return output;
+    }
+}
 
-// template <> inline int BT::convertFromString(StringView str) {
-//     auto value = convertFromString<double>(str);
-//     return (int) value;
-// }
+template <> inline int BT::convertFromString(StringView str) {
+    auto value = convertFromString<double>(str);
+    return (int) value;
+}
 
-// template <> inline std::deque<int> BT::convertFromString(StringView str) {
+template <> inline std::deque<int> BT::convertFromString(StringView str) {
 
-//     auto parts = splitString(str, ',');
-//     std::deque<int> output;
+    auto parts = splitString(str, ',');
+    std::deque<int> output;
 
-//     for (int i = 0; i < (int)parts.size(); i++) {
-//         output.push_back(convertFromString<int>(parts[i]));
-//     }
+    for (int i = 0; i < (int)parts.size(); i++) {
+        output.push_back(convertFromString<int>(parts[i]));
+    }
 
-//     return output;
-// }
+    return output;
+}
 
 bool LocReceiver::UpdateRobotPose(geometry_msgs::msg::PoseStamped &robot_pose_, tf2_ros::Buffer &tf_buffer_) {
     geometry_msgs::msg::TransformStamped transformStamped;
