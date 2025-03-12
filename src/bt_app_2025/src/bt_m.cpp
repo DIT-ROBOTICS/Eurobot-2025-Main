@@ -57,16 +57,23 @@ int main(int argc, char** argv) {
     auto node = std::make_shared<rclcpp::Node>("bt_app_2025");
     rclcpp::executors::MultiThreadedExecutor executor;
 
-    // Create a shared blackboard
-    auto blackboard = BT::Blackboard::create();
-    blackboard->set<double>("current_time", 0);
-    blackboard->set<int>("mission_progress", 0);
+    // Behavior Tree Factory
+    BT::BehaviorTreeFactory factory;
+    BT::RosNodeParams params;
+    int team = 0;
+    char plans = 'A';
+    params.nh = node;
 
     // Parameters
     std::string groot_xml_config_directory;
     std::string bt_tree_node_model;
     std::string Yellow_A_file, Yellow_B_file, Yellow_C_file, Blue_A_file, Blue_B_file, Blue_C_file;
     std::string tree_name;
+
+    // Create a shared blackboard
+    auto blackboard = BT::Blackboard::create();
+    blackboard->set<double>("current_time", 0);
+    blackboard->set<int>("mission_progress", 0);
 
     // Read parameters
     node->declare_parameter<std::string>("groot_xml_config_directory", "/home/user/Eurobot-2025-Main-ws/src/bt_app_2025/bt_m_config/");
@@ -89,16 +96,8 @@ int main(int argc, char** argv) {
     node->get_parameter("planB_Blue_config", Blue_B_file);
     node->get_parameter("planC_Blue_config", Blue_C_file);
 
-    // Behavior Tree Factory
-    BT::BehaviorTreeFactory factory;
-    BT::RosNodeParams params;
-    int team = 0;
-    params.nh = node;
-    params.clock = node->get_clock();
-    params.tf_buffer = node->get_clock();
     // action nodes
     /* receiver */
-    factory.registerNodeType<LocReceiver>("LocReceiver", node);
     factory.registerNodeType<NavReceiver>("NavReceiver", node, blackboard);
     factory.registerNodeType<CamReceiver>("CamReceiver", node, blackboard);
     /* navigation */
@@ -133,13 +132,13 @@ int main(int argc, char** argv) {
         RCLCPP_INFO(node->get_logger(), "[BT Application]: Yellow team is running!");
         switch (plans) {
             case 'A':
-            groot_filename = groot_xml_config_directory + "/" + planA_Yellow_file;
+            groot_filename = groot_xml_config_directory + "/" + Yellow_A_file;
             break;
             case 'B':
-            groot_filename = groot_xml_config_directory + "/" + planB_Yellow_file;
+            groot_filename = groot_xml_config_directory + "/" + Yellow_B_file;
             break;
             case 'C':
-            groot_filename = groot_xml_config_directory + "/" + planC_Yellow_file;
+            groot_filename = groot_xml_config_directory + "/" + Yellow_C_file;
             break;
             default:
             throw "False or Empty plan file";
@@ -148,13 +147,13 @@ int main(int argc, char** argv) {
         RCLCPP_INFO(node->get_logger(), "[BT Application]: Blue team is running!");
         switch (plans) {
             case 'A':
-            groot_filename = groot_xml_config_directory + "/" + planA_Blue_file;
+            groot_filename = groot_xml_config_directory + "/" + Blue_A_file;
             break;
             case 'B':
-            groot_filename = groot_xml_config_directory + "/" + planB_Blue_file;
+            groot_filename = groot_xml_config_directory + "/" + Blue_B_file;
             break;
             case 'C':
-            groot_filename = groot_xml_config_directory + "/" + planC_Blue_file;
+            groot_filename = groot_xml_config_directory + "/" + Blue_C_file;
             break;
             default:
             throw "False or Empty plan file";

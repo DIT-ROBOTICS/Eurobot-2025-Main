@@ -31,7 +31,7 @@ using namespace BT;
 using namespace std;
 
 namespace BT {
-    template <> inline geometry_msgs::msg::TwistStamped convertFromString(StringView str);
+    template <> inline geometry_msgs::msg::PointStamped convertFromString(StringView str);
     template <> inline int convertFromString(StringView str);
     template <> inline std::deque<int> convertFromString(StringView str);
 }
