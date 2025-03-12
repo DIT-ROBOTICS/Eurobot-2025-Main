@@ -1,4 +1,6 @@
 #include "bt_app_2025/bt_nodes_navigation.h"
+#include "bt_app_2025/bt_nodes_receiver.h"
+#include "bt_app_2025/bt_nodes_util.h"
 
 using namespace BT;
 using namespace std;
@@ -43,14 +45,20 @@ double inline calculateDistance(const geometry_msgs::msg::Pose &pose1, const geo
     return dist;
 }
 
-double inline calculateAngleDifference(const geometry_msgs::msg::Pose &pose1, const geometry_msgs::msg::Pose &pose2)
-{
+double inline calculateAngleDifference(const geometry_msgs::msg::Pose &pose1, const geometry_msgs::msg::Pose &pose2) {
     tf2::Quaternion orientation1, orientation2;
     tf2::fromMsg(pose1.orientation, orientation1);
     tf2::fromMsg(pose2.orientation, orientation2);
     double yaw1 = tf2::impl::getYaw(orientation1);
     double yaw2 = tf2::impl::getYaw(orientation2);
     return std::fabs(yaw1 - yaw2);
+}
+
+geometry_msgs::msg::PoseStamped inline ConvertPoseFormat(geometry_msgs::msg::PoseStamped pose_) {
+    tf2::Quaternion quaternion;
+    tf2::fromMsg(pose_.pose.orientation, quaternion);
+    pose_.pose.position.z = tf2::impl::getYaw(quaternion);
+    return pose_;
 }
 
 BT::PortsList Navigation::providedPorts() {
@@ -106,15 +114,16 @@ NodeStatus Navigation::onResultReceived(const WrappedResult& wr) {
     }
     // check the correctness of the final pose
     if (calculateDistance(current_pose_.pose, goal_.pose) < 0.03 && calculateAngleDifference(current_pose_.pose, goal_.pose) < 0.4) {
-        RCLCPP_INFO_STREAM(logger(), "success! final_pose: " << current_pose_.pose.position.x << ", " << current_pose_.pose.position.y);
+        RCLCPP_INFO_STREAM(logger(), "success! final_pose: " << current_pose_.pose.position.x << ", " << current_pose_.pose.position.y << ", " << ConvertPoseFormat(current_pose_).pose.position.z);
         RCLCPP_INFO_STREAM(logger(), "-----------------");
-        setOutput<geometry_msgs::msg::PoseStamped>("final_pose", current_pose_);
+        setOutput<geometry_msgs::msg::PoseStamped>("final_pose", ConvertPoseFormat(current_pose_));
         return NodeStatus::SUCCESS;
     } else {
         nav_error_ = true;
-        RCLCPP_INFO_STREAM(logger(), "fail! final_pose: " << current_pose_.pose.position.x << ", " << current_pose_.pose.position.y);
+        RCLCPP_INFO_STREAM(logger(), "fail! final_pose: " << current_pose_.pose.position.x << ", " << current_pose_.pose.position.y << ", " << ConvertPoseFormat(current_pose_).pose.position.z);
+        RCLCPP_INFO_STREAM(logger(), "z" << ConvertPoseFormat(goal_).pose.position.z);
         RCLCPP_INFO_STREAM(logger(), "-----------------");
-        setOutput<geometry_msgs::msg::PoseStamped>("final_pose", goal_);
+        setOutput<geometry_msgs::msg::PoseStamped>("final_pose", ConvertPoseFormat(goal_));
         return NodeStatus::SUCCESS;
     }
 }
@@ -122,9 +131,10 @@ NodeStatus Navigation::onResultReceived(const WrappedResult& wr) {
 NodeStatus Navigation::onFailure(ActionNodeErrorCode error) {
     nav_error_ = true;
     nav_finished_ = true;
-    RCLCPP_INFO_STREAM(logger(), "fail! final_pose: " << current_pose_.pose.position.x << ", " << current_pose_.pose.position.y);
+    RCLCPP_INFO_STREAM(logger(), "RETURN FAILURE! final_pose: " << current_pose_.pose.position.x << ", " << current_pose_.pose.position.y << ", " << current_pose_.pose.position.z);
+    RCLCPP_INFO_STREAM(logger(), "z" << ConvertPoseFormat(goal_).pose.position.z);
     RCLCPP_INFO_STREAM(logger(), "-----------------");
-    setOutput<geometry_msgs::msg::PoseStamped>("final_pose", goal_);
+    setOutput<geometry_msgs::msg::PoseStamped>("final_pose", ConvertPoseFormat(goal_));
     return NodeStatus::FAILURE;
 }
 
@@ -132,49 +142,44 @@ BT::PortsList Docking::providedPorts() {
     return { 
         BT::InputPort<geometry_msgs::msg::PoseStamped>("base"),
         BT::InputPort<double>("offset"),
-        BT::InputPort<bool>("useDocking"),
+        BT::InputPort<std::string>("dock_type"),
+        BT::InputPort<bool>("isPureDocking"),
         BT::OutputPort<geometry_msgs::msg::PoseStamped>("final_pose")
     };
 }
 
 bool Docking::setGoal(RosActionNode::Goal& goal) {
     auto m = getInput<geometry_msgs::msg::PoseStamped>("base");
-    double offset = getInput<double>("offset").value();
-    getInput<bool>("useDocking", useDocking_);
+    getInput<double>("offset", offset_);
+    getInput<bool>("isPureDocking", isPureDocking_);
+    getInput<std::string>("dock_type", dock_type_);
 
-    double offset_x = 0;
-    double offset_y = 0;
-    if ((int)offset == 0) {
-        offset_x = offset - (int)offset;
-    } else if ((int)offset == 1 || (int)offset == -1) {
-        offset_y = offset - (int)offset;
+    rclcpp::Time now = this->now(); // get current time
+    goal_.header.stamp = now; // set header time
+    goal_.header.frame_id = "map";  // set header frame
+    goal_.pose = m.value().pose; // calculate goal pose
+    if (dock_type_ == "mission_dock_x") {
+        goal_.pose.position.x += offset_; // set staging point
+    } else if (dock_type_ == "mission_dock_y") {
+        goal_.pose.position.y += offset_; // set staging point
     } else {
         RCLCPP_ERROR(logger(), "Invalid offset value");
         return false;
     }
-
-    goal.use_dock_id = false; // set use dock id
-    goal_.pose = m.value().pose; // calculate goal pose
+    goal_.pose.position.z = -offset_; // set offset distance
     tf2::Quaternion q; // declare Quaternion
     q.setRPY(0, 0, m.value().pose.position.z); // change degree-z into Quaternion
-    rclcpp::Time now = this->now(); // get current time
-    goal_.header.stamp = now; // set header time
-    goal_.header.frame_id = "map";  // set header frame
-    goal_.pose.position.x += offset_x; // set offset
-    goal_.pose.position.y += offset_y; // set offset
-    goal_.pose.position.z = 0; // set offset
     goal_.pose.orientation.x = q.x();
     goal_.pose.orientation.y = q.y();
     goal_.pose.orientation.z = q.z();
     goal_.pose.orientation.w = q.w();
-    goal.dock_pose = goal_; // set goal pose
-    goal.dock_type = "mission_dock";    // set dock type
+    goal.use_dock_id = false; // set use dock id
+    goal.dock_pose = goal_; // send goal pose
+    goal.dock_type = dock_type_;    // determine the docking direction (x or y)
     goal.max_staging_time = 1000.0; // set max staging time
-    goal.navigate_to_staging_pose = !useDocking_;  // is use docking
-    RCLCPP_INFO_STREAM(logger(), offset_x << offset_y << !useDocking_);
+    goal.navigate_to_staging_pose = !isPureDocking_;  // if it's pure docking, then don't need to navigate to staging pose
 
     RCLCPP_INFO(logger(), "Start Docking to (%f, %f)", goal.dock_pose.pose.position.x, goal.dock_pose.pose.position.y);
-
     return true;
 }
 
@@ -197,19 +202,21 @@ NodeStatus Docking::onResultReceived(const WrappedResult& wr) {
         return NodeStatus::FAILURE;
     // set output
     }
-    UpdateRobotPose();
-    RCLCPP_INFO_STREAM(logger(), "success! final_pose: " << robot_pose_.pose.position.x << ", " << robot_pose_.pose.position.y);
+    LocReceiver::UpdateRobotPose(robot_pose_, tf_buffer_);
+    // UpdateRobotPose();
+    RCLCPP_INFO_STREAM(logger(), "success! final_pose: " << robot_pose_.pose.position.x << ", " << robot_pose_.pose.position.y << ", " << ConvertPoseFormat(robot_pose_).pose.position.z);
     RCLCPP_INFO_STREAM(logger(), "-----------------");
-    setOutput<geometry_msgs::msg::PoseStamped>("final_pose", robot_pose_);
+    setOutput<geometry_msgs::msg::PoseStamped>("final_pose", ConvertPoseFormat(robot_pose_));
     return NodeStatus::SUCCESS;
 }
 
 NodeStatus Docking::onFailure(ActionNodeErrorCode error) {
     nav_error_ = true;
     nav_finished_ = true;
-    UpdateRobotPose();
-    setOutput<geometry_msgs::msg::PoseStamped>("final_pose", robot_pose_);
-    RCLCPP_INFO_STREAM(logger(), "fail! final_pose: " << robot_pose_.pose.position.x << ", " << robot_pose_.pose.position.y);
+    LocReceiver::UpdateRobotPose(robot_pose_, tf_buffer_);
+    // UpdateRobotPose();
+    setOutput<geometry_msgs::msg::PoseStamped>("final_pose", ConvertPoseFormat(robot_pose_));
+    RCLCPP_INFO_STREAM(logger(), "RETURN FAILURE! final_pose: " << robot_pose_.pose.position.x << ", " << robot_pose_.pose.position.y << ", " << robot_pose_.pose.position.z);
     RCLCPP_INFO_STREAM(logger(), "-----------------");
     return NodeStatus::FAILURE;
 }
@@ -244,23 +251,26 @@ BT::PortsList Rotation::providedPorts() {
 bool Rotation::setGoal(RosActionNode::Goal& goal) {
     auto m = getInput<geometry_msgs::msg::PoseStamped>("base");
     double rad = getInput<double>("degree").value() * PI / 180;
-    double rad_base = acos(m.value().pose.orientation.w) * 2;
+    // double rad_base = acos(m.value().pose.orientation.w) * 2;
+    double rad_base = m.value().pose.position.z;
     rad += rad_base;
+    RCLCPP_INFO_STREAM(rclcpp::get_logger("bt_m"), "rad_base: " << rad_base << ", rad: " << rad);
 
     rclcpp::Time now = this->now();
     goal_.header.stamp = now;
     goal_.header.frame_id = "map";
 
-    goal_.pose = m.value().pose;
+    goal_.pose.position.x = m.value().pose.position.x;
+    goal_.pose.position.y = m.value().pose.position.y;
     tf2::Quaternion q;
     q.setRPY(0, 0, rad);
+    goal_.pose.orientation.w = q.w();
     goal_.pose.orientation.x = q.x();
     goal_.pose.orientation.y = q.y();
     goal_.pose.orientation.z = q.z();
-    goal_.pose.orientation.w = q.w();
     goal.pose = goal_;
 
-    RCLCPP_INFO(logger(), "Start Rotating (%f, %f)", goal_.pose.orientation.z, goal_.pose.orientation.w);
+    RCLCPP_INFO(logger(), "Start Rotating (%f, %f)", goal_.pose.orientation.w, goal_.pose.orientation.z);
     return true;
 }
 
@@ -274,15 +284,17 @@ NodeStatus Rotation::onResultReceived(const WrappedResult& wr) {
     // check the correctness of the final pose
     if (calculateDistance(current_pose_.pose, goal_.pose) < 0.03 && calculateAngleDifference(current_pose_.pose, goal_.pose) < 0.4) {
         nav_finished_ = true;
-        RCLCPP_INFO(logger(), "success! final_direction: (%f, %f)", current_pose_.pose.orientation.z, current_pose_.pose.orientation.w);
+        RCLCPP_INFO(logger(), "success! final_direction: (%f, %f)", current_pose_.pose.orientation.w, current_pose_.pose.orientation.z);
+        RCLCPP_INFO_STREAM(logger(), "z" << ConvertPoseFormat(current_pose_).pose.position.z);
         RCLCPP_INFO_STREAM(logger(), "-----------------");
-        setOutput<geometry_msgs::msg::PoseStamped>("final_pose", current_pose_);
+        setOutput<geometry_msgs::msg::PoseStamped>("final_pose", ConvertPoseFormat(current_pose_));
         return NodeStatus::SUCCESS;
     } else {
         nav_error_ = true;
-        RCLCPP_INFO(logger(), "fail! final_direction: (%f, %f)", current_pose_.pose.orientation.z, current_pose_.pose.orientation.w);
+        RCLCPP_INFO(logger(), "fail! final_direction: (%f, %f)", current_pose_.pose.orientation.w, current_pose_.pose.orientation.z);
+        RCLCPP_INFO_STREAM(logger(), "z" << ConvertPoseFormat(goal_).pose.position.z);
         RCLCPP_INFO_STREAM(logger(), "-----------------");
-        setOutput<geometry_msgs::msg::PoseStamped>("final_pose", goal_);
+        setOutput<geometry_msgs::msg::PoseStamped>("final_pose", ConvertPoseFormat(goal_));
         return NodeStatus::SUCCESS;
     }
 }
@@ -290,10 +302,11 @@ NodeStatus Rotation::onResultReceived(const WrappedResult& wr) {
 NodeStatus Rotation::onFailure(ActionNodeErrorCode error) {
     nav_error_ = true;
     nav_finished_ = true;
-    RCLCPP_ERROR(logger(), "[BT]: Navigation error");
+    RCLCPP_INFO(logger(), "RETURN FAILURE! final_direction: (%f, %f)", current_pose_.pose.orientation.w, current_pose_.pose.orientation.z);
+    RCLCPP_INFO_STREAM(logger(), "z" << ConvertPoseFormat(goal_).pose.position.z);
     RCLCPP_INFO_STREAM(logger(), "-----------------");
-    setOutput<geometry_msgs::msg::PoseStamped>("final_pose", goal_);
-    return NodeStatus::FAILURE;
+    setOutput<geometry_msgs::msg::PoseStamped>("final_pose", ConvertPoseFormat(goal_));
+    return NodeStatus::SUCCESS;
 }
 
 BT::PortsList DynamicAdjustment::providedPorts() {

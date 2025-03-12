@@ -1,126 +1,94 @@
 #include "bt_app_2025/bt_nodes_receiver.h"
+#include "bt_app_2025/bt_nodes_util.h"
 
-using namespace BT;
-using namespace std;
+// using namespace BT;
+// using namespace std;
 
-template <> inline geometry_msgs::msg::TwistStamped BT::convertFromString(StringView str) {
+// template <> inline geometry_msgs::msg::TwistStamped BT::convertFromString(StringView str) {
 
-    auto parts = splitString(str, ',');
-    if (parts.size() != 3) {
-        throw RuntimeError("invalid input)");
-    }
-    else {
-        geometry_msgs::msg::TwistStamped output;
-        output.twist.linear.x = convertFromString<double>(parts[0]);
-        output.twist.linear.y = convertFromString<double>(parts[1]);
-        output.twist.linear.z = convertFromString<double>(parts[2]);
-        return output;
-    }
-}
+//     auto parts = splitString(str, ',');
+//     if (parts.size() != 3) {
+//         throw RuntimeError("invalid input)");
+//     }
+//     else {
+//         geometry_msgs::msg::TwistStamped output;
+//         output.twist.linear.x = convertFromString<double>(parts[0]);
+//         output.twist.linear.y = convertFromString<double>(parts[1]);
+//         output.twist.linear.z = convertFromString<double>(parts[2]);
+//         return output;
+//     }
+// }
 
-template <> inline geometry_msgs::msg::PoseStamped BT::convertFromString(StringView str) {
+// template <> inline geometry_msgs::msg::PoseStamped BT::convertFromString(StringView str) {
 
-    auto parts = splitString(str, ',');
-    if (parts.size() != 3) {
-        throw RuntimeError("invalid input)");
-    }
-    else {
-        geometry_msgs::msg::PoseStamped output;
-        output.pose.position.x = convertFromString<double>(parts[0]);
-        output.pose.position.y = convertFromString<double>(parts[1]);
-        output.pose.position.z = convertFromString<double>(parts[2]);
-        return output;
-    }
-}
+//     auto parts = splitString(str, ',');
+//     if (parts.size() != 3) {
+//         throw RuntimeError("invalid input)");
+//     }
+//     else {
+//         geometry_msgs::msg::PoseStamped output;
+//         output.pose.position.x = convertFromString<double>(parts[0]);
+//         output.pose.position.y = convertFromString<double>(parts[1]);
+//         output.pose.position.z = convertFromString<double>(parts[2]);
+//         return output;
+//     }
+// }
 
-template <> inline int BT::convertFromString(StringView str) {
-    auto value = convertFromString<double>(str);
-    return (int) value;
-}
+// template <> inline int BT::convertFromString(StringView str) {
+//     auto value = convertFromString<double>(str);
+//     return (int) value;
+// }
 
-template <> inline std::deque<int> BT::convertFromString(StringView str) {
+// template <> inline std::deque<int> BT::convertFromString(StringView str) {
 
-    auto parts = splitString(str, ',');
-    std::deque<int> output;
+//     auto parts = splitString(str, ',');
+//     std::deque<int> output;
 
-    for (int i = 0; i < (int)parts.size(); i++) {
-        output.push_back(convertFromString<int>(parts[i]));
-    }
+//     for (int i = 0; i < (int)parts.size(); i++) {
+//         output.push_back(convertFromString<int>(parts[i]));
+//     }
 
-    return output;
-}
+//     return output;
+// }
 
-PortsList LocReceiver::providedPorts() {
-    return { 
-        BT::OutputPort<geometry_msgs::msg::TwistStamped>("robot_pose"),
-        BT::OutputPort<geometry_msgs::msg::TwistStamped>("rival_pose") 
-    };
-}
-
-NodeStatus LocReceiver::tick() {
-    if (UpdateRobotPose() || UpdateRivalPose()) {
-        RCLCPP_INFO_STREAM(node_->get_logger(), "robot_pose_:(" << robot_pose_.twist.linear.x << ", " << robot_pose_.twist.linear.y << ")");
-        // Set the output port
-        setOutput("robot_pose", robot_pose_);
-        setOutput("rival_pose", rival_pose_);
-        return BT::NodeStatus::SUCCESS;
-    } else {
-        return BT::NodeStatus::FAILURE;
-    }
-}
-
-bool LocReceiver::UpdateRobotPose() {
+bool LocReceiver::UpdateRobotPose(geometry_msgs::msg::PoseStamped &robot_pose_, tf2_ros::Buffer &tf_buffer_) {
     geometry_msgs::msg::TransformStamped transformStamped;
 
     try {
         transformStamped = tf_buffer_.lookupTransform(
-            // "robot/map" /* Parent frame - map */, 
-            // "robot/base_footprint" /* Child frame - base */,
             "map", 
             "base_link",
             rclcpp::Time()
         );
-
-        /* Extract (x, y, theta) from the transformed stamped */
-        robot_pose_.twist.linear.x = transformStamped.transform.translation.x;
-        robot_pose_.twist.linear.y = transformStamped.transform.translation.y;
-        double theta;
-        tf2::Quaternion q;
-        tf2::fromMsg(transformStamped.transform.rotation, q);
-        robot_pose_.twist.angular.z = tf2::impl::getYaw(q);
-
+        robot_pose_.pose.position.x = transformStamped.transform.translation.x;
+        robot_pose_.pose.position.y = transformStamped.transform.translation.y;
+        robot_pose_.pose.position.z = 0;
+        robot_pose_.pose.orientation = transformStamped.transform.rotation;
         return true;
     }
     catch (tf2::TransformException &ex) {
-        RCLCPP_WARN_STREAM(node_->get_logger(), "[Kernel::UpdateRobotPose]: line " << __LINE__ << " " << ex.what());
-
+        RCLCPP_WARN_STREAM(rclcpp::get_logger("localization"), "[UpdateRobotPose]: line " << __LINE__ << " " << ex.what());
         return false;
     }
 }
 
-bool LocReceiver::UpdateRivalPose() {
+bool LocReceiver::UpdateRivalPose(geometry_msgs::msg::PoseStamped &rival_pose_, tf2_ros::Buffer &tf_buffer_) {
     geometry_msgs::msg::TransformStamped transformStamped;
 
     try {
         transformStamped = tf_buffer_.lookupTransform(
             "rival/map" /* Parent frame - map */, 
-            "rival/base_footprint" /* Child frame - base */,
+            "rival/final_pose" /* Child frame - base */,
             rclcpp::Time()
         );
-
-        /* Extract (x, y, theta) from the transformed stamped */
-        rival_pose_.twist.linear.x = transformStamped.transform.translation.x;
-        rival_pose_.twist.linear.y = transformStamped.transform.translation.y;
-        double theta;
-        tf2::Quaternion q;
-        tf2::fromMsg(transformStamped.transform.rotation, q);
-        rival_pose_.twist.angular.z = tf2::impl::getYaw(q);
-
+        rival_pose_.pose.position.x = transformStamped.transform.translation.x;
+        rival_pose_.pose.position.y = transformStamped.transform.translation.y;
+        rival_pose_.pose.position.z = 0;
+        rival_pose_.pose.orientation = transformStamped.transform.rotation;
         return true;
     }
     catch (tf2::TransformException &ex) {
-        RCLCPP_WARN_STREAM(node_->get_logger(), "[Kernel::UpdateRobotPose]: line " << __LINE__ << " " << ex.what());
-
+        RCLCPP_WARN_STREAM(rclcpp::get_logger("localization"), "[UpdateRivalPose]: line " << __LINE__ << " " << ex.what());
         return false;
     }
 }

@@ -17,17 +17,22 @@ from ament_index_python.packages import get_package_share_directory
 def generate_launch_description():
     config_path = os.path.join(
         get_package_share_directory('bt_app_2025'),
-        'config_path',
+        'params',
         'config_path.yaml'
     )
     mission_set = os.path.join(
         get_package_share_directory('bt_app_2025'),
-        'mission_set',
+        'params',
         'mission_set.yaml'
     )
     return LaunchDescription([
         Node(
-            parameters=[config_path, mission_set, {"tree_name": "MainTree"}],
+            parameters=[
+                config_path, 
+                mission_set, 
+                {"tree_name": "MainTree"}, 
+                {"Robot_name": "Invisible"}  # Invisible or Tongue
+            ],
             remappings=[
                 ("/map", "/map"),
                 ("/base_link", "/final_pose")

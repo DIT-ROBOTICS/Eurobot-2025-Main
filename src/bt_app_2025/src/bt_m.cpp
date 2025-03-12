@@ -18,6 +18,7 @@
 #include "bt_app_2025/bt_nodes_navigation.h"
 #include "bt_app_2025/bt_nodes_others.h"
 #include "bt_app_2025/bt_nodes_receiver.h"
+#include "bt_app_2025/bt_nodes_util.h"
 // C++
 #include <memory>
 #include <string>
@@ -56,65 +57,66 @@ int main(int argc, char** argv) {
     auto node = std::make_shared<rclcpp::Node>("bt_app_2025");
     rclcpp::executors::MultiThreadedExecutor executor;
 
+    // Behavior Tree Factory
+    BT::BehaviorTreeFactory factory;
+    BT::RosNodeParams params;
+    int team = 0;
+    char plans = 'A';
+    params.nh = node;
+
+    // Parameters
+    std::string groot_xml_config_directory;
+    std::string bt_tree_node_model;
+    std::string Yellow_A_file, Yellow_B_file, Yellow_C_file, Blue_A_file, Blue_B_file, Blue_C_file;
+    std::string tree_name;
+
     // Create a shared blackboard
     auto blackboard = BT::Blackboard::create();
     blackboard->set<double>("current_time", 0);
     blackboard->set<int>("mission_progress", 0);
 
-    // Parameters
-    std::string groot_xml_config_directory;
-    std::string bt_tree_node_model;
-    std::string planA_yellow_file, score_filepath, tree_name;
-
     // Read parameters
     node->declare_parameter<std::string>("groot_xml_config_directory", "/home/user/Eurobot-2025-Main-ws/src/bt_app_2025/bt_m_config/");
     node->declare_parameter<std::string>("tree_node_model_config_file", "/home/user/Eurobot-2025-Main-ws/src/bt_app_2025/bt_m_config/bt_m_tree_node_model.xml");
     node->declare_parameter<std::string>("tree_name", "NavTest");
-    node->declare_parameter<std::string>("planA_yellow_config", "bt_plan_a.xml");
-    node->declare_parameter("score_filepath", "score.json");
+    node->declare_parameter<std::string>("planA_Yellow_config", "bt_plan_a_Yellow.xml");
+    node->declare_parameter<std::string>("planB_Yellow_config", "bt_plan_b_Yellow.xml");
+    node->declare_parameter<std::string>("planC_Yellow_config", "bt_plan_c_Yellow.xml");
+    node->declare_parameter<std::string>("planA_Blue_config", "bt_plan_a_Blue.xml");
+    node->declare_parameter<std::string>("planB_Blue_config", "bt_plan_b_Blue.xml");
+    node->declare_parameter<std::string>("planC_Blue_config", "bt_plan_c_Blue.xml");
 
     node->get_parameter("groot_xml_config_directory", groot_xml_config_directory);
     node->get_parameter("tree_node_model_config_file", bt_tree_node_model);
     node->get_parameter("tree_name", tree_name);
-    node->get_parameter("planA_yellow_config", planA_yellow_file);
-    node->get_parameter("score_filepath", score_filepath);
+    node->get_parameter("planA_Yellow_config", Yellow_A_file);
+    node->get_parameter("planB_Yellow_config", Yellow_B_file);
+    node->get_parameter("planC_Yellow_config", Yellow_C_file);
+    node->get_parameter("planA_Blue_config", Blue_A_file);
+    node->get_parameter("planB_Blue_config", Blue_B_file);
+    node->get_parameter("planC_Blue_config", Blue_C_file);
 
-    // Behavior Tree Factory
-    BT::BehaviorTreeFactory factory;
-    BT::RosNodeParams params;
-    int team = 0;
-    params.nh = node;
     // action nodes
     /* receiver */
-    factory.registerNodeType<LocReceiver>("LocReceiver", node);
     factory.registerNodeType<NavReceiver>("NavReceiver", node, blackboard);
     factory.registerNodeType<CamReceiver>("CamReceiver", node, blackboard);
     /* navigation */
     factory.registerNodeType<DynamicAdjustment>("DynamicAdjustment");
     params.default_port_value = "navigate_to_pose";
     factory.registerNodeType<Navigation>("Navigation", params);
+    factory.registerNodeType<Rotation>("Rotation", params);
     params.default_port_value = "dock_robot";
     factory.registerNodeType<Docking>("Docking", params);
-    factory.registerNodeType<Rotation>("Rotation", params);
     // /* firmware */
     params.default_port_value = "firmware_mission";
-    factory.registerNodeType<BTMission>("BTMission", params);
     factory.registerNodeType<FirmwareMission>("FirmwareMission", node, blackboard);
     factory.registerNodeType<IntegratedMissionNode>("IntegratedMissionNode", node, blackboard);
     factory.registerNodeType<SIMAactivate>("SIMAactivate", node);
-    // factory.registerNodeType<BannerMission>("BannerMission", params);
-    factory.registerNodeType<ConstructFinisher>("ConstructFinisher", blackboard);
-    factory.registerNodeType<CollectFinisher>("CollectFinisher", blackboard);
     /* others */
     factory.registerNodeType<BTStarter>("BTStarter", node, blackboard);
-    // factory.registerNodeType<BTFinisher>("BTFinisher", score_filepath, team, node);
     factory.registerNodeType<Comparator>("Comparator", node); // decorator
     factory.registerNodeType<TimerChecker>("TimerChecker", blackboard); // decorator
-    // factory.registerNodeType<RivalStart>("RivalStart", team);
-    factory.registerNodeType<PointProvider>("PointProvider");
 
-    // Service Client
-    // auto client = node->create_client<std_srvs::srv::SetBool>("/robot/objects/ladybug_activate");
     // Subscriber
     auto time_sub = node->create_subscription<std_msgs::msg::Float32>("/robot/startup/time", 2, timeCallback);
 
@@ -126,14 +128,37 @@ int main(int argc, char** argv) {
 
     std::string groot_filename;
     // select tree
-    // if (team == 0) {
-    //     groot_filename = groot_xml_config_directory + "/" + "bt_blue.xml";
-    //     RCLCPP_INFO(node->get_logger(), "[BT Application]: Blue team is running!");
-    // } else {
-    //     groot_filename = groot_xml_config_directory + "/" + "bt_yellow.xml";
-    //     RCLCPP_INFO(node->get_logger(), "[BT Application]: Yellow team is running!");
-    // }
-    groot_filename = groot_xml_config_directory + "/" + planA_yellow_file;
+    if (team == 0) {
+        RCLCPP_INFO(node->get_logger(), "[BT Application]: Yellow team is running!");
+        switch (plans) {
+            case 'A':
+            groot_filename = groot_xml_config_directory + "/" + Yellow_A_file;
+            break;
+            case 'B':
+            groot_filename = groot_xml_config_directory + "/" + Yellow_B_file;
+            break;
+            case 'C':
+            groot_filename = groot_xml_config_directory + "/" + Yellow_C_file;
+            break;
+            default:
+            throw "False or Empty plan file";
+        }
+    } else {
+        RCLCPP_INFO(node->get_logger(), "[BT Application]: Blue team is running!");
+        switch (plans) {
+            case 'A':
+            groot_filename = groot_xml_config_directory + "/" + Blue_A_file;
+            break;
+            case 'B':
+            groot_filename = groot_xml_config_directory + "/" + Blue_B_file;
+            break;
+            case 'C':
+            groot_filename = groot_xml_config_directory + "/" + Blue_C_file;
+            break;
+            default:
+            throw "False or Empty plan file";
+        }
+    }
     factory.registerBehaviorTreeFromFile(groot_filename);
 
     auto tree = factory.createTree(tree_name, blackboard);

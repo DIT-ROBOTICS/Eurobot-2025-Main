@@ -7,18 +7,18 @@
                  isPureDocking="0"
                  dock_type="mission_dock_y"
                  offset="-0.1"
-                 base="0.75, 0.4, 3.14"
+                 base="2.25, 0.4, 3.14"
                  _description="go to place the banner"/>
         <Docking final_pose="{PrevGoal}"
                  isPureDocking="0"
                  dock_type="mission_dock_y"
                  offset="-0.1"
-                 base="1.25, 0.4, 3.14"/>
+                 base="1.75, 0.4, 3.14"/>
         <Docking final_pose="{PrevGoal}"
                  isPureDocking="0"
                  dock_type="mission_dock_y"
                  offset="-0.1"
-                 base="2.75, 0.4, 3.14"/>
+                 base="0.25, 0.4, 3.14"/>
       </Fallback>
       <Fallback>
         <Sleep msec="4000"/>
@@ -32,20 +32,6 @@
     </Sequence>
   </BehaviorTree>
 
-  <BehaviorTree ID="FuncTest">
-    <Sequence>
-      <Docking final_pose="{PrevGoal}"
-               isPureDocking="1"
-               dock_type="mission_dock_x"
-               offset="0.1"
-               base="1.6, 1.3, 0"/>
-      <SubTree ID="PortRemapTest"
-               DOCK_TYPE="mission_dock_x"
-               DOCK_DIST="0.3"
-               _autoremap="true"/>
-    </Sequence>
-  </BehaviorTree>
-
   <BehaviorTree ID="MainTree">
     <Sequence>
       <Sequence>
@@ -53,32 +39,32 @@
         <CamReceiver/>
       </Sequence>
       <ForceSuccess>
-        <SubTree ID="MissionPointOne"
+        <SubTree ID="MissionPointFive"
                  _autoremap="true"/>
       </ForceSuccess>
       <ForceSuccess>
-        <SubTree ID="MissionPointThree"
+        <SubTree ID="MissionPointSeven"
                  _autoremap="true"/>
       </ForceSuccess>
       <ForceSuccess>
-        <SubTree ID="MissionPointFour"
+        <SubTree ID="MissionPointEight"
                  _autoremap="true"/>
       </ForceSuccess>
       <Navigation final_pose="{PrevGoal}"
                   type="0"
-                  goal="0.8, 1.7, 4.71"
+                  goal="2.5, 1.7, 4.71"
                   _description="go home"/>
     </Sequence>
   </BehaviorTree>
 
-  <BehaviorTree ID="MissionPointFour">
+  <BehaviorTree ID="MissionPointEight">
     <Sequence>
       <RetryUntilSuccessful num_attempts="3">
         <Docking final_pose="{PrevGoal}"
                  isPureDocking="0"
                  dock_type="mission_dock_y"
                  offset="-0.1"
-                 base="0.8, 0.6, 1.57"/>
+                 base="2.2, 0.6, 1.57"/>
       </RetryUntilSuccessful>
       <Sleep msec="500"
              _description="take the raw material"/>
@@ -87,7 +73,7 @@
                  isPureDocking="0"
                  dock_type="mission_dock_y"
                  offset="-0.1"
-                 base="0.8, 0.45, 1.57"
+                 base="2.2, 0.45, 1.57"
                  _description="go back to do the mission"/>
       </RetryUntilSuccessful>
       <SubTree ID="PutTwoLevels"
@@ -98,19 +84,19 @@
     </Sequence>
   </BehaviorTree>
 
-  <BehaviorTree ID="MissionPointOne">
+  <BehaviorTree ID="MissionPointFive">
     <Sequence>
       <Fallback>
         <Docking final_pose="{PrevGoal}"
                  isPureDocking="0"
                  dock_type="mission_dock_x"
-                 offset="0.1"
-                 base="2.45, 1.3, 3.14"/>
+                 offset="-0.1"
+                 base="0.55, 1.3, 0.0"/>
         <Sequence>
           <Sleep msec="100"/>
           <Navigation final_pose="{PrevGoal}"
                       type="0"
-                      goal="2.55, 1.3, 3.14"/>
+                      goal="0.45, 1.3, 0.0"/>
         </Sequence>
       </Fallback>
       <Sleep msec="500"
@@ -119,13 +105,13 @@
         <Docking final_pose="{PrevGoal}"
                  isPureDocking="0"
                  dock_type="mission_dock_x"
-                 offset="0.1"
-                 base="2.45, 0.4, 0"/>
+                 offset="-0.1"
+                 base="0.55, 0.4, 3.14"/>
         <Sequence>
           <Sleep msec="100"/>
           <Navigation final_pose="{PrevGoal}"
                       type="0"
-                      goal="2.55, 0.4, 0"/>
+                      goal="0.45, 0.4, 3.14"/>
         </Sequence>
       </Fallback>
       <Sleep msec="500"
@@ -134,24 +120,24 @@
         <Docking final_pose="{PrevGoal}"
                  isPureDocking="0"
                  dock_type="mission_dock_x"
-                 offset="0.1"
-                 base="2.45, 0.9, 0"/>
+                 offset="-0.1"
+                 base="0.55, 0.9, 3.14"/>
         <Sequence>
           <Sleep msec="100"/>
           <Navigation final_pose="{PrevGoal}"
                       type="0"
-                      goal="2.55, 0.9, 0"/>
+                      goal="0.45, 0.9, 3.14"/>
         </Sequence>
       </Fallback>
       <SubTree ID="PutThreeLevels"
                DOCK_DIR="mission_dock_x"
-               DOCK_FORWARD="0.1"
-               DOCK_BACKWARD="-0.1"
+               DOCK_FORWARD="-0.1"
+               DOCK_BACKWARD="0.1"
                _autoremap="true"/>
     </Sequence>
   </BehaviorTree>
 
-  <BehaviorTree ID="MissionPointThree">
+  <BehaviorTree ID="MissionPointSeven">
     <Sequence>
       <Fallback>
         <Sequence>
@@ -160,7 +146,7 @@
                      isPureDocking="0"
                      dock_type="mission_dock_y"
                      offset="0.1"
-                     base="1.9, 0.7, 4.71"/>
+                     base="1.1, 0.7, 4.71"/>
           </RetryUntilSuccessful>
           <Sleep msec="500"
                  _description="take the raw material"/>
@@ -169,7 +155,7 @@
                      isPureDocking="0"
                      dock_type="mission_dock_y"
                      offset="-0.1"
-                     base="2.2, 0.5, 4.71"/>
+                     base="0.8, 0.5, 4.71"/>
           </RetryUntilSuccessful>
           <Sleep msec="500"
                  _description="take one level"/>
@@ -180,7 +166,7 @@
                      isPureDocking="0"
                      dock_type="mission_dock_y"
                      offset="0.1"
-                     base="1.9, 0.7, 4.71"/>
+                     base="1.1, 0.7, 4.71"/>
           </RetryUntilSuccessful>
           <Sleep msec="500"
                  _description="take the raw material"/>
@@ -191,7 +177,7 @@
                  isPureDocking="0"
                  dock_type="mission_dock_y"
                  offset="-0.1"
-                 base="1.25, 0.5, 4.71"/>
+                 base="0.75, 0.5, 4.71"/>
       </RetryUntilSuccessful>
       <SubTree ID="PutThreeLevels"
                DOCK_DIR="mission_dock_y"
@@ -205,13 +191,13 @@
     <Sequence>
       <Navigation final_pose="{PrevGoal}"
                   type="0"
-                  goal="1, 1, 0"/>
+                  goal="2, 1, 0"/>
       <Navigation final_pose="{PrevGoal}"
                   type="0"
-                  goal="1, 1, 1.57"/>
+                  goal="2, 1, 1.57"/>
       <Navigation final_pose="{PrevGoal}"
                   type="0"
-                  goal="1, 1, 3.14"/>
+                  goal="2, 1, 3.14"/>
       <Rotation final_pose="{PrevGoal}"
                 degree="90"
                 base="{PrevGoal}"/>
@@ -224,16 +210,6 @@
       <Rotation final_pose="{PrevGoal}"
                 degree="-90"
                 base="{PrevGoal}"/>
-    </Sequence>
-  </BehaviorTree>
-
-  <BehaviorTree ID="PortRemapTest">
-    <Sequence>
-      <Docking final_pose="{PrevGoal}"
-               isPureDocking="0"
-               dock_type="{DOCK_TYPE}"
-               offset="{DOCK_DIST}"
-               base="{PrevGoal}"/>
     </Sequence>
   </BehaviorTree>
 
