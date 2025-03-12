@@ -50,12 +50,14 @@ using namespace BT;
 double game_time = 0.0;
 std::string team = "0";
 char plans = 'A';
+bool isReady = false;
 
 void timeCallback(const std_msgs::msg::Float32::SharedPtr msg) {
     game_time = msg->data;
 }
 
 void startCallback(const geometry_msgs::msg::PointStamped::SharedPtr msg) {
+    RCLCPP_INFO_STREAM(rclcpp::get_logger("bt_m"), "team: " << team << ", msg->point.z: " << (int)msg->point.z);
     team = msg->header.frame_id;
     switch((int)msg->point.z) {
         case 1:
@@ -74,12 +76,14 @@ void startCallback(const geometry_msgs::msg::PointStamped::SharedPtr msg) {
             plans = 'A';
             break;
     };
+    isReady = true;
 }
 
 int main(int argc, char** argv) {
     rclcpp::init(argc, argv);
     auto node = std::make_shared<rclcpp::Node>("bt_app_2025");
     rclcpp::executors::MultiThreadedExecutor executor;
+    rclcpp::Rate rate(100);
 
     // Subscriber
     auto time_sub = node->create_subscription<std_msgs::msg::Float32>("/robot/startup/time", 2, timeCallback);
@@ -106,7 +110,7 @@ int main(int argc, char** argv) {
     node->declare_parameter<std::string>("groot_xml_config_directory", "/home/user/Eurobot-2025-Main-ws/src/bt_app_2025/bt_m_config/");
     node->declare_parameter<std::string>("tree_node_model_config_file", "/home/user/Eurobot-2025-Main-ws/src/bt_app_2025/bt_m_config/bt_m_tree_node_model.xml");
     node->declare_parameter<std::string>("tree_name", "FuncTest");
-    node->declare_parameter<std::string>("planA_Yellow_config", "bt_plan_a.xml");
+    node->declare_parameter<std::string>("planA_Yellow_config", "bt_plan_a_Yellow.xml");
     node->declare_parameter<std::string>("planB_Yellow_config", "bt_plan_b_Yellow.xml");
     node->declare_parameter<std::string>("planC_Yellow_config", "bt_plan_c_Yellow.xml");
     node->declare_parameter<std::string>("Special_Yellow_config", "bt_plan_a_Yellow.xml");
@@ -156,20 +160,26 @@ int main(int argc, char** argv) {
 
     std::string groot_filename;
     // select tree
+    while (rclcpp::ok() && !isReady) {
+        rclcpp::spin_some(node);
+    }
     if (team == "0") {
-        RCLCPP_INFO(node->get_logger(), "[BT Application]: Yellow team is running!");
         switch (plans) {
             case 'A':
             groot_filename = groot_xml_config_directory + "/" + Yellow_A_file;
+            RCLCPP_INFO(node->get_logger(), "[BT Application]: Yellow team is running plan A!");
             break;
             case 'B':
             groot_filename = groot_xml_config_directory + "/" + Yellow_B_file;
+            RCLCPP_INFO(node->get_logger(), "[BT Application]: Yellow team is running plan B!");
             break;
             case 'C':
             groot_filename = groot_xml_config_directory + "/" + Yellow_C_file;
+            RCLCPP_INFO(node->get_logger(), "[BT Application]: Yellow team is running plan C!");
             break;
             case 'S':
             groot_filename = groot_xml_config_directory + "/" + Yellow_Special_file;
+            RCLCPP_INFO(node->get_logger(), "[BT Application]: Yellow team is running Special plan!");
             break;
             default:
             throw "False or Empty plan file";
@@ -201,7 +211,6 @@ int main(int argc, char** argv) {
 
     BT::NodeStatus status = BT::NodeStatus::RUNNING;
     RCLCPP_INFO(node->get_logger(), "[BT Application]: Behavior Tree start running!");
-    rclcpp::Rate rate(100);
     // executor.add_node(node);
     while (rclcpp::ok() && status == BT::NodeStatus::RUNNING /* && game_time <= 95 */) {
         // executor.spin_some();

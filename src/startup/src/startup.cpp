@@ -31,6 +31,7 @@ public:
         this->declare_parameter<int>("start_point", 0);
         this->get_parameter("start_point", start_point_);
         /*******************************************************************/
+        RCLCPP_INFO_STREAM(rclcpp::get_logger("startup"), "start_point: " << start_point_);
         
         st_point[start_point_] = 1;
         start_up_state = INIT;

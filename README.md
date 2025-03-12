@@ -99,6 +99,10 @@
 - `$ rviz2`, and then open demo.rviz
 - Open the Foxglove connection program:
     `ros2 launch foxglove_bridge foxglove_bridge_launch.xml port:=8765`
+- 
+  ```
+  ros2 action send_goal /navigate_to_pose nav2_msgs/action/NavigateToPose "{pose: {header: {stamp: {sec: 0, nanosec: 0}, frame_id: 'map'}, pose: {position: {x: 0.35, y: 1.7, z: 0.0}, orientation: {x: 0.0, y: 0.0, z: 0.707, w: 0.707}}}}"
+  ```
 ### Rival Sim(導航組)
 - `$ ros2 run rival_layer RivalSim --ros-args -p Rival_mode:=<rival mode>`
 ### rival_simulation(主程式)
