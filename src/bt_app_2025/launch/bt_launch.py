@@ -30,7 +30,7 @@ def generate_launch_description():
             parameters=[
                 config_path, 
                 mission_set, 
-                {"tree_name": "MainTree"}, 
+                {"tree_name": "FuncTest"}, 
                 {"Robot_name": "Invisible"}  # Invisible or Tongue
             ],
             remappings=[
