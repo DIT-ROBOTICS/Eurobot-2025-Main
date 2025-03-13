@@ -160,9 +160,9 @@ int main(int argc, char** argv) {
 
     std::string groot_filename;
     // select tree
-    while (rclcpp::ok() && !isReady) {
-        rclcpp::spin_some(node);
-    }
+    // while (rclcpp::ok() && !isReady) {
+    //     rclcpp::spin_some(node);
+    // }
     if (team == "0") {
         switch (plans) {
             case 'A':
