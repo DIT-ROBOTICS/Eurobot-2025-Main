@@ -376,7 +376,7 @@
                  base="{PrevGoal}"
                  _description="backward to free up to space for grabber to fall down"/>
         <FirmwareMission mission_status=""
-                         mission_type="10"
+                         mission_type="30"
                          _description="arm down"/>
         <Docking final_pose="{PrevGoal}"
                  isPureDocking="1"
@@ -387,6 +387,9 @@
         <FirmwareMission mission_status=""
                          mission_type="11"
                          _description="front take 2 level"/>
+        <FirmwareMission mission_status=""
+                         mission_type="31"
+                         _description="arm to one level height"/>
         <Docking final_pose="{PrevGoal}"
                  isPureDocking="1"
                  dock_type="{DOCK_DIR}"
@@ -413,7 +416,7 @@
         <Docking final_pose="{PrevGoal}"
                  isPureDocking="1"
                  dock_type="{DOCK_DIR}"
-                 offset="{DOCK_BACKWARD}"
+                 offset="{DOCK_FORWARD}"
                  base="{PrevGoal}"
                  _description="step back"/>
         <Rotation final_pose="{PrevGoal}"
@@ -550,13 +553,13 @@
       <Sequence>
         <ForceSuccess>
           <FirmwareMission mission_status="{x}"
-                           mission_type="10"
+                           mission_type="20"
                            _description="back put the raw material"/>
         </ForceSuccess>
         <Docking final_pose="{PrevGoal}"
                  isPureDocking="1"
                  dock_type="mission_dock_x"
-                 offset="-0.1"
+                 offset="0.1"
                  base="1.6, 1.3, 0"
                  _description="step back"/>
         <Rotation final_pose="{PrevGoal}"

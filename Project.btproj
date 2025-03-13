@@ -1,25 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <root BTCPP_format="4" project_name="Project">
-    <include path="src/bt_app_2025/bt_m_config/bt_m_tree_node_model.xml"/>
     <include path="src/bt_app_2025/bt_m_config/bt_plan_a.xml"/>
     <!-- Description of Node Models (used by Groot) -->
     <TreeNodesModel>
-        <Action ID="BTMission">
-            <output_port name="result" type="int"/>
-            <input_port name="description" type="std::string"/>
-            <input_port name="mission_sub_type" type="std::deque&lt;int, std::allocator&lt;int&gt; &gt;"/>
-            <input_port name="mission_type" type="std::deque&lt;int, std::allocator&lt;int&gt; &gt;"/>
-        </Action>
         <Action ID="BTStarter">
             <output_port name="result" type="int"/>
         </Action>
         <Action ID="CamReceiver"/>
-        <Condition ID="Comparator">
-            <input_port name="game_status" type="int"/>
-            <input_port name="mission_sub_type" type="int"/>
-            <input_port name="mission_type" type="int"/>
-            <input_port name="compare_point" type="geometry_msgs::msg::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
-        </Condition>
         <Action ID="Docking">
             <output_port name="final_pose" type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
             <input_port name="isPureDocking" type="bool"/>
@@ -27,23 +14,9 @@
             <input_port name="offset" type="double"/>
             <input_port name="base" type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
         </Action>
-        <Action ID="DynamicAdjustment">
-            <input_port name="rival_pose" type="geometry_msgs::msg::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
-            <input_port name="robot_pose" type="geometry_msgs::msg::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
-        </Action>
         <Action ID="FirmwareMission">
             <output_port name="mission_status" type="int"/>
             <input_port name="mission_type" type="int"/>
-        </Action>
-        <Action ID="IntegratedMissionNode">
-            <output_port name="mission_progress" type="int"/>
-            <output_port name="mission_status" type="int"/>
-            <input_port name="base" type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
-            <input_port name="mission_set_name" type="std::string"/>
-        </Action>
-        <Action ID="LocReceiver">
-            <output_port name="rival_pose" type="geometry_msgs::msg::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
-            <output_port name="robot_pose" type="geometry_msgs::msg::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
         </Action>
         <Action ID="MissionFinisher">
             <output_port name="failed_levels" type="int"/>
@@ -51,25 +24,15 @@
             <input_port name="robot_type" type="bool"/>
             <input_port name="step_results" type="std::deque&lt;int, std::allocator&lt;int&gt; &gt;"/>
         </Action>
-        <Action ID="NavReceiver"/>
         <Action ID="Navigation">
             <output_port name="final_pose" type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
             <input_port name="type" type="int"/>
             <input_port name="goal" type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
-        </Action>
-        <Action ID="PointProvider">
-            <output_port name="point_out2" type="double"/>
-            <output_port name="point_out1" type="double"/>
-            <input_port name="point_in" type="double"/>
         </Action>
         <Action ID="Rotation">
             <output_port name="final_pose" type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
             <input_port name="degree" type="double"/>
             <input_port name="base" type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
         </Action>
-        <Action ID="SIMAactivate"/>
-        <Decorator ID="TimerChecker">
-            <input_port name="timer_sec" type="int"/>
-        </Decorator>
     </TreeNodesModel>
 </root>
