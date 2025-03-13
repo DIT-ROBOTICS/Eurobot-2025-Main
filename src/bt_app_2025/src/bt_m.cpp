@@ -10,10 +10,14 @@
 // ROS
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp/executors.hpp"
+#include "rclcpp/client.hpp"  // Service client
+#include "rclcpp/service.hpp" // Service server
 // ros message
 #include "std_srvs/srv/set_bool.hpp"
 #include "std_msgs/msg/float32.hpp"
 #include "geometry_msgs/msg/point_stamped.hpp"
+// Include startup necessary service
+#include "btcpp_ros2_interfaces/srv/example.hpp"
 // BTaction nodes
 #include "bt_app_2025/bt_nodes_firmware.h"
 #include "bt_app_2025/bt_nodes_navigation.h"
@@ -54,10 +58,13 @@ bool isReady = false;
 
 void timeCallback(const std_msgs::msg::Float32::SharedPtr msg) {
     game_time = msg->data;
+    if (game_time <= 0.3)
+        RCLCPP_INFO_STREAM(rclcpp::get_logger("bt_m"), "game_time: " << game_time);
 }
 
-void startCallback(const geometry_msgs::msg::PointStamped::SharedPtr msg) {
-    RCLCPP_INFO_STREAM(rclcpp::get_logger("bt_m"), "team: " << team << ", msg->point.z: " << (int)msg->point.z);
+void readyCallback(const geometry_msgs::msg::PointStamped::SharedPtr msg) {
+    if (isReady)
+        return;
     team = msg->header.frame_id;
     switch((int)msg->point.z) {
         case 1:
@@ -80,15 +87,19 @@ void startCallback(const geometry_msgs::msg::PointStamped::SharedPtr msg) {
 }
 
 int main(int argc, char** argv) {
+    // initialize
     rclcpp::init(argc, argv);
     auto node = std::make_shared<rclcpp::Node>("bt_app_2025");
     rclcpp::executors::MultiThreadedExecutor executor;
     rclcpp::Rate rate(100);
 
+    // ROS msg
+    std_msgs::msg::Int32 ready_feedback;
+
     // Subscriber
     auto time_sub = node->create_subscription<std_msgs::msg::Float32>("/robot/startup/time", 2, timeCallback);
-    // auto sub = node->create_subscription<geometry_msgs::msg::PointStamped>("/robot/startup/ready_signal", 2, readyCallback);
-    auto start_sub = node->create_subscription<geometry_msgs::msg::PointStamped>("/robot/startup/start_signal", 2, startCallback);
+    auto sub = node->create_subscription<geometry_msgs::msg::PointStamped>("/robot/startup/ready_signal", 2, readyCallback);
+    rclcpp::Publisher<std_msgs::msg::Int32>::SharedPtr pub = node->create_publisher<std_msgs::msg::Int32>("/robot/Start", 2);
 
     // Behavior Tree Factory
     BT::BehaviorTreeFactory factory;
@@ -118,7 +129,7 @@ int main(int argc, char** argv) {
     node->declare_parameter<std::string>("planB_Blue_config", "bt_plan_b_Blue.xml");
     node->declare_parameter<std::string>("planC_Blue_config", "bt_plan_c_Blue.xml");
     node->declare_parameter<std::string>("Special_Blue_config", "bt_plan_a_Blue.xml");
-
+    // get parameters
     node->get_parameter("groot_xml_config_directory", groot_xml_config_directory);
     node->get_parameter("tree_node_model_config_file", bt_tree_node_model);
     node->get_parameter("tree_name", tree_name);
@@ -158,11 +169,19 @@ int main(int argc, char** argv) {
     file << xml_models;
     file.close();
 
-    std::string groot_filename;
+    // Receiving team number and plan code
+    while (rclcpp::ok() && !isReady) {
+        rclcpp::spin_some(node);
+        rclcpp::Rate rate(100);
+    }
+    // Send feed back to startup
+    for (int j = 0; j < 20; j++) {
+        ready_feedback.data = 1;
+        pub->publish(ready_feedback);
+        rclcpp::Rate rate(100);
+    }
     // select tree
-    // while (rclcpp::ok() && !isReady) {
-    //     rclcpp::spin_some(node);
-    // }
+    std::string groot_filename;
     if (team == "0") {
         switch (plans) {
             case 'A':

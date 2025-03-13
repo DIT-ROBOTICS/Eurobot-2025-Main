@@ -4,9 +4,6 @@
 #include "std_msgs/msg/float32.hpp"
 #include "geometry_msgs/msg/point_stamped.hpp"
 
-/* Include startup necessary service */
-#include "btcpp_ros2_interfaces/srv/start_up_srv.hpp"
-
 #include <jsoncpp/json/json.h>
 #include <fstream>
 
@@ -138,13 +135,6 @@ public:
         }
     }
 
-    // bool ReadyFeedback(const std::shared_ptr<btcpp_ros2_interfaces::srv::StartUpSrv::Request> req,
-    //                         std::shared_ptr<btcpp_ros2_interfaces::srv::StartUpSrv::Response> res) {
-
-        // ready_feedback += req->group;
-
-    //     return true;
-    // }
     void UpdateTeamAndPoint(int point) {
         switch (point) {
         case 0:
@@ -209,6 +199,7 @@ public:
 
         if (msg->data == 1) {
             if (prev_msg == 0) {
+                ready_feedback = 1;
                 start = true;
             }
         }
@@ -222,16 +213,15 @@ private:
     rclcpp::Publisher<geometry_msgs::msg::PointStamped>::SharedPtr start_pub;
     rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr time_pub;
     rclcpp::Subscription<std_msgs::msg::Int32>::SharedPtr start_sub;
-    rclcpp::Service<btcpp_ros2_interfaces::srv::StartUpSrv>::SharedPtr srv;
 
     int team;
     char plan;
-    int ready_feedback = 1;
+    int ready_feedback = 0;
     int st_point[6];
     int start_point;
     bool ready = false;
     bool pub_ready = false;
-    bool start = true;
+    bool start = false;
     double starting_time = 0;
     StartUpState start_up_state;
     geometry_msgs::msg::PointStamped start_position;
