@@ -145,6 +145,9 @@ BT::NodeStatus MissionFinisher::onStart()
     blackboard_->get<int>("front_materials", front_materials_);
     blackboard_->get<int>("back_materials", back_materials_);
     blackboard_->set<int>("mission_progress", 0);
+    
+    RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "finisher get step_results: %d", step_results_.back());
+    RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "finisher get robot_type_: %d", robot_type_);
 
     return BT::NodeStatus::RUNNING;
 }
@@ -158,7 +161,8 @@ BT::NodeStatus MissionFinisher::onRunning()
     auto spin_construct_2_ = matrix_node_->get_parameter("spin_construct_2").as_integer_array();
     auto not_spin_construct_3_ = matrix_node_->get_parameter("not_spin_construct_3").as_integer_array();
     auto spin_construct_3_ = matrix_node_->get_parameter("spin_construct_3").as_integer_array();
-    switch(mission_progress_){
+    
+    switch(step_results_.back()){
 
         // front_collect
         case 1:
@@ -197,16 +201,16 @@ BT::NodeStatus MissionFinisher::onRunning()
         case 4:
             if(robot_type_)
             {
-                front_materials_ = not_spin_construct_2_[mission_progress_ * 4 + 2];
-                back_materials_ = not_spin_construct_2_[mission_progress_ * 4 + 3];
-                success_levels_ = not_spin_construct_2_[mission_progress_ * 4 + 4];
+                front_materials_ = not_spin_construct_2_[mission_progress_ * 4 + 1];
+                back_materials_ = not_spin_construct_2_[mission_progress_ * 4 + 2];
+                success_levels_ = not_spin_construct_2_[mission_progress_ * 4 + 3];
                 failed_levels_ = 2 - success_levels_;
             }
             else
             {
-                front_materials_ = spin_construct_2_[mission_progress_ * 4 + 2];
-                back_materials_ = spin_construct_2_[mission_progress_ * 4 + 3];
-                success_levels_ = spin_construct_2_[mission_progress_ * 4 + 4];
+                front_materials_ = spin_construct_2_[mission_progress_ * 4 + 1];
+                back_materials_ = spin_construct_2_[mission_progress_ * 4 + 2];
+                success_levels_ = spin_construct_2_[mission_progress_ * 4 + 3];
                 failed_levels_ = 2 - success_levels_;
             }
 
@@ -218,15 +222,15 @@ BT::NodeStatus MissionFinisher::onRunning()
         case 5:
             if(robot_type_)
             {
-                front_materials_ = not_spin_construct_3_[mission_progress_ * 4 + 2];
-                back_materials_ = not_spin_construct_3_[mission_progress_ * 4 + 3];
+                front_materials_ = not_spin_construct_3_[mission_progress_ * 4 + 1];
+                back_materials_ = not_spin_construct_3_[mission_progress_ * 4 + 2];
                 
-                // 疊三層時，過程中兩層的成功與否受到建造區影響
-                if (not_spin_construct_3_[mission_progress_ * 4 + 4] != 4)
+                if (not_spin_construct_3_[mission_progress_ * 4 + 3] != 4)
                 {
-                    success_levels_ = not_spin_construct_3_[mission_progress_ * 4 + 4];
+                    success_levels_ = not_spin_construct_3_[mission_progress_ * 4 + 3];
                     failed_levels_ = 3 - success_levels_;
                 }
+                // 疊三層時，過程中兩層的成功與否受到建造區影響
                 else
                 {
                     success_levels_ = 1;
@@ -235,15 +239,15 @@ BT::NodeStatus MissionFinisher::onRunning()
             }
             else
             {
-                front_materials_ = spin_construct_3_[mission_progress_ * 4 + 2];
-                back_materials_ = spin_construct_3_[mission_progress_ * 4 + 3];
+                front_materials_ = spin_construct_3_[mission_progress_ * 4 + 1];
+                back_materials_ = spin_construct_3_[mission_progress_ * 4 + 2];
                 
-                // 疊三層時，過程中兩層的成功與否受到建造區影響
-                if (spin_construct_3_[mission_progress_ * 4 + 4] != 4)
+                if (spin_construct_3_[mission_progress_ * 4 + 3] != 4)
                 {
-                    success_levels_ = spin_construct_3_[mission_progress_ * 4 + 4];
+                    success_levels_ = spin_construct_3_[mission_progress_ * 4 + 3];
                     failed_levels_ = 3 - success_levels_;
                 }
+                // 疊三層時，過程中兩層的成功與否受到建造區影響
                 else
                 {
                     success_levels_ = 1;
@@ -264,6 +268,10 @@ BT::NodeStatus MissionFinisher::onRunning()
 
     setOutput("success_levels", success_levels_); 
     setOutput("failed_levels", failed_levels_);
+
+    RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "mission_progress: %d", mission_progress_);
+    RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "success_levels: %d, failed_levels: %d", success_levels_, failed_levels_);
+    RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "front_materials: %d, back_materials: %d", front_materials_, back_materials_);
     
     if (matreials_accord_)
         return BT::NodeStatus::SUCCESS;
@@ -317,6 +325,7 @@ BT::NodeStatus FirmwareMission::onStart() {
     RCLCPP_INFO(node_->get_logger(), "Node start");
     getInput<int>("mission_type", mission_type_);
     blackboard_->get<int>("mission_progress", mission_progress_);
+
     return BT::NodeStatus::RUNNING;
 }
 
@@ -325,7 +334,18 @@ BT::NodeStatus FirmwareMission::onRunning() {
     pub_msg.data = mission_type_;
     if (!mission_received_)
         publisher_->publish(pub_msg);
-    return BT::NodeStatus::RUNNING;
+
+    RCLCPP_INFO(node_->get_logger(), "mission_progress: %d", mission_progress_);
+    RCLCPP_INFO(node_->get_logger(), "mission_type: %d", mission_type_);
+
+    // **failure test**
+    if (mission_progress_ != 5)
+        blackboard_->set<int>("mission_progress", ++mission_progress_);
+    
+    return BT::NodeStatus::SUCCESS;
+    // **failure test**
+
+    // return BT::NodeStatus::RUNNING;
 }
 
 void FirmwareMission::onHalted() {

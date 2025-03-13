@@ -41,6 +41,12 @@
             <output_port name="rival_pose" type="geometry_msgs::msg::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
             <output_port name="robot_pose" type="geometry_msgs::msg::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
         </Action>
+        <Action ID="MissionFinisher">
+            <output_port name="failed_levels" type="int"/>
+            <output_port name="success_levels" type="int"/>
+            <input_port name="robot_type" type="bool"/>
+            <input_port name="step_results" type="std::deque&lt;int, std::allocator&lt;int&gt; &gt;"/>
+        </Action>
         <Action ID="NavReceiver"/>
         <Action ID="Navigation">
             <output_port name="final_pose" type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>

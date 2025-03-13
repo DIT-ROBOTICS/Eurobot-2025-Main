@@ -165,11 +165,7 @@ private:
 
   std::deque<int> stage_info_;
 
-
   rclcpp::Node::SharedPtr matrix_node_;
-
-  BT::Blackboard::Ptr blackboard_;
-
 };
 
 /****************/

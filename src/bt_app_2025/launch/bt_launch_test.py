@@ -18,7 +18,12 @@ def generate_launch_description():
     config_path = os.path.join(
         get_package_share_directory('bt_app_2025'),
         'params',
-        'config_path.yaml'
+        'config_path_test.yaml'
+    )
+    config_path = os.path.join(
+        get_package_share_directory('bt_app_2025'),
+        'params',
+        'finisher.yaml'
     )
     mission_set = os.path.join(
         get_package_share_directory('bt_app_2025'),
@@ -27,7 +32,7 @@ def generate_launch_description():
     )
     return LaunchDescription([
         Node(
-            parameters=[config_path, mission_set, {"tree_name": "MainTree"}],
+            parameters=[config_path, mission_set, {"tree_name": "PutTwoTest"}],
             remappings=[
                 ("/map", "/map"),
                 ("/base_link", "/final_pose")

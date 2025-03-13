@@ -59,8 +59,8 @@ int main(int argc, char** argv) {
     // Create a shared blackboard
     auto blackboard = BT::Blackboard::create();
     blackboard->set<double>("current_time", 0);
-    blackboard->set<double>("front_materials", 0);
-    blackboard->set<double>("back_materials", 0);
+    blackboard->set<int>("front_materials", 0);
+    blackboard->set<int>("back_materials", 0);
     blackboard->set<int>("mission_progress", 0);
 
 
