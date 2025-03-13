@@ -27,7 +27,12 @@ def generate_launch_description():
     )
     return LaunchDescription([
         Node(
-            parameters=[config_path, mission_set, {"tree_name": "MainTree"}],
+            parameters=[
+                config_path, 
+                mission_set, 
+                {"tree_name": "MainTree"}, 
+                {"Robot_name": "Tongue"}  # Invisible or Tongue
+            ],
             remappings=[
                 ("/map", "/map"),
                 ("/base_link", "/final_pose")
@@ -37,6 +42,9 @@ def generate_launch_description():
             name = 'bt_m'
         ),
         Node(
+            parameters=[
+                {"start_point": "0"} # 0 to 5
+            ],
             package = 'startup',
             executable = 'startup',
             name = 'startup'

@@ -25,8 +25,14 @@ public:
         time_pub = this->create_publisher<std_msgs::msg::Float32>("/robot/startup/time", 2);
         start_sub = this->create_subscription<std_msgs::msg::Int32>("/robot/Start", 2, std::bind(&StartUp::StartCallback, this, std::placeholders::_1));
         // srv = this->create_service<btcpp_ros2_interfaces::srv::StartUpSrv>("/robot/startup/ready_signal_feedback",  &StartUp::ReadyFeedback);
+
+        /* temp: will be delete and get the `start_point_` from web pannel */ 
+        int start_point_ = 0;
+        this->declare_parameter<int>("start_point", 0);
+        this->get_parameter("start_point", start_point_);
+        /*******************************************************************/
         
-        st_point[0] = 1;
+        st_point[start_point_] = 1;
         start_up_state = INIT;
         timer_ = this->create_wall_timer(
             std::chrono::microseconds(100), 
@@ -142,30 +148,54 @@ public:
         switch (point) {
         case 0:
             team = 0;
-            start_position.point.x = 2.7;
+            plan = 'A';
+            start_position.point.x = 2.6;
             start_position.point.y = 0.9;
-            start_position.point.z = 0;
+            start_position.point.z = 1;
             break;
         case 1:
             team = 0;
-            start_position.point.x = 1.25;
-            start_position.point.y = 0.25;
-            start_position.point.z = 0;
+            plan = 'B';
+            start_position.point.x = 0.5;
+            start_position.point.y = 1.7;
+            start_position.point.z = 2;
             break;
         case 2: 
             team = 0;
-            start_position.point.x = 0.8;
+            plan = 'C';
+            start_position.point.x = 1.25;
+            start_position.point.y = 0.25;
+            start_position.point.z = 3;
+            break;
+        case 3:
+            team = 1;
+            plan = 'A';
+            start_position.point.x = 2.7;
+            start_position.point.y = 0.9;
+            start_position.point.z = 1;
+            break;
+        case 4:
+            team = 1;
+            plan = 'B';
+            start_position.point.x = 2.5;
             start_position.point.y = 1.7;
-            start_position.point.z = 0;
+            start_position.point.z = 2;
+            break;
+        case 5: 
+            team = 1;
+            plan = 'C';
+            start_position.point.x = 1.75;
+            start_position.point.y = 0.25;
+            start_position.point.z = 3;
             break;
         }
     }
 
     int CheckStartPoint() {
         
-        for (int i = 1; i < 4; i++) {
-            if (st_point[i - 1] == 1) {
-                UpdateTeamAndPoint(i - 1);
+        for (int i = 0; i < 6; i++) {
+            if (st_point[i] == 1) {
+                UpdateTeamAndPoint(i);
                 return i;
             }
         }
@@ -194,8 +224,9 @@ private:
     rclcpp::Service<btcpp_ros2_interfaces::srv::StartUpSrv>::SharedPtr srv;
 
     int team;
+    char plan;
     int ready_feedback = 1;
-    int st_point[3];
+    int st_point[6];
     int start_point;
     bool ready = false;
     bool pub_ready = false;

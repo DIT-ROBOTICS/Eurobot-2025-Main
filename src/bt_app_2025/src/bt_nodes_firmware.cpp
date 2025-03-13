@@ -3,17 +3,17 @@
 using namespace BT;
 using namespace std;
 
-template <> inline geometry_msgs::msg::TwistStamped BT::convertFromString(StringView str) {
+template <> inline geometry_msgs::msg::PoseStamped BT::convertFromString(StringView str) {
 
     auto parts = splitString(str, ',');
     if (parts.size() != 3) {
         throw RuntimeError("invalid input)");
     }
     else {
-        geometry_msgs::msg::TwistStamped output;
-        output.twist.linear.x = convertFromString<double>(parts[0]);
-        output.twist.linear.y = convertFromString<double>(parts[1]);
-        output.twist.linear.z = convertFromString<double>(parts[2]);
+        geometry_msgs::msg::PoseStamped output;
+        output.pose.position.x = convertFromString<double>(parts[0]);
+        output.pose.position.y = convertFromString<double>(parts[1]);
+        output.pose.position.z = convertFromString<double>(parts[2]);
         return output;
     }
 }
@@ -34,55 +34,6 @@ template <> inline std::deque<int> BT::convertFromString(StringView str) {
 
     return output;
 }
-
-/********************/
-/* Firmware Mission */
-/********************/
-BT::PortsList BTMission::providedPorts() {
-    return { 
-        BT::InputPort<std::deque<int>>("mission_type"),
-        BT::InputPort<std::deque<int>>("mission_sub_type"),
-        BT::InputPort<std::string>("description"),
-        BT::OutputPort<int>("result")
-    };
-}
-bool BTMission::setGoal(RosActionNode::Goal& goal) {
-    mission_type_ = getInput<std::deque<int>>("mission_type").value();
-    mission_sub_type_ = getInput<std::deque<int>>("mission_sub_type").value();
-
-    goal.mission_type = mission_type_.front();
-    goal.mission_sub_type = mission_sub_type_.front();
-
-    mission_finished_ = false;
-    mission_failed_ = false;
-
-    // blackboard()->set<std::string>("global_param", "Updated Value");
-    // blackboard()->get("global_param", value);
-    // std::cout << "Global parameter: " << value << std::endl;
-
-    return true;
-}
-NodeStatus BTMission::onResultReceived(const WrappedResult& wr) {
-    // result_ = wr.result->outcome.data;
-    mission_finished_ = true;
-    mission_failed_ = false;
-    setOutput<int>("result", mission_type_.front());
-    return NodeStatus::SUCCESS;
-}
-NodeStatus BTMission::onFailure(ActionNodeErrorCode error) {
-    mission_failed_ = true;
-    setOutput<int>("result", mission_type_.front());
-    RCLCPP_ERROR(logger(), "[BT]: Navigation error");
-    return NodeStatus::FAILURE;
-}
-NodeStatus BTMission::onFeedback(const std::shared_ptr<const Feedback> feedback) {
-    progress_ = feedback->progress.data;
-    return NodeStatus::RUNNING;
-}
-
-/******************/
-/* Banner Mission */
-/******************/
 
 /********************************/
 /* Simple Node to activate SIMA */

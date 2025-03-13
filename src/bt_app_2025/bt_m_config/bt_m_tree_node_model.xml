@@ -1,11 +1,5 @@
 <root BTCPP_format="4">
     <TreeNodesModel>
-        <Action ID="BTMission">
-            <output_port name="result" type="int"/>
-            <input_port name="description" type="std::string"/>
-            <input_port name="mission_sub_type" type="std::deque&lt;int, std::allocator&lt;int&gt; &gt;"/>
-            <input_port name="mission_type" type="std::deque&lt;int, std::allocator&lt;int&gt; &gt;"/>
-        </Action>
         <Action ID="BTStarter">
             <output_port name="result" type="int"/>
         </Action>
@@ -37,10 +31,6 @@
             <input_port name="base" type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
             <input_port name="mission_set_name" type="std::string"/>
         </Action>
-        <Action ID="LocReceiver">
-            <output_port name="rival_pose" type="geometry_msgs::msg::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
-            <output_port name="robot_pose" type="geometry_msgs::msg::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
-        </Action>
         <Action ID="MissionFinisher">
             <output_port name="failed_levels" type="int"/>
             <output_port name="success_levels" type="int"/>
@@ -52,11 +42,6 @@
             <output_port name="final_pose" type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
             <input_port name="type" type="int"/>
             <input_port name="goal" type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
-        </Action>
-        <Action ID="PointProvider">
-            <output_port name="point_out2" type="double"/>
-            <output_port name="point_out1" type="double"/>
-            <input_port name="point_in" type="double"/>
         </Action>
         <Action ID="Rotation">
             <output_port name="final_pose" type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>

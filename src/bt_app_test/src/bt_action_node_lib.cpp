@@ -120,42 +120,37 @@ void Testing::onHalted()
 PortsList TopicPubTest::providedPorts() {
   return { 
     BT::InputPort<std::string>("topic_name"), 
-    BT::InputPort<int>("base_number"),
-    BT::InputPort<int>("add_number"),
-    BT::OutputPort<int>("total_number") 
+    BT::InputPort<int>("number"),
   };
 }
 
 BT::NodeStatus TopicPubTest::onStart() {
   RCLCPP_INFO(node_->get_logger(), "Node start");
-  getInput<int>("base_number", a);
-  getInput<int>("add_number", b);
+  getInput<int>("number", a);
   return BT::NodeStatus::RUNNING;
 }
 
 BT::NodeStatus TopicPubTest::onRunning() {
   RCLCPP_INFO(node_->get_logger(), "Testing Node running");
-  number.data = a + b;
-  std::cout << a << " + " << b << " = " << number.data << std::endl;
-  setOutput<int>("total_number", number.data); 
+  number.data = a;
+  publisher_->publish(number);
   return BT::NodeStatus::SUCCESS;
 }
 
 void TopicPubTest::onHalted() {
   // Reset the output port
-  setOutput<int>("total_number", 0);
   RCLCPP_INFO(node_->get_logger(), "Testing Node halted");
   return;
 }
 
 PortsList TopicSubTest::providedPorts() {
   return { 
-    BT::OutputPort<int>("output") 
+    BT::OutputPort<int>("sum") 
   };
 }
 
 void TopicSubTest::topic_callback(const std_msgs::msg::Int32::SharedPtr msg) {
-  number = msg->data;
+  number += msg->data;
   RCLCPP_INFO(node_->get_logger(), "I heard: '%d'", msg->data);
 }
 
@@ -165,14 +160,14 @@ BT::NodeStatus TopicSubTest::onStart() {
 }
 
 BT::NodeStatus TopicSubTest::onRunning() {
-  setOutput<int>("output", number);
+  setOutput<int>("sum", number);
   RCLCPP_INFO(node_->get_logger(), "Testing Node running");
   return BT::NodeStatus::SUCCESS;
 }
 
 void TopicSubTest::onHalted() {
   // Reset the output port
-  setOutput<int>("output", 0);
+  setOutput<int>("sum", 0);
   RCLCPP_INFO(node_->get_logger(), "Testing Node halted");
   return;
 }

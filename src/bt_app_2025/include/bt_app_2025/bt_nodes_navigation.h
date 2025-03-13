@@ -67,6 +67,7 @@ public:
 private:
     bool nav_finished_ = false;
     bool nav_error_ = false;
+    int nav_recov_times_ = 0;
     int nav_type_;
     geometry_msgs::msg::PoseStamped goal_;
     geometry_msgs::msg::PoseStamped current_pose_;
@@ -95,10 +96,10 @@ public:
 
 private:
     bool UpdateRobotPose();
-
     bool nav_finished_;
     bool nav_error_;
     bool isPureDocking_;
+    int nav_recov_times_ = 0;
     std::string dock_type_;
     double offset_;
     geometry_msgs::msg::PoseStamped goal_;
@@ -125,9 +126,9 @@ public:
     NodeStatus onFeedback(const std::shared_ptr<const Feedback> feedback);
 
 private:
-
     bool nav_finished_;
     bool nav_error_;
+    int nav_recov_times_ = 0;
     geometry_msgs::msg::PoseStamped goal_;
     geometry_msgs::msg::PoseStamped current_pose_;
 };

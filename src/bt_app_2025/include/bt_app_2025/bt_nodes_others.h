@@ -33,9 +33,6 @@
 #include <tf2_ros/buffer.h>
 #include <tf2/exceptions.h>
 
-// Use self define message
-
-
 using namespace BT;
 
 namespace BT {
@@ -43,27 +40,6 @@ namespace BT {
     template <> inline int convertFromString(StringView str);
     template <> inline std::deque<int> convertFromString(StringView str);
 }
-
-/*****************/
-/* PointProvider */
-/*****************/
-// convert a input message and output as two BT port parameter
-// each one represent the forward and backward distance
-class PointProvider : public BT::SyncActionNode {
-
-public:
-    PointProvider(const std::string& name, const BT::NodeConfig& config)
-        : BT::SyncActionNode(name, config)
-    {}
-
-    /* Node remapping function */
-    static BT::PortsList providedPorts();
-
-    /* Start and running function */
-    BT::NodeStatus tick() override;
-private:
-    double point;
-};
 
 /******************************/
 /* BTStarter - Start the tree */

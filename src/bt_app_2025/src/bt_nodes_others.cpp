@@ -35,23 +35,6 @@ template <> inline std::deque<int> BT::convertFromString(StringView str) {
     return output;
 }
 
-BT::PortsList PointProvider::providedPorts() {
-    return { 
-        BT::InputPort<double>("point_in"),
-        BT::OutputPort<double>("point_out1"),
-        BT::OutputPort<double>("point_out2") 
-    };
-}
-
-BT::NodeStatus PointProvider::tick() {
-    point = getInput<double>("point_in").value();
-    setOutput<double>("point_out1", point);
-    point *= -1;
-    setOutput<double>("point_out2", point);
-
-    return BT::NodeStatus::SUCCESS;
-}
-
 /*************/
 /* BTStarter */
 /*************/
