@@ -76,83 +76,165 @@ bool SIMAactivate::wakeUpSIMA() {
         timer_.reset();
     return true;
 }
-/*************/
-/* Finisher */
-/************/
-PortsList Finisher::providedPorts() {
+/********************/
+/* MissionFinisher */
+/********************/
+PortsList MissionFinisher::providedPorts() {
     return { 
         BT::InputPort<std::deque<int>>("step_results"),
         BT::InputPort<bool>("robot_type"),
-        //construct:
         BT::OutputPort<int>("success_levels"), 
-        BT::OutputPort<int>("failed_levels"), 
-        BT::OutputPort<int>("on_robot_materials"),
-        //collect:
-        BT::OutputPort<bool>("has_raw_material"), 
-        BT::OutputPort<bool>("has_one_level")
+        BT::OutputPort<int>("failed_levels")
     };
 }
 
-BT::NodeStatus Finisher::onStart()
+BT::NodeStatus MissionFinisher::onStart()
 {
     getInput<std::deque<int>>("step_results", step_results_);
     getInput<bool>("robot_type", robot_type_);
     blackboard_->get<int>("mission_progress", mission_progress_);
+    blackboard_->get<int>("front_materials", front_materials_);
+    blackboard_->get<int>("back_materials", back_materials_);
     blackboard_->set<int>("mission_progress", 0);
+    
+    RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "finisher get step_results: %d", step_results_.back());
+    RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "finisher get robot_type_: %d", robot_type_);
+
     return BT::NodeStatus::RUNNING;
 }
 
-BT::NodeStatus Finisher::onRunning()
+BT::NodeStatus MissionFinisher::onRunning()
 {
-    switch(mission_progress_){
+    auto front_collect_ = matrix_node_->get_parameter("front_collect").as_integer_array();
+    auto back_collect_ = matrix_node_->get_parameter("back_collect").as_integer_array();
+    auto construct_1_ = matrix_node_->get_parameter("construct_1").as_integer_array();
+    auto not_spin_construct_2_ = matrix_node_->get_parameter("not_spin_construct_2").as_integer_array();
+    auto spin_construct_2_ = matrix_node_->get_parameter("spin_construct_2").as_integer_array();
+    auto not_spin_construct_3_ = matrix_node_->get_parameter("not_spin_construct_3").as_integer_array();
+    auto spin_construct_3_ = matrix_node_->get_parameter("spin_construct_3").as_integer_array();
+    
+    switch(step_results_.back()){
 
+        // front_collect
         case 1:
+            front_materials_ += front_collect_[1];
+            back_materials_ += front_collect_[2];
+            success_levels_ = 0;
+            failed_levels_ = 0;
+
+            if (front_materials_ == 3)
+                matreials_accord_ = 1;
+
             break;
+        // back_collect
         case 2:
+            front_materials_ += back_collect_[1];
+            back_materials_ += back_collect_[2];
+            success_levels_ = 0;
+            failed_levels_ = 0;
+
+            if (back_materials_ == 1)
+                matreials_accord_ = 1;
+
             break;
+        // construct_1
         case 3:
+            front_materials_ = construct_1_[1];
+            back_materials_ = construct_1_[2];
+            success_levels_ = construct_1_[3];
+            failed_levels_ = 1 - success_levels_;
+
+            if (front_materials_ == 0)
+                matreials_accord_ = 1;
+
             break;
+        // construct_2
         case 4:
             if(robot_type_)
             {
-
+                front_materials_ = not_spin_construct_2_[mission_progress_ * 4 + 1];
+                back_materials_ = not_spin_construct_2_[mission_progress_ * 4 + 2];
+                success_levels_ = not_spin_construct_2_[mission_progress_ * 4 + 3];
+                failed_levels_ = 2 - success_levels_;
             }
             else
             {
-              
+                front_materials_ = spin_construct_2_[mission_progress_ * 4 + 1];
+                back_materials_ = spin_construct_2_[mission_progress_ * 4 + 2];
+                success_levels_ = spin_construct_2_[mission_progress_ * 4 + 3];
+                failed_levels_ = 2 - success_levels_;
             }
+
+            if (front_materials_ == 0 && back_materials_ == 0)
+                matreials_accord_ = 1;
+
             break;
+        // construct_3
         case 5:
             if(robot_type_)
             {
-
+                front_materials_ = not_spin_construct_3_[mission_progress_ * 4 + 1];
+                back_materials_ = not_spin_construct_3_[mission_progress_ * 4 + 2];
+                
+                if (not_spin_construct_3_[mission_progress_ * 4 + 3] != 4)
+                {
+                    success_levels_ = not_spin_construct_3_[mission_progress_ * 4 + 3];
+                    failed_levels_ = 3 - success_levels_;
+                }
+                // 疊三層時，過程中兩層的成功與否受到建造區影響
+                else
+                {
+                    success_levels_ = 1;
+                    failed_levels_ = 2;
+                }
             }
             else
             {
+                front_materials_ = spin_construct_3_[mission_progress_ * 4 + 1];
+                back_materials_ = spin_construct_3_[mission_progress_ * 4 + 2];
                 
+                if (spin_construct_3_[mission_progress_ * 4 + 3] != 4)
+                {
+                    success_levels_ = spin_construct_3_[mission_progress_ * 4 + 3];
+                    failed_levels_ = 3 - success_levels_;
+                }
+                // 疊三層時，過程中兩層的成功與否受到建造區影響
+                else
+                {
+                    success_levels_ = 1;
+                    failed_levels_ = 2;
+                }
             }
+
+            if (front_materials_ == 0 && back_materials_ == 0)
+                matreials_accord_ = 1;
+            
             break;
         default:
             break;
     }
 
+    blackboard_->set<int>("front_materials", front_materials_);
+    blackboard_->set<int>("back_materials", back_materials_);
+
     setOutput("success_levels", success_levels_); 
-    setOutput("failed_levels", failed_levels_); 
-    setOutput("on_robot_materials", on_robot_materials_);
-    setOutput("has_raw_material", has_raw_material_); 
-    setOutput("has_one_level", has_one_level_);
+    setOutput("failed_levels", failed_levels_);
+
+    RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "mission_progress: %d", mission_progress_);
+    RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "success_levels: %d, failed_levels: %d", success_levels_, failed_levels_);
+    RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "front_materials: %d, back_materials: %d", front_materials_, back_materials_);
     
-    return BT::NodeStatus::SUCCESS;
+    if (matreials_accord_)
+        return BT::NodeStatus::SUCCESS;
+    else
+        return BT::NodeStatus::FAILURE;
 }
 
-void Finisher::onHalted()
+void MissionFinisher::onHalted()
 {
     // Reset the output port
     setOutput("success_levels", 0); 
     setOutput("failed_levels", 0); 
-    setOutput("has_raw_material", false); 
-    setOutput("has_one_level", false);
-    setOutput("on_robot_materials", 0);
 
     RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Testing Node halted");
     return;
@@ -194,6 +276,7 @@ BT::NodeStatus FirmwareMission::onStart() {
     RCLCPP_INFO(node_->get_logger(), "Node start");
     getInput<int>("mission_type", mission_type_);
     blackboard_->get<int>("mission_progress", mission_progress_);
+
     return BT::NodeStatus::RUNNING;
 }
 
@@ -202,7 +285,18 @@ BT::NodeStatus FirmwareMission::onRunning() {
     pub_msg.data = mission_type_;
     if (!mission_received_)
         publisher_->publish(pub_msg);
-    return BT::NodeStatus::RUNNING;
+
+    RCLCPP_INFO(node_->get_logger(), "mission_progress: %d", mission_progress_);
+    RCLCPP_INFO(node_->get_logger(), "mission_type: %d", mission_type_);
+
+    // **failure test**
+    if (mission_progress_ != 5)
+        blackboard_->set<int>("mission_progress", ++mission_progress_);
+    
+    return BT::NodeStatus::SUCCESS;
+    // **failure test**
+
+    // return BT::NodeStatus::RUNNING;
 }
 
 void FirmwareMission::onHalted() {

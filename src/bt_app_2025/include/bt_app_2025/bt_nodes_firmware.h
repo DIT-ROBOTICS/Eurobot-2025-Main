@@ -67,12 +67,25 @@ private:
   bool mission_finished_ = false;
 };
 
-class Finisher : public BT::StatefulActionNode
+class MissionFinisher : public BT::StatefulActionNode
 {
 public:
-  Finisher(const std::string& name, const BT::NodeConfig& config, BT::Blackboard::Ptr blackboard)
+
+  MissionFinisher(const std::string& name, const BT::NodeConfig& config, BT::Blackboard::Ptr blackboard)
     : BT::StatefulActionNode(name, config), blackboard_(blackboard)
-  {}
+  {
+    matrix_node_ = rclcpp::Node::make_shared("matrix_node");
+    matreials_accord_ = 0;
+
+    matrix_node_->declare_parameter<std::vector<int>>("front_collect", std::vector<int>{});
+    matrix_node_->declare_parameter<std::vector<int>>("back_collect", std::vector<int>{});
+    matrix_node_->declare_parameter<std::vector<int>>("construct_1", std::vector<int>{});
+    matrix_node_->declare_parameter<std::vector<int>>("spin_construct_2", std::vector<int>{});
+    matrix_node_->declare_parameter<std::vector<int>>("spin_construct_3", std::vector<int>{});
+    matrix_node_->declare_parameter<std::vector<int>>("not_spin_construct_2", std::vector<int>{});
+    matrix_node_->declare_parameter<std::vector<int>>("not_spin_construct_3", std::vector<int>{});
+  }
+
 
   /* Node remapping function */
   static BT::PortsList providedPorts();
@@ -90,15 +103,16 @@ private:
   std::deque<int> step_results_;
   // obot_type_-> 0: SpinArm 1: NotSpinArm
   bool robot_type_;
+  bool matreials_accord_;
   int success_levels_;
   int failed_levels_;
-  bool has_garbage_;
-  int on_robot_materials_;
-  bool has_raw_material_;
-  bool has_one_level_;
   int mission_progress_;
+  int front_materials_;
+  int back_materials_;
 
   std::deque<int> stage_info_;
+
+  rclcpp::Node::SharedPtr matrix_node_;
 };
 
 /****************/
@@ -250,5 +264,6 @@ private:
   geometry_msgs::msg::Pose goal_pose_;
   geometry_msgs::msg::PoseStamped goal_;
   geometry_msgs::msg::PoseStamped current_pose_;
+
 
 };
