@@ -34,40 +34,42 @@
 
   <BehaviorTree ID="FuncTest">
     <Sequence>
-      <Docking final_pose="{PrevGoal}"
-               isPureDocking="1"
-               dock_type="mission_dock_x"
-               offset="0.1"
-               base="1.6, 1.3, 0"/>
-      <SubTree ID="PortRemapTest"
-               DOCK_TYPE="mission_dock_x"
-               DOCK_DIST="0.3"
-               _autoremap="true"/>
+      <FirmwareMission mission_status="{Emp}"
+                       mission_type="1"/>
     </Sequence>
   </BehaviorTree>
 
   <BehaviorTree ID="MainTree">
     <Sequence>
-      <Sequence>
-        <BTStarter result="{STATUS}"/>
-        <CamReceiver/>
-      </Sequence>
-      <ForceSuccess>
-        <SubTree ID="MissionPointOne"
-                 _autoremap="true"/>
-      </ForceSuccess>
-      <ForceSuccess>
-        <SubTree ID="MissionPointThree"
-                 _autoremap="true"/>
-      </ForceSuccess>
-      <ForceSuccess>
-        <SubTree ID="MissionPointFour"
-                 _autoremap="true"/>
-      </ForceSuccess>
-      <Navigation final_pose="{PrevGoal}"
-                  type="0"
-                  goal="0.5, 1.7, 3"
-                  _description="go home"/>
+      <Parallel failure_count="2"
+                success_count="1">
+        <Sequence>
+          <Sequence>
+            <BTStarter result="{STATUS}"/>
+            <CamReceiver/>
+          </Sequence>
+          <ForceSuccess>
+            <SubTree ID="MissionPointOne"
+                     _autoremap="true"/>
+          </ForceSuccess>
+          <ForceSuccess>
+            <SubTree ID="MissionPointThree"
+                     _autoremap="true"/>
+          </ForceSuccess>
+          <ForceSuccess>
+            <SubTree ID="MissionPointFour"
+                     _autoremap="true"/>
+          </ForceSuccess>
+        </Sequence>
+        <Delay delay_msec="95000">
+          <Sleep msec="1"/>
+        </Delay>
+      </Parallel>
+      <Docking final_pose="{PrevGoal}"
+               isPureDocking="0"
+               dock_type="mission_dock_y"
+               offset="0.1"
+               base="0.35, 1.6, 3"/>
     </Sequence>
   </BehaviorTree>
 
@@ -365,6 +367,12 @@
                   type="double"/>
       <input_port name="base"
                   type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+    </Action>
+    <Action ID="FirmwareMission">
+      <output_port name="mission_status"
+                   type="int"/>
+      <input_port name="mission_type"
+                  type="int"/>
     </Action>
     <Action ID="Navigation">
       <output_port name="final_pose"

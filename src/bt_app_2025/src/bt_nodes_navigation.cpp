@@ -57,7 +57,7 @@ double inline calculateAngleDifference(const geometry_msgs::msg::Pose &pose1, co
 geometry_msgs::msg::PoseStamped inline ConvertPoseFormat(geometry_msgs::msg::PoseStamped pose_) {
     tf2::Quaternion quaternion;
     tf2::fromMsg(pose_.pose.orientation, quaternion);
-    pose_.pose.position.z = tf2::impl::getYaw(quaternion);
+    pose_.pose.position.z = tf2::impl::getYaw(quaternion) * 2 / PI;
     return pose_;
 }
 
@@ -183,7 +183,7 @@ bool Docking::setGoal(RosActionNode::Goal& goal) {
         RCLCPP_ERROR(logger(), "Invalid offset value");
         return false;
     }
-    goal_.pose.position.z = -offset_; // set offset distance
+    goal_.pose.position.z = offset_; // set offset distance
     tf2::Quaternion q; // declare Quaternion
     q.setRPY(0, 0, m.value().pose.position.z * PI / 2); // change degree-z into Quaternion
     goal_.pose.orientation.x = q.x();

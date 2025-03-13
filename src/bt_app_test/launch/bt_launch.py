@@ -25,6 +25,6 @@ def generate_launch_description():
             package = 'bt_app_test',
             executable = 'bt_ros2',
             name = 'bt_ros2',
-            parameters = [params, {"tree_name": "MainTree"}]
+            parameters = [params, {"tree_name": "Hey"}]
         )
     ])
