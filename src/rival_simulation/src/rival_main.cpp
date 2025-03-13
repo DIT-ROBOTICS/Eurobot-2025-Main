@@ -63,7 +63,7 @@ int main(int argc, char** argv) {
 
     factory.registerBehaviorTreeFromFile(script_file_directory);
     auto tree = factory.createTree(tree_name);
-    BT::Groot2Publisher publisher(tree, 2227);
+    // BT::Groot2Publisher publisher(tree, 2227);
 
     BT::NodeStatus status = BT::NodeStatus::RUNNING;
 

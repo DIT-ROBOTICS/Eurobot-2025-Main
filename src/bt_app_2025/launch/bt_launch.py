@@ -30,7 +30,7 @@ def generate_launch_description():
             parameters=[
                 config_path, 
                 mission_set, 
-                {"tree_name": "FuncTest"}, 
+                {"tree_name": "MainTree"}, 
                 {"Robot_name": "Tongue"}  # Invisible or Tongue
             ],
             remappings=[
@@ -43,7 +43,7 @@ def generate_launch_description():
         ),
         Node(
             parameters=[
-                {"start_point": 0} # 0 to 5
+                {"start_point": 3} # 0 to 5
             ],
             package = 'startup',
             executable = 'startup',

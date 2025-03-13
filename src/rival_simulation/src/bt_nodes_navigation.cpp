@@ -128,6 +128,7 @@ BT::NodeStatus Navigation::onRunning() {
         broadcastTransform(current_pose_.pose.pose);
         // rival_pub_->publish(current_pose_);
         blackboard_->set<geometry_msgs::msg::PoseWithCovarianceStamped>("current_pose", current_pose_);
+        // nav_msgs::msg::Odometry
         RCLCPP_INFO(node_->get_logger(), "Navigating");
         rate.sleep();
     }

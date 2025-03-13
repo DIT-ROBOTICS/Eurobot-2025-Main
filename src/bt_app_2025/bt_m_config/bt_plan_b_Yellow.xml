@@ -34,22 +34,30 @@
 
   <BehaviorTree ID="MainTree">
     <Sequence>
-      <Sequence>
-        <BTStarter result="{STATUS}"/>
-        <CamReceiver/>
-      </Sequence>
-      <ForceSuccess>
-        <SubTree ID="MissionPointThree_0"
-                 _autoremap="true"/>
-      </ForceSuccess>
-      <ForceSuccess>
-        <SubTree ID="MissionPointThree_1"
-                 _autoremap="true"/>
-      </ForceSuccess>
-      <ForceSuccess>
-        <SubTree ID="MissionPointFour"
-                 _autoremap="true"/>
-      </ForceSuccess>
+      <Parallel failure_count="2"
+                success_count="1">
+        <Sequence>
+          <Sequence>
+            <BTStarter result="{STATUS}"/>
+            <CamReceiver/>
+          </Sequence>
+          <ForceSuccess>
+            <SubTree ID="MissionPointThree_0"
+                     _autoremap="true"/>
+          </ForceSuccess>
+          <ForceSuccess>
+            <SubTree ID="MissionPointThree_1"
+                     _autoremap="true"/>
+          </ForceSuccess>
+          <ForceSuccess>
+            <SubTree ID="MissionPointFour"
+                     _autoremap="true"/>
+          </ForceSuccess>
+        </Sequence>
+        <Delay delay_msec="95000">
+          <Sleep msec="1"/>
+        </Delay>
+      </Parallel>
       <Docking final_pose="{PrevGoal}"
                isPureDocking="0"
                dock_type="mission_dock_y"
