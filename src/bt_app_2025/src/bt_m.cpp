@@ -58,8 +58,6 @@ bool isReady = false;
 
 void timeCallback(const std_msgs::msg::Float32::SharedPtr msg) {
     game_time = msg->data;
-    if (game_time <= 0.3)
-        RCLCPP_INFO_STREAM(rclcpp::get_logger("bt_m"), "game_time: " << game_time);
 }
 
 void readyCallback(const geometry_msgs::msg::PointStamped::SharedPtr msg) {
@@ -222,7 +220,6 @@ int main(int argc, char** argv) {
             throw "False or Empty plan file";
         }
     }
-    groot_filename = groot_xml_config_directory + "/" + Yellow_A_file;
     factory.registerBehaviorTreeFromFile(groot_filename);
 
     auto tree = factory.createTree(tree_name, blackboard);

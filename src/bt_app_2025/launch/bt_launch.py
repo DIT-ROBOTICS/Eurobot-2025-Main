@@ -30,12 +30,12 @@ def generate_launch_description():
             parameters=[
                 config_path, 
                 mission_set, 
-                {"tree_name": "MainTree"}, 
+                {"tree_name": "FuncTest"}, 
                 {"Robot_name": "Tongue"}  # Invisible or Tongue
             ],
             remappings=[
                 ("/map", "/map"),
-                ("/base_link", "/final_pose")
+                ("/base_link", "/base_footprint")
             ],
             package = 'bt_app_2025',
             executable = 'bt_m',
@@ -43,7 +43,7 @@ def generate_launch_description():
         ),
         Node(
             parameters=[
-                {"start_point": 1} # 0 to 5
+                {"start_point": 0} # 0 to 5
             ],
             package = 'startup',
             executable = 'startup',

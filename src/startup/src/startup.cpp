@@ -59,7 +59,7 @@ public:
             if (ready_feedback == 1) {
                 if (ready == false) {
                     RCLCPP_INFO(this->get_logger(), "[StartUp Program]: All of the programs are ready!");
-                } 
+                }
                 ready = true;
             }
 
@@ -187,7 +187,7 @@ public:
         for (int i = 0; i < 6; i++) {
             if (st_point[i] == 1) {
                 UpdateTeamAndPoint(i);
-                return i;
+                return 1;
             }
         }
         return 0;
@@ -195,12 +195,13 @@ public:
 
     void StartCallback(const std_msgs::msg::Int32::SharedPtr msg) {
 
-        static int prev_msg = -1;
+        static int prev_msg = 0;
 
         if (msg->data == 1) {
             if (prev_msg == 0) {
                 ready_feedback = 1;
                 start = true;
+                RCLCPP_INFO_STREAM(this->get_logger(), "start callback: " << ready_feedback << start);
             }
         }
 
