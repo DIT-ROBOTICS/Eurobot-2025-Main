@@ -173,19 +173,22 @@ BT::NodeStatus FirmwareMission::mission_callback(const std_msgs::msg::Int32::Sha
     RCLCPP_INFO(node_->get_logger(), "I heard: '%d'", mission_status_);
     if (mission_status_ == 1) {
         RCLCPP_INFO(node_->get_logger(), "Mission success");
+        subscription_.reset();
         blackboard_->set<int>("mission_progress", ++mission_progress_);
         setOutput<int>("mission_status", mission_status_);
         return BT::NodeStatus::SUCCESS;
     } else if (mission_status_ == 0) {
         RCLCPP_INFO(node_->get_logger(), "Mission running");
         return BT::NodeStatus::RUNNING;
-    } else if (mission_status_ == 2) {
-        RCLCPP_INFO(node_->get_logger(), "Mission received");
-        mission_received_ = true;
-        return BT::NodeStatus::RUNNING;
-    } else {
+    } else if (mission_status_ == -1) {
         RCLCPP_INFO(node_->get_logger(), "Mission failed");
+        subscription_.reset();
         setOutput<int>("mission_status", mission_status_);
+        return BT::NodeStatus::FAILURE;
+    } else {
+        RCLCPP_INFO(node_->get_logger(), "Unknown status code, Stop mission");
+        subscription_.reset();
+        setOutput<int>("mission_status", -1);
         return BT::NodeStatus::FAILURE;
     }
 }

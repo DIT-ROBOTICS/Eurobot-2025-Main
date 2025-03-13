@@ -116,7 +116,7 @@ public:
   void onHalted() override;
 private:
   // function
-  void topic_callback(const std_msgs::msg::Int32::SharedPtr msg);
+  BT::NodeStatus topic_callback(const std_msgs::msg::Int32::SharedPtr msg);
   // node
   rclcpp::Subscription<std_msgs::msg::Int32>::SharedPtr subscription_;
   std::shared_ptr<rclcpp::Node> node_;

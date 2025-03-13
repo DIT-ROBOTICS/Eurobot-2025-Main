@@ -149,9 +149,13 @@ PortsList TopicSubTest::providedPorts() {
   };
 }
 
-void TopicSubTest::topic_callback(const std_msgs::msg::Int32::SharedPtr msg) {
+BT::NodeStatus TopicSubTest::topic_callback(const std_msgs::msg::Int32::SharedPtr msg) {
   number += msg->data;
   RCLCPP_INFO(node_->get_logger(), "I heard: '%d'", msg->data);
+  if (number > 3) {
+    subscription_.reset();
+  }
+  return BT::NodeStatus::SUCCESS;
 }
 
 BT::NodeStatus TopicSubTest::onStart() {
@@ -161,13 +165,17 @@ BT::NodeStatus TopicSubTest::onStart() {
 
 BT::NodeStatus TopicSubTest::onRunning() {
   setOutput<int>("sum", number);
-  RCLCPP_INFO(node_->get_logger(), "Testing Node running");
+  RCLCPP_INFO_STREAM(node_->get_logger(), number);
+  if (number > 3) {
+    subscription_.reset();
+  }
   return BT::NodeStatus::SUCCESS;
 }
 
 void TopicSubTest::onHalted() {
   // Reset the output port
-  setOutput<int>("sum", 0);
+  subscription_.reset();
+  setOutput<int>("sum", number);
   RCLCPP_INFO(node_->get_logger(), "Testing Node halted");
   return;
 }
