@@ -32,7 +32,7 @@ def generate_launch_description():
     )
     return LaunchDescription([
         Node(
-            parameters=[config_path, mission_set, {"tree_name": "PutTwoTest"}],
+            parameters=[config_path, mission_set, {"tree_name": "notSpinPutTwoLevels"}],
             remappings=[
                 ("/map", "/map"),
                 ("/base_link", "/final_pose")
