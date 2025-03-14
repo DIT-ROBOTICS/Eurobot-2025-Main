@@ -144,7 +144,8 @@ public:
   BT::NodeStatus onStart() override;
   BT::NodeStatus onRunning() override;
 
-  BT::NodeStatus mission_callback(const std_msgs::msg::Int32::SharedPtr sub_msg);
+  void mission_callback(const std_msgs::msg::Int32::SharedPtr sub_msg);
+  BT::NodeStatus stopStep();
   /* Halt function */
   void onHalted() override;
 
