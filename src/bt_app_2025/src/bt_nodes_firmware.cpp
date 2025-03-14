@@ -255,7 +255,7 @@ BT::NodeStatus FirmwareMission::mission_callback(const std_msgs::msg::Int32::Sha
     RCLCPP_INFO(node_->get_logger(), "I heard: '%d'", mission_status_);
     if (mission_status_ == 1) {
         RCLCPP_INFO(node_->get_logger(), "Mission success");
-        // subscription_.reset();
+        subscription_.reset();
         blackboard_->set<int>("mission_progress", ++mission_progress_);
         setOutput<int>("mission_status", mission_status_);
         return BT::NodeStatus::SUCCESS;
@@ -264,12 +264,12 @@ BT::NodeStatus FirmwareMission::mission_callback(const std_msgs::msg::Int32::Sha
         return BT::NodeStatus::RUNNING;
     } else if (mission_status_ == -1) {
         RCLCPP_INFO(node_->get_logger(), "Mission failed");
-        // subscription_.reset();
+        subscription_.reset();
         setOutput<int>("mission_status", mission_status_);
         return BT::NodeStatus::FAILURE;
     } else {
         RCLCPP_INFO(node_->get_logger(), "Unknown status code, Stop mission");
-        // subscription_.reset();
+        subscription_.reset();
         setOutput<int>("mission_status", -1);
         return BT::NodeStatus::FAILURE;
     }
@@ -286,20 +286,14 @@ BT::NodeStatus FirmwareMission::onStart() {
 BT::NodeStatus FirmwareMission::onRunning() {
     RCLCPP_INFO(node_->get_logger(), "Testing Node running");
     pub_msg.data = mission_type_;
-    if (!mission_received_)
-        publisher_->publish(pub_msg);
-
+    publisher_->publish(pub_msg);
     RCLCPP_INFO(node_->get_logger(), "mission_progress: %d", mission_progress_);
     RCLCPP_INFO(node_->get_logger(), "mission_type: %d", mission_type_);
-
+    return BT::NodeStatus::RUNNING;
     // **failure test**
-    if (mission_progress_ != 5)
-        blackboard_->set<int>("mission_progress", ++mission_progress_);
-    
-    return BT::NodeStatus::SUCCESS;
-    // **failure test**
-
-    // return BT::NodeStatus::RUNNING;
+    // if (mission_progress_ != 5)
+    //    blackboard_->set<int>("mission_progress", ++mission_progress_);
+    // return BT::NodeStatus::SUCCESS;
 }
 
 void FirmwareMission::onHalted() {
