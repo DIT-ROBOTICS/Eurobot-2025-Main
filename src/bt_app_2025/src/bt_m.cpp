@@ -94,6 +94,12 @@ int main(int argc, char** argv) {
     // ROS msg
     std_msgs::msg::Int32 ready_feedback;
 
+    // Create a shared blackboard
+    auto blackboard = BT::Blackboard::create();
+    blackboard->set<double>("current_time", 0);
+    blackboard->set<int>("front_materials", 0);
+    blackboard->set<int>("back_materials", 0);
+    blackboard->set<int>("mission_progress", 0);
     // Subscriber
     auto time_sub = node->create_subscription<std_msgs::msg::Float32>("/robot/startup/time", 2, timeCallback);
     auto sub = node->create_subscription<geometry_msgs::msg::PointStamped>("/robot/startup/ready_signal", 2, readyCallback);
@@ -104,16 +110,12 @@ int main(int argc, char** argv) {
     BT::RosNodeParams params;
     params.nh = node;
 
+
     // Parameters
     std::string groot_xml_config_directory;
     std::string bt_tree_node_model;
     std::string Yellow_A_file, Yellow_B_file, Yellow_C_file, Yellow_Special_file, Blue_A_file, Blue_B_file, Blue_C_file, Blue_Special_file;
     std::string tree_name;
-
-    // Create a shared blackboard
-    auto blackboard = BT::Blackboard::create();
-    blackboard->set<double>("current_time", 0);
-    blackboard->set<int>("mission_progress", 0);
 
     // Read parameters
     node->declare_parameter<std::string>("groot_xml_config_directory", "/home/user/Eurobot-2025-Main-ws/src/bt_app_2025/bt_m_config/");
@@ -156,6 +158,8 @@ int main(int argc, char** argv) {
     factory.registerNodeType<FirmwareMission>("FirmwareMission", node, blackboard);
     factory.registerNodeType<IntegratedMissionNode>("IntegratedMissionNode", node, blackboard);
     factory.registerNodeType<SIMAactivate>("SIMAactivate", node);
+    // factory.registerNodeType<BannerMission>("BannerMission", params);
+    factory.registerNodeType<MissionFinisher>("MissionFinisher", blackboard);
     /* others */
     factory.registerNodeType<BTStarter>("BTStarter", node, blackboard);
     factory.registerNodeType<Comparator>("Comparator", node); // decorator
