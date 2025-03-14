@@ -19,38 +19,35 @@
         <Docking final_pose="{PrevGoal}"
                  isPureDocking="0"
                  dock_type="mission_dock_y"
-                 shift=""
+                 shift="0"
                  offset="-0.1"
                  base="2.75, 0.4, 2"/>
       </Fallback>
       <Fallback>
         <Sleep msec="4000"/>
-        <Switch2 case_1="1"
-                 case_2="2"
-                 variable="1">
-          <Sleep msec="4000"/>
-          <Sleep msec="4000"/>
-        </Switch2>
+        <Sleep msec="4000"/>
+        <Sleep msec="4000"/>
       </Fallback>
     </Sequence>
   </BehaviorTree>
 
   <BehaviorTree ID="FuncTest">
     <Sequence>
-      <ForceSuccess>
-        <Timeout msec="100">
-          <FirmwareMission mission_status="{Emp}"
-                           mission_type="1"/>
-        </Timeout>
-      </ForceSuccess>
-      <ForceSuccess>
-        <Timeout msec="100">
-          <FirmwareMission mission_status="{Emp}"
-                           mission_type="2"/>
-        </Timeout>
-      </ForceSuccess>
       <FirmwareMission mission_status="{Emp}"
                        mission_type="1"/>
+      <Sleep msec="3000"/>
+      <FirmwareMission mission_status="{Emp}"
+                       mission_type="1"/>
+      <Sleep msec="5000"/>
+      <FirmwareMission mission_status="{Emp}"
+                       mission_type="1"/>
+      <Sleep msec="7000"/>
+      <FirmwareMission mission_status="{Emp}"
+                       mission_type="1"/>
+      <Sleep msec="9000"/>
+      <FirmwareMission mission_status="{Emp}"
+                       mission_type="1"/>
+      <Sleep msec="10000"/>
     </Sequence>
   </BehaviorTree>
 
@@ -61,7 +58,6 @@
         <Sequence>
           <Sequence>
             <BTStarter result="{STATUS}"/>
-            <CamReceiver/>
           </Sequence>
           <ForceSuccess>
             <SubTree ID="MissionPointOne"
@@ -112,20 +108,11 @@
                  base="0.8, 0.4, 1"
                  _description="go back to do the mission"/>
       </RetryUntilSuccessful>
-      <Switch2 case_1="0"
-               case_2="1"
-               variable="1">
-        <SubTree ID="PutTwoLevels"
-                 DOCK_DIR="mission_dock_y"
-                 DOCK_FORWARD="-0.15"
-                 DOCK_BACKWARD="0.15"
-                 _autoremap="true"/>
-        <SubTree ID="notSpinPutTwoLevels"
-                 DOCK_DIR="mission_dock_y"
-                 DOCK_FORWARD="-0.15"
-                 DOCK_BACKWARD="0.15"
-                 _autoremap="true"/>
-      </Switch2>
+      <SubTree ID="notSpinPutTwoLevels"
+               DOCK_DIR="mission_dock_y"
+               DOCK_FORWARD="-0.15"
+               DOCK_BACKWARD="0.15"
+               _autoremap="true"/>
     </Sequence>
   </BehaviorTree>
 
@@ -159,20 +146,11 @@
                  offset="0.15"
                  base="2.55, 0.9, 0"/>
       </RetryUntilSuccessful>
-      <Switch2 case_1="0"
-               case_2="1"
-               variable="1">
-        <SubTree ID="PutThreeLevels"
-                 DOCK_DIR="mission_dock_x"
-                 DOCK_FORWARD="0.15"
-                 DOCK_BACKWARD="-0.15"
-                 _autoremap="true"/>
-        <SubTree ID="notSpinPutThreeLevels"
-                 DOCK_DIR="mission_dock_x"
-                 DOCK_FORWARD="0.15"
-                 DOCK_BACKWARD="-0.15"
-                 _autoremap="true"/>
-      </Switch2>
+      <SubTree ID="notSpinPutThreeLevels"
+               DOCK_DIR="mission_dock_x"
+               DOCK_FORWARD="0.15"
+               DOCK_BACKWARD="-0.15"
+               _autoremap="true"/>
     </Sequence>
   </BehaviorTree>
 
@@ -206,46 +184,17 @@
                  offset="-0.15"
                  base="1.25, 0.55, 3"/>
       </RetryUntilSuccessful>
-      <Switch2 case_1="0"
-               case_2="1"
-               variable="1">
-        <SubTree ID="PutThreeLevels"
-                 DOCK_DIR="mission_dock_y"
-                 DOCK_FORWARD="-0.15"
-                 DOCK_BACKWARD="0.15"
-                 _autoremap="true"/>
-        <SubTree ID="notSpinPutThreeLevels"
-                 DOCK_BACKWARD="0.15"
-                 DOCK_DIR="mission_dock_y"
-                 DOCK_FORWARD="-0.15"
-                 _autoremap="true"/>
-      </Switch2>
+      <SubTree ID="notSpinPutThreeLevels"
+               DOCK_BACKWARD="0.15"
+               DOCK_DIR="mission_dock_y"
+               DOCK_FORWARD="-0.15"
+               _autoremap="true"/>
     </Sequence>
   </BehaviorTree>
 
   <BehaviorTree ID="NavTest">
     <Sequence>
-      <Navigation final_pose="{PrevGoal}"
-                  type="0"
-                  goal="1, 1, 0"/>
-      <Navigation final_pose="{PrevGoal}"
-                  type="0"
-                  goal="1, 1, 1"/>
-      <Navigation final_pose="{PrevGoal}"
-                  type="0"
-                  goal="1, 1, 2"/>
-      <Rotation final_pose="{PrevGoal}"
-                degree="90"
-                base="{PrevGoal}"/>
-      <Rotation final_pose="{PrevGoal}"
-                degree="90"
-                base="{PrevGoal}"/>
-      <Rotation final_pose="{PrevGoal}"
-                degree="-90"
-                base="{PrevGoal}"/>
-      <Rotation final_pose="{PrevGoal}"
-                degree="-90"
-                base="{PrevGoal}"/>
+      <SubTree ID="MissionPointOne"/>
     </Sequence>
   </BehaviorTree>
 
@@ -543,13 +492,13 @@
                              _description="arm up"/>
           </Timeout>
         </ForceSuccess>
-        <ForceFailure>
+        <ForceSuccess>
           <Timeout msec="100">
             <FirmwareMission mission_status="{x}"
                              mission_type="70"
                              _description="place board"/>
           </Timeout>
-        </ForceFailure>
+        </ForceSuccess>
         <ForceSuccess>
           <Timeout msec="100">
             <FirmwareMission mission_status="{x}"
@@ -578,7 +527,6 @@
       <output_port name="result"
                    type="int"/>
     </Action>
-    <Action ID="CamReceiver"/>
     <Action ID="Docking">
       <output_port name="final_pose"
                    type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
@@ -608,14 +556,6 @@
                   type="bool"/>
       <input_port name="step_results"
                   type="std::deque&lt;int, std::allocator&lt;int&gt; &gt;"/>
-    </Action>
-    <Action ID="Navigation">
-      <output_port name="final_pose"
-                   type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
-      <input_port name="type"
-                  type="int"/>
-      <input_port name="goal"
-                  type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
     </Action>
     <Action ID="Rotation">
       <output_port name="final_pose"

@@ -25,12 +25,8 @@
       </Fallback>
       <Fallback>
         <Sleep msec="4000"/>
-        <Switch2 case_1="1"
-                 case_2="2"
-                 variable="1">
-          <Sleep msec="4000"/>
-          <Sleep msec="4000"/>
-        </Switch2>
+        <Sleep msec="4000"/>
+        <Sleep msec="4000"/>
       </Fallback>
     </Sequence>
   </BehaviorTree>
@@ -94,20 +90,11 @@
                  base="0.8, 0.4, 1"
                  _description="go back to do the mission point 4"/>
       </RetryUntilSuccessful>
-      <Switch2 case_1="0"
-               case_2="1"
-               variable="1">
-        <SubTree ID="PutTwoLevels"
-                 DOCK_DIR="mission_dock_y"
-                 DOCK_FORWARD="-0.15"
-                 DOCK_BACKWARD="0.15"
-                 _autoremap="true"/>
-        <SubTree ID="notSpinPutTwoLevels"
-                 DOCK_BACKWARD="0.15"
-                 DOCK_DIR="mission_dock_y"
-                 DOCK_FORWARD="-0.15"
-                 _autoremap="true"/>
-      </Switch2>
+      <SubTree ID="notSpinPutTwoLevels"
+               DOCK_BACKWARD="0.15"
+               DOCK_DIR="mission_dock_y"
+               DOCK_FORWARD="-0.15"
+               _autoremap="true"/>
     </Sequence>
   </BehaviorTree>
 
@@ -144,20 +131,11 @@
                  base="1.25, 0.55, 3"
                  _description="mission point 3"/>
       </RetryUntilSuccessful>
-      <Switch2 case_1="0"
-               case_2="1"
-               variable="1">
-        <SubTree ID="PutThreeLevels"
-                 DOCK_DIR="mission_dock_y"
-                 DOCK_FORWARD="-0.15"
-                 DOCK_BACKWARD="0.15"
-                 _autoremap="true"/>
-        <SubTree ID="notSpinPutThreeLevels"
-                 DOCK_BACKWARD="0.15"
-                 DOCK_DIR="mission_dock_y"
-                 DOCK_FORWARD="-0.15"
-                 _autoremap="true"/>
-      </Switch2>
+      <SubTree ID="notSpinPutThreeLevels"
+               DOCK_BACKWARD="0.15"
+               DOCK_DIR="mission_dock_y"
+               DOCK_FORWARD="-0.15"
+               _autoremap="true"/>
     </Sequence>
   </BehaviorTree>
 
@@ -215,20 +193,11 @@
                       _description="mission point 3"/>
         </Sequence>
       </Fallback>
-      <Switch2 case_1="0"
-               case_2="1"
-               variable="1">
-        <SubTree ID="PutThreeLevels"
-                 DOCK_DIR="mission_dock_y"
-                 DOCK_FORWARD="-0.15"
-                 DOCK_BACKWARD="0.15"
-                 _autoremap="true"/>
-        <SubTree ID="notSpinPutThreeLevels"
-                 DOCK_BACKWARD="0.15"
-                 DOCK_DIR="mission_dock_y"
-                 DOCK_FORWARD="-0.15"
-                 _autoremap="true"/>
-      </Switch2>
+      <SubTree ID="notSpinPutThreeLevels"
+               DOCK_BACKWARD="0.15"
+               DOCK_DIR="mission_dock_y"
+               DOCK_FORWARD="-0.15"
+               _autoremap="true"/>
     </Sequence>
   </BehaviorTree>
 
