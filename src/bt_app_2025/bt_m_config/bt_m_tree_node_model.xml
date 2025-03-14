@@ -14,6 +14,7 @@
             <output_port name="final_pose" type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
             <input_port name="isPureDocking" type="bool"/>
             <input_port name="dock_type" type="std::string"/>
+            <input_port name="shift" type="double"/>
             <input_port name="offset" type="double"/>
             <input_port name="base" type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
         </Action>
