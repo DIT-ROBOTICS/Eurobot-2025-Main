@@ -159,6 +159,7 @@ BT::PortsList Docking::providedPorts() {
     return { 
         BT::InputPort<geometry_msgs::msg::PoseStamped>("base"),
         BT::InputPort<double>("offset"),
+        BT::InputPort<double>("shift"),
         BT::InputPort<std::string>("dock_type"),
         BT::InputPort<bool>("isPureDocking"),
         BT::OutputPort<geometry_msgs::msg::PoseStamped>("final_pose")
@@ -168,6 +169,7 @@ BT::PortsList Docking::providedPorts() {
 bool Docking::setGoal(RosActionNode::Goal& goal) {
     auto m = getInput<geometry_msgs::msg::PoseStamped>("base");
     getInput<double>("offset", offset_);
+    getInput<double>("shift", shift_);
     getInput<bool>("isPureDocking", isPureDocking_);
     getInput<std::string>("dock_type", dock_type_);
 
@@ -177,7 +179,9 @@ bool Docking::setGoal(RosActionNode::Goal& goal) {
     goal_.pose = m.value().pose; // calculate goal pose
     if (dock_type_ == "mission_dock_x") {
         goal_.pose.position.x += offset_; // set staging point
+        goal_.pose.position.y += shift_;
     } else if (dock_type_ == "mission_dock_y") {
+        goal_.pose.position.x += shift_;
         goal_.pose.position.y += offset_; // set staging point
     } else {
         RCLCPP_ERROR(logger(), "Invalid offset value");

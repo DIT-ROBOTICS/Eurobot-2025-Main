@@ -102,6 +102,7 @@ private:
     int nav_recov_times_ = 0;
     std::string dock_type_;
     double offset_;
+    double shift_ = 0;
     geometry_msgs::msg::PoseStamped goal_;
     geometry_msgs::msg::PoseStamped robot_pose_;
     tf2_ros::Buffer tf_buffer_;
