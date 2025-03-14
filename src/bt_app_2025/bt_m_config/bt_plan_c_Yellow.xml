@@ -521,13 +521,13 @@
                              _description="arm up"/>
           </Timeout>
         </ForceSuccess>
-        <ForceFailure>
+        <ForceSuccess>
           <Timeout msec="100">
             <FirmwareMission mission_status="{x}"
                              mission_type="70"
                              _description="place board"/>
           </Timeout>
-        </ForceFailure>
+        </ForceSuccess>
         <ForceSuccess>
           <Timeout msec="100">
             <FirmwareMission mission_status="{x}"
