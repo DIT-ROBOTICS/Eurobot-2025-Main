@@ -35,7 +35,7 @@ def generate_launch_description():
             parameters=[config_path, mission_set, {"tree_name": "notSpinPutTwoLevels"}],
             remappings=[
                 ("/map", "/map"),
-                ("/base_link", "/final_pose")
+                ("/base_link", "/base_footprint")
             ],
             package = 'bt_app_2025',
             executable = 'bt_m',
