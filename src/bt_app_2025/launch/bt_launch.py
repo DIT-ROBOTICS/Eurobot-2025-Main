@@ -20,30 +20,37 @@ def generate_launch_description():
         'params',
         'config_path.yaml'
     )
-    mission_set = os.path.join(
+    finisher = os.path.join(
         get_package_share_directory('bt_app_2025'),
         'params',
-        'mission_set.yaml'
+        'finisher.yaml'
     )
     return LaunchDescription([
         Node(
+            package='micro_ros_agent',
+            executable='micro_ros_agent',
+            name='micro_ros_agent',
+            output='screen',
+            arguments=['serial', '-b', '115200', '-D', '/dev/ttyACM0']
+        ),
+        Node(
             parameters=[
                 config_path, 
-                mission_set, 
-                {"tree_name": "MainTree"}, 
+                finisher, 
+                {"tree_name": "FuncTest"}, 
                 {"Robot_name": "Tongue"}  # Invisible or Tongue
             ],
-            remappings=[
-                ("/map", "/map"),
-                ("/base_link", "/base_footprint")
-            ],
+            # remappings=[
+            #     ("/map", "/map"),
+            #     ("/base_link", "/base_footprint")
+            # ],
             package = 'bt_app_2025',
             executable = 'bt_m',
             name = 'bt_m'
         ),
         Node(
             parameters=[
-                {"start_point": 2} # 0 to 5
+                {"start_point": 0} # 0 to 5
             ],
             package = 'startup',
             executable = 'startup',

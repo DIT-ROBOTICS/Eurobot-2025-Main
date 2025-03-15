@@ -57,7 +57,7 @@ bool LocReceiver::UpdateRobotPose(geometry_msgs::msg::PoseStamped &robot_pose_, 
     try {
         transformStamped = tf_buffer_.lookupTransform(
             "map", 
-            "base_link",
+            frame_id_,
             rclcpp::Time()
         );
         robot_pose_.pose.position.x = transformStamped.transform.translation.x;
@@ -78,7 +78,7 @@ bool LocReceiver::UpdateRivalPose(geometry_msgs::msg::PoseStamped &rival_pose_, 
     try {
         transformStamped = tf_buffer_.lookupTransform(
             "rival/map" /* Parent frame - map */, 
-            "rival/final_pose" /* Child frame - base */,
+            "rival" + frame_id_ /* Child frame - base */,
             rclcpp::Time()
         );
         rival_pose_.pose.position.x = transformStamped.transform.translation.x;

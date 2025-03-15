@@ -18,21 +18,16 @@ def generate_launch_description():
     config_path = os.path.join(
         get_package_share_directory('bt_app_2025'),
         'params',
-        'config_path_test.yaml'
+        'config_path.yaml'
     )
-    config_path = os.path.join(
+    finisher = os.path.join(
         get_package_share_directory('bt_app_2025'),
         'params',
         'finisher.yaml'
     )
-    mission_set = os.path.join(
-        get_package_share_directory('bt_app_2025'),
-        'params',
-        'mission_set.yaml'
-    )
     return LaunchDescription([
         Node(
-            parameters=[config_path, mission_set, {"tree_name": "notSpinPutTwoLevels"}],
+            parameters=[config_path, finisher, {"tree_name": "notSpinPutTwoLevels"}],
             remappings=[
                 ("/map", "/map"),
                 ("/base_link", "/base_footprint")

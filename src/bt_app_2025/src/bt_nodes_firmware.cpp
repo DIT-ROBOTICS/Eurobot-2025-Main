@@ -279,7 +279,6 @@ void FirmwareMission::mission_callback(const std_msgs::msg::Int32::SharedPtr sub
         mission_status_ = sub_msg->data;
         RCLCPP_INFO(node_->get_logger(), "mission type: '%d', heard: '%d'", mission_type_, mission_status_);
     }
-    // stopStep();
 }
 
 BT::NodeStatus FirmwareMission::onStart() {
@@ -291,14 +290,12 @@ BT::NodeStatus FirmwareMission::onStart() {
 }
 
 BT::NodeStatus FirmwareMission::onRunning() {
-    // RCLCPP_INFO(node_->get_logger(), "Testing Node running");
     pub_msg.data = mission_type_;
     publisher_->publish(pub_msg);
     RCLCPP_INFO(node_->get_logger(), "mission_progress: %d", mission_progress_);
     RCLCPP_INFO(node_->get_logger(), "mission_type: %d", mission_type_);
 
     return stopStep();
-    // return BT::NodeStatus::RUNNING;
     // **failure test**
     // if (mission_progress_ != 5)
     //    blackboard_->set<int>("mission_progress", ++mission_progress_);
