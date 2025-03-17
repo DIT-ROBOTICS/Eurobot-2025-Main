@@ -16,8 +16,6 @@
 #include "std_srvs/srv/set_bool.hpp"
 #include "std_msgs/msg/float32.hpp"
 #include "geometry_msgs/msg/point_stamped.hpp"
-// Include startup necessary service
-#include "btcpp_ros2_interfaces/srv/example.hpp"
 // BTaction nodes
 #include "bt_app_2025/bt_nodes_firmware.h"
 #include "bt_app_2025/bt_nodes_navigation.h"
@@ -129,6 +127,20 @@ int main(int argc, char** argv) {
     node->declare_parameter<std::string>("planB_Blue_config", "bt_plan_b_Blue.xml");
     node->declare_parameter<std::string>("planC_Blue_config", "bt_plan_c_Blue.xml");
     node->declare_parameter<std::string>("Special_Blue_config", "bt_plan_a_Blue.xml");
+
+    node->declare_parameter<std::string>("frame_id", "base_link");
+    node->declare_parameter<double>("nav_dist_error", 0.03);
+    node->declare_parameter<double>("nav_ang_error", 0.4);
+    node->declare_parameter<double>("rotate_dist_error", 0.03);
+    node->declare_parameter<double>("rotate_ang_error", 0.4);
+    // MissionFInisher params
+    node->declare_parameter<std::vector<int>>("front_collect", std::vector<int>{});
+    node->declare_parameter<std::vector<int>>("back_collect", std::vector<int>{});
+    node->declare_parameter<std::vector<int>>("construct_1", std::vector<int>{});
+    node->declare_parameter<std::vector<int>>("spin_construct_2", std::vector<int>{});
+    node->declare_parameter<std::vector<int>>("spin_construct_3", std::vector<int>{});
+    node->declare_parameter<std::vector<int>>("not_spin_construct_2", std::vector<int>{});
+    node->declare_parameter<std::vector<int>>("not_spin_construct_3", std::vector<int>{});
     // get parameters
     node->get_parameter("groot_xml_config_directory", groot_xml_config_directory);
     node->get_parameter("tree_node_model_config_file", bt_tree_node_model);
@@ -153,13 +165,12 @@ int main(int argc, char** argv) {
     factory.registerNodeType<Rotation>("Rotation", params);
     params.default_port_value = "dock_robot";
     factory.registerNodeType<Docking>("Docking", params);
-    // /* firmware */
+    /* firmware */
     params.default_port_value = "firmware_mission";
     factory.registerNodeType<FirmwareMission>("FirmwareMission", node, blackboard);
     factory.registerNodeType<IntegratedMissionNode>("IntegratedMissionNode", node, blackboard);
     factory.registerNodeType<SIMAactivate>("SIMAactivate", node);
-    // factory.registerNodeType<BannerMission>("BannerMission", params);
-    factory.registerNodeType<MissionFinisher>("MissionFinisher", blackboard);
+    factory.registerNodeType<MissionFinisher>("MissionFinisher", node, blackboard);
     /* others */
     factory.registerNodeType<BTStarter>("BTStarter", node, blackboard);
     factory.registerNodeType<Comparator>("Comparator", node); // decorator

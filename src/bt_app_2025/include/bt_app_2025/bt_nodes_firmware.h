@@ -71,21 +71,11 @@ class MissionFinisher : public BT::StatefulActionNode
 {
 public:
 
-  MissionFinisher(const std::string& name, const BT::NodeConfig& config, BT::Blackboard::Ptr blackboard)
-    : BT::StatefulActionNode(name, config), blackboard_(blackboard)
+  MissionFinisher(const std::string& name, const BT::NodeConfig& config, std::shared_ptr<rclcpp::Node> node, BT::Blackboard::Ptr blackboard)
+    : BT::StatefulActionNode(name, config), node_(node), blackboard_(blackboard)
   {
-    matrix_node_ = rclcpp::Node::make_shared("matrix_node");
     matreials_accord_ = 0;
-
-    matrix_node_->declare_parameter<std::vector<int>>("front_collect", std::vector<int>{});
-    matrix_node_->declare_parameter<std::vector<int>>("back_collect", std::vector<int>{});
-    matrix_node_->declare_parameter<std::vector<int>>("construct_1", std::vector<int>{});
-    matrix_node_->declare_parameter<std::vector<int>>("spin_construct_2", std::vector<int>{});
-    matrix_node_->declare_parameter<std::vector<int>>("spin_construct_3", std::vector<int>{});
-    matrix_node_->declare_parameter<std::vector<int>>("not_spin_construct_2", std::vector<int>{});
-    matrix_node_->declare_parameter<std::vector<int>>("not_spin_construct_3", std::vector<int>{});
   }
-
 
   /* Node remapping function */
   static BT::PortsList providedPorts();
@@ -112,7 +102,7 @@ private:
 
   std::deque<int> stage_info_;
 
-  rclcpp::Node::SharedPtr matrix_node_;
+  rclcpp::Node::SharedPtr node_;
 };
 
 /****************/

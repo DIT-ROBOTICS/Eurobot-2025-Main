@@ -105,13 +105,13 @@ BT::NodeStatus MissionFinisher::onStart()
 
 BT::NodeStatus MissionFinisher::onRunning()
 {
-    auto front_collect_ = matrix_node_->get_parameter("front_collect").as_integer_array();
-    auto back_collect_ = matrix_node_->get_parameter("back_collect").as_integer_array();
-    auto construct_1_ = matrix_node_->get_parameter("construct_1").as_integer_array();
-    auto not_spin_construct_2_ = matrix_node_->get_parameter("not_spin_construct_2").as_integer_array();
-    auto spin_construct_2_ = matrix_node_->get_parameter("spin_construct_2").as_integer_array();
-    auto not_spin_construct_3_ = matrix_node_->get_parameter("not_spin_construct_3").as_integer_array();
-    auto spin_construct_3_ = matrix_node_->get_parameter("spin_construct_3").as_integer_array();
+    auto front_collect_ = node_->get_parameter("front_collect").as_integer_array();
+    auto back_collect_ = node_->get_parameter("back_collect").as_integer_array();
+    auto construct_1_ = node_->get_parameter("construct_1").as_integer_array();
+    auto not_spin_construct_2_ = node_->get_parameter("not_spin_construct_2").as_integer_array();
+    auto spin_construct_2_ = node_->get_parameter("spin_construct_2").as_integer_array();
+    auto not_spin_construct_3_ = node_->get_parameter("not_spin_construct_3").as_integer_array();
+    auto spin_construct_3_ = node_->get_parameter("spin_construct_3").as_integer_array();
     
     switch(step_results_.back()){
 

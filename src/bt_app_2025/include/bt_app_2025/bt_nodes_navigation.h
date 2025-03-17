@@ -57,7 +57,9 @@ class Navigation : public BT::RosActionNode<nav2_msgs::action::NavigateToPose> {
 public:
     Navigation(const std::string& name, const NodeConfig& conf, const RosNodeParams& params)
         : RosActionNode<nav2_msgs::action::NavigateToPose>(name, conf, params)
-    {}
+    {
+        node_ = params.nh.lock();
+    }
     /* Node remapping function */
     static PortsList providedPorts();
     bool setGoal(RosActionNode::Goal& goal) override;
@@ -65,6 +67,8 @@ public:
     virtual NodeStatus onFailure(ActionNodeErrorCode error) override;
     NodeStatus onFeedback(const std::shared_ptr<const Feedback> feedback);
 private:
+    NodeStatus goalErrorDetect();
+    std::shared_ptr<rclcpp::Node> node_;
     bool nav_finished_ = false;
     bool nav_error_ = false;
     int nav_recov_times_ = 0;
@@ -82,6 +86,8 @@ public:
     Docking(const std::string& name, const NodeConfig& conf, const RosNodeParams& params)
         : RosActionNode<opennav_docking_msgs::action::DockRobot>(name, conf, params), tf_buffer_(params.nh.lock()->get_clock()), listener_(tf_buffer_)
     {
+        node_ = params.nh.lock();
+        node_->get_parameter("frame_id", frame_id_);
         nav_finished_ = false;
         nav_error_ = false;
         isPureDocking_ = true;
@@ -93,9 +99,9 @@ public:
     NodeStatus onResultReceived(const WrappedResult& wr) override;
     virtual NodeStatus onFailure(ActionNodeErrorCode error) override;
     NodeStatus onFeedback(const std::shared_ptr<const Feedback> feedback);
-
 private:
     bool UpdateRobotPose();
+    std::shared_ptr<rclcpp::Node> node_;
     bool nav_finished_;
     bool nav_error_;
     bool isPureDocking_;
@@ -107,6 +113,7 @@ private:
     geometry_msgs::msg::PoseStamped robot_pose_;
     tf2_ros::Buffer tf_buffer_;
     tf2_ros::TransformListener listener_;
+    std::string frame_id_;
 };
 
 class Rotation : public BT::RosActionNode<nav2_msgs::action::NavigateToPose> {
@@ -115,10 +122,10 @@ public:
     Rotation(const std::string& name, const NodeConfig& conf, const RosNodeParams& params)
         : RosActionNode<nav2_msgs::action::NavigateToPose>(name, conf, params)
     {
+        node_ = params.nh.lock();
         nav_finished_ = false;
         nav_error_ = false;
     }
-
     /* Node remapping function */
     static PortsList providedPorts();
     bool setGoal(RosActionNode::Goal& goal) override;
@@ -127,6 +134,8 @@ public:
     NodeStatus onFeedback(const std::shared_ptr<const Feedback> feedback);
 
 private:
+    NodeStatus goalErrorDetect();
+    std::shared_ptr<rclcpp::Node> node_;
     bool nav_finished_;
     bool nav_error_;
     int nav_recov_times_ = 0;

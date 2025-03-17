@@ -4,21 +4,6 @@
 using namespace BT;
 using namespace std;
 
-// template <> inline geometry_msgs::msg::TwistStamped BT::convertFromString(StringView str) {
-
-//     auto parts = splitString(str, ',');
-//     if (parts.size() != 3) {
-//         throw RuntimeError("invalid input)");
-//     }
-//     else {
-//         geometry_msgs::msg::TwistStamped output;
-//         output.twist.linear.x = convertFromString<double>(parts[0]);
-//         output.twist.linear.y = convertFromString<double>(parts[1]);
-//         output.twist.linear.z = convertFromString<double>(parts[2]);
-//         return output;
-//     }
-// }
-
 template <> inline geometry_msgs::msg::PoseStamped BT::convertFromString(StringView str) {
 
     auto parts = splitString(str, ',');
@@ -51,7 +36,7 @@ template <> inline std::deque<int> BT::convertFromString(StringView str) {
     return output;
 }
 
-bool LocReceiver::UpdateRobotPose(geometry_msgs::msg::PoseStamped &robot_pose_, tf2_ros::Buffer &tf_buffer_) {
+bool LocReceiver::UpdateRobotPose(geometry_msgs::msg::PoseStamped &robot_pose_, tf2_ros::Buffer &tf_buffer_, std::string frame_id_) {
     geometry_msgs::msg::TransformStamped transformStamped;
 
     try {
@@ -72,13 +57,13 @@ bool LocReceiver::UpdateRobotPose(geometry_msgs::msg::PoseStamped &robot_pose_, 
     }
 }
 
-bool LocReceiver::UpdateRivalPose(geometry_msgs::msg::PoseStamped &rival_pose_, tf2_ros::Buffer &tf_buffer_) {
+bool LocReceiver::UpdateRivalPose(geometry_msgs::msg::PoseStamped &rival_pose_, tf2_ros::Buffer &tf_buffer_, std::string frame_id_) {
     geometry_msgs::msg::TransformStamped transformStamped;
 
     try {
         transformStamped = tf_buffer_.lookupTransform(
             "rival/map" /* Parent frame - map */, 
-            "rival" + frame_id_ /* Child frame - base */,
+            "rival/" + frame_id_ /* Child frame - base */,
             rclcpp::Time()
         );
         rival_pose_.pose.position.x = transformStamped.transform.translation.x;
