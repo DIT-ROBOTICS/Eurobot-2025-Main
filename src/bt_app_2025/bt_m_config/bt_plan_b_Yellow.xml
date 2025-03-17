@@ -77,8 +77,13 @@
                  base="0.82, 0.6, 1"
                  _description="material point 6"/>
       </RetryUntilSuccessful>
-      <Sleep msec="500"
-             _description="take the raw material"/>
+      <ForceSuccess>
+        <Timeout msec="100">
+          <FirmwareMission mission_status="{x}"
+                           mission_type="21"
+                           _description="take the raw material"/>
+        </Timeout>
+      </ForceSuccess>
       <SubTree ID="BannerMission"
                _autoremap="true"/>
       <RetryUntilSuccessful num_attempts="2">
@@ -109,8 +114,13 @@
                  base="0.78, 1.375, 3"
                  _description="material point 9"/>
       </RetryUntilSuccessful>
-      <Sleep msec="500"
-             _description="take the raw material"/>
+      <ForceSuccess>
+        <Timeout msec="100">
+          <FirmwareMission mission_status="{x}"
+                           mission_type="21"
+                           _description="take the raw material"/>
+        </Timeout>
+      </ForceSuccess>
       <RetryUntilSuccessful num_attempts="2">
         <Docking final_pose="{PrevGoal}"
                  isPureDocking="0"
@@ -120,8 +130,13 @@
                  base="0.425, 1.32, 2"
                  _description="material point 7"/>
       </RetryUntilSuccessful>
-      <Sleep msec="500"
-             _description="take one level"/>
+      <ForceSuccess>
+        <Timeout msec="100">
+          <FirmwareMission mission_status="{x}"
+                           mission_type="11"
+                           _description="take one level"/>
+        </Timeout>
+      </ForceSuccess>
       <RetryUntilSuccessful num_attempts="2">
         <Docking final_pose="{PrevGoal}"
                  isPureDocking="0"
@@ -157,8 +172,13 @@
                       _description="material point 5"/>
         </Sequence>
       </Fallback>
-      <Sleep msec="500"
-             _description="take the raw material"/>
+      <ForceSuccess>
+        <Timeout msec="100">
+          <FirmwareMission mission_status="{x}"
+                           mission_type="21"
+                           _description="take the raw material"/>
+        </Timeout>
+      </ForceSuccess>
       <Fallback>
         <Docking final_pose="{PrevGoal}"
                  isPureDocking="0"
@@ -175,8 +195,13 @@
                       _description="material point 8"/>
         </Sequence>
       </Fallback>
-      <Sleep msec="500"
-             _description="take one level (2 board &amp; 2 column)"/>
+      <ForceSuccess>
+        <Timeout msec="100">
+          <FirmwareMission mission_status="{x}"
+                           mission_type="11"
+                           _description="take one level"/>
+        </Timeout>
+      </ForceSuccess>
       <Fallback _description="go to the placement area">
         <Docking final_pose="{PrevGoal}"
                  isPureDocking="0"

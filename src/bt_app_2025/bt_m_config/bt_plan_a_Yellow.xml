@@ -95,8 +95,13 @@
                  offset="-0.2"
                  base="0.82, 0.6, 1"/>
       </RetryUntilSuccessful>
-      <Sleep msec="500"
-             _description="take the raw material"/>
+      <ForceSuccess>
+        <Timeout msec="100">
+          <FirmwareMission mission_status="{x}"
+                           mission_type="21"
+                           _description="take the raw material"/>
+        </Timeout>
+      </ForceSuccess>
       <SubTree ID="BannerMission"
                _autoremap="true"/>
       <RetryUntilSuccessful num_attempts="2">
@@ -126,8 +131,13 @@
                  offset="0.2"
                  base="2.575, 1.32, 2"/>
       </RetryUntilSuccessful>
-      <Sleep msec="500"
-             _description="take the raw material"/>
+      <ForceSuccess>
+        <Timeout msec="100">
+          <FirmwareMission mission_status="{x}"
+                           mission_type="21"
+                           _description="take the raw material"/>
+        </Timeout>
+      </ForceSuccess>
       <RetryUntilSuccessful num_attempts="2">
         <Docking final_pose="{PrevGoal}"
                  isPureDocking="0"
@@ -136,8 +146,13 @@
                  offset="0.2"
                  base="2.575, 0.395, 0"/>
       </RetryUntilSuccessful>
-      <Sleep msec="500"
-             _description="take one level (2 board &amp; 2 column)"/>
+      <ForceSuccess>
+        <Timeout msec="100">
+          <FirmwareMission mission_status="{x}"
+                           mission_type="11"
+                           _description="take one level"/>
+        </Timeout>
+      </ForceSuccess>
       <RetryUntilSuccessful num_attempts="2">
         <Docking final_pose="{PrevGoal}"
                  isPureDocking="0"
@@ -164,8 +179,13 @@
                  offset="0.2"
                  base="1.895, 0.6, 3"/>
       </RetryUntilSuccessful>
-      <Sleep msec="500"
-             _description="take the raw material"/>
+      <ForceSuccess>
+        <Timeout msec="100">
+          <FirmwareMission mission_status="{x}"
+                           mission_type="21"
+                           _description="take the raw material"/>
+        </Timeout>
+      </ForceSuccess>
       <RetryUntilSuccessful num_attempts="2">
         <Docking final_pose="{PrevGoal}"
                  isPureDocking="0"
@@ -174,8 +194,13 @@
                  offset="-0.2"
                  base="2.22, 0.6, 3"/>
       </RetryUntilSuccessful>
-      <Sleep msec="500"
-             _description="take one level"/>
+      <ForceSuccess>
+        <Timeout msec="100">
+          <FirmwareMission mission_status="{x}"
+                           mission_type="11"
+                           _description="take one level"/>
+        </Timeout>
+      </ForceSuccess>
       <RetryUntilSuccessful num_attempts="2">
         <Docking final_pose="{PrevGoal}"
                  isPureDocking="0"
