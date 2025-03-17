@@ -35,19 +35,19 @@
     <Sequence>
       <FirmwareMission mission_status="{Emp}"
                        mission_type="1"/>
-      <Sleep msec="3000"/>
+      <Sleep msec="2000"/>
+      <FirmwareMission mission_status="{Emp}"
+                       mission_type="0"/>
+      <Sleep msec="2000"/>
       <FirmwareMission mission_status="{Emp}"
                        mission_type="1"/>
-      <Sleep msec="5000"/>
+      <Sleep msec="2000"/>
+      <FirmwareMission mission_status="{Emp}"
+                       mission_type="0"/>
+      <Sleep msec="2000"/>
       <FirmwareMission mission_status="{Emp}"
                        mission_type="1"/>
-      <Sleep msec="7000"/>
-      <FirmwareMission mission_status="{Emp}"
-                       mission_type="1"/>
-      <Sleep msec="9000"/>
-      <FirmwareMission mission_status="{Emp}"
-                       mission_type="1"/>
-      <Sleep msec="10000"/>
+      <Sleep msec="2000"/>
     </Sequence>
   </BehaviorTree>
 
