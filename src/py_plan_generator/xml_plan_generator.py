@@ -26,7 +26,7 @@ def read_input():
     print(points_list)
 
 def import_subtree_and_nodes():
-    tree_a = ET.parse('test_output.xml') # get plan tree file
+    tree_a = ET.parse('compter_plan.xml') # get plan tree file
     root_a = tree_a.getroot() # get root of plan tree
     empty_model = ET.SubElement(root_a, "TreeNodesModel") # create area for storaging models
     data_b = ET.parse('subtrees.xml').getroot() # get root of models file
@@ -34,7 +34,7 @@ def import_subtree_and_nodes():
     for TreeNodesModel in data_b.iter('TreeNodesModel'): # find the target to be insert
         insertion_point = tree_a.findall("./TreeNodesModel")[0] # find the insert point in plan tree
         insertion_point.extend(TreeNodesModel)
-    tree_a.write("test_output.xml", encoding="utf-8", xml_declaration=True)
+    tree_a.write("compter_plan.xml", encoding="utf-8", xml_declaration=True)
 
 def create_tree(name, point_numbers):
     print(name, point_numbers)
@@ -64,7 +64,7 @@ def main():
     divid_sub_tree()
 
     # ### Write XML element tree to file
-    main_tree.write("test_output.xml")
+    main_tree.write("compter_plan.xml")
     import_subtree_and_nodes()
 
 
