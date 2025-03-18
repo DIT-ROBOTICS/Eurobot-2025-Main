@@ -125,9 +125,9 @@
         <Docking final_pose="{PrevGoal}"
                  isPureDocking="0"
                  dock_type="mission_dock_x"
-                 shift="0.05"
+                 shift="0"
                  offset="-0.2"
-                 base="0.425, 1.32, 2"
+                 base="0.425, 1.36, 2"
                  _description="material point 7"/>
       </RetryUntilSuccessful>
       <ForceSuccess>
