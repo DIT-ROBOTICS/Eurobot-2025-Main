@@ -103,11 +103,13 @@ void CamReceiver::materials_info_callback(const geometry_msgs::msg::PoseArray::S
     blackboard_->set<geometry_msgs::msg::PoseArray>("materials_info", materials_info_);
     // To Do: modify message type
 }
+
 void CamReceiver::banner_info_callback(const std_msgs::msg::Int32::SharedPtr msg) {
     banner_info_ = *msg;
     blackboard_->set<std_msgs::msg::Int32>("banner_info", banner_info_);
     // To Do: modify message type
 }
+
 void CamReceiver::obstacles_info_callback(const geometry_msgs::msg::PoseArray::SharedPtr msg) {
     obstacles_info_ = *msg;
     blackboard_->set<geometry_msgs::msg::PoseArray>("obstacles_info", obstacles_info_);
@@ -117,7 +119,7 @@ void CamReceiver::obstacles_info_callback(const geometry_msgs::msg::PoseArray::S
 
 BT::NodeStatus CamReceiver::tick() {
     RCLCPP_INFO(node_->get_logger(), "Node start");
-    sub_materials_info_ = node_->create_subscription<geometry_msgs::msg::PoseArray>("/robot/objects/materials_info", 10, std::bind(&CamReceiver::materials_info_callback, this, std::placeholders::_1));
+    sub_materials_info_ = node_->create_subscription<geometry_msgs::msg::PoseArray>("/detected/global_center_poses/platform", 10, std::bind(&CamReceiver::materials_info_callback, this, std::placeholders::_1));
     sub_banner_info_ = node_->create_subscription<std_msgs::msg::Int32>("/robot/objects/banner_info", 10, std::bind(&CamReceiver::banner_info_callback, this, std::placeholders::_1));
     sub_obstacles_info_ = node_->create_subscription<geometry_msgs::msg::PoseArray>("/robot/objects/obstacles_info", 10, std::bind(&CamReceiver::obstacles_info_callback, this, std::placeholders::_1));
     
