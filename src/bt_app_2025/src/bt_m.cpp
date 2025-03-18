@@ -141,6 +141,9 @@ int main(int argc, char** argv) {
     node->declare_parameter<std::vector<int>>("spin_construct_3", std::vector<int>{});
     node->declare_parameter<std::vector<int>>("not_spin_construct_2", std::vector<int>{});
     node->declare_parameter<std::vector<int>>("not_spin_construct_3", std::vector<int>{});
+    // map points
+    node->declare_parameter<std::vector<double>>("material_points", std::vector<double>{});
+    node->declare_parameter<std::vector<double>>("mission_points", std::vector<double>{});
     // get parameters
     node->get_parameter("groot_xml_config_directory", groot_xml_config_directory);
     node->get_parameter("tree_node_model_config_file", bt_tree_node_model);
@@ -159,6 +162,8 @@ int main(int argc, char** argv) {
     factory.registerNodeType<NavReceiver>("NavReceiver", node, blackboard);
     factory.registerNodeType<CamReceiver>("CamReceiver", node, blackboard);
     /* navigation */
+    factory.registerNodeType<StopRobot>("StopRobot", node);
+    factory.registerNodeType<VisionCheck>("VisionCheck", node, blackboard);
     factory.registerNodeType<DynamicAdjustment>("DynamicAdjustment");
     params.default_port_value = "navigate_to_pose";
     factory.registerNodeType<Navigation>("Navigation", params);

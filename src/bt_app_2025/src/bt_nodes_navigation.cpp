@@ -322,6 +322,20 @@ NodeStatus Rotation::onFailure(ActionNodeErrorCode error) {
     return NodeStatus::SUCCESS;
 }
 
+PortsList StopRobot::providedPorts() {
+    return {};
+}
+
+BT::NodeStatus StopRobot::tick() {
+    stop_msg.data = true;
+    for (int i = 0; i < 10; i++)
+        publisher_->publish(stop_msg);
+    stop_msg.data = false;
+    for (int i = 0; i < 10; i++)
+        publisher_->publish(stop_msg);
+    return BT::NodeStatus::SUCCESS;
+}
+
 BT::PortsList DynamicAdjustment::providedPorts() {
     return {
         BT::InputPort<geometry_msgs::msg::TwistStamped>("robot_pose"),
@@ -343,4 +357,95 @@ BT::NodeStatus DynamicAdjustment::onRunning() {
 void DynamicAdjustment::onHalted() {
     // To Do: 
     return;
+}
+
+PortsList VisionCheck::providedPorts() {
+    return {
+        // BT::InOutPort<int>("counter")
+        BT::InputPort<int>("base"),
+        BT::InputPort<std::string>("dock_type"),
+        BT::InputPort<std::string>("mission_type"), // front or back
+        BT::InputPort<double>("offset"),
+        BT::InputPort<double>("shift"),
+        BT::OutputPort<geometry_msgs::msg::PoseStamped>("remap_base"),
+        BT::OutputPort<std::string>("remap_dock_type"),
+        BT::OutputPort<double>("remap_offset"),
+        BT::OutputPort<double>("remap_shift")
+    };
+}
+
+int VisionCheck::findBestTarget() {
+    double robotVelocity_, rivalVelocity;
+    double robotMaterialDist, rivalMaterialDist;
+    geometry_msgs::msg::PoseStamped rivalGoal;
+
+    LocReceiver::UpdateRobotPose(robot_pose_, tf_buffer_, frame_id_);
+    LocReceiver::UpdateRivalPose(rival_pose_, tf_buffer_, frame_id_);
+    for (int i = 0; i < 10; i++)
+        if (materials_info_.poses[i].position.z != -1)
+            canditate_.push_back(i);
+    for (const auto &point_index : canditate_)
+        if (calculateDistance(materials_info_.poses[point_index], rival_pose_) < calculateDistance(materials_info_.poses[point_index], robot_pose_))
+            canditate_.erase(point_index);
+    int min_index = canditate_.front();
+    while (!canditate_.empty()) {
+        canditate_.pop();
+        if (min_index > canditate_.front())
+            min_index = canditate_.front();
+    }
+    return min_index;
+}
+
+NodeStatus VisionCheck::tick() {
+    // get input
+    int baseIndex_ = getInput<double>("base_index").value();
+    std::string dockType_ = getInput<double>("dock_type").value();
+    std::string missionType_ = getInput<double>("mission_type").value();
+    double offset_ = getInput<double>("offset").value();
+    double shift_ = getInput<double>("shift").value();
+    std::vector<double> materialPoints_;
+    std::vector<double> missionPoints_;
+    // get parameters
+    node->get_parameter("material_points", materialPoints_);
+    node->get_parameter("mission_points", missionPoints_);
+
+    // use vision message to check the target
+    blackboard_->get<geometry_msgs::msg::PoseArray>("materials_info", materials_info_);
+    
+    // If the target is not ok
+    // use vision message to find the best new target `i` (new base)
+    if (materials_info_.poses[baseIndex_].position.z == -1) {
+        baseIndex_ = findBestTarget();
+    }
+    // get base & offset from map_points[i]
+    base_.pose.posiotn.x = materialPoints_[baseIndex_ * 4];
+    base_.pose.posiotn.y = materialPoints_[baseIndex_ * 4 + 1];
+    base_.pose.posiotn.z = materialPoints_[baseIndex_ * 4 + 2];
+    offset_ = materialPoints_[baseIndex_ * 4 + 3];
+
+    // derive the position.z & offset & shift according to mission_type & map_points[i]
+    if (missionType_ == "front") {
+        int dockTypeCode_;
+        if (dockType_ == "mission_dock_y") // dock type code: 1 for y, -1 for x
+            dockTypeCode_ = 1;
+        else
+            dockTypeCode_ = -1;
+        shift_ *= offset_ / abs(offset_) * dockTypeCode_; // use dock type to determine the shift direction
+    } else if (missionType_ == "back") {
+        base_.pose.posiotn.z = ((int)base_.pose.posiotn.z / 2) ? z - 2 : z + 2;
+        offset_ *= -1;
+        shift_ = 0;
+    } else {
+        throw "error mission direction for choosing nav goal!";
+    }
+
+    // set output port
+    setOutput<geometry_msgs::msg::PoseStamped>("remap_base", base_);
+    setOutput<std::string>("remap_dock_type", dockType_);
+    setOutput<double>("remap_offset", offset_);
+    setOutput<double>("remap_shift", shift_);
+
+    // Run the child node
+    BT::NodeStatus child_status = child_node_->executeTick();
+    return child_status;
 }
