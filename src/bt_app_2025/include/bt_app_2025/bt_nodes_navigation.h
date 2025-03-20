@@ -21,6 +21,7 @@
 // Use ros message
 #include "std_srvs/srv/set_bool.hpp"
 #include "std_msgs/msg/float32.hpp"
+#include "std_msgs/msg/bool.hpp"
 #include "geometry_msgs/msg/twist_stamped.hpp"
 #include "geometry_msgs/msg/pose_stamped.hpp"
 #include "geometry_msgs/msg/pose_array.hpp"
@@ -57,7 +58,9 @@ class Navigation : public BT::RosActionNode<nav2_msgs::action::NavigateToPose> {
 public:
     Navigation(const std::string& name, const NodeConfig& conf, const RosNodeParams& params)
         : RosActionNode<nav2_msgs::action::NavigateToPose>(name, conf, params)
-    {}
+    {
+        node_ = params.nh.lock();
+    }
     /* Node remapping function */
     static PortsList providedPorts();
     bool setGoal(RosActionNode::Goal& goal) override;
@@ -65,6 +68,8 @@ public:
     virtual NodeStatus onFailure(ActionNodeErrorCode error) override;
     NodeStatus onFeedback(const std::shared_ptr<const Feedback> feedback);
 private:
+    NodeStatus goalErrorDetect();
+    std::shared_ptr<rclcpp::Node> node_;
     bool nav_finished_ = false;
     bool nav_error_ = false;
     int nav_recov_times_ = 0;
@@ -82,6 +87,8 @@ public:
     Docking(const std::string& name, const NodeConfig& conf, const RosNodeParams& params)
         : RosActionNode<opennav_docking_msgs::action::DockRobot>(name, conf, params), tf_buffer_(params.nh.lock()->get_clock()), listener_(tf_buffer_)
     {
+        node_ = params.nh.lock();
+        node_->get_parameter("frame_id", frame_id_);
         nav_finished_ = false;
         nav_error_ = false;
         isPureDocking_ = true;
@@ -93,9 +100,8 @@ public:
     NodeStatus onResultReceived(const WrappedResult& wr) override;
     virtual NodeStatus onFailure(ActionNodeErrorCode error) override;
     NodeStatus onFeedback(const std::shared_ptr<const Feedback> feedback);
-
 private:
-    bool UpdateRobotPose();
+    std::shared_ptr<rclcpp::Node> node_;
     bool nav_finished_;
     bool nav_error_;
     bool isPureDocking_;
@@ -107,6 +113,7 @@ private:
     geometry_msgs::msg::PoseStamped robot_pose_;
     tf2_ros::Buffer tf_buffer_;
     tf2_ros::TransformListener listener_;
+    std::string frame_id_;
 };
 
 class Rotation : public BT::RosActionNode<nav2_msgs::action::NavigateToPose> {
@@ -115,10 +122,10 @@ public:
     Rotation(const std::string& name, const NodeConfig& conf, const RosNodeParams& params)
         : RosActionNode<nav2_msgs::action::NavigateToPose>(name, conf, params)
     {
+        node_ = params.nh.lock();
         nav_finished_ = false;
         nav_error_ = false;
     }
-
     /* Node remapping function */
     static PortsList providedPorts();
     bool setGoal(RosActionNode::Goal& goal) override;
@@ -127,11 +134,30 @@ public:
     NodeStatus onFeedback(const std::shared_ptr<const Feedback> feedback);
 
 private:
+    NodeStatus goalErrorDetect();
+    std::shared_ptr<rclcpp::Node> node_;
     bool nav_finished_;
     bool nav_error_;
     int nav_recov_times_ = 0;
     geometry_msgs::msg::PoseStamped goal_;
     geometry_msgs::msg::PoseStamped current_pose_;
+};
+
+class StopRobot : public BT::SyncActionNode
+{
+public:
+    StopRobot(const std::string& name, const BT::NodeConfig& config, std::shared_ptr<rclcpp::Node> node)
+    : BT::SyncActionNode(name, config), node_(node)
+    {
+        publisher_ = node_->create_publisher<std_msgs::msg::Bool>("/stopRobot", rclcpp::QoS(10).reliable().transient_local());
+    }
+    static BT::PortsList providedPorts();
+    BT::NodeStatus tick() override;
+private:
+    std::shared_ptr<rclcpp::Node> node_;
+    BT::Blackboard::Ptr blackboard_;
+    rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr publisher_;
+    std_msgs::msg::Bool stop_msg;
 };
 
 class DynamicAdjustment : public BT::StatefulActionNode
@@ -156,10 +182,36 @@ private:
     geometry_msgs::msg::PoseStamped rival_pose_;
     geometry_msgs::msg::PoseStamped rival_predict_goal_;
     std::deque<int> stage_info_;
-    std::deque<geometry_msgs::msg::PoseStamped> materials_info_;
+    geometry_msgs::msg::PoseArray materials_info_;
     std::deque<geometry_msgs::msg::PoseStamped> garbage_points_;
 
     std::deque<geometry_msgs::msg::PoseStamped> goal_canditate_;
 
     geometry_msgs::msg::PoseStamped goal_;
+};
+
+class VisionCheck : public BT::DecoratorNode
+{
+public:
+    VisionCheck(const std::string &name, const BT::NodeConfig &config, std::shared_ptr<rclcpp::Node> node, BT::Blackboard::Ptr blackboard)
+        : BT::DecoratorNode(name, config), node_(node), blackboard_(blackboard), tf_buffer_(node_->get_clock())
+    {
+        node_->get_parameter("frame_id", frame_id_);
+    }
+    static BT::PortsList providedPorts();
+    BT::NodeStatus tick() override;
+private:
+    int findBestTarget();
+    BT::Blackboard::Ptr blackboard_;
+    rclcpp::Node::SharedPtr node_;
+    // for tf listener
+    tf2_ros::Buffer tf_buffer_;
+    std::string frame_id_;
+    geometry_msgs::msg::PoseStamped robot_pose_;
+    geometry_msgs::msg::PoseStamped rival_pose_;
+    // for input
+    geometry_msgs::msg::PoseArray materials_info_;
+    geometry_msgs::msg::PoseStamped base_;
+    // for vision
+    std::deque<int> canditate_;
 };

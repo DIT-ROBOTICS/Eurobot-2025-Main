@@ -91,7 +91,7 @@ BT::NodeStatus Testing::onRunning()
   tick_count++;
 
   // Log the current count
-  std::cout << "Testing: " << tick_count << std::endl;
+  RCLCPP_INFO_STREAM(rclcpp::get_logger("bt_ros2"), "Testing: " << tick_count);
 
   if(tick_count == 10)
   {

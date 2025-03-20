@@ -64,20 +64,9 @@
 
   <BehaviorTree ID="MainTree">
     <Sequence>
-      <Parallel failure_count="-1"
-                success_count="1">
-        <Repeat num_cycles="20">
-          <Sequence>
-            <Sleep msec="1000"/>
-            <TopicPubTest number="1"
-                          topic_name="number"/>
-          </Sequence>
-        </Repeat>
-        <Sequence>
-          <Sleep msec="5000"/>
-          <TopicSubTest sum="{sum}"/>
-        </Sequence>
-      </Parallel>
+      <Testing output=""
+               input=""/>
+      <Sleep msec="10000"/>
     </Sequence>
   </BehaviorTree>
 
@@ -308,16 +297,6 @@
                    type="std::string"/>
       <input_port name="input"
                   type="std::string"/>
-    </Action>
-    <Action ID="TopicPubTest">
-      <input_port name="number"
-                  type="int"/>
-      <input_port name="topic_name"
-                  type="std::string"/>
-    </Action>
-    <Action ID="TopicSubTest">
-      <output_port name="sum"
-                   type="int"/>
     </Action>
     <Action ID="count_10">
       <output_port name="output"

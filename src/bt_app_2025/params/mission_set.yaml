@@ -1,7 +1,0 @@
-bt_app_2025:
-  ros__parameters:
-    TAKE_1_LEVEL: [1, 1, 1, 1]
-    TAKE_2_LEVEL: [1, 1, 1, 1]
-    PLACE_1_LEVEL: [1, 1, 1, 1]
-    PLACE_2_LEVEL: [1, 1, 1, 1]
-    PLACE_3_LEVEL: [1, 1, 1, 1]

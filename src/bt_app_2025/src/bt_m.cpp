@@ -16,8 +16,6 @@
 #include "std_srvs/srv/set_bool.hpp"
 #include "std_msgs/msg/float32.hpp"
 #include "geometry_msgs/msg/point_stamped.hpp"
-// Include startup necessary service
-#include "btcpp_ros2_interfaces/srv/example.hpp"
 // BTaction nodes
 #include "bt_app_2025/bt_nodes_firmware.h"
 #include "bt_app_2025/bt_nodes_navigation.h"
@@ -115,6 +113,7 @@ int main(int argc, char** argv) {
     std::string groot_xml_config_directory;
     std::string bt_tree_node_model;
     std::string Yellow_A_file, Yellow_B_file, Yellow_C_file, Yellow_Special_file, Blue_A_file, Blue_B_file, Blue_C_file, Blue_Special_file;
+    std::string Bot2_BlueA_file;
     std::string tree_name;
 
     // Read parameters
@@ -129,6 +128,24 @@ int main(int argc, char** argv) {
     node->declare_parameter<std::string>("planB_Blue_config", "bt_plan_b_Blue.xml");
     node->declare_parameter<std::string>("planC_Blue_config", "bt_plan_c_Blue.xml");
     node->declare_parameter<std::string>("Special_Blue_config", "bt_plan_a_Blue.xml");
+    node->declare_parameter<std::string>("Bot2_BlueA_config", "bot2_blue_a.xml");
+
+    node->declare_parameter<std::string>("frame_id", "base_link");
+    node->declare_parameter<double>("nav_dist_error", 0.03);
+    node->declare_parameter<double>("nav_ang_error", 0.4);
+    node->declare_parameter<double>("rotate_dist_error", 0.03);
+    node->declare_parameter<double>("rotate_ang_error", 0.4);
+    // MissionFInisher params
+    node->declare_parameter<std::vector<int>>("front_collect", std::vector<int>{});
+    node->declare_parameter<std::vector<int>>("back_collect", std::vector<int>{});
+    node->declare_parameter<std::vector<int>>("construct_1", std::vector<int>{});
+    node->declare_parameter<std::vector<int>>("spin_construct_2", std::vector<int>{});
+    node->declare_parameter<std::vector<int>>("spin_construct_3", std::vector<int>{});
+    node->declare_parameter<std::vector<int>>("not_spin_construct_2", std::vector<int>{});
+    node->declare_parameter<std::vector<int>>("not_spin_construct_3", std::vector<int>{});
+    // map points
+    node->declare_parameter<std::vector<double>>("material_points", std::vector<double>{});
+    node->declare_parameter<std::vector<double>>("mission_points", std::vector<double>{});
     // get parameters
     node->get_parameter("groot_xml_config_directory", groot_xml_config_directory);
     node->get_parameter("tree_node_model_config_file", bt_tree_node_model);
@@ -141,31 +158,33 @@ int main(int argc, char** argv) {
     node->get_parameter("planB_Blue_config", Blue_B_file);
     node->get_parameter("planC_Blue_config", Blue_C_file);
     node->get_parameter("Special_Blue_config", Blue_Special_file);
+    node->get_parameter("Bot2_BlueA_config", Bot2_BlueA_file);
 
     // action nodes
     /* receiver */
     factory.registerNodeType<NavReceiver>("NavReceiver", node, blackboard);
     factory.registerNodeType<CamReceiver>("CamReceiver", node, blackboard);
     /* navigation */
+    factory.registerNodeType<StopRobot>("StopRobot", node);
+    factory.registerNodeType<VisionCheck>("VisionCheck", node, blackboard);
     factory.registerNodeType<DynamicAdjustment>("DynamicAdjustment");
     params.default_port_value = "navigate_to_pose";
     factory.registerNodeType<Navigation>("Navigation", params);
     factory.registerNodeType<Rotation>("Rotation", params);
     params.default_port_value = "dock_robot";
     factory.registerNodeType<Docking>("Docking", params);
-    // /* firmware */
+    /* firmware */
     params.default_port_value = "firmware_mission";
     factory.registerNodeType<FirmwareMission>("FirmwareMission", node, blackboard);
     factory.registerNodeType<IntegratedMissionNode>("IntegratedMissionNode", node, blackboard);
     factory.registerNodeType<SIMAactivate>("SIMAactivate", node);
-    // factory.registerNodeType<BannerMission>("BannerMission", params);
-    factory.registerNodeType<MissionFinisher>("MissionFinisher", blackboard);
+    factory.registerNodeType<MissionFinisher>("MissionFinisher", node, blackboard);
     /* others */
     factory.registerNodeType<BTStarter>("BTStarter", node, blackboard);
     factory.registerNodeType<Comparator>("Comparator", node); // decorator
     factory.registerNodeType<TimerChecker>("TimerChecker", blackboard); // decorator
 
-    // generate the tree in xml and safe the xml into a file
+    // generate the tree nodes in xml
     std::string xml_models = BT::writeTreeNodesModelXML(factory);
     std::ofstream file(bt_tree_node_model);
     file << xml_models;
@@ -174,13 +193,13 @@ int main(int argc, char** argv) {
     // Receiving team number and plan code
     while (rclcpp::ok() && !isReady) {
         rclcpp::spin_some(node);
-        rclcpp::Rate rate(100);
+        rate.sleep();
     }
     // Send feed back to startup
     for (int j = 0; j < 20; j++) {
         ready_feedback.data = 1;
         pub->publish(ready_feedback);
-        rclcpp::Rate rate(100);
+        rate.sleep();
     }
     // select tree
     std::string groot_filename;
@@ -188,28 +207,29 @@ int main(int argc, char** argv) {
         switch (plans) {
             case 'A':
             groot_filename = groot_xml_config_directory + "/" + Yellow_A_file;
-            RCLCPP_INFO(node->get_logger(), "[BT Application]: Yellow team is running plan A!");
+            RCLCPP_INFO(node->get_logger(), "[Bot1]: Yellow team is running plan A!");
             break;
             case 'B':
             groot_filename = groot_xml_config_directory + "/" + Yellow_B_file;
-            RCLCPP_INFO(node->get_logger(), "[BT Application]: Yellow team is running plan B!");
+            RCLCPP_INFO(node->get_logger(), "[Bot1]: Yellow team is running plan B!");
             break;
             case 'C':
             groot_filename = groot_xml_config_directory + "/" + Yellow_C_file;
-            RCLCPP_INFO(node->get_logger(), "[BT Application]: Yellow team is running plan C!");
+            RCLCPP_INFO(node->get_logger(), "[Bot1]: Yellow team is running plan C!");
             break;
             case 'S':
             groot_filename = groot_xml_config_directory + "/" + Yellow_Special_file;
-            RCLCPP_INFO(node->get_logger(), "[BT Application]: Yellow team is running Special plan!");
+            RCLCPP_INFO(node->get_logger(), "[Bot1]: Yellow team is running Special plan!");
             break;
             default:
             throw "False or Empty plan file";
         }
     } else {
-        RCLCPP_INFO(node->get_logger(), "[BT Application]: Blue team is running!");
+        RCLCPP_INFO(node->get_logger(), "[Bot2]: Blue team is running!");
         switch (plans) {
             case 'A':
-            groot_filename = groot_xml_config_directory + "/" + Blue_A_file;
+            groot_filename = groot_xml_config_directory + "/" + Bot2_BlueA_file;
+            RCLCPP_INFO(node->get_logger(), "[Bot2]: Blue team is running plan A!");
             break;
             case 'B':
             groot_filename = groot_xml_config_directory + "/" + Blue_B_file;

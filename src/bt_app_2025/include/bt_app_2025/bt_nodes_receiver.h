@@ -49,15 +49,18 @@ class LocReceiver
 public:
   LocReceiver(std::shared_ptr<rclcpp::Node> node)
     : node_(node), tf_buffer_(node_->get_clock()), listener_(tf_buffer_)
-  {}
-  static bool UpdateRobotPose(geometry_msgs::msg::PoseStamped &robot_pose_, tf2_ros::Buffer &tf_buffer_);
-  static bool UpdateRivalPose(geometry_msgs::msg::PoseStamped &rival_pose_, tf2_ros::Buffer &tf_buffer_);
+  {
+    node_->get_parameter("frame_id", frame_id_);
+  }
+  static bool UpdateRobotPose(geometry_msgs::msg::PoseStamped &robot_pose_, tf2_ros::Buffer &tf_buffer_, std::string frame_id_);
+  static bool UpdateRivalPose(geometry_msgs::msg::PoseStamped &rival_pose_, tf2_ros::Buffer &tf_buffer_, std::string frame_id_);
 private:
   geometry_msgs::msg::PoseStamped robot_pose_;
   geometry_msgs::msg::PoseStamped rival_pose_;
   std::shared_ptr<rclcpp::Node> node_;
   tf2_ros::Buffer tf_buffer_;
   tf2_ros::TransformListener listener_;
+  std::string frame_id_;
 };
 
 /***************/

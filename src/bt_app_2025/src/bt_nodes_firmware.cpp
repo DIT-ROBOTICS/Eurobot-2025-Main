@@ -97,21 +97,21 @@ BT::NodeStatus MissionFinisher::onStart()
     blackboard_->get<int>("back_materials", back_materials_);
     blackboard_->set<int>("mission_progress", 0);
     
-    RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "finisher get step_results: %d", step_results_.back());
-    RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "finisher get robot_type_: %d", robot_type_);
+    // RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "finisher get step_results: %d", step_results_.back());
+    // RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "finisher get robot_type_: %d", robot_type_);
 
     return BT::NodeStatus::RUNNING;
 }
 
 BT::NodeStatus MissionFinisher::onRunning()
 {
-    auto front_collect_ = matrix_node_->get_parameter("front_collect").as_integer_array();
-    auto back_collect_ = matrix_node_->get_parameter("back_collect").as_integer_array();
-    auto construct_1_ = matrix_node_->get_parameter("construct_1").as_integer_array();
-    auto not_spin_construct_2_ = matrix_node_->get_parameter("not_spin_construct_2").as_integer_array();
-    auto spin_construct_2_ = matrix_node_->get_parameter("spin_construct_2").as_integer_array();
-    auto not_spin_construct_3_ = matrix_node_->get_parameter("not_spin_construct_3").as_integer_array();
-    auto spin_construct_3_ = matrix_node_->get_parameter("spin_construct_3").as_integer_array();
+    auto front_collect_ = node_->get_parameter("front_collect").as_integer_array();
+    auto back_collect_ = node_->get_parameter("back_collect").as_integer_array();
+    auto construct_1_ = node_->get_parameter("construct_1").as_integer_array();
+    auto not_spin_construct_2_ = node_->get_parameter("not_spin_construct_2").as_integer_array();
+    auto spin_construct_2_ = node_->get_parameter("spin_construct_2").as_integer_array();
+    auto not_spin_construct_3_ = node_->get_parameter("not_spin_construct_3").as_integer_array();
+    auto spin_construct_3_ = node_->get_parameter("spin_construct_3").as_integer_array();
     
     switch(step_results_.back()){
 
@@ -220,9 +220,9 @@ BT::NodeStatus MissionFinisher::onRunning()
     setOutput("success_levels", success_levels_); 
     setOutput("failed_levels", failed_levels_);
 
-    RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "mission_progress: %d", mission_progress_);
-    RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "success_levels: %d, failed_levels: %d", success_levels_, failed_levels_);
-    RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "front_materials: %d, back_materials: %d", front_materials_, back_materials_);
+    // RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "mission_progress: %d", mission_progress_);
+    // RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "success_levels: %d, failed_levels: %d", success_levels_, failed_levels_);
+    // RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "front_materials: %d, back_materials: %d", front_materials_, back_materials_);
     
     if (matreials_accord_)
         return BT::NodeStatus::SUCCESS;
@@ -250,28 +250,34 @@ PortsList FirmwareMission::providedPorts() {
     };
 }
 
-BT::NodeStatus FirmwareMission::mission_callback(const std_msgs::msg::Int32::SharedPtr sub_msg) {
-    mission_status_ = sub_msg->data;
-    RCLCPP_INFO(node_->get_logger(), "I heard: '%d'", mission_status_);
+BT::NodeStatus FirmwareMission::stopStep() {
     if (mission_status_ == 1) {
         RCLCPP_INFO(node_->get_logger(), "Mission success");
-        subscription_.reset();
         blackboard_->set<int>("mission_progress", ++mission_progress_);
         setOutput<int>("mission_status", mission_status_);
+        mission_status_ = 0;
+        subscription_.reset();
         return BT::NodeStatus::SUCCESS;
     } else if (mission_status_ == 0) {
-        RCLCPP_INFO(node_->get_logger(), "Mission running");
+        // RCLCPP_INFO(node_->get_logger(), "Mission running");
         return BT::NodeStatus::RUNNING;
     } else if (mission_status_ == -1) {
         RCLCPP_INFO(node_->get_logger(), "Mission failed");
-        subscription_.reset();
         setOutput<int>("mission_status", mission_status_);
+        subscription_.reset();
         return BT::NodeStatus::FAILURE;
     } else {
         RCLCPP_INFO(node_->get_logger(), "Unknown status code, Stop mission");
-        subscription_.reset();
         setOutput<int>("mission_status", -1);
+        subscription_.reset();
         return BT::NodeStatus::FAILURE;
+    }
+}
+void FirmwareMission::mission_callback(const std_msgs::msg::Int32::SharedPtr sub_msg) {
+    if (mission_type_)
+    {
+        mission_status_ = sub_msg->data;
+        RCLCPP_INFO(node_->get_logger(), "mission type: '%d', heard: '%d'", mission_type_, mission_status_);
     }
 }
 
@@ -284,12 +290,15 @@ BT::NodeStatus FirmwareMission::onStart() {
 }
 
 BT::NodeStatus FirmwareMission::onRunning() {
-    RCLCPP_INFO(node_->get_logger(), "Testing Node running");
     pub_msg.data = mission_type_;
-    publisher_->publish(pub_msg);
-    RCLCPP_INFO(node_->get_logger(), "mission_progress: %d", mission_progress_);
-    RCLCPP_INFO(node_->get_logger(), "mission_type: %d", mission_type_);
-    return BT::NodeStatus::RUNNING;
+    BT::NodeStatus nodeStatus_ = stopStep();
+    if (mission_status_ == 0) {
+        publisher_->publish(pub_msg);
+        RCLCPP_INFO(node_->get_logger(), "mission_progress: %d", mission_progress_);
+        RCLCPP_INFO(node_->get_logger(), "mission_type: %d", mission_type_);
+    }
+    return nodeStatus_;
+    // return stopStep();
     // **failure test**
     // if (mission_progress_ != 5)
     //    blackboard_->set<int>("mission_progress", ++mission_progress_);
