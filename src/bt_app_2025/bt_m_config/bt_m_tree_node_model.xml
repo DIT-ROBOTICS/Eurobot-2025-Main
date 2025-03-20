@@ -50,8 +50,20 @@
             <input_port name="base" type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
         </Action>
         <Action ID="SIMAactivate"/>
+        <Action ID="StopRobot"/>
         <Decorator ID="TimerChecker">
             <input_port name="timer_sec" type="int"/>
+        </Decorator>
+        <Decorator ID="VisionCheck">
+            <output_port name="remap_offset" type="double"/>
+            <output_port name="remap_shift" type="double"/>
+            <output_port name="remap_dock_type" type="std::string"/>
+            <output_port name="remap_base" type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+            <input_port name="shift" type="double"/>
+            <input_port name="mission_type" type="std::string"/>
+            <input_port name="dock_type" type="std::string"/>
+            <input_port name="offset" type="double"/>
+            <input_port name="base" type="int"/>
         </Decorator>
     </TreeNodesModel>
 </root>
