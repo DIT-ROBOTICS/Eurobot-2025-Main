@@ -291,11 +291,14 @@ BT::NodeStatus FirmwareMission::onStart() {
 
 BT::NodeStatus FirmwareMission::onRunning() {
     pub_msg.data = mission_type_;
-    publisher_->publish(pub_msg);
-    RCLCPP_INFO(node_->get_logger(), "mission_progress: %d", mission_progress_);
-    RCLCPP_INFO(node_->get_logger(), "mission_type: %d", mission_type_);
-
-    return stopStep();
+    BT::NodeStatus nodeStatus_ = stopStep();
+    if (mission_status_ == 0) {
+        publisher_->publish(pub_msg);
+        RCLCPP_INFO(node_->get_logger(), "mission_progress: %d", mission_progress_);
+        RCLCPP_INFO(node_->get_logger(), "mission_type: %d", mission_type_);
+    }
+    return nodeStatus_;
+    // return stopStep();
     // **failure test**
     // if (mission_progress_ != 5)
     //    blackboard_->set<int>("mission_progress", ++mission_progress_);

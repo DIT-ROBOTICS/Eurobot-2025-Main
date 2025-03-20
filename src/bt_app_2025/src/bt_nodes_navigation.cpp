@@ -384,12 +384,14 @@ int VisionCheck::findBestTarget() {
     for (int i = 0; i < 10; i++)
         if (materials_info_.poses[i].position.z != -1)
             canditate_.push_back(i);
-    for (const auto &point_index : canditate_)
-        if (calculateDistance(materials_info_.poses[point_index], rival_pose_) < calculateDistance(materials_info_.poses[point_index], robot_pose_))
-            canditate_.erase(point_index);
+    for (int i = 0; i < canditate_.size(); i++) {
+        if (calculateDistance(materials_info_.poses[canditate_.front()], rival_pose_.pose) >= calculateDistance(materials_info_.poses[canditate_.front()], robot_pose_.pose))
+            canditate_.push_back(canditate_.front());
+        canditate_.pop_front();
+    }
     int min_index = canditate_.front();
     while (!canditate_.empty()) {
-        canditate_.pop();
+        canditate_.pop_front();
         if (min_index > canditate_.front())
             min_index = canditate_.front();
     }
@@ -399,15 +401,15 @@ int VisionCheck::findBestTarget() {
 NodeStatus VisionCheck::tick() {
     // get input
     int baseIndex_ = getInput<double>("base_index").value();
-    std::string dockType_ = getInput<double>("dock_type").value();
-    std::string missionType_ = getInput<double>("mission_type").value();
+    std::string dockType_ = getInput<std::string>("dock_type").value();
+    std::string missionType_ = getInput<std::string>("mission_type").value();
     double offset_ = getInput<double>("offset").value();
     double shift_ = getInput<double>("shift").value();
     std::vector<double> materialPoints_;
     std::vector<double> missionPoints_;
     // get parameters
-    node->get_parameter("material_points", materialPoints_);
-    node->get_parameter("mission_points", missionPoints_);
+    node_->get_parameter("material_points", materialPoints_);
+    node_->get_parameter("mission_points", missionPoints_);
 
     // use vision message to check the target
     blackboard_->get<geometry_msgs::msg::PoseArray>("materials_info", materials_info_);
@@ -418,9 +420,9 @@ NodeStatus VisionCheck::tick() {
         baseIndex_ = findBestTarget();
     }
     // get base & offset from map_points[i]
-    base_.pose.posiotn.x = materialPoints_[baseIndex_ * 4];
-    base_.pose.posiotn.y = materialPoints_[baseIndex_ * 4 + 1];
-    base_.pose.posiotn.z = materialPoints_[baseIndex_ * 4 + 2];
+    base_.pose.position.x = materialPoints_[baseIndex_ * 4];
+    base_.pose.position.y = materialPoints_[baseIndex_ * 4 + 1];
+    base_.pose.position.z = materialPoints_[baseIndex_ * 4 + 2];
     offset_ = materialPoints_[baseIndex_ * 4 + 3];
 
     // derive the position.z & offset & shift according to mission_type & map_points[i]
@@ -432,7 +434,7 @@ NodeStatus VisionCheck::tick() {
             dockTypeCode_ = -1;
         shift_ *= offset_ / abs(offset_) * dockTypeCode_; // use dock type to determine the shift direction
     } else if (missionType_ == "back") {
-        base_.pose.posiotn.z = ((int)base_.pose.posiotn.z / 2) ? z - 2 : z + 2;
+        base_.pose.position.z = ((int)base_.pose.position.z / 2) ? base_.pose.position.z - 2 : base_.pose.position.z + 2;
         offset_ *= -1;
         shift_ = 0;
     } else {

@@ -113,6 +113,7 @@ int main(int argc, char** argv) {
     std::string groot_xml_config_directory;
     std::string bt_tree_node_model;
     std::string Yellow_A_file, Yellow_B_file, Yellow_C_file, Yellow_Special_file, Blue_A_file, Blue_B_file, Blue_C_file, Blue_Special_file;
+    std::string Bot2_BlueA_file;
     std::string tree_name;
 
     // Read parameters
@@ -127,6 +128,7 @@ int main(int argc, char** argv) {
     node->declare_parameter<std::string>("planB_Blue_config", "bt_plan_b_Blue.xml");
     node->declare_parameter<std::string>("planC_Blue_config", "bt_plan_c_Blue.xml");
     node->declare_parameter<std::string>("Special_Blue_config", "bt_plan_a_Blue.xml");
+    node->declare_parameter<std::string>("Bot2_BlueA_config", "bot2_blue_a.xml");
 
     node->declare_parameter<std::string>("frame_id", "base_link");
     node->declare_parameter<double>("nav_dist_error", 0.03);
@@ -156,6 +158,7 @@ int main(int argc, char** argv) {
     node->get_parameter("planB_Blue_config", Blue_B_file);
     node->get_parameter("planC_Blue_config", Blue_C_file);
     node->get_parameter("Special_Blue_config", Blue_Special_file);
+    node->get_parameter("Bot2_BlueA_config", Bot2_BlueA_file);
 
     // action nodes
     /* receiver */
@@ -181,7 +184,7 @@ int main(int argc, char** argv) {
     factory.registerNodeType<Comparator>("Comparator", node); // decorator
     factory.registerNodeType<TimerChecker>("TimerChecker", blackboard); // decorator
 
-    // generate the tree in xml and safe the xml into a file
+    // generate the tree nodes in xml
     std::string xml_models = BT::writeTreeNodesModelXML(factory);
     std::ofstream file(bt_tree_node_model);
     file << xml_models;
@@ -190,13 +193,13 @@ int main(int argc, char** argv) {
     // Receiving team number and plan code
     while (rclcpp::ok() && !isReady) {
         rclcpp::spin_some(node);
-        rclcpp::Rate rate(100);
+        rate.sleep();
     }
     // Send feed back to startup
     for (int j = 0; j < 20; j++) {
         ready_feedback.data = 1;
         pub->publish(ready_feedback);
-        rclcpp::Rate rate(100);
+        rate.sleep();
     }
     // select tree
     std::string groot_filename;
@@ -204,28 +207,29 @@ int main(int argc, char** argv) {
         switch (plans) {
             case 'A':
             groot_filename = groot_xml_config_directory + "/" + Yellow_A_file;
-            RCLCPP_INFO(node->get_logger(), "[BT Application]: Yellow team is running plan A!");
+            RCLCPP_INFO(node->get_logger(), "[Bot1]: Yellow team is running plan A!");
             break;
             case 'B':
             groot_filename = groot_xml_config_directory + "/" + Yellow_B_file;
-            RCLCPP_INFO(node->get_logger(), "[BT Application]: Yellow team is running plan B!");
+            RCLCPP_INFO(node->get_logger(), "[Bot1]: Yellow team is running plan B!");
             break;
             case 'C':
             groot_filename = groot_xml_config_directory + "/" + Yellow_C_file;
-            RCLCPP_INFO(node->get_logger(), "[BT Application]: Yellow team is running plan C!");
+            RCLCPP_INFO(node->get_logger(), "[Bot1]: Yellow team is running plan C!");
             break;
             case 'S':
             groot_filename = groot_xml_config_directory + "/" + Yellow_Special_file;
-            RCLCPP_INFO(node->get_logger(), "[BT Application]: Yellow team is running Special plan!");
+            RCLCPP_INFO(node->get_logger(), "[Bot1]: Yellow team is running Special plan!");
             break;
             default:
             throw "False or Empty plan file";
         }
     } else {
-        RCLCPP_INFO(node->get_logger(), "[BT Application]: Blue team is running!");
+        RCLCPP_INFO(node->get_logger(), "[Bot2]: Blue team is running!");
         switch (plans) {
             case 'A':
-            groot_filename = groot_xml_config_directory + "/" + Blue_A_file;
+            groot_filename = groot_xml_config_directory + "/" + Bot2_BlueA_file;
+            RCLCPP_INFO(node->get_logger(), "[Bot2]: Blue team is running plan A!");
             break;
             case 'B':
             groot_filename = groot_xml_config_directory + "/" + Blue_B_file;
