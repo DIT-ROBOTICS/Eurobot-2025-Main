@@ -43,7 +43,7 @@ def generate_launch_description():
             config_path, 
             finisher, 
             nav_parameters,
-            {"frame_id": "base_footprint"},
+            {"frame_id": "base_link"},
             {"tree_name": "FirmwareTest"}, 
             {"Robot_name": "Tongue"}  # Invisible or Tongue
         ],
@@ -59,20 +59,20 @@ def generate_launch_description():
         executable = 'startup',
         name = 'startup'
     )
-    # firmware_node = Node(
-    #     package='micro_ros_agent',
-    #     executable='micro_ros_agent',
-    #     name='micro_ros_agent',
-    #     output='screen',
-    #     arguments=['serial', '-b', '115200', '-D', '/dev/mission']
-    # )
+    firmware_node = Node(
+        package='micro_ros_agent',
+        executable='micro_ros_agent',
+        name='micro_ros_agent',
+        output='screen',
+        arguments=['serial', '-b', '115200', '-D', '/dev/ttyACM0']
+    )
     return LaunchDescription([
         config_path_arg,
         finisher_arg,
         nav_parameters_arg,
         bt_m_node,
         startup_node,
-        # firmware_node
+        firmware_node
         # TimerAction(
         #     period = 1.0,
         #     actions = [Node(
