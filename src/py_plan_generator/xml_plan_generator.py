@@ -1,6 +1,7 @@
 import xml.etree.ElementTree as ET
 import os, os.path, sys
 import glob
+import queue
 
 ### Create XML element tree
 root = ET.Element("root", {"BTCPP_format": "4"})
@@ -10,20 +11,55 @@ type_list = []
 number_list = []
 points_list = []
 
-def read_input():
-    input_tree = ET.parse('input_data.xml')
+mis_linked_dict = {10: [11, 2, 30, 31], 11: [2, 30, 31], 2: [30, 31], 30: [31, 4], 31: [4]}
+mis_linked_check = [[0, 0, 0, 0], [0, 0, 0], [0, 0], [0, 0], [0]]
+mis_total_num = 3
+mis_current_num = 0
+mat_linked_dict = {1: [2, 3, 4], 2: [3, 4], 3: [4, 5, 6, 9], 4: [6], 5: [6, 7, 8, 9], 6: [7, 8, 9], 7: [8, 9], 8: [9]}
+mat_linked_check = [[0, 0, 0], [0, 0], [0, 0, 0, 0], [0], [0, 0, 0, 0], [0, 0, 0], [0, 0], [0]]
+mis_total_num = 5
+mis_current_num = 0
+result_mats_que = queue.Queue()
+result_miss_que = queue.Queue()
+x = -1
+y = -1
+z = -1
+
+def visit_linked_list(num):
+    if ()
+
+def generate_plans():
+    i = 0
+    j = 0
+    while (mis_linked_check[i][j] == 0):
+        mis_current_num = 0
+        # while (mis_current_num < mis_total_num):
+
+        mis_linked_check[i][j] = 1
+        mis_current_num += 1
+        result_miss_que.push(mis_linked_dict[str(i)][j])
+        i
+
+        
+
+
+def get_source_point(type, num):
+    input_tree = ET.parse('source_points.xml')
     root = input_tree.getroot()
-    for elem in root:
-        # print(elem.tag, elem[1].text, elem.attrib)
-        for i in elem:
-            print(i.text)
-            if (i.tag == "type"):
-                type_list.append(i.text)
-            if (i.tag == "number"):
-                number_list.append(i.text)
-            if (i.tag != "type" and i.tag != "number"):
-                points_list.append(i.text)
-    print(points_list)
+    materials = root[0]
+    missions = root[1]
+    if (type == "material"):
+        x = materials[num][0]
+        y = materials[num][1]
+        z = materials[num][2]
+        offset = materials[num][3]
+        # for mat in materials:
+    elif (type == "mission"):
+        x = missions[num][0]
+        y = missions[num][1]
+        z = missions[num][2]
+        offset = missions[num][3]
+        # for mis in missions:
 
 def import_subtree_and_nodes():
     tree_a = ET.parse('compter_plan.xml') # get plan tree file

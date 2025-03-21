@@ -56,8 +56,14 @@
         </point>
     </material>
     <missions>
-        <point ID="1">
+        <point ID="10">
             <position_x>2.55</position_x>
+            <position_y>0.9</position_y>
+            <position_z>0.0</position_z> 
+            <offset>0.15</offset>
+        </point>
+        <point ID="11">
+            <position_x>2.4</position_x>
             <position_y>0.9</position_y>
             <position_z>0.0</position_z> 
             <offset>0.15</offset>
@@ -68,9 +74,15 @@
             <position_z>3.0</position_z> 
             <offset>-0.15</offset>
         </point>
-        <point ID="3">
+        <point ID="30">
             <position_x>1.25</position_x>
-            <position_y>0.55</position_y>
+            <position_y>0.52</position_y>
+            <position_z>3.0</position_z> 
+            <offset>-0.15</offset>
+        </point>
+        <point ID="31">
+            <position_x>1.25</position_x>
+            <position_y>0.62</position_y>
             <position_z>3.0</position_z> 
             <offset>-0.15</offset>
         </point>
