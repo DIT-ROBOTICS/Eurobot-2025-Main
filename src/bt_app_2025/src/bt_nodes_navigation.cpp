@@ -361,8 +361,7 @@ void DynamicAdjustment::onHalted() {
 
 PortsList VisionCheck::providedPorts() {
     return {
-        // BT::InOutPort<int>("counter")
-        BT::InputPort<int>("base"),
+        BT::InputPort<int>("base_index"),           // if base index is -1, then plan new goal directly
         BT::InputPort<std::string>("dock_type"),
         BT::InputPort<std::string>("mission_type"), // front or back
         BT::InputPort<double>("offset"),
@@ -416,7 +415,7 @@ NodeStatus VisionCheck::tick() {
     
     // If the target is not ok
     // use vision message to find the best new target `i` (new base)
-    if (materials_info_.poses[baseIndex_].position.z == -1) {
+    if (materials_info_.poses[baseIndex_].position.z == -1 || baseIndex_ == -1) {
         baseIndex_ = findBestTarget();
     }
     // get base & offset from map_points[i]
