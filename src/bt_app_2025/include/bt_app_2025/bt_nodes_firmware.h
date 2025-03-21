@@ -122,7 +122,7 @@ class FirmwareMission : public BT::StatefulActionNode
 {
 public:
   FirmwareMission(const std::string& name, const BT::NodeConfig& config, std::shared_ptr<rclcpp::Node> node, BT::Blackboard::Ptr blackboard)
-    : BT::StatefulActionNode(name, config), node_(node), blackboard_(blackboard) {
+    : BT::StatefulActionNode(name, config), node_(node), blackboard_(blackboard), rate_(30) {
     publisher_ = node_->create_publisher<std_msgs::msg::Int32>("mission_type", 10);
     subscription_ = node_->create_subscription<std_msgs::msg::Int32>("mission_status", 10, std::bind(&FirmwareMission::mission_callback, this, std::placeholders::_1));
   }
@@ -142,11 +142,14 @@ public:
 private:
   std::shared_ptr<rclcpp::Node> node_;
   BT::Blackboard::Ptr blackboard_;
+  rclcpp::Rate rate_;
   rclcpp::Publisher<std_msgs::msg::Int32>::SharedPtr publisher_;
   rclcpp::Subscription<std_msgs::msg::Int32>::SharedPtr subscription_;
 
   std_msgs::msg::Int32 pub_msg;
   int mission_progress_ = 0;
+  bool ready_finish_ = false;
+  int error_filter_ = 0;
   int mission_type_ = 0;
   int mission_status_ = 0;
   bool mission_received_ = false;
@@ -255,6 +258,4 @@ private:
   geometry_msgs::msg::Pose goal_pose_;
   geometry_msgs::msg::PoseStamped goal_;
   geometry_msgs::msg::PoseStamped current_pose_;
-
-
 };

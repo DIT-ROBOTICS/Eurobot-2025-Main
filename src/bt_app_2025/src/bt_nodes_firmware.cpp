@@ -251,19 +251,21 @@ PortsList FirmwareMission::providedPorts() {
 }
 
 BT::NodeStatus FirmwareMission::stopStep() {
-    if (mission_status_ == 1) {
+    if (mission_status_ == 1 && ready_finish_) {
         RCLCPP_INFO(node_->get_logger(), "Mission success");
         blackboard_->set<int>("mission_progress", ++mission_progress_);
         setOutput<int>("mission_status", mission_status_);
+        ready_finish_ = false;
         mission_status_ = 0;
         subscription_.reset();
         return BT::NodeStatus::SUCCESS;
-    } else if (mission_status_ == 0) {
+    } else if (mission_status_ == 0 || (!ready_finish_ && mission_status_ == 1)) {
         // RCLCPP_INFO(node_->get_logger(), "Mission running");
         return BT::NodeStatus::RUNNING;
     } else if (mission_status_ == -1) {
         RCLCPP_INFO(node_->get_logger(), "Mission failed");
         setOutput<int>("mission_status", mission_status_);
+        ready_finish_ = false;
         subscription_.reset();
         return BT::NodeStatus::FAILURE;
     } else {
@@ -276,8 +278,10 @@ BT::NodeStatus FirmwareMission::stopStep() {
 void FirmwareMission::mission_callback(const std_msgs::msg::Int32::SharedPtr sub_msg) {
     if (mission_type_)
     {
+        if (sub_msg->data == 0)
+            ready_finish_ = true;
         mission_status_ = sub_msg->data;
-        RCLCPP_INFO(node_->get_logger(), "mission type: '%d', heard: '%d'", mission_type_, mission_status_);
+        RCLCPP_INFO(node_->get_logger(), "ready_finish_: %d, mission type: '%d', heard: '%d'", ready_finish_, mission_type_, mission_status_);
     }
 }
 
@@ -291,14 +295,15 @@ BT::NodeStatus FirmwareMission::onStart() {
 
 BT::NodeStatus FirmwareMission::onRunning() {
     pub_msg.data = mission_type_;
-    BT::NodeStatus nodeStatus_ = stopStep();
-    if (mission_status_ == 0) {
+    // BT::NodeStatus nodeStatus_ = stopStep();
+    // if (nodeStatus_ == BT::NodeStatus::RUNNING) {
         publisher_->publish(pub_msg);
         RCLCPP_INFO(node_->get_logger(), "mission_progress: %d", mission_progress_);
         RCLCPP_INFO(node_->get_logger(), "mission_type: %d", mission_type_);
-    }
-    return nodeStatus_;
-    // return stopStep();
+        rate_.sleep();
+    // }
+    // return nodeStatus_;
+    return stopStep();
     // **failure test**
     // if (mission_progress_ != 5)
     //    blackboard_->set<int>("mission_progress", ++mission_progress_);
