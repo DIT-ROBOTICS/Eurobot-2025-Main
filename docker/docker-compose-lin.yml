@@ -1,5 +1,3 @@
-version: '3'
-
 services:
   main-ws:
     build:
@@ -29,10 +27,10 @@ services:
       - /d/.Xauthority:/root/.Xauthority
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
       # Direct Rendering Infrastructure
-      - /dev:/dev
+    #   - /dev:/dev
       - ../:/home/user/Eurobot-2025-Main-ws
-    ports:
-      - "8765:8765"
+    # ports:
+    #   - "8765:8765"
 
     command: /bin/bash
     # command: >

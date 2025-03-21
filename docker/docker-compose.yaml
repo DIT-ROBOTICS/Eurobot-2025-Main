@@ -1,0 +1,44 @@
+services:
+  main-ws:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+      target: final
+      args:
+        ROS_DISTRO: ${ROS_DISTRO}
+        USERNAME: ros
+    image: scx/main-ws:${ROS_DISTRO}
+    container_name: main-ws
+    stdin_open: true
+    tty: true
+    privileged: true
+    network_mode: "host"
+    # restart: unless-stopped
+
+    working_dir: /home/ros
+
+    environment:
+      - DISPLAY=${DISPLAY}
+      # - XAUTHORITY=/root/.Xauthority
+      - ROS_WS=/home/ros/Eurobot-2025-Main
+      - GROOT_APPIMAGE=/home/ros/Eurobot-2025-Main/groot/groot.AppImage
+      - ROS_DOMAIN_ID=${ROS_DOMAIN_ID}
+      - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+    
+    volumes:
+      - ./entrypoint.sh:/entrypoint.sh
+      # Mount app resources into container.
+      - ../:/home/ros/Eurobot-2025-Main
+
+      # Mount local timezone into container.
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+      # Mount X11 server
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      # - /d/.Xauthority:/root/.Xauthority
+      
+      # Direct Rendering Infrastructure
+      - /dev:/dev
+
+    entrypoint: ["/bin/bash", "-c", "/entrypoint.sh"]
+    command: ["/bin/bash"]
