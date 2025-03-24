@@ -148,8 +148,6 @@ private:
 
   std_msgs::msg::Int32 pub_msg;
   int mission_progress_ = 0;
-  bool ready_finish_ = false;
-  int error_filter_ = 0;
   int mission_type_ = 0;
   int mission_status_ = 0;
   bool mission_received_ = false;

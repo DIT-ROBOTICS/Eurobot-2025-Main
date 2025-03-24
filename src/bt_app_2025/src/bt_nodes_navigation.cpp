@@ -3,6 +3,7 @@
 // #include "bt_app_2025/bt_nodes_util.h"
 
 using namespace BT;
+// using namespace MATH;
 using namespace std;
 
 template <> inline geometry_msgs::msg::PoseStamped BT::convertFromString(StringView str) {
@@ -336,34 +337,11 @@ BT::NodeStatus StopRobot::tick() {
     return BT::NodeStatus::SUCCESS;
 }
 
-BT::PortsList DynamicAdjustment::providedPorts() {
-    return {
-        BT::InputPort<geometry_msgs::msg::TwistStamped>("robot_pose"),
-        BT::InputPort<geometry_msgs::msg::TwistStamped>("rival_pose")
-        // To Do: 
-    };
-}
-
-BT::NodeStatus DynamicAdjustment::onStart() {
-    // To Do: 
-    return BT::NodeStatus::RUNNING;
-}
-
-BT::NodeStatus DynamicAdjustment::onRunning() {
-    // To Do: 
-    return BT::NodeStatus::SUCCESS;
-}
-
-void DynamicAdjustment::onHalted() {
-    // To Do: 
-    return;
-}
-
 PortsList VisionCheck::providedPorts() {
     return {
         BT::InputPort<int>("base_index"),           // if base index is -1, then plan new goal directly
         BT::InputPort<std::string>("dock_type"),
-        BT::InputPort<std::string>("mission_type"), // front or back
+        BT::InputPort<std::string>("mission_type"), // front grabber or back grabber
         BT::InputPort<double>("offset"),
         BT::InputPort<double>("shift"),
         BT::OutputPort<geometry_msgs::msg::PoseStamped>("remap_base"),
@@ -375,26 +353,52 @@ PortsList VisionCheck::providedPorts() {
 
 int VisionCheck::findBestTarget() {
     double robotVelocity_, rivalVelocity;
-    double robotMaterialDist, rivalMaterialDist;
     geometry_msgs::msg::PoseStamped rivalGoal;
+    geometry_msgs::msg::Pose targetMaterialPose_;
+    double safestDeltaDist_ = 5;
+    int deltaDist_, safestPointIndex_, minDistIndex_;
+    bool team_;
+    blackboard_->get<bool>("team", team_);        // get team color
 
     LocReceiver::UpdateRobotPose(robot_pose_, tf_buffer_, frame_id_);
     LocReceiver::UpdateRivalPose(rival_pose_, tf_buffer_, frame_id_);
-    for (int i = 0; i < 10; i++)
-        if (materials_info_.poses[i].position.z != -1)
-            canditate_.push_back(i);
-    for (int i = 0; i < canditate_.size(); i++) {
-        if (calculateDistance(materials_info_.poses[canditate_.front()], rival_pose_.pose) >= calculateDistance(materials_info_.poses[canditate_.front()], robot_pose_.pose))
-            canditate_.push_back(canditate_.front());
-        canditate_.pop_front();
+    for (int i = 1; i < 9; i++)                  // delete empty materials point
+        if (materials_info_.data[i])
+            candidate_.push_back(i);
+    if (team_ && materials_info_.data[0])       // if it's blue team, then detect if the first point is empty
+        candidate_.push_back(0);
+    else if (!team_ && materials_info_.data[9]) // if it's yellow team, then detect if the last point is empty
+        candidate_.push_back(9);
+    if (candidate_.empty()) {
+        RCLCPP_INFO_STREAM(node_->get_logger(), "No material point detected");
+        return -1;
     }
-    int min_index = canditate_.front();
-    while (!canditate_.empty()) {
-        canditate_.pop_front();
-        if (min_index > canditate_.front())
-            min_index = canditate_.front();
-    }
-    return min_index;
+    
+    safestPointIndex_ = candidate_.front();
+    minDistIndex_ = candidate_.front();
+    do {                                         // delete materials point that is too close to rival
+        targetMaterialPose_.position.x = material_points_[candidate_.front() * 4];
+        targetMaterialPose_.position.y = material_points_[candidate_.front() * 4 + 1];
+        deltaDist_ = calculateDistance(targetMaterialPose_, rival_pose_.pose) - calculateDistance(targetMaterialPose_, robot_pose_.pose);
+        if (safestDeltaDist_ < deltaDist_) {     // iterate to find the safest material point
+            safestDeltaDist_ = deltaDist_;
+            safestPointIndex_ = candidate_.front();
+        }
+        if (deltaDist_ >= 0 || deltaDist_ == safestDeltaDist_) {         // iterate to find the closest material point
+            targetMaterialPose_.position.x = material_points_[minDistIndex_ * 4];
+            targetMaterialPose_.position.y = material_points_[minDistIndex_ * 4 + 1];
+            if (calculateDistance(targetMaterialPose_, robot_pose_.pose) > calculateDistance(targetMaterialPose_, robot_pose_.pose)) {
+                minDistIndex_ = candidate_.front();
+            }
+            // candidate_.push_back(candidate_.front());
+        }
+        candidate_.pop_front();
+    } while (!candidate_.empty());
+    int min_index = candidate_.front();
+    if (last_mission_failed_)
+        return safestPointIndex_;
+    else
+        return minDistIndex_;
 }
 
 NodeStatus VisionCheck::tick() {
@@ -404,25 +408,31 @@ NodeStatus VisionCheck::tick() {
     std::string missionType_ = getInput<std::string>("mission_type").value();
     double offset_ = getInput<double>("offset").value();
     double shift_ = getInput<double>("shift").value();
-    std::vector<double> materialPoints_;
-    std::vector<double> missionPoints_;
-    // get parameters
-    node_->get_parameter("material_points", materialPoints_);
-    node_->get_parameter("mission_points", missionPoints_);
 
-    // use vision message to check the target
-    blackboard_->get<geometry_msgs::msg::PoseArray>("materials_info", materials_info_);
+    // get parameters
+    node_->get_parameter("material_points", material_points_);
+    node_->get_parameter("mission_points", mission_points_);
+
+    blackboard_->get<std_msgs::msg::Int32MultiArray>("materials_info", materials_info_);  // use vision message to check the target
+    blackboard_->get<bool>("last_mission_failed", last_mission_failed_);                  // see if last mission failed
     
     // If the target is not ok
     // use vision message to find the best new target `i` (new base)
-    if (materials_info_.poses[baseIndex_].position.z == -1 || baseIndex_ == -1) {
+    if (materials_info_.data[baseIndex_] == 0 || baseIndex_ == -1) {
         baseIndex_ = findBestTarget();
+        /**********************************************************/
+        /* Notice!! this part need to be consider again carefully */
+        /* Return fail directly is very dangerous!                */
+        /**********************************************************/
+        if (baseIndex_ == -1) { 
+            return NodeStatus::FAILURE;
+        }
     }
     // get base & offset from map_points[i]
-    base_.pose.position.x = materialPoints_[baseIndex_ * 4];
-    base_.pose.position.y = materialPoints_[baseIndex_ * 4 + 1];
-    base_.pose.position.z = materialPoints_[baseIndex_ * 4 + 2];
-    offset_ = materialPoints_[baseIndex_ * 4 + 3];
+    base_.pose.position.x = material_points_[baseIndex_ * 4];
+    base_.pose.position.y = material_points_[baseIndex_ * 4 + 1];
+    base_.pose.position.z = material_points_[baseIndex_ * 4 + 2];
+    offset_ = material_points_[baseIndex_ * 4 + 3];
 
     // derive the position.z & offset & shift according to mission_type & map_points[i]
     if (missionType_ == "front") {

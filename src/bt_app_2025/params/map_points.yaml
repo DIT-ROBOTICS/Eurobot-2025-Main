@@ -1,4 +1,4 @@
-bt_app_2025:
+/**:
   ros__parameters:
   # reprecent `x position`, `y position`, `initial facing direction`, `offset dist` in order
     material_points: [

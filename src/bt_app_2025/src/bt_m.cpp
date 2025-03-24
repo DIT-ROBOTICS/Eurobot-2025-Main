@@ -98,6 +98,8 @@ int main(int argc, char** argv) {
     blackboard->set<int>("front_materials", 0);
     blackboard->set<int>("back_materials", 0);
     blackboard->set<int>("mission_progress", 0);
+    blackboard->set<bool>("last_mission_failed", false);
+    blackboard->set<bool>("team", false);
     // Subscriber
     auto time_sub = node->create_subscription<std_msgs::msg::Float32>("/robot/startup/time", 2, timeCallback);
     auto sub = node->create_subscription<geometry_msgs::msg::PointStamped>("/robot/startup/ready_signal", 2, readyCallback);
@@ -167,7 +169,6 @@ int main(int argc, char** argv) {
     /* navigation */
     factory.registerNodeType<StopRobot>("StopRobot", node);
     factory.registerNodeType<VisionCheck>("VisionCheck", node, blackboard);
-    factory.registerNodeType<DynamicAdjustment>("DynamicAdjustment");
     params.default_port_value = "navigate_to_pose";
     factory.registerNodeType<Navigation>("Navigation", params);
     factory.registerNodeType<Rotation>("Rotation", params);
@@ -252,7 +253,7 @@ int main(int argc, char** argv) {
     BT::NodeStatus status = BT::NodeStatus::RUNNING;
     RCLCPP_INFO(node->get_logger(), "[BT Application]: Behavior Tree start running!");
     // executor.add_node(node);
-    while (rclcpp::ok() && status == BT::NodeStatus::RUNNING /* && game_time <= 95 */) {
+    while (rclcpp::ok() && status == BT::NodeStatus::RUNNING) {
         // executor.spin_some();
         rclcpp::spin_some(node);
         rate.sleep();

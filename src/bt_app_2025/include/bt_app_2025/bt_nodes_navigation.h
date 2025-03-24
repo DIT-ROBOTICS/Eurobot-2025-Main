@@ -22,9 +22,8 @@
 #include "std_srvs/srv/set_bool.hpp"
 #include "std_msgs/msg/float32.hpp"
 #include "std_msgs/msg/bool.hpp"
-#include "geometry_msgs/msg/twist_stamped.hpp"
+#include "std_msgs/msg/int32_multi_array.hpp"
 #include "geometry_msgs/msg/pose_stamped.hpp"
-#include "geometry_msgs/msg/pose_array.hpp"
 #include "geometry_msgs/msg/pose.hpp"
 
 // tf2 
@@ -43,6 +42,7 @@
 #define PI 3.1415926
 
 using namespace BT;
+// using namespace MATH;
 
 namespace BT {
     template <> inline geometry_msgs::msg::PoseStamped convertFromString(StringView str);
@@ -160,36 +160,6 @@ private:
     std_msgs::msg::Bool stop_msg;
 };
 
-class DynamicAdjustment : public BT::StatefulActionNode
-{
-public:
-    DynamicAdjustment(const std::string& name, const BT::NodeConfig& config)
-        : BT::StatefulActionNode(name, config)
-    {}
-
-    /* Node remapping function */
-    static BT::PortsList providedPorts();
-
-    /* Start and running function */
-    BT::NodeStatus onStart() override;
-    BT::NodeStatus onRunning() override;
-
-    /* Halt function */
-    void onHalted() override;
-
-private:
-    geometry_msgs::msg::PoseStamped robot_pose_;
-    geometry_msgs::msg::PoseStamped rival_pose_;
-    geometry_msgs::msg::PoseStamped rival_predict_goal_;
-    std::deque<int> stage_info_;
-    geometry_msgs::msg::PoseArray materials_info_;
-    std::deque<geometry_msgs::msg::PoseStamped> garbage_points_;
-
-    std::deque<geometry_msgs::msg::PoseStamped> goal_canditate_;
-
-    geometry_msgs::msg::PoseStamped goal_;
-};
-
 class VisionCheck : public BT::DecoratorNode
 {
 public:
@@ -210,8 +180,11 @@ private:
     geometry_msgs::msg::PoseStamped robot_pose_;
     geometry_msgs::msg::PoseStamped rival_pose_;
     // for input
-    geometry_msgs::msg::PoseArray materials_info_;
+    std_msgs::msg::Int32MultiArray materials_info_;
     geometry_msgs::msg::PoseStamped base_;
+    std::vector<double> material_points_;
+    std::vector<double> mission_points_;
     // for vision
-    std::deque<int> canditate_;
+    std::deque<int> candidate_;
+    bool last_mission_failed_;
 };
