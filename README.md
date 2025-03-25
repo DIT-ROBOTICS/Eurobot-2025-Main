@@ -12,6 +12,8 @@
 - Already have image
     - If Windows: `$ docker compose -f docker-compose-win.yml up`
     - If Linux: `$ docker compose -f docker-compose-lin.yml up`
+- On the robot
+    - `$ docker compose up`
 - `$ docker start main-ws`
 ### Open Work Space
 - Attach Visual Studio Code
