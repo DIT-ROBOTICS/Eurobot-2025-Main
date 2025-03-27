@@ -45,8 +45,8 @@ using namespace BT;
 class LocReceiver
 {
 public:
-  LocReceiver(std::shared_ptr<rclcpp::Node> node)
-    : node_(node), tf_buffer_(node_->get_clock()), listener_(tf_buffer_)
+  LocReceiver(const RosNodeParams& params)
+    : node_(params.nh.lock()), tf_buffer_(node_->get_clock()), listener_(tf_buffer_)
   {
     node_->get_parameter("frame_id", frame_id_);
   }
@@ -69,8 +69,8 @@ private:
 class NavReceiver : public BT::SyncActionNode
 {
 public:
-  NavReceiver(const std::string& name, const BT::NodeConfig& config, std::shared_ptr<rclcpp::Node> node, BT::Blackboard::Ptr blackboard)
-    : BT::SyncActionNode(name, config), node_(node), blackboard_(blackboard)
+  NavReceiver(const std::string& name, const BT::NodeConfig& config, const RosNodeParams& params, BT::Blackboard::Ptr blackboard)
+    : BT::SyncActionNode(name, config), node_(params.nh.lock()), blackboard_(blackboard)
   {}
 
   /* Node remapping function */
@@ -98,8 +98,8 @@ private:
 class CamReceiver : public BT::SyncActionNode
 {
 public:
-  CamReceiver(const std::string& name, const BT::NodeConfig& config, std::shared_ptr<rclcpp::Node> node, BT::Blackboard::Ptr blackboard)
-    : BT::SyncActionNode(name, config), node_(node), blackboard_(blackboard)
+  CamReceiver(const std::string& name, const BT::NodeConfig& config, const RosNodeParams& params, BT::Blackboard::Ptr blackboard)
+    : BT::SyncActionNode(name, config), node_(params.nh.lock()), blackboard_(blackboard)
   {}
 
   /* Node remapping function */

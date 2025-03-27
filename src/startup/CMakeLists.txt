@@ -31,6 +31,7 @@ ament_target_dependencies(startup
   "rclcpp"
   "geometry_msgs"
   "nav_msgs"
+  "std_msgs"
   "tf2"
   "tf2_ros"
   "btcpp_ros2_interfaces"
@@ -40,6 +41,25 @@ target_link_libraries(startup
 )
 install(TARGETS
   startup
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+add_executable(startup_new src/startup_new.cpp)
+ament_target_dependencies(startup_new
+  ${THIS_PACKAGE_DEPS}
+  "rclcpp"
+  "geometry_msgs"
+  "nav_msgs"
+  "std_msgs"
+  "tf2"
+  "tf2_ros"
+  "btcpp_ros2_interfaces"
+  "jsoncpp"
+)
+target_link_libraries(startup_new
+)
+install(TARGETS
+  startup_new
   DESTINATION lib/${PROJECT_NAME}
 )
 

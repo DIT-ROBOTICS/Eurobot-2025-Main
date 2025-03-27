@@ -146,8 +146,8 @@ private:
 class StopRobot : public BT::SyncActionNode
 {
 public:
-    StopRobot(const std::string& name, const BT::NodeConfig& config, std::shared_ptr<rclcpp::Node> node)
-    : BT::SyncActionNode(name, config), node_(node)
+    StopRobot(const std::string& name, const BT::NodeConfig& config, const RosNodeParams& params)
+    : BT::SyncActionNode(name, config), node_(params.nh.lock())
     {
         publisher_ = node_->create_publisher<std_msgs::msg::Bool>("/stopRobot", rclcpp::QoS(10).reliable().transient_local());
     }
@@ -163,8 +163,8 @@ private:
 class VisionCheck : public BT::DecoratorNode
 {
 public:
-    VisionCheck(const std::string &name, const BT::NodeConfig &config, std::shared_ptr<rclcpp::Node> node, BT::Blackboard::Ptr blackboard)
-        : BT::DecoratorNode(name, config), node_(node), blackboard_(blackboard), tf_buffer_(node_->get_clock())
+    VisionCheck(const std::string &name, const BT::NodeConfig &config, const RosNodeParams& params, BT::Blackboard::Ptr blackboard)
+        : BT::DecoratorNode(name, config), node_(params.nh.lock()), blackboard_(blackboard), tf_buffer_(params.nh.lock()->get_clock())
     {
         node_->get_parameter("frame_id", frame_id_);
     }
