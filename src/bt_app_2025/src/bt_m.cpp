@@ -68,6 +68,7 @@ public:
         blackboard->set<double>("current_time", 0);
         blackboard->set<int>("front_materials", 0);
         blackboard->set<int>("back_materials", 0);
+        blackboard->set<std::vector<int>>("mission_points_status", std::vector<int>{0, 0, 0, 0, 0, 0, 0, 0});
         blackboard->set<int>("mission_progress", 0);
         blackboard->set<bool>("last_mission_failed", false);
         blackboard->set<bool>("team", false);
@@ -231,10 +232,14 @@ void MainClass::readyCallback(const std_msgs::msg::String::SharedPtr msg) {
         return;
     }
     RCLCPP_INFO_STREAM(this->get_logger(), "in the callback: " << msg->data);
-    team = msg->data.back();
-    msg->data.pop_back();
-    groot_filename = msg->data;
-    isReady = true;
+    team = msg->data.back();  // get team color
+    if (team == '0')
+        blackboard->set<bool>("team", false); // team color is yellow
+    else
+        blackboard->set<bool>("team", true); // team color is blue
+    msg->data.pop_back();   // delete the last char of string
+    groot_filename = msg->data;  // the remain string is the plan xml file name
+    isReady = true;   // set as received ready message
 }
 
 int main(int argc, char **argv) {

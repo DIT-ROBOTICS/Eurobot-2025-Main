@@ -460,3 +460,56 @@ NodeStatus VisionCheck::tick() {
     BT::NodeStatus child_status = child_node_->executeTick();
     return child_status;
 }
+
+PortsList MissionNearRival::providedPorts() {
+    return {
+        BT::InputPort<int>("base_index"),
+        BT::InputPort<std::string>("mission_type"), // front grabber or back grabber
+        BT::OutputPort<geometry_msgs::msg::PoseStamped>("remap_base"),
+    };
+}
+
+NodeStatus MissionNearRival::tick() {
+    // get input
+    int baseIndex_ = getInput<double>("base_index").value();
+    std::string missionType_ = getInput<std::string>("mission_type").value();
+    double dist = 0;
+    double offset = 0;
+
+    // get parameters
+    node_->get_parameter("material_points", material_points_);
+    blackboard_->get<std::vector<int>>("mission_points_status", mission_points_status_);
+    
+    // get base & offset from map_points[i]
+    base_.pose.position.x = material_points_[baseIndex_ * 4];
+    base_.pose.position.y = material_points_[baseIndex_ * 4 + 1];
+    base_.pose.position.z = material_points_[baseIndex_ * 4 + 2];
+    offset = material_points_[baseIndex_ * 4 + 3];
+
+    LocReceiver::UpdateRivalPose(rival_pose_, tf_buffer_, frame_id_);
+    dist = calculateDistance(base_.pose, rival_pose_.pose);
+
+    if (missionType_ == "back") {
+        base_.pose.position.z = ((int)base_.pose.position.z / 2) ? base_.pose.position.z - 2 : base_.pose.position.z + 2;
+    }
+    if (base_.pose.position.z == 1.0 || base_.pose.position.z == 3.0) {
+        if (mission_points_status_[baseIndex_] > 0)
+            base_.pose.position.y -= offset * 1.3;
+        if (dist < 0.3 && (base_.pose.position.x - rival_pose_.pose.position.x)) {
+            base_.pose.position.x += (base_.pose.position.x - rival_pose_.pose.position.x)/abs(base_.pose.position.x - rival_pose_.pose.position.x)*(0.3 - abs(base_.pose.position.x - rival_pose_.pose.position.x));
+        }
+    } else {
+        if (mission_points_status_[baseIndex_] > 0)
+            base_.pose.position.x -= offset * 1.3;
+        if (dist < 0.3 && (base_.pose.position.y - rival_pose_.pose.position.y)) {
+            base_.pose.position.y += (base_.pose.position.y - rival_pose_.pose.position.y)/abs(base_.pose.position.y - rival_pose_.pose.position.y)*(0.3 - abs(base_.pose.position.y - rival_pose_.pose.position.y));
+        }
+    }
+
+    // set output port
+    setOutput<geometry_msgs::msg::PoseStamped>("remap_base", base_);
+
+    // Run the child node
+    BT::NodeStatus child_status = child_node_->executeTick();
+    return child_status;
+}

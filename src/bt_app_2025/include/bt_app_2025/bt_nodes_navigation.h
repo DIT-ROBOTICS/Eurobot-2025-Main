@@ -188,3 +188,28 @@ private:
     std::deque<int> candidate_;
     bool last_mission_failed_;
 };
+
+class MissionNearRival : public BT::DecoratorNode
+{
+public:
+    MissionNearRival(const std::string &name, const BT::NodeConfig &config, const RosNodeParams& params, BT::Blackboard::Ptr blackboard)
+        : BT::DecoratorNode(name, config), node_(params.nh.lock()), blackboard_(blackboard), tf_buffer_(params.nh.lock()->get_clock())
+    {
+        node_->get_parameter("frame_id", frame_id_);
+    }
+    static BT::PortsList providedPorts();
+    BT::NodeStatus tick() override;
+private:
+    BT::Blackboard::Ptr blackboard_;
+    rclcpp::Node::SharedPtr node_;
+    // for tf listener
+    tf2_ros::Buffer tf_buffer_;
+    std::string frame_id_;
+    geometry_msgs::msg::PoseStamped robot_pose_;
+    geometry_msgs::msg::PoseStamped rival_pose_;
+    // for input
+    std_msgs::msg::Int32MultiArray materials_info_;
+    std::vector<int> mission_points_status_;
+    geometry_msgs::msg::PoseStamped base_;
+    std::vector<double> material_points_;
+};
