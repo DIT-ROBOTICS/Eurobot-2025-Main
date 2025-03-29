@@ -3,13 +3,29 @@
   <BehaviorTree ID="BannerMission">
     <Sequence>
       <Fallback>
-        <Docking final_pose="{PrevGoal}"
-                 isPureDocking="0"
-                 dock_type="mission_dock_y"
-                 shift=""
-                 offset="-0.1"
-                 base="2.25, 0.4, 2"
-                 _description="go to place the banner"/>
+        <Switch2 case_1="1"
+                 case_2="2"
+                 variable="{BANNER_PLACE}">
+          <Docking final_pose="{PrevGoal}"
+                   isPureDocking="0"
+                   dock_type="mission_dock_y"
+                   shift=""
+                   offset="-0.1"
+                   base="0.25, 0.4, 2"/>
+          <Docking final_pose="{PrevGoal}"
+                   isPureDocking="0"
+                   dock_type="mission_dock_y"
+                   shift=""
+                   offset="-0.1"
+                   base="1.75, 0.4, 2"/>
+          <Docking final_pose="{PrevGoal}"
+                   isPureDocking="0"
+                   dock_type="mission_dock_y"
+                   shift=""
+                   offset="-0.1"
+                   base="2.25, 0.4, 2"
+                   _description="go to place the banner"/>
+        </Switch2>
         <Docking final_pose="{PrevGoal}"
                  isPureDocking="0"
                  dock_type="mission_dock_y"
@@ -23,15 +39,7 @@
                  offset="-0.1"
                  base="0.25, 0.4, 2"/>
       </Fallback>
-      <Fallback>
-        <Sleep msec="4000"/>
-        <Switch2 case_1="1"
-                 case_2="2"
-                 variable="1">
-          <Sleep msec="4000"/>
-          <Sleep msec="4000"/>
-        </Switch2>
-      </Fallback>
+      <Sleep msec="4000"/>
     </Sequence>
   </BehaviorTree>
 
@@ -66,7 +74,7 @@
                isPureDocking="0"
                dock_type="mission_dock_y"
                shift="0"
-               offset="0.1"
+               offset="0"
                base="2.65, 1.6, 3"/>
     </Sequence>
   </BehaviorTree>
@@ -100,7 +108,7 @@
                    remap_shift="{shift}"
                    remap_dock_type="{dock_type}"
                    remap_base="{base}"
-                   shift="0"
+                   shift="0.045"
                    offset="-0.2"
                    mission_type="front"
                    dock_type="mission_dock_x"
@@ -112,36 +120,45 @@
                  offset="{offset}"
                  base="{base}"/>
       </VisionCheck>
-      <SubTree ID="TwoLevelsBot1new"
-               _autoremap="true"/>
-      <Docking final_pose="{PrevGoal}"
-               isPureDocking="1"
-               dock_type="{DOCK_DIR}"
-               shift="0"
-               offset="{FORWARD_S}"
-               base="{PrevGoal}"
-               _description="forward to take 2 levels"/>
-      <ForceSuccess>
-        <Timeout msec="6000">
-          <FirmwareMission mission_status="{x}"
-                           mission_type="11"
-                           _description="front take 2 levels"/>
-        </Timeout>
-      </ForceSuccess>
+      <Sequence>
+        <SubTree ID="TwoLevelsBot1new"
+                 BACK_L="0.2"
+                 BACK_M="0.1"
+                 BACK_S="0.05"
+                 DOCK_DIR="mission_dock_x"
+                 FORWARD_L="-0.15"
+                 FORWARD_M="-0.09"
+                 FORWARD_S="-0.065"
+                 _autoremap="true"/>
+        <Docking final_pose="{PrevGoal}"
+                 isPureDocking="1"
+                 dock_type="{DOCK_DIR}"
+                 shift="0"
+                 offset="{FORWARD_S}"
+                 base="{PrevGoal}"
+                 _description="forward to take 2 levels"/>
+        <ForceSuccess>
+          <Timeout msec="6000">
+            <FirmwareMission mission_status="{x}"
+                             mission_type="11"
+                             _description="front take 2 levels"/>
+          </Timeout>
+        </ForceSuccess>
+      </Sequence>
       <Docking final_pose="{PrevGoal}"
                isPureDocking="0"
                dock_type="mission_dock_x"
                shift="0"
                offset="-0.1"
-               base="0.4, 0.9, 2"/>
-      <SubTree ID="3levelmissionTest"
-               BACK_L="-0.2"
-               BACK_M="-0.10"
-               BACK_S="-0.05"
+               base="0.35, 0.9, 2"/>
+      <SubTree ID="ThreeLevelsBot1new"
+               BACK_L="0.2"
+               BACK_M="0.1"
+               BACK_S="0.05"
                DOCK_DIR="mission_dock_x"
-               FORWARD_L="0.15"
-               FORWARD_M="0.09"
-               FORWARD_S="0.065"
+               FORWARD_L="-0.15"
+               FORWARD_M="-0.09"
+               FORWARD_S="-0.065"
                _autoremap="true"/>
     </Sequence>
   </BehaviorTree>
@@ -156,7 +173,7 @@
                    offset="-0.2"
                    mission_type="back"
                    dock_type="mission_dock_y"
-                   base_index="4">
+                   base_index="5">
         <Docking final_pose="{PrevGoal}"
                  isPureDocking="0"
                  dock_type="{dock_type}"
@@ -171,13 +188,57 @@
                            _description="take the raw material"/>
         </Timeout>
       </ForceSuccess>
+      <SubTree ID="BannerMission"
+               BANNER_PLACE="1"
+               _autoremap="true"/>
+      <VisionCheck remap_offset="{offset}"
+                   remap_shift="{shift}"
+                   remap_dock_type="{dock_type}"
+                   remap_base="{base}"
+                   shift="0"
+                   offset="-0.2"
+                   mission_type="front"
+                   dock_type="mission_dock_y"
+                   base_index="4">
+        <Docking final_pose="{PrevGoal}"
+                 isPureDocking="0"
+                 dock_type="{dock_type}"
+                 shift="{shift}"
+                 offset="{offset}"
+                 base="{base}"/>
+      </VisionCheck>
+      <Sequence>
+        <SubTree ID="TwoLevelsBot1new"
+                 BACK_L="0.2"
+                 BACK_M="0.1"
+                 BACK_S="0.05"
+                 DOCK_DIR="mission_dock_y"
+                 FORWARD_L="-0.15"
+                 FORWARD_M="-0.09"
+                 FORWARD_S="-0.065"
+                 _autoremap="true"/>
+        <Docking final_pose="{PrevGoal}"
+                 isPureDocking="1"
+                 dock_type="{DOCK_DIR}"
+                 shift="0"
+                 offset="{FORWARD_S}"
+                 base="{PrevGoal}"
+                 _description="forward to take 2 levels"/>
+        <ForceSuccess>
+          <Timeout msec="6000">
+            <FirmwareMission mission_status="{x}"
+                             mission_type="11"
+                             _description="front take 2 levels"/>
+          </Timeout>
+        </ForceSuccess>
+      </Sequence>
       <Docking final_pose="{PrevGoal}"
                isPureDocking="0"
                dock_type="mission_dock_y"
                shift="0"
                offset="-0.1"
                base="2.2, 0.35, 1"/>
-      <SubTree ID="TwoLevelsBot1"
+      <SubTree ID="ThreeLevelsBot1new"
                BACK_L="0.2"
                BACK_M="0.1"
                BACK_S="0.05"
@@ -195,9 +256,9 @@
                    remap_shift="{shift}"
                    remap_dock_type="{dock_type}"
                    remap_base="{base}"
-                   shift="0"
+                   shift="0.045"
                    offset="0.2"
-                   mission_type="back"
+                   mission_type="front"
                    dock_type="mission_dock_y"
                    base_index="6">
         <Docking final_pose="{PrevGoal}"
@@ -207,45 +268,40 @@
                  offset="{offset}"
                  base="{base}"/>
       </VisionCheck>
-      <ForceSuccess>
-        <Timeout msec="6000">
-          <FirmwareMission mission_status="{x}"
-                           mission_type="21"
-                           _description="take the raw material"/>
-        </Timeout>
-      </ForceSuccess>
-      <VisionCheck remap_offset="{offset}"
-                   remap_shift="{shift}"
-                   remap_dock_type="{dock_type}"
-                   remap_base="{base}"
-                   shift="0"
-                   offset="-0.2"
-                   mission_type="front"
-                   dock_type="mission_dock_y"
-                   base_index="5">
+      <Sequence>
+        <SubTree ID="TwoLevelsBot1new"
+                 BACK_L="-0.2"
+                 BACK_M="-0.1"
+                 BACK_S="-0.05"
+                 DOCK_DIR="mission_dock_y"
+                 FORWARD_L="0.15"
+                 FORWARD_M="0.09"
+                 FORWARD_S="0.065"
+                 _autoremap="true"/>
         <Docking final_pose="{PrevGoal}"
-                 isPureDocking="0"
-                 dock_type="{dock_type}"
-                 shift="{shift}"
-                 offset="{offset}"
-                 base="{base}"/>
-      </VisionCheck>
-      <ForceSuccess>
-        <Timeout msec="6000">
-          <FirmwareMission mission_status="{x}"
-                           mission_type="11"
-                           _description="take the raw material"/>
-        </Timeout>
-      </ForceSuccess>
+                 isPureDocking="1"
+                 dock_type="{DOCK_DIR}"
+                 shift="0"
+                 offset="{FORWARD_S}"
+                 base="{PrevGoal}"
+                 _description="forward to take 2 levels"/>
+        <ForceSuccess>
+          <Timeout msec="6000">
+            <FirmwareMission mission_status="{x}"
+                             mission_type="11"
+                             _description="front take 2 levels"/>
+          </Timeout>
+        </ForceSuccess>
+      </Sequence>
       <Docking final_pose="{PrevGoal}"
                isPureDocking="0"
                dock_type="mission_dock_x"
-               shift=""
+               shift="0"
                offset="-0.1"
                base="1.75, 0.5, 3"/>
-      <SubTree ID="3levelmissionTest"
+      <SubTree ID="ThreeLevelsBot1new"
                BACK_L="0.2"
-               BACK_M="0.10"
+               BACK_M="0.1"
                BACK_S="0.05"
                DOCK_DIR="mission_dock_y"
                FORWARD_L="-0.15"
