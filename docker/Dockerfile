@@ -25,7 +25,7 @@ FROM base AS user-setup
 RUN groupadd --gid $USER_GID $USERNAME \
     && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME \
     && apt-get update \
-    && apt-get install -y sudo \
+    && apt-get install -y sudo gosu \
     && echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME \
     && chmod 0440 /etc/sudoers.d/$USERNAME \
     && rm -rf /var/lib/apt/lists/*
@@ -58,9 +58,9 @@ RUN apt-get update && apt-get install -y \
     ros-humble-rqt-plot \
     ros-humble-rqt-tf-tree \
     ros-humble-nav2-msgs \
+    ros-humble-nav2-util \
     # Groot
-    libfuse2 \
-    fuse3 \
+    libfuse2 fuse3 \
     ros-humble-behaviortree-cpp \
     ros-humble-generate-parameter-library
 
@@ -81,15 +81,21 @@ FROM tools AS final
 ENV TZ=Asia/Taipei
 ENV SHELL=/bin/bash
 ENV TERM=xterm-256color
-USER $USERNAME
-WORKDIR /esp_daemon
+
+USER root
+WORKDIR /home/$USERNAME
 
 # Set up bashrc
-COPY .bashrc /home/$USERNAME/.bashrc.conf
-RUN cat /home/$USERNAME/.bashrc.conf >> /home/$USERNAME/.bashrc
+COPY .bashrc .bashrc.conf
+RUN cat .bashrc.conf >> .bashrc && rm .bashrc.conf
 
 # Set up python environment
 # RUN pip install --upgrade pip
 # RUN pip install --no-cache-dir
 
+# Set up the entrypoint
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+ENTRYPOINT ["/entrypoint.sh"]
+# Set up the default command
 CMD ["/bin/bash"]

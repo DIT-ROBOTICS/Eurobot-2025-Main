@@ -117,8 +117,8 @@ int main(int argc, char** argv) {
     std::string tree_name;
 
     // Read parameters
-    node->declare_parameter<std::string>("groot_xml_config_directory", "/home/user/Eurobot-2025-Main-ws/src/bt_app_2025/bt_m_config/");
-    node->declare_parameter<std::string>("tree_node_model_config_file", "/home/user/Eurobot-2025-Main-ws/src/bt_app_2025/bt_m_config/bt_m_tree_node_model.xml");
+    node->declare_parameter<std::string>("groot_xml_config_directory", "/home/ros/Eurobot-2025-Main/src/bt_app_2025/bt_m_config/");
+    node->declare_parameter<std::string>("tree_node_model_config_file", "/home/ros/Eurobot-2025-Main/src/bt_app_2025/bt_m_config/bt_m_tree_node_model.xml");
     node->declare_parameter<std::string>("tree_name", "FuncTest");
     node->declare_parameter<std::string>("planA_Yellow_config", "bt_plan_a_Yellow.xml");
     node->declare_parameter<std::string>("planB_Yellow_config", "bt_plan_b_Yellow.xml");
