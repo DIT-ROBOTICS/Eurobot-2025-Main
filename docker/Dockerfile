@@ -59,8 +59,7 @@ RUN apt-get update && apt-get install -y \
     ros-humble-rqt-tf-tree \
     ros-humble-nav2-msgs \
     # Groot
-    libfuse2 \
-    fuse3 \
+    libfuse2 fuse3 \
     ros-humble-behaviortree-cpp \
     ros-humble-generate-parameter-library
 
@@ -87,8 +86,7 @@ WORKDIR /home/$USERNAME
 
 # Set up bashrc
 COPY .bashrc .bashrc.conf
-RUN cat .bashrc.conf >> .bashrc \
-    && rm .bashrc.conf
+RUN cat .bashrc.conf >> .bashrc && rm .bashrc.conf
 
 # Set up python environment
 # RUN pip install --upgrade pip
