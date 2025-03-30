@@ -4,6 +4,14 @@ USER_ID=${LOCAL_USER_ID:-1000}
 GROUP_ID=${LOCAL_GROUP_ID:-1000}
 USERNAME=ros
 
+# Update ros user's UID and GID to match external user
+if [ "$(id -u $USERNAME)" != "$USER_ID" ] || [ "$(id -g $USERNAME)" != "$GROUP_ID" ]; then
+    echo "Updating $USERNAME UID and GID to match external user..."
+    usermod -u $USER_ID $USERNAME
+    groupmod -g $GROUP_ID $USERNAME
+    chown -R $USERNAME:$USERNAME /home/$USERNAME
+fi
+
 # Enter the ROS workspace
 cd $ROS_WS
 

@@ -20,8 +20,8 @@ services:
     environment:
       - AUTO_BUILD=${AUTO_BUILD}
       - AUTO_RUN=${AUTO_RUN}
-      - LOCAL_USER_ID=UID
-      - LOCAL_GROUP_ID=GID
+      - LOCAL_USER_ID=${LOCAL_USER_ID}
+      - LOCAL_GROUP_ID=${LOCAL_GROUP_ID}
       - DISPLAY=${DISPLAY}
       # - XAUTHORITY=/root/.Xauthority
       - ROS_WS=/home/ros/Eurobot-2025-Main
