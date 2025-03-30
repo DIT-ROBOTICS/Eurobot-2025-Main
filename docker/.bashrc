@@ -3,9 +3,6 @@
 # ==== Description: ROS environment setup ===== #
 # =================== BEGIN =================== #
 
-# TO-DO: Update your workspace directory
-ROS_WS=/home/ros/Eurobot-2025-Main
-
 source_ros_environment() {
     if [ "$ROS_DISTRO" = "humble" ]; then
         # Custom Alias

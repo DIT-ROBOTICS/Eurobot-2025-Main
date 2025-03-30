@@ -1,10 +1,10 @@
-#!/bin/bash
+#!/bin/bash -e
 
-# Set the ROS workspace
-if [ -z "$ROS_WS" ]; then
-    echo "ROS_WS is not set. Setting to default"
-    ROS_WS=/home/ros/Eurobot-2025-Main
-fi
+USER_ID=${LOCAL_USER_ID:-1000}
+GROUP_ID=${LOCAL_GROUP_ID:-1000}
+USERNAME=ros
+
+# Enter the ROS workspace
 cd $ROS_WS
 
 # Install micro-ROS
@@ -12,14 +12,33 @@ if [ ! -d "$ROS_WS/src/micro_ros" ]; then
     git clone -b humble https://github.com/micro-ROS/micro_ros_setup.git src/micro_ros
 fi
 
+# Source ROS Environment
+if [ -f "$ROS_WS/install/setup.bash" ]; then
+    echo "Sourcing ROS workspace setup..."
+    source "$ROS_WS/install/setup.bash"
+fi
 
-# . /opt/ros/humble/setup.sh && colcon build --symlink-install
+# Auto build workspace
+if [ "${AUTO_BUILD}" = "true" ]; then
+    echo "Running colcon build..."
+    source /opt/ros/humble/setup.bash
+    cd "$ROS_WS"
+    colcon build --symlink-install
+fi
 
-source $ROS_WS/install/setup.bash
-# ros2 run robot_status_monitor robot_status_node
+# Auto run program
+if [ "${AUTO_RUN}" = "true" ]; then
+    echo "Launching main program..."
+    source "$ROS_WS/install/setup.bash"
+    ros2 launch bt_app_2025 bt_launch.py
+    # exit 0
+fi
 
-while true; do
-    sleep 60
-done
-
-exec "$@"
+# If no command is provided, start an idle loop to keep the container alive
+if [ $# -eq 0 ]; then
+    echo "No command provided. Starting idle loop to keep container alive..."
+    while true; do sleep 60; done
+else
+    echo "Executing command as $USERNAME: $@"
+    exec gosu $USERNAME "$@"
+fi

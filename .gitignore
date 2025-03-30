@@ -1,5 +1,18 @@
-.vscode
-/build
-/install
-/log
+# Ignore the vscode directory
+**/.vscode/
+
+# Ignore the build directory
+**/build/
+**/install/
+**/log/
+
+# Ignore python cache files
+**/__pycache__/
+
+# Ignore docker compose env files
+**/.env
+
+# Other pecific files or directories
 *.AppImage
+**/Backups/
+/Project.btproj

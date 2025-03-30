@@ -1,5 +1,5 @@
 services:
-  main-ws:
+  main:
     build: 
       context: .
       dockerfile: Dockerfile
@@ -7,8 +7,8 @@ services:
       args:
         ROS_DISTRO: ${ROS_DISTRO}
         USERNAME: ros
-    image: scx/main-ws:${ROS_DISTRO}
-    container_name: main-ws
+    image: scx/main:${ROS_DISTRO}
+    container_name: main
     stdin_open: true
     tty: true
     privileged: true
@@ -18,6 +18,10 @@ services:
     working_dir: /home/ros
 
     environment:
+      - AUTO_BUILD=${AUTO_BUILD}
+      - AUTO_RUN=${AUTO_RUN}
+      - LOCAL_USER_ID=UID
+      - LOCAL_GROUP_ID=GID
       - DISPLAY=${DISPLAY}
       # - XAUTHORITY=/root/.Xauthority
       - ROS_WS=/home/ros/Eurobot-2025-Main
@@ -26,7 +30,6 @@ services:
       - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
     
     volumes:
-      - ./entrypoint.sh:/entrypoint.sh
       # Mount app resources into container.
       - ../:/home/ros/Eurobot-2025-Main
 
@@ -40,5 +43,7 @@ services:
       # Direct Rendering Infrastructure
       - /dev:/dev
 
-    entrypoint: ["/bin/bash", "-c", "/entrypoint.sh"]
-    command: ["/bin/bash"]
+    stop_grace_period: 1s
+
+    entrypoint: ["/entrypoint.sh"]
+    command: ["${CUSTOM_COMMAND:-/bin/bash}"]
