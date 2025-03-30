@@ -12,8 +12,12 @@
 # Ignore docker compose env files
 **/.env
 
+# Ignore mirco-ROS files
+**/src/mirco_ros/
+**/src/uros/
+**/ros2.repos
+
 # Other pecific files or directories
 *.AppImage
 **/Backups/
 /Project.btproj
-**/ros2.repos
