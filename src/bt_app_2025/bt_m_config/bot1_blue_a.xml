@@ -3,41 +3,41 @@
   <BehaviorTree ID="BannerMission">
     <Sequence>
       <Fallback>
-        <Switch2 case_1="1"
-                 case_2="2"
+        <Switch2 case_1="0"
+                 case_2="1"
                  variable="{BANNER_PLACE}">
           <Docking final_pose="{PrevGoal}"
                    isPureDocking="0"
                    dock_type="mission_dock_y"
-                   shift=""
+                   shift="0"
                    offset="-0.1"
-                   base="0.25, 0.4, 2"/>
+                   base="0.25, 0.3, 0"/>
           <Docking final_pose="{PrevGoal}"
                    isPureDocking="0"
                    dock_type="mission_dock_y"
-                   shift=""
+                   shift="0"
                    offset="-0.1"
-                   base="1.75, 0.4, 2"/>
+                   base="1.75, 0.3, 0"/>
           <Docking final_pose="{PrevGoal}"
                    isPureDocking="0"
                    dock_type="mission_dock_y"
-                   shift=""
+                   shift="0"
                    offset="-0.1"
-                   base="2.25, 0.4, 2"
+                   base="2.25, 0.3, 0"
                    _description="go to place the banner"/>
         </Switch2>
         <Docking final_pose="{PrevGoal}"
                  isPureDocking="0"
                  dock_type="mission_dock_y"
-                 shift=""
+                 shift="0"
                  offset="-0.1"
-                 base="1.75, 0.4, 2"/>
+                 base="1.75, 0.3, 0"/>
         <Docking final_pose="{PrevGoal}"
                  isPureDocking="0"
                  dock_type="mission_dock_y"
-                 shift=""
+                 shift="0"
                  offset="-0.1"
-                 base="0.25, 0.4, 2"/>
+                 base="0.25, 0.3, 0"/>
       </Fallback>
       <Sleep msec="4000"/>
     </Sequence>
@@ -189,7 +189,7 @@
         </Timeout>
       </ForceSuccess>
       <SubTree ID="BannerMission"
-               BANNER_PLACE="1"
+               BANNER_PLACE="0"
                _autoremap="true"/>
       <VisionCheck remap_offset="{offset}"
                    remap_shift="{shift}"
