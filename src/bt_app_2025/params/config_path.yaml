@@ -4,6 +4,6 @@ bt_app_2025:
     planB_Yellow_config: "bt_plan_b_Yellow.xml"
     planC_Yellow_config: "bt_plan_c_Yellow.xml"
     planA_Blue_config: "bt_plan_a_Blue.xml"
-    tree_node_model_config_file: "/home/user/Eurobot-2025-Main-ws/src/bt_app_2025/bt_m_config/bt_m_tree_node_model.xml"
-    groot_xml_config_directory: "/home/user/Eurobot-2025-Main-ws/src/bt_app_2025/bt_m_config/"
+    tree_node_model_config_file: "/home/ros/Eurobot-2025-Main/src/bt_app_2025/bt_m_config/bt_m_tree_node_model.xml"
+    groot_xml_config_directory: "/home/ros/Eurobot-2025-Main/src/bt_app_2025/bt_m_config/"
     frame_id: "base_footprint"

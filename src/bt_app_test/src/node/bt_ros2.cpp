@@ -24,8 +24,8 @@ int main(int argc, char** argv)
   rclcpp::init(argc, argv);
   auto node = std::make_shared<rclcpp::Node>("bt_node");
 
-  node->declare_parameter<string>("bt_tree_node_model", "/home/user/Eurobot-2025-Main-ws/src/bt_app_test/bt_config/bt_tree_node_model.xml");
-  node->declare_parameter<string>("groot_xml_config_directory", "/home/user/Eurobot-2025-Main-ws/src/bt_app_test/bt_config/");
+  node->declare_parameter<string>("bt_tree_node_model", "/home/ros/Eurobot-2025-Main/src/bt_app_test/bt_config/bt_tree_node_model.xml");
+  node->declare_parameter<string>("groot_xml_config_directory", "/home/ros/Eurobot-2025-Main/src/bt_app_test/bt_config/");
   node->declare_parameter<std::string>("tree_name", "MainTree");
   node->get_parameter("bt_tree_node_model", bt_tree_node_model_);
   node->get_parameter("groot_xml_config_directory", groot_xml_config_directory_);
