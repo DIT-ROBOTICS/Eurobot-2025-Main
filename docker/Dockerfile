@@ -58,6 +58,7 @@ RUN apt-get update && apt-get install -y \
     ros-humble-rqt-plot \
     ros-humble-rqt-tf-tree \
     ros-humble-nav2-msgs \
+    ros-humble-nav2-util \
     # Groot
     libfuse2 fuse3 \
     ros-humble-behaviortree-cpp \

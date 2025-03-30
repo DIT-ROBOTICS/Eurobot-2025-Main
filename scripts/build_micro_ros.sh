@@ -1,21 +1,24 @@
-#!/bin/bash
+#!/bin/bash -e
 
-# Exit immediately if a command fails
+# Enter the ROS workspace
+cd $ROS_WS
 
-chmod +x build_micro_ros.sh
+# Mark directories as safe for Git
+git config --global --add safe.directory $ROS_WS/src/uros/micro-ROS-Agent
+git config --global --add safe.directory $ROS_WS/src/uros/micro_ros_msgs
 
-set -e
-
+echo -e "\033[1;32m--------------- [ micro-ROS Build Start ] ----------------\033[0m"
+sudo apt-get update
 rosdep update
-# Source the ROS 2 workspace setup file
-source /home/user/Eurobot-2025-Main-ws/install/local_setup.bash
 
-# Run micro-ROS setup scripts
+source ./install/setup.bash
+
+echo -e "\033[1;32m--------------- [ micro-ROS Agent Creat ] ------------------\033[0m"
 ros2 run micro_ros_setup create_agent_ws.sh
+echo -e "\033[1;32m--------------- [ micro-ROS Build Agent ] ------------------\033[0m"
 ros2 run micro_ros_setup build_agent.sh
 
-# Build the workspace using colcon
 colcon build --packages-select micro_ros_setup
 colcon build --packages-select micro_ros_agent
 
-echo "Build process completed successfully!"
+echo -e "\033[1;32m--------------- [ micro-ROS Build Complete ] ---------------\033[0m"

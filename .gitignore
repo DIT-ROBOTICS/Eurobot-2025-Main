@@ -16,3 +16,4 @@
 *.AppImage
 **/Backups/
 /Project.btproj
+**/ros2.repos

@@ -32,6 +32,8 @@ if [ "${AUTO_BUILD}" = "true" ]; then
     source /opt/ros/humble/setup.bash
     cd "$ROS_WS"
     colcon build --symlink-install
+    echo "Installing micro-ROS agent..."
+    ./scripts/build_micro_ros.sh
 fi
 
 # Auto run program

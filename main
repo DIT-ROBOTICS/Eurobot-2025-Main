@@ -98,7 +98,8 @@ case $ACTION in
         ;;
     close)
         export AUTO_BUILD=false AUTO_RUN=false
-        if docker ps --filter "name=main" --filter "status=running" | grep -q "main"; then
+        if docker ps --filter "name=main" --filter "status=running" | grep -q "main" || \
+           docker ps --filter "name=main" --filter "status=exited" | grep -q "main"; then
             echo "Stopping the container..."
             docker compose down
         else
