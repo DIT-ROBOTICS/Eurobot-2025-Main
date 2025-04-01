@@ -16,7 +16,8 @@ from ament_index_python.packages import get_package_share_directory
 
 def generate_launch_description():
 
-    pkg_dir = os.path.join('/home/user/Eurobot-2025-Main/src/bt_app_2025')
+
+    pkg_dir = os.path.join('/home/ros/Eurobot-2025-Main/src/bt_app_2025')
 
     config_path_arg = DeclareLaunchArgument(
         'params0',
@@ -51,7 +52,7 @@ def generate_launch_description():
             nav_parameters,
             map_points,
             {"frame_id": "base_link"},
-            {"tree_name": "MainTree"},
+            {"tree_name": "MainTree"}, 
         ],
         package = 'bt_app_2025',
         executable = 'bt_m',
@@ -61,7 +62,7 @@ def generate_launch_description():
         parameters=[
             config_path,
             map_points,
-            {"Robot_name": "Tongue"},  # Invisible or Tongue
+            {"Robot_name": "TO-DO"},  # Invisible or Tongue
             {"plan_code": 11} # 10e1: plan (start from 1), 10e0: color(0 for yellow, 1 for blue)
         ],
         package = 'startup',
@@ -73,7 +74,7 @@ def generate_launch_description():
         executable='micro_ros_agent',
         name='micro_ros_agent',
         output='screen',
-        arguments=['serial', '-b', '115200', '-D', '/dev/ttyACM0']
+        arguments=['serial', '-b', '115200', '-D', '/dev/mission']
     )
     return LaunchDescription([
         config_path_arg,
