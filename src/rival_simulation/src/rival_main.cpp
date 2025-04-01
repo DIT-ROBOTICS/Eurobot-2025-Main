@@ -28,7 +28,7 @@ int main(int argc, char** argv) {
     std::string groot_xml_config_directory;
     std::string bt_tree_node_model;
     std::string script_file_directory, tree_name;
-    std::string mission_points, material_points;
+    std::vector<double> material_points;
 
     // Read parameters
     node->declare_parameter<std::string>("script_file_directory", "/home/user/Eurobot-2025-Main-ws/src/rival_simulation/rival_main_config/bt_rival_script.xml");
@@ -40,7 +40,6 @@ int main(int argc, char** argv) {
     node->get_parameter("tree_node_model_config_file", bt_tree_node_model);
     node->get_parameter("tree_name", tree_name);
     node->get_parameter("material_points", material_points);
-    node->get_parameter("mission_points", mission_points);
 
     blackboard->set<std::vector<int>>("material_status", std::vector<int>{1, 1, 1, 1, 1, 1, 1, 1, 1, 1});
 
