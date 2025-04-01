@@ -98,7 +98,7 @@
                  base="{base}"/>
       </VisionCheck>
       <ForceSuccess>
-        <Timeout msec="6000">
+        <Timeout msec="500">
           <FirmwareMission mission_status="{x}"
                            mission_type="21"
                            _description="take the raw material"/>
@@ -132,13 +132,13 @@
                  _autoremap="true"/>
         <Docking final_pose="{PrevGoal}"
                  isPureDocking="1"
-                 dock_type="{DOCK_DIR}"
+                 dock_type="mission_dock_x"
                  shift="0"
                  offset="{FORWARD_S}"
                  base="{PrevGoal}"
                  _description="forward to take 2 levels"/>
         <ForceSuccess>
-          <Timeout msec="6000">
+          <Timeout msec="500">
             <FirmwareMission mission_status="{x}"
                              mission_type="11"
                              _description="front take 2 levels"/>
@@ -182,7 +182,7 @@
                  base="{base}"/>
       </VisionCheck>
       <ForceSuccess>
-        <Timeout msec="6000">
+        <Timeout msec="500">
           <FirmwareMission mission_status="{x}"
                            mission_type="21"
                            _description="take the raw material"/>
@@ -219,13 +219,13 @@
                  _autoremap="true"/>
         <Docking final_pose="{PrevGoal}"
                  isPureDocking="1"
-                 dock_type="{DOCK_DIR}"
+                 dock_type="mission_dock_y"
                  shift="0"
                  offset="{FORWARD_S}"
                  base="{PrevGoal}"
                  _description="forward to take 2 levels"/>
         <ForceSuccess>
-          <Timeout msec="6000">
+          <Timeout msec="500">
             <FirmwareMission mission_status="{x}"
                              mission_type="11"
                              _description="front take 2 levels"/>
@@ -280,13 +280,13 @@
                  _autoremap="true"/>
         <Docking final_pose="{PrevGoal}"
                  isPureDocking="1"
-                 dock_type="{DOCK_DIR}"
+                 dock_type="mission_dock_y"
                  shift="0"
                  offset="{FORWARD_S}"
                  base="{PrevGoal}"
                  _description="forward to take 2 levels"/>
         <ForceSuccess>
-          <Timeout msec="6000">
+          <Timeout msec="500">
             <FirmwareMission mission_status="{x}"
                              mission_type="11"
                              _description="front take 2 levels"/>
@@ -315,7 +315,7 @@
     <Fallback>
       <Sequence>
         <ForceSuccess>
-          <Timeout msec="100">
+          <Timeout msec="500">
             <FirmwareMission mission_status="{x}"
                              mission_type="10"
                              _description="front put 1 level"/>
@@ -348,7 +348,7 @@
                  base="{PrevGoal}"
                  _description="backward to free up to space for grabber to fall down"/>
         <ForceSuccess>
-          <Timeout msec="100">
+          <Timeout msec="500">
             <FirmwareMission mission_status="{x}"
                              mission_type="30"
                              _description="arm down"/>
@@ -362,14 +362,14 @@
                  base="{PrevGoal}"
                  _description="forward to take two levels"/>
         <ForceSuccess>
-          <Timeout msec="100">
+          <Timeout msec="500">
             <FirmwareMission mission_status="{x}"
                              mission_type="11"
                              _description="front take 2 level"/>
           </Timeout>
         </ForceSuccess>
         <ForceSuccess>
-          <Timeout msec="100">
+          <Timeout msec="500">
             <FirmwareMission mission_status="{x}"
                              mission_type="32"
                              _description="arm up"/>
@@ -383,14 +383,14 @@
                  base="{PrevGoal}"
                  _description="forward to place two levels on one level"/>
         <ForceSuccess>
-          <Timeout msec="100">
+          <Timeout msec="500">
             <FirmwareMission mission_status="{x}"
                              mission_type="31"
                              _description="arm to one level height"/>
           </Timeout>
         </ForceSuccess>
         <ForceSuccess>
-          <Timeout msec="100">
+          <Timeout msec="500">
             <FirmwareMission mission_status="{x}"
                              mission_type="10"
                              _description="front place 2 level"/>
@@ -408,7 +408,7 @@
     <Fallback>
       <Sequence>
         <ForceSuccess>
-          <Timeout msec="100">
+          <Timeout msec="500">
             <FirmwareMission mission_status="{x}"
                              mission_type="20"
                              _description="back put 1 level"/>
@@ -425,14 +425,14 @@
                   degree="180"
                   base="{PrevGoal}"/>
         <ForceSuccess>
-          <Timeout msec="100">
+          <Timeout msec="500">
             <FirmwareMission mission_status="{x}"
                              mission_type="91"
                              _description="enable back magnet "/>
           </Timeout>
         </ForceSuccess>
         <ForceSuccess>
-          <Timeout msec="100">
+          <Timeout msec="500">
             <FirmwareMission mission_status="{x}"
                              mission_type="30"
                              _description="arm down"/>
@@ -446,14 +446,14 @@
                  base="{PrevGoal}"
                  _description="step back"/>
         <ForceSuccess>
-          <Timeout msec="100">
+          <Timeout msec="500">
             <FirmwareMission mission_status="{x}"
                              mission_type="11"
                              _description="front take 2 levels"/>
           </Timeout>
         </ForceSuccess>
         <ForceSuccess>
-          <Timeout msec="100">
+          <Timeout msec="500">
             <FirmwareMission mission_status="{x}"
                              mission_type="31"
                              _description="arm up"/>
@@ -467,7 +467,7 @@
                  base="{PrevGoal}"
                  _description="forward to place two levels on one level"/>
         <ForceSuccess>
-          <Timeout msec="100">
+          <Timeout msec="500">
             <FirmwareMission mission_status="{x}"
                              mission_type="10"
                              _description="front place 2 level"/>
@@ -481,7 +481,7 @@
                  base="{PrevGoal}"
                  _description="step back"/>
         <ForceSuccess>
-          <Timeout msec="100">
+          <Timeout msec="500">
             <FirmwareMission mission_status="{x}"
                              mission_type="90"
                              _description="enable front magnet "/>
@@ -499,7 +499,7 @@
     <Fallback>
       <Sequence>
         <ForceSuccess>
-          <Timeout msec="100">
+          <Timeout msec="500">
             <FirmwareMission mission_status="{x}"
                              mission_type="20"
                              _description="back put the raw material"/>
@@ -524,7 +524,7 @@
                  base="{PrevGoal}"
                  _description="docking to the material"/>
         <ForceSuccess>
-          <Timeout msec="100">
+          <Timeout msec="500">
             <FirmwareMission mission_status="{x}"
                              mission_type="71"
                              _description="take board"/>
@@ -538,7 +538,7 @@
                  base="{PrevGoal}"
                  _description="step back"/>
         <ForceSuccess>
-          <Timeout msec="100">
+          <Timeout msec="500">
             <FirmwareMission mission_status="{x}"
                              mission_type="30"
                              _description="arm down"/>
@@ -552,35 +552,35 @@
                  base="{PrevGoal}"
                  _description="go forward "/>
         <ForceSuccess>
-          <Timeout msec="100">
+          <Timeout msec="500">
             <FirmwareMission mission_status="{x}"
                              mission_type="11"
                              _description="front take 1 level"/>
           </Timeout>
         </ForceSuccess>
         <ForceSuccess>
-          <Timeout msec="100">
+          <Timeout msec="500">
             <FirmwareMission mission_status="{x}"
                              mission_type="32"
                              _description="arm up"/>
           </Timeout>
         </ForceSuccess>
         <ForceSuccess>
-          <Timeout msec="100">
+          <Timeout msec="500">
             <FirmwareMission mission_status="{x}"
                              mission_type="70"
                              _description="place board"/>
           </Timeout>
         </ForceSuccess>
         <ForceSuccess>
-          <Timeout msec="100">
+          <Timeout msec="500">
             <FirmwareMission mission_status="{x}"
                              mission_type="31"
                              _description="arm to one level height"/>
           </Timeout>
         </ForceSuccess>
         <ForceSuccess>
-          <Timeout msec="100">
+          <Timeout msec="500">
             <FirmwareMission mission_status="{x}"
                              mission_type="10"
                              _description="front place 1 level"/>
@@ -598,7 +598,7 @@
     <Fallback>
       <Sequence>
         <ForceSuccess>
-          <Timeout msec="100">
+          <Timeout msec="500">
             <FirmwareMission mission_status="{x}"
                              mission_type="71"
                              _description="take board"/>
@@ -612,7 +612,7 @@
                  base="{PrevGoal}"
                  _description="step back"/>
         <ForceSuccess>
-          <Timeout msec="100">
+          <Timeout msec="500">
             <FirmwareMission mission_status="{x}"
                              mission_type="30"
                              _description="arm down"/>
@@ -626,35 +626,35 @@
                  base="{PrevGoal}"
                  _description="go forward "/>
         <ForceSuccess>
-          <Timeout msec="100">
+          <Timeout msec="500">
             <FirmwareMission mission_status="{x}"
                              mission_type="11"
                              _description="front take 1 level"/>
           </Timeout>
         </ForceSuccess>
         <ForceSuccess>
-          <Timeout msec="100">
+          <Timeout msec="500">
             <FirmwareMission mission_status="{x}"
                              mission_type="32"
                              _description="arm up"/>
           </Timeout>
         </ForceSuccess>
         <ForceSuccess>
-          <Timeout msec="100">
+          <Timeout msec="500">
             <FirmwareMission mission_status="{x}"
                              mission_type="70"
                              _description="place board"/>
           </Timeout>
         </ForceSuccess>
         <ForceSuccess>
-          <Timeout msec="100">
+          <Timeout msec="500">
             <FirmwareMission mission_status="{x}"
                              mission_type="31"
                              _description="arm to one level height"/>
           </Timeout>
         </ForceSuccess>
         <ForceSuccess>
-          <Timeout msec="100">
+          <Timeout msec="500">
             <FirmwareMission mission_status="{x}"
                              mission_type="10"
                              _description="front place 1 level"/>
@@ -668,14 +668,14 @@
                  base="{PrevGoal}"
                  _description="step back "/>
         <ForceSuccess>
-          <Timeout msec="100">
+          <Timeout msec="500">
             <FirmwareMission mission_status="{x}"
                              mission_type="90"
                              _description="enable front magnet "/>
           </Timeout>
         </ForceSuccess>
         <ForceSuccess>
-          <Timeout msec="100">
+          <Timeout msec="500">
             <FirmwareMission mission_status="{x}"
                              mission_type="30"
                              _description="arm down"/>
