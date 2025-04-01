@@ -31,6 +31,7 @@ ament_target_dependencies(startup
   "rclcpp"
   "geometry_msgs"
   "nav_msgs"
+  "std_msgs"
   "tf2"
   "tf2_ros"
   "btcpp_ros2_interfaces"

@@ -251,21 +251,20 @@ PortsList FirmwareMission::providedPorts() {
 }
 
 BT::NodeStatus FirmwareMission::stopStep() {
-    if (mission_status_ == 1 && ready_finish_) {
+    if (mission_status_ == 1 && mission_received_) {
         RCLCPP_INFO(node_->get_logger(), "Mission success");
         blackboard_->set<int>("mission_progress", ++mission_progress_);
         setOutput<int>("mission_status", mission_status_);
-        ready_finish_ = false;
+        mission_received_ = false;
         mission_status_ = 0;
         subscription_.reset();
         return BT::NodeStatus::SUCCESS;
-    } else if (mission_status_ == 0 || (!ready_finish_ && mission_status_ == 1)) {
-        // RCLCPP_INFO(node_->get_logger(), "Mission running");
+    } else if (mission_status_ == 0 || (!mission_received_ && mission_status_ == 1)) {
         return BT::NodeStatus::RUNNING;
     } else if (mission_status_ == -1) {
         RCLCPP_INFO(node_->get_logger(), "Mission failed");
         setOutput<int>("mission_status", mission_status_);
-        ready_finish_ = false;
+        mission_received_ = false;
         subscription_.reset();
         return BT::NodeStatus::FAILURE;
     } else {
@@ -279,9 +278,9 @@ void FirmwareMission::mission_callback(const std_msgs::msg::Int32::SharedPtr sub
     if (mission_type_)
     {
         if (sub_msg->data == 0)
-            ready_finish_ = true;
+            mission_received_ = true;
         mission_status_ = sub_msg->data;
-        RCLCPP_INFO(node_->get_logger(), "ready_finish_: %d, mission type: '%d', heard: '%d'", ready_finish_, mission_type_, mission_status_);
+        RCLCPP_INFO(node_->get_logger(), "mission_received_: %d, mission type: '%d', heard: '%d'", mission_received_, mission_type_, mission_status_);
     }
 }
 
@@ -295,14 +294,10 @@ BT::NodeStatus FirmwareMission::onStart() {
 
 BT::NodeStatus FirmwareMission::onRunning() {
     pub_msg.data = mission_type_;
-    // BT::NodeStatus nodeStatus_ = stopStep();
-    // if (nodeStatus_ == BT::NodeStatus::RUNNING) {
-        publisher_->publish(pub_msg);
-        RCLCPP_INFO(node_->get_logger(), "mission_progress: %d", mission_progress_);
-        RCLCPP_INFO(node_->get_logger(), "mission_type: %d", mission_type_);
-        rate_.sleep();
-    // }
-    // return nodeStatus_;
+    publisher_->publish(pub_msg);
+    RCLCPP_INFO(node_->get_logger(), "mission_progress: %d", mission_progress_);
+    RCLCPP_INFO(node_->get_logger(), "mission_type: %d", mission_type_);
+    rate_.sleep();
     return stopStep();
     // **failure test**
     // if (mission_progress_ != 5)
@@ -341,9 +336,6 @@ BT::NodeStatus IntegratedMissionNode::mission_callback(const std_msgs::msg::Int3
         mission_finished_ = true;
     } else if (mission_status_ == MissionState::RUNNING1 || mission_status_ == MissionState::RUNNING2 || mission_status_ == MissionState::RUNNING3) {
         RCLCPP_INFO(node_->get_logger(), "Mission running");
-    } else if (mission_status_ == MissionState::RECEIVED) {
-        RCLCPP_INFO(node_->get_logger(), "Mission received");
-        mission_received_ = true;
     } else {
         RCLCPP_INFO(node_->get_logger(), "Mission failed");
         mission_finished_ = true;
@@ -378,10 +370,9 @@ BT::NodeStatus IntegratedMissionNode::onRunning() {
             while (!nav_client->is_nav_finished()) {
               rclcpp::spin_some(nav_client);
             }
-        } else if (!mission_received_) {
-            pub_msg.data = mission_type_;
-            publisher_->publish(pub_msg);
         }
+        pub_msg.data = mission_type_;
+        publisher_->publish(pub_msg);
     }
     setOutputs();
     if (mission_finished_)

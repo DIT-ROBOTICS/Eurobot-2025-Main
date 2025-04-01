@@ -15,16 +15,21 @@ from launch.substitutions import LaunchConfiguration
 from ament_index_python.packages import get_package_share_directory
 
 def generate_launch_description():
-    params = os.path.join(
+    config_path = os.path.join(
         get_package_share_directory('rival_simulation'),
         'params',
         'config_path.yaml'
+    )
+    map_points = os.path.join(
+        get_package_share_directory('bt_app_2025'),
+        'params',
+        'map_points.yaml'
     )
     return LaunchDescription([
         Node(
             package = 'rival_simulation',
             executable = 'rival_main',
             name = 'rival_main',
-            parameters = [params, {"tree_name": "MainTree"}]
+            parameters = [config_path, map_points, {"tree_name": "MainTree"}]
         )
     ])

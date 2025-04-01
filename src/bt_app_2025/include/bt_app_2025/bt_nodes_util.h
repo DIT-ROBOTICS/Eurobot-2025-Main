@@ -6,6 +6,8 @@
 #include <deque>
 #include <bitset>
 #include <vector>
+#include <cmath>
+#include <string.h>
 
 // Use behavior tree
 #include <behaviortree_cpp/bt_factory.h>

@@ -33,19 +33,25 @@ def generate_launch_description():
         default_value=os.path.join(pkg_dir, 'params', 'nav_parameters.yaml'),
         description='Full path to parameter YAML file'
     )
+    map_points_arg = DeclareLaunchArgument(
+        'params3',
+        default_value = os.path.join(pkg_dir, 'params', 'map_points.yaml'),
+        description = 'map points'
+    )
 
     config_path = LaunchConfiguration('params0')
     finisher = LaunchConfiguration('params1')
     nav_parameters = LaunchConfiguration('params2')
+    map_points = LaunchConfiguration('params3')
 
     bt_m_node = Node(
         parameters=[
-            config_path, 
-            finisher, 
+            config_path,
+            finisher,
             nav_parameters,
+            map_points,
             {"frame_id": "base_link"},
-            {"tree_name": "FirmwareTest"}, 
-            {"Robot_name": "Tongue"}  # Invisible or Tongue
+            {"tree_name": "MainTree"},
         ],
         package = 'bt_app_2025',
         executable = 'bt_m',
@@ -53,7 +59,10 @@ def generate_launch_description():
     )
     startup_node = Node(
         parameters=[
-            {"start_point": 1} # 0 to 5
+            config_path,
+            map_points,
+            {"Robot_name": "Tongue"},  # Invisible or Tongue
+            {"plan_code": 11} # 10e1: plan (start from 1), 10e0: color(0 for yellow, 1 for blue)
         ],
         package = 'startup',
         executable = 'startup',
@@ -70,9 +79,10 @@ def generate_launch_description():
         config_path_arg,
         finisher_arg,
         nav_parameters_arg,
+        map_points_arg,
         bt_m_node,
         startup_node,
-        firmware_node
+        # firmware_node
         # TimerAction(
         #     period = 1.0,
         #     actions = [Node(

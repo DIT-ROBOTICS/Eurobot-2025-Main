@@ -19,7 +19,6 @@ find_package(tf2_geometry_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(nav2_msgs REQUIRED)
 find_package(btcpp_ros2_interfaces REQUIRED)
-find_package(Curses REQUIRED)
 
 # Include directories
 include_directories(
@@ -34,36 +33,18 @@ ament_target_dependencies(rival_main
   ${THIS_PACKAGE_DEPS}
   "behaviortree_ros2"
   "behaviortree_cpp"
-  "btcpp_ros2_interfaces"
-  "nav2_msgs"
   "rclcpp"
-  "std_msgs"
 )
 install(TARGETS
   rival_main
   DESTINATION lib/${PROJECT_NAME}
 )
 
-add_executable(my_teleop src/my_teleop.cpp)
-target_link_libraries(my_teleop
-  ncurses
-  ${ARMADILLO_LIBRARIES})
-ament_target_dependencies(my_teleop
-  "rclcpp"
-  "geometry_msgs"
-  ${THIS_PACKAGE_DEPS}
-)
-install(TARGETS
-  my_teleop
-  DESTINATION lib/${PROJECT_NAME}
-)
-
-add_library(BTNODE_NAVIGATION src/bt_nodes_navigation.cpp)
+add_library(BTNODE_NAVIGATION src/rival_navigation.cpp)
 target_link_libraries(BTNODE_NAVIGATION  
   ${ARMADILLO_LIBRARIES})
 ament_target_dependencies(BTNODE_NAVIGATION
-  "btcpp_ros2_interfaces"
-  "nav2_msgs"
+  "nav_msgs"
   "behaviortree_ros2"
   "behaviortree_cpp"
   "std_msgs"
@@ -72,8 +53,6 @@ ament_target_dependencies(BTNODE_NAVIGATION
   "tf2_geometry_msgs"
   "geometry_msgs"
   "rclcpp"
-  "rclcpp_action"
-  "rclcpp_components"
   ${THIS_PACKAGE_DEPS}
 )
 

@@ -1,7 +1,6 @@
 #include "bt_app_2025/bt_nodes_util.h"
 
 using namespace BT;
-using namespace MATH;
 using namespace std;
 
 template <> inline geometry_msgs::msg::PoseStamped BT::convertFromString(StringView str) {
@@ -36,7 +35,7 @@ template <> inline std::deque<int> BT::convertFromString(StringView str) {
     return output;
 }
 
-double inline calculateDistance(const geometry_msgs::msg::Pose &pose1, const geometry_msgs::msg::Pose &pose2) {
+double inline MATH::calculateDistance(const geometry_msgs::msg::Pose &pose1, const geometry_msgs::msg::Pose &pose2) {
     tf2::Vector3 position1(pose1.position.x, pose1.position.y, 0);
     tf2::Vector3 position2(pose2.position.x, pose2.position.y, 0);
     double dist = position1.distance(position2);
@@ -44,7 +43,7 @@ double inline calculateDistance(const geometry_msgs::msg::Pose &pose1, const geo
     return dist;
 }
 
-double inline calculateAngleDifference(const geometry_msgs::msg::Pose &pose1, const geometry_msgs::msg::Pose &pose2) {
+double inline MATH::calculateAngleDifference(const geometry_msgs::msg::Pose &pose1, const geometry_msgs::msg::Pose &pose2) {
     tf2::Quaternion orientation1, orientation2;
     tf2::fromMsg(pose1.orientation, orientation1);
     tf2::fromMsg(pose2.orientation, orientation2);
@@ -53,7 +52,7 @@ double inline calculateAngleDifference(const geometry_msgs::msg::Pose &pose1, co
     return std::fabs(yaw1 - yaw2);
 }
 
-geometry_msgs::msg::PoseStamped inline ConvertPoseFormat(geometry_msgs::msg::PoseStamped &pose_) {
+geometry_msgs::msg::PoseStamped inline MATH::ConvertPoseFormat(geometry_msgs::msg::PoseStamped &pose_) {
     tf2::Quaternion quaternion;
     tf2::fromMsg(pose_.pose.orientation, quaternion);
     pose_.pose.position.z = tf2::impl::getYaw(quaternion);

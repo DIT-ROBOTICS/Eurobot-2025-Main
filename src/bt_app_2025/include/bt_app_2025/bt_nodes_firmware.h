@@ -48,8 +48,8 @@ namespace BT {
 /********************************/
 class SIMAactivate : public BT::SyncActionNode {
 public:
-  SIMAactivate(const std::string& name, const BT::NodeConfig& config, std::shared_ptr<rclcpp::Node> node)
-    : BT::SyncActionNode(name, config), node_(node)
+  SIMAactivate(const std::string& name, const BT::NodeConfig& config, const RosNodeParams& params)
+    : BT::SyncActionNode(name, config), node_(params.nh.lock())
   {}
 
   /* Node remapping function */
@@ -71,8 +71,8 @@ class MissionFinisher : public BT::StatefulActionNode
 {
 public:
 
-  MissionFinisher(const std::string& name, const BT::NodeConfig& config, std::shared_ptr<rclcpp::Node> node, BT::Blackboard::Ptr blackboard)
-    : BT::StatefulActionNode(name, config), node_(node), blackboard_(blackboard)
+  MissionFinisher(const std::string& name, const BT::NodeConfig& config, const RosNodeParams& params, BT::Blackboard::Ptr blackboard)
+    : BT::StatefulActionNode(name, config), node_(params.nh.lock()), blackboard_(blackboard)
   {
     matreials_accord_ = 0;
   }
@@ -121,8 +121,8 @@ typedef enum {
 class FirmwareMission : public BT::StatefulActionNode
 {
 public:
-  FirmwareMission(const std::string& name, const BT::NodeConfig& config, std::shared_ptr<rclcpp::Node> node, BT::Blackboard::Ptr blackboard)
-    : BT::StatefulActionNode(name, config), node_(node), blackboard_(blackboard), rate_(30) {
+  FirmwareMission(const std::string& name, const BT::NodeConfig& config, const RosNodeParams& params, BT::Blackboard::Ptr blackboard)
+    : BT::StatefulActionNode(name, config), node_(params.nh.lock()), blackboard_(blackboard), rate_(30) {
     publisher_ = node_->create_publisher<std_msgs::msg::Int32>("mission_type", 10);
     subscription_ = node_->create_subscription<std_msgs::msg::Int32>("mission_status", 10, std::bind(&FirmwareMission::mission_callback, this, std::placeholders::_1));
   }
@@ -148,8 +148,6 @@ private:
 
   std_msgs::msg::Int32 pub_msg;
   int mission_progress_ = 0;
-  bool ready_finish_ = false;
-  int error_filter_ = 0;
   int mission_type_ = 0;
   int mission_status_ = 0;
   bool mission_received_ = false;
@@ -162,8 +160,8 @@ private:
 class IntegratedMissionNode : public BT::StatefulActionNode
 {
 public:
-  IntegratedMissionNode(const std::string& name, const BT::NodeConfig& config, std::shared_ptr<rclcpp::Node> node, BT::Blackboard::Ptr blackboard)
-    : BT::StatefulActionNode(name, config), node_(node), blackboard_(blackboard), tf_buffer_(node->get_clock()), listener_(tf_buffer_) {
+  IntegratedMissionNode(const std::string& name, const BT::NodeConfig& config, const RosNodeParams& params, BT::Blackboard::Ptr blackboard)
+    : BT::StatefulActionNode(name, config), node_(params.nh.lock()), blackboard_(blackboard), tf_buffer_(params.nh.lock()->get_clock()), listener_(tf_buffer_) {
     publisher_ = node_->create_publisher<std_msgs::msg::Int32>("mission_type", 10);
     subscription_ = node_->create_subscription<std_msgs::msg::Int32>("mission_status", 10, std::bind(&IntegratedMissionNode::mission_callback, this, std::placeholders::_1));
   }

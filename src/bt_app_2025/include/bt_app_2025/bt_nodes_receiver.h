@@ -18,11 +18,9 @@
 // Use ros message
 #include "std_srvs/srv/set_bool.hpp"
 #include "std_msgs/msg/int32.hpp"
+#include "std_msgs/msg/int32_multi_array.hpp"
 #include "std_msgs/msg/float32.hpp"
-#include "std_msgs/msg/float32_multi_array.hpp"
-#include "geometry_msgs/msg/twist_stamped.hpp"
-#include "geometry_msgs/msg/pose_array.hpp"
-// tf2 
+// tf2
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 #include <tf2/impl/utils.h>
@@ -47,8 +45,8 @@ using namespace BT;
 class LocReceiver
 {
 public:
-  LocReceiver(std::shared_ptr<rclcpp::Node> node)
-    : node_(node), tf_buffer_(node_->get_clock()), listener_(tf_buffer_)
+  LocReceiver(const RosNodeParams& params)
+    : node_(params.nh.lock()), tf_buffer_(node_->get_clock()), listener_(tf_buffer_)
   {
     node_->get_parameter("frame_id", frame_id_);
   }
@@ -71,8 +69,8 @@ private:
 class NavReceiver : public BT::SyncActionNode
 {
 public:
-  NavReceiver(const std::string& name, const BT::NodeConfig& config, std::shared_ptr<rclcpp::Node> node, BT::Blackboard::Ptr blackboard)
-    : BT::SyncActionNode(name, config), node_(node), blackboard_(blackboard)
+  NavReceiver(const std::string& name, const BT::NodeConfig& config, const RosNodeParams& params, BT::Blackboard::Ptr blackboard)
+    : BT::SyncActionNode(name, config), node_(params.nh.lock()), blackboard_(blackboard)
   {}
 
   /* Node remapping function */
@@ -100,8 +98,8 @@ private:
 class CamReceiver : public BT::SyncActionNode
 {
 public:
-  CamReceiver(const std::string& name, const BT::NodeConfig& config, std::shared_ptr<rclcpp::Node> node, BT::Blackboard::Ptr blackboard)
-    : BT::SyncActionNode(name, config), node_(node), blackboard_(blackboard)
+  CamReceiver(const std::string& name, const BT::NodeConfig& config, const RosNodeParams& params, BT::Blackboard::Ptr blackboard)
+    : BT::SyncActionNode(name, config), node_(params.nh.lock()), blackboard_(blackboard)
   {}
 
   /* Node remapping function */
@@ -111,17 +109,14 @@ public:
   BT::NodeStatus tick() override;
 
 private:
-  void materials_info_callback(const geometry_msgs::msg::PoseArray::SharedPtr msg);
-  void banner_info_callback(const std_msgs::msg::Int32::SharedPtr msg);
-  void obstacles_info_callback(const geometry_msgs::msg::PoseArray::SharedPtr msg);
+  void materials_info_callback(const std_msgs::msg::Int32MultiArray::SharedPtr msg);
+  void mission_info_callback(const std_msgs::msg::Int32::SharedPtr msg);
 
-  rclcpp::Subscription<geometry_msgs::msg::PoseArray>::SharedPtr sub_materials_info_;
-  rclcpp::Subscription<std_msgs::msg::Int32>::SharedPtr sub_banner_info_;
-  rclcpp::Subscription<geometry_msgs::msg::PoseArray>::SharedPtr sub_obstacles_info_;
+  rclcpp::Subscription<std_msgs::msg::Int32MultiArray>::SharedPtr sub_materials_info_;
+  rclcpp::Subscription<std_msgs::msg::Int32>::SharedPtr sub_mission_info_;
 
-  geometry_msgs::msg::PoseArray materials_info_;
-  std_msgs::msg::Int32 banner_info_;
-  geometry_msgs::msg::PoseArray obstacles_info_;
+  std_msgs::msg::Int32MultiArray materials_info_;
+  std_msgs::msg::Int32 mission_info_;
 
   std::shared_ptr<rclcpp::Node> node_;
   BT::Blackboard::Ptr blackboard_;
