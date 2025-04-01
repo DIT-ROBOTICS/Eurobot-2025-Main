@@ -65,8 +65,8 @@ def generate_launch_description():
             {"plan_code": 11} # 10e1: plan (start from 1), 10e0: color(0 for yellow, 1 for blue)
         ],
         package = 'startup',
-        executable = 'startup_new',
-        name = 'startup_new'
+        executable = 'startup',
+        name = 'startup'
     )
     firmware_node = Node(
         package='micro_ros_agent',
