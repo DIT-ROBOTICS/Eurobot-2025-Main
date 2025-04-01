@@ -55,6 +55,9 @@
         <Decorator ID="TimerChecker">
             <input_port name="timer_sec" type="int"/>
         </Decorator>
+        <Action ID="TopicSubTest">
+            <output_port name="sum" type="int"/>
+        </Action>
         <Decorator ID="VisionCheck">
             <output_port name="remap_offset" type="double"/>
             <output_port name="remap_shift" type="double"/>

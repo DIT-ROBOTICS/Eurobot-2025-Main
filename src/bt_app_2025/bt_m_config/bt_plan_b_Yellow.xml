@@ -169,20 +169,6 @@
                  _description="step back"/>
         <SubTree ID="2levelmissionTest"
                  _autoremap="true"/>
-        <!-- <Docking final_pose="{PrevGoal}"
-                 isPureDocking="1"
-                 dock_type="{DOCK_DIR}"
-                 shift="0"
-                 offset="{BACK_M}"
-                 base="{PrevGoal}"
-                 _description="backward to free up to space for grabber to fall down"/>
-        <ForceSuccess>
-          <Timeout msec="6000">
-            <FirmwareMission mission_status="{x}"
-                             mission_type="30"
-                             _description="arm down"/>
-          </Timeout>
-        </ForceSuccess> -->
         <Docking final_pose="{PrevGoal}"
                  isPureDocking="0"
                  dock_type="{DOCK_DIR}"
@@ -305,7 +291,7 @@
                            _description="grab back material"/>
         </Timeout>
       </ForceSuccess>
-      <!-- <Docking final_pose="{PrevGoal}"
+      <Docking final_pose="{PrevGoal}"
                isPureDocking="0"
                dock_type="mission_dock_y"
                shift="0"
@@ -327,7 +313,7 @@
                shift="0"
                offset="0.065"
                base="{PrevGoal}"
-               _description="mission point 3"/> -->
+               _description="mission point 3"/>
       <Docking final_pose="{PrevGoal}"
                isPureDocking="0"
                dock_type="mission_dock_y"

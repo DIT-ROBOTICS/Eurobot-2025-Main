@@ -196,6 +196,7 @@ public:
         : BT::DecoratorNode(name, config), node_(params.nh.lock()), blackboard_(blackboard), tf_buffer_(params.nh.lock()->get_clock())
     {
         node_->get_parameter("frame_id", frame_id_);
+        tf_buffer_.setUsingDedicatedThread(true);
     }
     static BT::PortsList providedPorts();
     BT::NodeStatus tick() override;
