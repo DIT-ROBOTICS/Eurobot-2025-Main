@@ -63,11 +63,14 @@ public:
     }
 
     void InitParam() { 
+        // for (int i = 0; i < 10; i++)
+        materials_info_.data = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
         // Create a shared blackboard
         blackboard = BT::Blackboard::create();
         blackboard->set<double>("current_time", 0);
         blackboard->set<int>("front_materials", 0);
         blackboard->set<int>("back_materials", 0);
+        blackboard->set<std_msgs::msg::Int32MultiArray>("materials_info", materials_info_);
         blackboard->set<std::vector<int>>("mission_points_status", std::vector<int>{0, 0, 0, 0, 0, 0, 0, 0});
         blackboard->set<int>("mission_progress", 0);
         blackboard->set<bool>("last_mission_failed", false);
@@ -208,6 +211,7 @@ private:
     BT::RosNodeParams params;
     // ROS msg
     std_msgs::msg::Int32 ready_feedback;
+    std_msgs::msg::Int32MultiArray materials_info_;
     double game_time = 0.0;
     char team = '0';
     std::string groot_filename;
