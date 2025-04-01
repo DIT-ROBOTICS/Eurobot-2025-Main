@@ -34,6 +34,11 @@
             <input_port name="robot_type" type="bool"/>
             <input_port name="step_results" type="std::deque&lt;int, std::allocator&lt;int&gt; &gt;"/>
         </Action>
+        <Decorator ID="MissionNearRival">
+            <output_port name="remap_base" type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+            <input_port name="mission_type" type="std::string"/>
+            <input_port name="base_index" type="int"/>
+        </Decorator>
         <Action ID="NavReceiver"/>
         <Action ID="Navigation">
             <output_port name="final_pose" type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
