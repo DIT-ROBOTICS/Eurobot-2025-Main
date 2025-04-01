@@ -12,5 +12,5 @@
     Bot2_BlueA_config: "bot2_blue_a.xml"
     Bot2_BlueB_config: "bot2_blue_b.xml"
     Bot2_BlueC_config: "bot2_blue_c.xml"
-    tree_node_model_config_file: "/Eurobot-2025-Main-ws/src/bt_app_2025/bt_m_config/bt_m_tree_node_model.xml"
-    groot_xml_config_directory: "/Eurobot-2025-Main-ws/src/bt_app_2025/bt_m_config/"
+    tree_node_model_config_file: "/Eurobot-2025-Main/src/bt_app_2025/bt_m_config/bt_m_tree_node_model.xml"
+    groot_xml_config_directory: "/Eurobot-2025-Main/src/bt_app_2025/bt_m_config/"

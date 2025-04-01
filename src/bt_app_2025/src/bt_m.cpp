@@ -80,8 +80,8 @@ public:
         sub = this->create_subscription<std_msgs::msg::String>("/robot/startup/ready_signal", 2, std::bind(&MainClass::readyCallback, this, std::placeholders::_1));
         pub = this->create_publisher<std_msgs::msg::Int32>("/robot/Start", 2);
         // Read parameters
-        this->declare_parameter<std::string>("groot_xml_config_directory", "/Eurobot-2025-Main-ws/src/bt_app_2025/bt_m_config/");
-        this->declare_parameter<std::string>("tree_node_model_config_file", "/Eurobot-2025-Main-ws/src/bt_app_2025/bt_m_config/bt_m_tree_node_model.xml");
+        this->declare_parameter<std::string>("groot_xml_config_directory", "/Eurobot-2025-Main/src/bt_app_2025/bt_m_config/");
+        this->declare_parameter<std::string>("tree_node_model_config_file", "/Eurobot-2025-Main/src/bt_app_2025/bt_m_config/bt_m_tree_node_model.xml");
         this->declare_parameter<std::string>("tree_name", "FuncTest");
         this->declare_parameter<std::string>("frame_id", "base_link");
         this->declare_parameter<double>("nav_dist_error", 0.03);
