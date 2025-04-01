@@ -496,18 +496,21 @@ NodeStatus MissionNearRival::tick() {
         base_.pose.position.z = ((int)base_.pose.position.z / 2) ? base_.pose.position.z - 2 : base_.pose.position.z + 2;
     }
     if (base_.pose.position.z == 1.0 || base_.pose.position.z == 3.0) {
-        if (mission_points_status_[baseIndex_] > 0)
-            base_.pose.position.y -= offset * 1.3;
-        if (dist < 0.3 && (base_.pose.position.x - rival_pose_.pose.position.x)) {
-            base_.pose.position.x += (base_.pose.position.x - rival_pose_.pose.position.x)/abs(base_.pose.position.x - rival_pose_.pose.position.x)*(0.3 - abs(base_.pose.position.x - rival_pose_.pose.position.x));
+        if (mission_points_status_[baseIndex_] > 0)   // check if this mission is already placed
+            base_.pose.position.y -= offset * 1.3;    // if yes, the placement point need to e changed
+        if (dist < 0.5 && (base_.pose.position.x - rival_pose_.pose.position.x)) {
+            base_.pose.position.x += (base_.pose.position.x - rival_pose_.pose.position.x)/abs(base_.pose.position.x - rival_pose_.pose.position.x)*(0.5 - abs(base_.pose.position.x - rival_pose_.pose.position.x));
         }
     } else {
-        if (mission_points_status_[baseIndex_] > 0)
-            base_.pose.position.x -= offset * 1.3;
-        if (dist < 0.3 && (base_.pose.position.y - rival_pose_.pose.position.y)) {
-            base_.pose.position.y += (base_.pose.position.y - rival_pose_.pose.position.y)/abs(base_.pose.position.y - rival_pose_.pose.position.y)*(0.3 - abs(base_.pose.position.y - rival_pose_.pose.position.y));
+        if (mission_points_status_[baseIndex_] > 0)  // check if this mission is already placed
+            base_.pose.position.x -= offset * 1.3;   // if yes, the placement point need to e changed
+        if (dist < 0.5 && (base_.pose.position.y - rival_pose_.pose.position.y)) {
+            base_.pose.position.y += (base_.pose.position.y - rival_pose_.pose.position.y)/abs(base_.pose.position.y - rival_pose_.pose.position.y)*(0.5 - abs(base_.pose.position.y - rival_pose_.pose.position.y));
         }
     }
+    // update mission_points_status_
+    mission_points_status_[baseIndex_]++;
+    blackboard_->set<std::vector<int>>("mission_points_status", mission_points_status_);
 
     // set output port
     setOutput<geometry_msgs::msg::PoseStamped>("remap_base", base_);

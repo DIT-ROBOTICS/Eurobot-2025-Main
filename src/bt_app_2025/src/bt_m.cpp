@@ -115,6 +115,7 @@ public:
         /* navigation */
         factory.registerNodeType<StopRobot>("StopRobot", params);
         factory.registerNodeType<VisionCheck>("VisionCheck", params, blackboard);
+        factory.registerNodeType<MissionNearRival>("MissionNearRival", params, blackboard);
         params.default_port_value = "navigate_to_pose";
         factory.registerNodeType<Navigation>("Navigation", params);
         factory.registerNodeType<Rotation>("Rotation", params);
