@@ -15,6 +15,12 @@ fi
 # Enter the ROS workspace
 cd $ROS_WS
 
+# Change user to ros
+if [ "$(id -u)" != "$USER_ID" ]; then
+    echo "Switching to user $USERNAME..."
+    exec gosu $USERNAME "$0" "$@"
+fi
+
 # Install micro-ROS
 if [ ! -d "$ROS_WS/src/micro_ros" ]; then
     git clone -b humble https://github.com/micro-ROS/micro_ros_setup.git src/micro_ros
@@ -31,13 +37,20 @@ if [ "${AUTO_BUILD}" = "true" ]; then
     echo "Running colcon build..."
     source /opt/ros/humble/setup.bash
     cd "$ROS_WS"
-    colcon build --symlink-install
+    
+    if [ ! -d "$ROS_WS/install/micro_ros_msgs" ]; then
+        echo "Building workspace excluding micro_ros_msgs..."
+        colcon build --symlink-install --packages-skip micro_ros_msgs
+    else
+        echo "micro-ROS already built. Skipping build step for micro_ros_msgs."
+    fi
 
     if [ ! -d "$ROS_WS/src/uros" ]; then
+        echo "Building all packages..."
+        colcon build --symlink-install
         echo "Installing micro-ROS agent..."
         ./scripts/build_micro_ros.sh
     fi
-fi
 fi
 
 # Auto run program
@@ -54,5 +67,6 @@ if [ $# -eq 0 ]; then
     while true; do sleep 60; done
 else
     echo "Executing command as $USERNAME: $@"
-    exec gosu $USERNAME "$@"
+    # exec gosu $USERNAME "$@"
+    exec "$@"
 fi
