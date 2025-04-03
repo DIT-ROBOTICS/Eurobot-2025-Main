@@ -1,0 +1,44 @@
+<root>
+    <point ID="1">
+        <type>material</type>
+        <number>2</number>
+        <position_x>2.575</position_x>
+        <position_y>1.32</position_y>
+        <position_z>2.0</position_z>
+    </point>
+    <point ID="2">
+        <type>material</type>
+        <number>1</number>
+        <position_x>2.575</position_x>
+        <position_y>0.395</position_y>
+        <position_z>0.0</position_z>
+    </point>
+    <point ID="3">
+        <type>mission</type>
+        <number>3</number>
+        <position_x>2.5</position_x>
+        <position_y>0.9</position_y>
+        <position_z>0.0</position_z>
+    </point>
+    <point ID="4">
+        <type>material</type>
+        <number>2</number>
+        <position_x>2.575</position_x>
+        <position_y>1.32</position_y>
+        <position_z>2.0</position_z>
+    </point>
+    <point ID="5">
+        <type>material</type>
+        <number>1</number>
+        <position_x>2.575</position_x>
+        <position_y>0.395</position_y>
+        <position_z>0.0</position_z>
+    </point>
+    <point ID="6">
+        <type>mission</type>
+        <number>3</number>
+        <position_x>2.5</position_x>
+        <position_y>0.9</position_y>
+        <position_z>0.0</position_z>
+    </point>
+</root>

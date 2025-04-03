@@ -5,8 +5,10 @@
 #include <fstream>
 #include <deque>
 #include <bitset>
+#include <math.h>
 
 // Use behavior tree
+#include "behaviortree_ros2/bt_action_node.hpp"
 #include "behaviortree_cpp/decorators/loop_node.h"
 #include "behaviortree_cpp/bt_factory.h"
 #include "behaviortree_cpp/behavior_tree.h"
@@ -32,9 +34,6 @@
 #include <tf2_ros/buffer.h>
 #include <tf2/exceptions.h>
 
-// Use self define message
-
-
 using namespace BT;
 
 namespace BT {
@@ -46,29 +45,12 @@ namespace BT {
 /******************************/
 /* BTStarter - Start the tree */
 /******************************/
-class PointProvider : public BT::SyncActionNode {
-
-public:
-    PointProvider(const std::string& name, const BT::NodeConfig& config)
-        : BT::SyncActionNode(name, config)
-    {}
-
-    /* Node remapping function */
-    static BT::PortsList providedPorts();
-
-    /* Start and running function */
-    BT::NodeStatus tick() override;
-private:
-    geometry_msgs::msg::PoseStamped point;
-};
-/******************************/
-/* BTStarter - Start the tree */
-/******************************/
+// continuous update the current time
 class BTStarter : public BT::SyncActionNode {
 
 public:
-    BTStarter(const std::string& name, const BT::NodeConfig& config, std::shared_ptr<rclcpp::Node> node, BT::Blackboard::Ptr blackboard)
-        : BT::SyncActionNode(name, config), node_(node), blackboard_(blackboard)
+    BTStarter(const std::string& name, const BT::NodeConfig& config, const RosNodeParams& params, BT::Blackboard::Ptr blackboard)
+        : BT::SyncActionNode(name, config), node_(params.nh.lock()), blackboard_(blackboard)
     {}
 
     /* Node remapping function */
@@ -86,12 +68,15 @@ private:
     float current_time_;
 };
 
+/******************************/
 /* BTFinisher - Send mission type to kernel */
+/******************************/
+// No useage now
 class BTFinisher : public BT::SyncActionNode {
 
 public:
-    BTFinisher(const std::string& name, const BT::NodeConfig& config, std::string file, int team, std::shared_ptr<rclcpp::Node> node)
-        : BT::SyncActionNode(name, config), score_filepath(file), team_(team),  node_(node){}
+    BTFinisher(const std::string& name, const BT::NodeConfig& config, std::string file, int team, const RosNodeParams& params)
+        : BT::SyncActionNode(name, config), score_filepath(file), team_(team),  node_(params.nh.lock()){}
 
     /* Node remapping function */
     static BT::PortsList providedPorts();
@@ -108,11 +93,12 @@ public:
 /*****************************************/
 /* Comparator to check the state is safe */
 /*****************************************/
+// No usage now
 class Comparator : public BT::ConditionNode {
 
 public:
-    Comparator(const std::string& name, const BT::NodeConfig& config, std::shared_ptr<rclcpp::Node> node)
-        : BT::ConditionNode(name, config), node_(node), tf_buffer_(node_->get_clock()), listener_(tf_buffer_)
+    Comparator(const std::string& name, const BT::NodeConfig& config, const RosNodeParams& params)
+        : BT::ConditionNode(name, config), node_(params.nh.lock()), tf_buffer_(node_->get_clock()), listener_(tf_buffer_)
     {}
 
     /* Node remapping function */
@@ -139,6 +125,7 @@ private:
 /****************************/
 /* TimerChecker - Decorator */
 /****************************/
+// No usage now
 class TimerChecker : public BT::DecoratorNode {
 
 public:

@@ -6,18 +6,21 @@ services:
       context: .
       args:
         USERNAME: user
-    image: tedwang/main-ws:latest
+    image: tedwang2/main-ws:1.1
     container_name: main-ws
     stdin_open: true
     tty: true
     privileged: true
+    stop_grace_period: 3s
     network_mode: host
-    working_dir: /home/user/Eurobot-2025-Main-ws
+    working_dir: /home/user/Eurobot-2025-Main
     environment:
       - DISPLAY=host.docker.internal:0.0
       - XAUTHORITY=/root/.Xauthority
-      - ROS_WS=/home/user/Eurobot-2025-Main-ws
+      - ROS_WS=/home/user/Eurobot-2025-Main
       - GROOT_APPIMAGE=/home/user/Eurobot-2025-Main-ws/groot/groot.AppImage
+      - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+      - ROS_DOMAIN_ID=25
     volumes:
       # Mount local timezone into container. ( Readonly )
       # Reference: https://stackoverflow.com/questions/57607381/how-do-i-change-timezone-in-a-docker-container
@@ -28,7 +31,7 @@ services:
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
       # Direct Rendering Infrastructure
       - /dev:/dev
-      - ../:/home/user/Eurobot-2025-Main-ws
+      - ../:/home/user/Eurobot-2025-Main
     ports:
       - "8765:8765"
 

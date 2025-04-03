@@ -25,6 +25,7 @@ find_package(geometry_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
 find_package(nav2_msgs REQUIRED)
 find_package(btcpp_ros2_interfaces REQUIRED)
+find_package(opennav_docking_msgs REQUIRED)
 
 # Include directories
 include_directories(
@@ -37,6 +38,7 @@ target_link_libraries(bt_m
   BTNODE_FIRMWARE
   BTNODE_NAVIGATION
   BTNODE_OTHERS
+  BTNODE_UTIL
   ${ARMADILLO_LIBRARIES})
 ament_target_dependencies(bt_m
   ${THIS_PACKAGE_DEPS}
@@ -49,6 +51,7 @@ ament_target_dependencies(bt_m
   "rclcpp_components"
   "std_srvs"
   "std_msgs"
+  "geometry_msgs"
 )
 install(TARGETS
   bt_m
@@ -56,7 +59,8 @@ install(TARGETS
 )
 
 add_library(BTNODE_RECEIVER src/bt_nodes_receiver.cpp)
-target_link_libraries(BTNODE_RECEIVER  
+target_link_libraries(BTNODE_RECEIVER
+  BTNODE_UTIL
   ${ARMADILLO_LIBRARIES})
 ament_target_dependencies(BTNODE_RECEIVER
   "behaviortree_ros2"
@@ -74,14 +78,18 @@ ament_target_dependencies(BTNODE_RECEIVER
 )
 
 add_library(BTNODE_FIRMWARE src/bt_nodes_firmware.cpp)
-target_link_libraries(BTNODE_FIRMWARE  
+target_link_libraries(BTNODE_FIRMWARE
+  BTNODE_UTIL
+  BTNODE_RECEIVER
   ${ARMADILLO_LIBRARIES})
 ament_target_dependencies(BTNODE_FIRMWARE
   "btcpp_ros2_interfaces"
+  "nav2_msgs"
   "behaviortree_ros2"
   "behaviortree_cpp"
   "std_msgs"
   "std_srvs"
+  "tf2_ros"
   "geometry_msgs"
   "rclcpp"
   "rclcpp_action"
@@ -90,10 +98,13 @@ ament_target_dependencies(BTNODE_FIRMWARE
 )
 
 add_library(BTNODE_NAVIGATION src/bt_nodes_navigation.cpp)
-target_link_libraries(BTNODE_NAVIGATION  
+target_link_libraries(BTNODE_NAVIGATION
+  BTNODE_UTIL
+  BTNODE_RECEIVER
   ${ARMADILLO_LIBRARIES})
 ament_target_dependencies(BTNODE_NAVIGATION
   "btcpp_ros2_interfaces"
+  "opennav_docking_msgs"
   "nav2_msgs"
   "behaviortree_ros2"
   "behaviortree_cpp"
@@ -110,7 +121,8 @@ ament_target_dependencies(BTNODE_NAVIGATION
 )
 
 add_library(BTNODE_OTHERS src/bt_nodes_others.cpp)
-target_link_libraries(BTNODE_OTHERS 
+target_link_libraries(BTNODE_OTHERS
+  BTNODE_UTIL
   ${ARMADILLO_LIBRARIES})
 ament_target_dependencies(BTNODE_OTHERS
   "behaviortree_ros2"
@@ -125,6 +137,19 @@ ament_target_dependencies(BTNODE_OTHERS
   "rclcpp"
   "rclcpp_action"
   "rclcpp_components"
+  ${THIS_PACKAGE_DEPS}
+)
+
+add_library(BTNODE_UTIL src/bt_nodes_util.cpp)
+target_link_libraries(BTNODE_UTIL
+  ${ARMADILLO_LIBRARIES})
+ament_target_dependencies(BTNODE_UTIL
+  "behaviortree_cpp"
+  "tf2"
+  "tf2_ros"
+  "tf2_geometry_msgs"
+  "geometry_msgs"
+  "rclcpp"
   ${THIS_PACKAGE_DEPS}
 )
 

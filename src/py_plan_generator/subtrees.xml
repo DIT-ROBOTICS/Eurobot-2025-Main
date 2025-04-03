@@ -1,0 +1,45 @@
+<!-- Description of Node Models (used by Groot) -->
+<TreeNodesModel>
+    <Action ID="BTStarter">
+        <output_port name="result"
+                    type="int"/>
+    </Action>
+    <Action ID="Docking">
+        <output_port name="final_pose"
+                    type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+        <input_port name="isPureDocking"
+                    type="bool"/>
+        <input_port name="dock_type"
+                    type="std::string"/>
+        <input_port name="shift"
+                    type="double"/>
+        <input_port name="offset"
+                    type="double"/>
+        <input_port name="base"
+                    type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+    </Action>
+    <Action ID="FirmwareMission">
+        <output_port name="mission_status"
+                    type="int"/>
+        <input_port name="mission_type"
+                    type="int"/>
+    </Action>
+    <Action ID="MissionFinisher">
+        <output_port name="failed_levels"
+                    type="int"/>
+        <output_port name="success_levels"
+                    type="int"/>
+        <input_port name="robot_type"
+                    type="bool"/>
+        <input_port name="step_results"
+                    type="std::deque&lt;int, std::allocator&lt;int&gt; &gt;"/>
+    </Action>
+    <Action ID="Rotation">
+        <output_port name="final_pose"
+                    type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+        <input_port name="degree"
+                    type="double"/>
+        <input_port name="base"
+                    type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+    </Action>
+</TreeNodesModel>
