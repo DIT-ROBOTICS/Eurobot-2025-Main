@@ -121,3 +121,27 @@ private:
   std::shared_ptr<rclcpp::Node> node_;
   BT::Blackboard::Ptr blackboard_;
 };
+
+class TopicSubTest : public BT::StatefulActionNode
+{
+public:
+  TopicSubTest(const std::string& name, const BT::NodeConfig& config, const RosNodeParams& params)
+    : BT::StatefulActionNode(name, config), node_(params.nh) {
+    subscription_ = node_->create_subscription<std_msgs::msg::Int32>("number", 10, std::bind(&TopicSubTest::topic_callback, this, std::placeholders::_1));
+  }
+  /* Node remapping function */
+  static BT::PortsList providedPorts();
+  /* Start and running function */
+  BT::NodeStatus onStart() override;
+  BT::NodeStatus onRunning() override;
+  /* Halt function */
+  void onHalted() override;
+private:
+  // function
+  BT::NodeStatus topic_callback(const std_msgs::msg::Int32::SharedPtr msg);
+  // node
+  rclcpp::Subscription<std_msgs::msg::Int32>::SharedPtr subscription_;
+  std::shared_ptr<rclcpp::Node> node_;
+  // params
+  int number = 0;
+};

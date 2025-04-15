@@ -43,6 +43,16 @@
     </Sequence>
   </BehaviorTree>
 
+  <BehaviorTree ID="FuncTest">
+    <Sequence>
+      <MissionNearRival remap_base="{base}"
+                        mission_type="front"
+                        base_index="15">
+        <Sleep msec="1000"/>
+      </MissionNearRival>
+    </Sequence>
+  </BehaviorTree>
+
   <BehaviorTree ID="MainTree">
     <Sequence>
       <Parallel failure_count="2"
@@ -736,6 +746,14 @@
       <input_port name="step_results"
                   type="std::deque&lt;int, std::allocator&lt;int&gt; &gt;"/>
     </Action>
+    <Decorator ID="MissionNearRival">
+      <output_port name="remap_base"
+                   type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+      <input_port name="mission_type"
+                  type="std::string"/>
+      <input_port name="base_index"
+                  type="int"/>
+    </Decorator>
     <Action ID="Rotation">
       <output_port name="final_pose"
                    type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>

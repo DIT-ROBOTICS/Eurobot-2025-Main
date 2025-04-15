@@ -92,6 +92,7 @@ public:
         nav_finished_ = false;
         nav_error_ = false;
         isPureDocking_ = true;
+        tf_buffer_.setUsingDedicatedThread(true);
     }
 
     /* Node remapping function */
@@ -167,6 +168,7 @@ public:
         : BT::DecoratorNode(name, config), node_(params.nh.lock()), blackboard_(blackboard), tf_buffer_(params.nh.lock()->get_clock())
     {
         node_->get_parameter("frame_id", frame_id_);
+        tf_buffer_.setUsingDedicatedThread(true);
     }
     static BT::PortsList providedPorts();
     BT::NodeStatus tick() override;
@@ -196,6 +198,7 @@ public:
         : BT::DecoratorNode(name, config), node_(params.nh.lock()), blackboard_(blackboard), tf_buffer_(params.nh.lock()->get_clock())
     {
         node_->get_parameter("frame_id", frame_id_);
+        tf_buffer_.setUsingDedicatedThread(true);
     }
     static BT::PortsList providedPorts();
     BT::NodeStatus tick() override;

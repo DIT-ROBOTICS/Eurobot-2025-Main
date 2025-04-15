@@ -115,3 +115,40 @@ BT::NodeStatus CamReceiver::tick() {
     
     return BT::NodeStatus::SUCCESS;
 }
+
+PortsList TopicSubTest::providedPorts() {
+    return { 
+      BT::OutputPort<int>("sum") 
+    };
+}
+  
+BT::NodeStatus TopicSubTest::topic_callback(const std_msgs::msg::Int32::SharedPtr msg) {
+    number += msg->data;
+    RCLCPP_INFO(node_->get_logger(), "I heard: '%d'", msg->data);
+    if (number > 3) {
+      subscription_.reset();
+    }
+    return BT::NodeStatus::SUCCESS;
+}
+  
+BT::NodeStatus TopicSubTest::onStart() {
+    RCLCPP_INFO(node_->get_logger(), "Node start");
+    return BT::NodeStatus::RUNNING;
+}
+  
+BT::NodeStatus TopicSubTest::onRunning() {
+    setOutput<int>("sum", number);
+    RCLCPP_INFO_STREAM(node_->get_logger(), number);
+    if (number > 3) {
+      subscription_.reset();
+    }
+    return BT::NodeStatus::SUCCESS;
+}
+  
+void TopicSubTest::onHalted() {
+    // Reset the output port
+    subscription_.reset();
+    setOutput<int>("sum", number);
+    RCLCPP_INFO(node_->get_logger(), "Testing Node halted");
+    return;
+}

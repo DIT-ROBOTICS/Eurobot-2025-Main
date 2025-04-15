@@ -29,6 +29,8 @@
 
 using namespace BT;
 
+bool isReady = false;
+
 class MainClass : public rclcpp::Node {
 public:
     MainClass() : Node("bt_app_2025"), rate(100) {}
@@ -110,6 +112,7 @@ public:
         // action nodes
         params.nh = node_;
         /* receiver */
+        factory.registerNodeType<TopicSubTest>("TopicSubTest", params);
         factory.registerNodeType<NavReceiver>("NavReceiver", params, blackboard);
         factory.registerNodeType<CamReceiver>("CamReceiver", params, blackboard);
         /* navigation */
@@ -168,9 +171,8 @@ public:
 
         BT::NodeStatus status = BT::NodeStatus::RUNNING;
         RCLCPP_INFO(this->get_logger(), "[BT Application]: Behavior Tree start running!");
-        // executor.add_node(node);
         while (rclcpp::ok() && status == BT::NodeStatus::RUNNING) {
-            // executor.spin_some();
+            rclcpp::spin_some(node_);
             rate.sleep();
             status = tree.rootNode()->executeTick();
         }
@@ -216,7 +218,6 @@ private:
     double game_time = 0.0;
     char team = '0';
     std::string groot_filename;
-    bool isReady = false;
     // Parameters
     std::string groot_xml_config_directory;
     std::string bt_tree_node_model;
@@ -232,8 +233,6 @@ void MainClass::timeCallback(const std_msgs::msg::Float32::SharedPtr msg) {
 
 void MainClass::readyCallback(const std_msgs::msg::String::SharedPtr msg) {
     if (isReady) {
-        LoadXML();
-        RunTheTree();
         return;
     }
     RCLCPP_INFO_STREAM(this->get_logger(), "in the callback: " << msg->data);
@@ -250,11 +249,17 @@ void MainClass::readyCallback(const std_msgs::msg::String::SharedPtr msg) {
 int main(int argc, char **argv) {
     // initialize
     rclcpp::init(argc, argv);
+    rclcpp::Rate rate(100);
     auto node = std::make_shared<MainClass>();
     // rclcpp::executors::MultiThreadedExecutor executor;
     node->get_node();
     node->InitParam();
     node->CreateTreeNodes();
-    rclcpp::spin(node);
+    while (rclcpp::ok() && !isReady) {
+        rclcpp::spin_some(node);
+        rate.sleep();
+    }
+    node->LoadXML();
+    node->RunTheTree();
     return 0;
 }

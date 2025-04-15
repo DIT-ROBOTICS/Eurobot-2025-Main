@@ -119,7 +119,10 @@ class PublishPose : public BT::SyncActionNode
 public:
     PublishPose(const std::string& name, const BT::NodeConfig& config, std::shared_ptr<rclcpp::Node> node, BT::Blackboard::Ptr blackboard)
         : BT::SyncActionNode(name, config), node_(node), blackboard_(blackboard)
-    {}
+    {
+        node_->get_parameter("frame_id", frame_id_);
+        tf_broadcaster_ = std::make_shared<tf2_ros::TransformBroadcaster>(node_);
+    }
 
     /* Node remapping function */
     static BT::PortsList providedPorts();
@@ -134,6 +137,9 @@ private:
     BT::Blackboard::Ptr blackboard_;
     rclcpp::TimerBase::SharedPtr timer_;
 
+    std::shared_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_;
+    geometry_msgs::msg::TransformStamped tf_;
+    std::string frame_id_;
     rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr rival_pub_;
     nav_msgs::msg::Odometry current_pose_;
 };

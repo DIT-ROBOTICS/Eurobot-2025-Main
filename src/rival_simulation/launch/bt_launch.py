@@ -30,6 +30,11 @@ def generate_launch_description():
             package = 'rival_simulation',
             executable = 'rival_main',
             name = 'rival_main',
-            parameters = [config_path, map_points, {"tree_name": "MainTree"}]
+            parameters = [
+                config_path, 
+                map_points, 
+                {"frame_id": "base_link"}, 
+                {"tree_name": "MainTree"}
+            ]
         )
     ])
