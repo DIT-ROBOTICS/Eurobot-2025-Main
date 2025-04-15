@@ -209,8 +209,14 @@ void PublishPose::timer_publisher() {
     rclcpp::Rate rate(100);
     while (rclcpp::ok()) { 
         blackboard_->get("current_pose", current_pose_);
-        RCLCPP_INFO_STREAM(node_->get_logger(), current_pose_.pose.pose.position.x << ", " << current_pose_.pose.pose.position.y);
+        tf_.header.stamp = node_->get_clock()->now();
+        tf_.header.frame_id = "map";
+        tf_.child_frame_id = "rival/" + frame_id_;
+        tf_.transform.translation.x = current_pose_.pose.pose.position.x;
+        tf_.transform.translation.y = current_pose_.pose.pose.position.y;
+        tf_broadcaster_->sendTransform(tf_);
         rival_pub_->publish(current_pose_);
+        RCLCPP_INFO_STREAM(node_->get_logger(), current_pose_.pose.pose.position.x << ", " << current_pose_.pose.pose.position.y);
         rate.sleep();
     }
 }
