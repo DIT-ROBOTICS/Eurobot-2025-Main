@@ -62,7 +62,7 @@ bool LocReceiver::UpdateRivalPose(geometry_msgs::msg::PoseStamped &rival_pose_, 
 
     try {
         transformStamped = tf_buffer_.lookupTransform(
-            "rival/map" /* Parent frame - map */, 
+            "map" /* Parent frame - map */, 
             "rival/" + frame_id_ /* Child frame - base */,
             rclcpp::Time()
         );

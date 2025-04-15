@@ -291,45 +291,51 @@
                            _description="grab back material"/>
         </Timeout>
       </ForceSuccess>
-      <Docking final_pose="{PrevGoal}"
-               isPureDocking="0"
-               dock_type="mission_dock_y"
-               shift="0"
-               offset="-0.10"
-               base="1.25, 0.5, 1"
-               _description="mission point 3"/>
-      <SubTree ID="2levelmissionTest"
-               BACK_L="0.2"
-               BACK_M="0.10"
-               BACK_S="0.045"
-               FORWARD_L="-0.15"
-               FORWARD_M="-0.09"
-               FORWARD_S="-0.065"
-               DOCK_DIR="mission_dock_y"
-               _autoremap="true"/>
-      <Docking final_pose="{PrevGoal}"
-               isPureDocking="0"
-               dock_type="mission_dock_y"
-               shift="0"
-               offset="0.065"
-               base="{PrevGoal}"
-               _description="mission point 3"/>
-      <Docking final_pose="{PrevGoal}"
-               isPureDocking="0"
-               dock_type="mission_dock_y"
-               shift="0"
-               offset="-0.10"
-               base="1.25, 0.35, 3"
-               _description="mission point 3"/>
-      <SubTree ID="3levelmissionTest"
-               BACK_L="0.2"
-               BACK_M="0.10"
-               BACK_S="0.047"
-               FORWARD_L="-0.15"
-               FORWARD_M="-0.088"
-               FORWARD_S="-0.065"
-               DOCK_DIR="mission_dock_y"
-               _autoremap="true"/>
+      <Switch2 case_1="0"
+              case_2="1"
+              variable="0">
+        <Sequence>
+          <MissionNearRival remap_base="{base}"
+                            mission_type="front"
+                            base_index="13">
+            <Docking final_pose="{PrevGoal}"
+                    isPureDocking="0"
+                    dock_type="mission_dock_y"
+                    shift="0"
+                    offset="-0.10"
+                    base="1.25, 0.5, 1"
+                    _description="mission point 3"/>
+          </MissionNearRival>
+          <SubTree ID="2levelmissionTest"
+                  BACK_L="0.2"
+                  BACK_M="0.10"
+                  BACK_S="0.045"
+                  FORWARD_L="-0.15"
+                  FORWARD_M="-0.09"
+                  FORWARD_S="-0.065"
+                  DOCK_DIR="mission_dock_y"
+                  _autoremap="true"/>
+        </Sequence>
+        <Sequence>
+          <Docking final_pose="{PrevGoal}"
+                  isPureDocking="0"
+                  dock_type="mission_dock_y"
+                  shift="0"
+                  offset="-0.10"
+                  base="1.25, 0.35, 3"
+                  _description="mission point 3"/>
+          <SubTree ID="3levelmissionTest"
+                  BACK_L="0.2"
+                  BACK_M="0.10"
+                  BACK_S="0.047"
+                  FORWARD_L="-0.15"
+                  FORWARD_M="-0.088"
+                  FORWARD_S="-0.065"
+                  DOCK_DIR="mission_dock_y"
+                  _autoremap="true"/>
+        </Sequence>
+        <Sleep msec="1000"/>
+      </Switch2>
     </Sequence>
   </BehaviorTree>
 
