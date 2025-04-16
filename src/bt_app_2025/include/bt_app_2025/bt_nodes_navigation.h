@@ -165,7 +165,7 @@ class VisionCheck : public BT::DecoratorNode
 {
 public:
     VisionCheck(const std::string &name, const BT::NodeConfig &config, const RosNodeParams& params, BT::Blackboard::Ptr blackboard)
-        : BT::DecoratorNode(name, config), node_(params.nh.lock()), blackboard_(blackboard), tf_buffer_(params.nh.lock()->get_clock())
+        : BT::DecoratorNode(name, config), node_(params.nh.lock()), blackboard_(blackboard), tf_buffer_(params.nh.lock()->get_clock()), listener_(tf_buffer_)
     {
         node_->get_parameter("frame_id", frame_id_);
         tf_buffer_.setUsingDedicatedThread(true);
@@ -178,6 +178,7 @@ private:
     rclcpp::Node::SharedPtr node_;
     // for tf listener
     tf2_ros::Buffer tf_buffer_;
+    tf2_ros::TransformListener listener_;
     std::string frame_id_;
     geometry_msgs::msg::PoseStamped robot_pose_;
     geometry_msgs::msg::PoseStamped rival_pose_;
@@ -195,7 +196,7 @@ class MissionNearRival : public BT::DecoratorNode
 {
 public:
     MissionNearRival(const std::string &name, const BT::NodeConfig &config, const RosNodeParams& params, BT::Blackboard::Ptr blackboard)
-        : BT::DecoratorNode(name, config), node_(params.nh.lock()), blackboard_(blackboard), tf_buffer_(params.nh.lock()->get_clock())
+        : BT::DecoratorNode(name, config), node_(params.nh.lock()), blackboard_(blackboard), tf_buffer_(params.nh.lock()->get_clock()), listener_(tf_buffer_)
     {
         node_->get_parameter("frame_id", frame_id_);
         tf_buffer_.setUsingDedicatedThread(true);
@@ -207,6 +208,7 @@ private:
     rclcpp::Node::SharedPtr node_;
     // for tf listener
     tf2_ros::Buffer tf_buffer_;
+    tf2_ros::TransformListener listener_;
     std::string frame_id_;
     geometry_msgs::msg::PoseStamped robot_pose_;
     geometry_msgs::msg::PoseStamped rival_pose_;

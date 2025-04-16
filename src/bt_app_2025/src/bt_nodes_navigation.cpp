@@ -42,7 +42,7 @@ double inline calculateDistance(const geometry_msgs::msg::Pose &pose1, const geo
     tf2::Vector3 position1(pose1.position.x, pose1.position.y, 0);
     tf2::Vector3 position2(pose2.position.x, pose2.position.y, 0);
     double dist = position1.distance(position2);
-    RCLCPP_INFO_STREAM(rclcpp::get_logger("rclcpp"), "distance: " << dist);
+    // RCLCPP_INFO_STREAM(rclcpp::get_logger("rclcpp"), "distance: " << dist);
     return dist;
 }
 
@@ -443,6 +443,7 @@ NodeStatus VisionCheck::tick() {
         else
             dockTypeCode_ = -1;
         shift_ *= offset_ / abs(offset_) * dockTypeCode_; // use dock type to determine the shift direction
+        offset_ *= 0.8;
     } else if (missionType_ == "back") {
         base_.pose.position.z = ((int)base_.pose.position.z / 2) ? base_.pose.position.z - 2 : base_.pose.position.z + 2;
         offset_ *= -1;
@@ -496,21 +497,21 @@ NodeStatus MissionNearRival::tick() {
         base_.pose.position.z = ((int)base_.pose.position.z / 2) ? base_.pose.position.z - 2 : base_.pose.position.z + 2;
     }
     if (base_.pose.position.z == 1.0 || base_.pose.position.z == 3.0) {
-        if (mission_points_status_[baseIndex_] > 0)   // check if this mission is already placed
+        if (mission_points_status_[baseIndex_ - 11] != 0)   // check if this mission is already placed
             base_.pose.position.y -= offset * 1.3;    // if yes, the placement point need to e changed
-        if (dist < 0.5 && (base_.pose.position.x - rival_pose_.pose.position.x)) {
+        if (dist < 0.5 && abs(base_.pose.position.y - rival_pose_.pose.position.y) < 0.4) {
             base_.pose.position.x += (base_.pose.position.x - rival_pose_.pose.position.x)/abs(base_.pose.position.x - rival_pose_.pose.position.x)*(0.5 - abs(base_.pose.position.x - rival_pose_.pose.position.x));
         }
     } else {
-        if (mission_points_status_[baseIndex_] > 0)  // check if this mission is already placed
+        if (mission_points_status_[baseIndex_ - 11] != 0)  // check if this mission is already placed
             base_.pose.position.x -= offset * 1.3;   // if yes, the placement point need to e changed
-        if (dist < 0.5 && (base_.pose.position.y - rival_pose_.pose.position.y)) {
+        if (dist < 0.5 && abs(base_.pose.position.x - rival_pose_.pose.position.x) < 0.4) {
             base_.pose.position.y += (base_.pose.position.y - rival_pose_.pose.position.y)/abs(base_.pose.position.y - rival_pose_.pose.position.y)*(0.5 - abs(base_.pose.position.y - rival_pose_.pose.position.y));
         }
     }
     // update mission_points_status_
-    mission_points_status_[baseIndex_]++;
-    blackboard_->set<std::vector<int>>("mission_points_status", mission_points_status_);
+    // mission_points_status_[baseIndex_]++;
+    // blackboard_->set<std::vector<int>>("mission_points_status", mission_points_status_);
 
     // set output port
     setOutput<geometry_msgs::msg::PoseStamped>("remap_base", base_);
