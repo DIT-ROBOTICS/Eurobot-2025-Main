@@ -173,10 +173,10 @@ bool Docking::setGoal(RosActionNode::Goal& goal) {
     goal_.header.stamp = now; // set header time
     goal_.header.frame_id = "map";  // set header frame
     goal_.pose = m.value().pose; // calculate goal pose
-    if (dock_type_ == "mission_dock_x") {
+    if (dock_type_ == "mission_dock_x" || dock_type_.substr(0, 6) == "dock_x") {
         goal_.pose.position.x += offset_; // set staging point
         goal_.pose.position.y += shift_;
-    } else if (dock_type_ == "mission_dock_y") {
+    } else if (dock_type_ == "mission_dock_y" || dock_type_.substr(0, 6) == "dock_y") {
         goal_.pose.position.x += shift_;
         goal_.pose.position.y += offset_; // set staging point
     } else {
@@ -446,7 +446,7 @@ NodeStatus VisionCheck::tick() {
         offset_ *= 0.8;
     } else if (missionType_ == "back") {
         base_.pose.position.z = ((int)base_.pose.position.z / 2) ? base_.pose.position.z - 2 : base_.pose.position.z + 2;
-        offset_ *= -1;
+        // offset_ *= -1;
         shift_ = 0;
     } else {
         throw "error mission direction for choosing nav goal!";
