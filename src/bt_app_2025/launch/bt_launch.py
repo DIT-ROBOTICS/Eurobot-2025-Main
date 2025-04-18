@@ -17,7 +17,7 @@ from ament_index_python.packages import get_package_share_directory
 def generate_launch_description():
 
 
-    pkg_dir = os.path.join('/home/user/Eurobot-2025-Main/src/bt_app_2025')
+    pkg_dir = os.path.join('/home/ros/Eurobot-2025-Main/src/bt_app_2025')
 
     config_path_arg = DeclareLaunchArgument(
         'params0',
@@ -52,7 +52,7 @@ def generate_launch_description():
             nav_parameters,
             map_points,
             {"frame_id": "base_footprint"},
-            {"tree_name": "FirmwareTest"}, 
+            {"tree_name": "FuncTest"}, # "MissionPointOne"
         ],
         package = 'bt_app_2025',
         executable = 'bt_m',
@@ -63,7 +63,7 @@ def generate_launch_description():
             config_path,
             map_points,
             {"Robot_name": "Tongue"},  # Invisible or Tongue
-            {"plan_code": 20} # 10e1: plan (start from 1), 10e0: color(0 for yellow, 1 for blue)
+            {"plan_code": 11} # 10e1: plan (start from 1), 10e0: color(0 for yellow, 1 for blue)
         ],
         package = 'startup',
         executable = 'startup',
@@ -83,7 +83,7 @@ def generate_launch_description():
         map_points_arg,
         bt_m_node,
         startup_node,
-        firmware_node
+        # firmware_node
         # TimerAction(
         #     period = 1.0,
         #     actions = [Node(
