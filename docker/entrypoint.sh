@@ -39,10 +39,10 @@ if [ "${AUTO_BUILD}" = "true" ]; then
     cd "$ROS_WS"
     
     if [ ! -d "$ROS_WS/install/micro_ros_msgs" ]; then
-        echo "Building workspace excluding micro_ros_msgs..."
-        colcon build --symlink-install --packages-skip micro_ros_msgs
+        colcon build --symlink-install
     else
         echo "micro-ROS already built. Skipping build step for micro_ros_msgs."
+        colcon build --symlink-install --packages-skip micro_ros_msgs
     fi
 
     if [ ! -d "$ROS_WS/src/uros" ]; then

@@ -54,7 +54,7 @@
    ```
 ## Modifing Steps before Execute Main Program on the Robot
 - bt_launch.py: `pkg_dir = os.path.join('/home/ros/Eurobot-2025-Main/src/bt_app_2025')`
-- bt_launch.py: `{"frame_id": "base_link"},`
+- bt_launch.py: `{"frame_id": "base_footprint"},`
 - bt_launch.py: `arguments=['serial', '-b', '115200', '-D', '/dev/mission']`
 
 ## Notes for Groot Functionality
