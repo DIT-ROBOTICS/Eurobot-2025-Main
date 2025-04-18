@@ -64,11 +64,27 @@
 
   <BehaviorTree ID="MainTree">
     <Sequence>
-      <TopicSubTest output="{POINT}"/>
-      <TopicSubTest output="{POINT2}"/>
-      <NavigationTemp goal="2.3, 1.3, 0"/>
-      <NavigationTemp goal="2.3, 0.46, 0"/>
-      <Sleep msec="100"/>
+      <Testing output=""
+               input=""/>
+      <Sleep msec="10000"/>
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="ParallelTree">
+    <Sequence>
+      <Parallel_check output="start"
+                      input="start"/>
+      <Parallel failure_count="3"
+                success_count="2">
+        <count_5 output="a"
+                 input="a"/>
+        <count_10 output="b"
+                  input="b"/>
+        <count_15 output="c"
+                  input="c"/>
+      </Parallel>
+      <Parallel_check output="end"
+                      input="end"/>
     </Sequence>
   </BehaviorTree>
 
@@ -108,6 +124,51 @@
     </Sequence>
   </BehaviorTree>
 
+  <BehaviorTree ID="Stupid-Tree">
+    <Sequence>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.5, 1.3, 3.14"/>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.6, 1.3, 3.14"/>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.5, 0.4, 0"/>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.6, 0.4, 0"/>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.5, 0.4, 0"/>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.6, 0.4, 0"/>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.5, 0.4, 0"/>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.5, 0.9, 0"/>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.6, 0.9, 0"/>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.5, 0.9, 0"/>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.5, 0.9, 3.14"/>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.6, 0.9, 3.14"/>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.6, 0.9, 0"/>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.5, 0.9, 0"/>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.4, 0.9, 0"/>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.5, 0.9, 0"/>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.4, 0.9, 0"/>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.5, 0.9, 0"/>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.4, 0.9, 0"/>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.5, 0.9, 0"/>
+    </Sequence>
+  </BehaviorTree>
+
   <BehaviorTree ID="SubTree-Remapping-Test-Wrong">
     <Sequence>
       <SubTree ID="Test-SubTree-remapping"
@@ -126,27 +187,102 @@
     </Sequence>
   </BehaviorTree>
 
+  <BehaviorTree ID="nav_test_0">
+    <Sequence>
+      <Sequence>
+        <NavAction final_pose="{NavGoal}"
+                   goal="2.5, 1.3, 3.14"/>
+        <NavAction final_pose="{NavGoal}"
+                   goal="2.6, 1.3, 3.14"/>
+      </Sequence>
+      <Sequence>
+        <NavAction final_pose="{NavGoal}"
+                   goal="2.5, 0.4, 0"/>
+        <NavAction final_pose="{NavGoal}"
+                   goal="2.6, 0.4, 0"/>
+      </Sequence>
+      <SubTree ID="nav_test_1"
+               _autoremap="true"/>
+      <Sequence>
+        <NavAction final_pose="{NavGoal}"
+                   goal="2.5, 0.9, 0"/>
+        <NavAction final_pose="{NavGoal}"
+                   goal="2.6, 0.9, 0"/>
+      </Sequence>
+      <SubTree ID="nav_test_2"
+               _autoremap="true"/>
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="nav_test_1">
+    <Sequence>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.5, 0.4, 0"/>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.6, 0.4, 0"/>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.5, 0.4, 0"/>
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="nav_test_2">
+    <Sequence>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.5, 0.9, 0"/>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.5, 0.9, 3.14"/>
+      <SubTree ID="nav_test_3"
+               _autoremap="true"/>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.4, 0.9, 0"/>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.5, 0.9, 0"/>
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="nav_test_3">
+    <Sequence>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.6, 0.9, 3.14"/>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.6, 0.9, 0"/>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.5, 0.9, 0"/>
+      <SubTree ID="nav_test_4"
+               _autoremap="true"/>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.5, 0.9, 0"/>
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="nav_test_4">
+    <Sequence>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.4, 0.9, 0"/>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.5, 0.9, 0"/>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.4, 0.9, 0"/>
+    </Sequence>
+  </BehaviorTree>
+
   <!-- Description of Node Models (used by Groot) -->
   <TreeNodesModel>
-    <Action ID="Docking">
-      <output_port name="result"
-                   type="geometry_msgs::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
-      <input_port name="offset"
-                  type="geometry_msgs::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
-      <input_port name="base"
-                  type="geometry_msgs::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
-      <input_port name="mission_type"
-                  type="int"/>
-    </Action>
     <Decorator ID="ElapseTimeCheck">
       <input_port name="max_time_count"
                   type="double"/>
     </Decorator>
-    <Action ID="Navigation">
-      <output_port name="result"
-                   type="geometry_msgs::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+    <Action ID="NavAction">
+      <output_port name="final_pose"
+                   type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
       <input_port name="goal"
-                  type="geometry_msgs::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+                  type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+    </Action>
+    <Action ID="Parallel_check">
+      <output_port name="output"
+                   type="std::string"/>
+      <input_port name="input"
+                  type="std::string"/>
     </Action>
     <Decorator ID="RaceTimeCheck">
       <input_port name="max_time_count"
@@ -162,9 +298,23 @@
       <input_port name="input"
                   type="std::string"/>
     </Action>
-    <Action ID="TopicSubTest">
+    <Action ID="count_10">
       <output_port name="output"
-                   type="int"/>
+                   type="std::string"/>
+      <input_port name="input"
+                  type="std::string"/>
+    </Action>
+    <Action ID="count_15">
+      <output_port name="output"
+                   type="std::string"/>
+      <input_port name="input"
+                  type="std::string"/>
+    </Action>
+    <Action ID="count_5">
+      <output_port name="output"
+                   type="std::string"/>
+      <input_port name="input"
+                  type="std::string"/>
     </Action>
   </TreeNodesModel>
 

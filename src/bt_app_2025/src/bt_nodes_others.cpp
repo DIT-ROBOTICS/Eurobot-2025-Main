@@ -35,24 +35,6 @@ template <> inline std::deque<int> BT::convertFromString(StringView str) {
     return output;
 }
 
-BT::PortsList PointProvider::providedPorts() {
-    return { 
-        BT::InputPort<geometry_msgs::msg::PoseStamped>("point_in"),
-        BT::OutputPort<geometry_msgs::msg::PoseStamped>("point_out1"),
-        BT::OutputPort<geometry_msgs::msg::PoseStamped>("point_out2") 
-    };
-}
-
-BT::NodeStatus PointProvider::tick() {
-    point = getInput<geometry_msgs::msg::PoseStamped>("point_in").value();
-    setOutput<geometry_msgs::msg::PoseStamped>("point_out1", point);
-    point.pose.position.x *= -1;
-    point.pose.position.y *= -1;
-    setOutput<geometry_msgs::msg::PoseStamped>("point_out2", point);
-
-    return BT::NodeStatus::SUCCESS;
-}
-
 /*************/
 /* BTStarter */
 /*************/
@@ -70,7 +52,6 @@ BT::NodeStatus BTStarter::tick() {
 
 void BTStarter::topic_callback(const std_msgs::msg::Float32::SharedPtr msg) {
     current_time_ = msg->data;
-    // blackboard_ = BT::Blackboard::create();
     blackboard_->set<double>("current_time", current_time_);
 }
 
