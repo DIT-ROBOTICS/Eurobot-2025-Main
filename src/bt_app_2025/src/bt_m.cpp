@@ -35,9 +35,9 @@ class MainClass : public rclcpp::Node {
 public:
     MainClass() : Node("bt_app_2025"), rate(100) {}
     std::shared_ptr<rclcpp::Node> get_node() {
-        RCLCPP_INFO(this->get_logger(), "in constructor");
+        // RCLCPP_INFO(this->get_logger(), "in constructor");
         node_ = shared_from_this(); 
-        RCLCPP_INFO(this->get_logger(), "0");
+        // RCLCPP_INFO(this->get_logger(), "0");
         return shared_from_this();  // Get a shared pointer to this node
     }
 
@@ -65,7 +65,6 @@ public:
     }
 
     void InitParam() { 
-        // for (int i = 0; i < 10; i++)
         materials_info_.data = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
         // Create a shared blackboard
         blackboard = BT::Blackboard::create();
@@ -108,7 +107,6 @@ public:
     }
 
     void CreateTreeNodes() {
-        RCLCPP_INFO(this->get_logger(), "1");
         // action nodes
         params.nh = node_;
         /* receiver */
@@ -121,9 +119,9 @@ public:
         factory.registerNodeType<MissionNearRival>("MissionNearRival", params, blackboard);
         params.default_port_value = "navigate_to_pose";
         factory.registerNodeType<Navigation>("Navigation", params);
-        factory.registerNodeType<Rotation>("Rotation", params);
         params.default_port_value = "dock_robot";
         factory.registerNodeType<Docking>("Docking", params);
+        factory.registerNodeType<Rotation>("Rotation", params);
         /* firmware */
         params.default_port_value = "firmware_mission";
         factory.registerNodeType<FirmwareMission>("FirmwareMission", params, blackboard);
@@ -134,11 +132,10 @@ public:
         factory.registerNodeType<BTStarter>("BTStarter", params, blackboard);
         factory.registerNodeType<Comparator>("Comparator", params); // decorator
         factory.registerNodeType<TimerChecker>("TimerChecker", blackboard); // decorator
-        RCLCPP_INFO(this->get_logger(), "2");
     }
 
     void LoadXML() {
-        RCLCPP_INFO(this->get_logger(), "3");
+        // RCLCPP_INFO(this->get_logger(), "3");
         shellCmd("whoami", user_name);   // command to get user name
         user_name.pop_back();
         // register tree xml
@@ -146,20 +143,19 @@ public:
         RCLCPP_INFO_STREAM(this->get_logger(), groot_filename);
         factory.registerBehaviorTreeFromFile(groot_filename); // translate new tree nodes into xml language
         // add new tree nodes into xml
-        RCLCPP_INFO(this->get_logger(), "4");
+        // RCLCPP_INFO(this->get_logger(), "4");
         xml_models = BT::writeTreeNodesModelXML(factory);
-        RCLCPP_INFO(this->get_logger(), "5");
+        // RCLCPP_INFO(this->get_logger(), "5");
         bt_tree_node_model = "/home/" + user_name + bt_tree_node_model;
-        RCLCPP_INFO(this->get_logger(), "6");
+        // RCLCPP_INFO(this->get_logger(), "6");
         std::ofstream file(bt_tree_node_model);  // open the xml that store the tree nodes
-        RCLCPP_INFO(this->get_logger(), "7");
+        // RCLCPP_INFO(this->get_logger(), "7");
         file << xml_models;
         file.close();
     }
 
     void RunTheTree() {
         // Send feed back to startup
-        RCLCPP_INFO_STREAM(this->get_logger(), "run the tree");
         for (int j = 0; j < 20; j++) {
             ready_feedback.data = 1;
             pub->publish(ready_feedback);
@@ -235,7 +231,7 @@ void MainClass::readyCallback(const std_msgs::msg::String::SharedPtr msg) {
     if (isReady) {
         return;
     }
-    RCLCPP_INFO_STREAM(this->get_logger(), "in the callback: " << msg->data);
+    // RCLCPP_INFO_STREAM(this->get_logger(), "in the callback: " << msg->data);
     team = msg->data.back();  // get team color
     if (team == '0')
         blackboard->set<bool>("team", false); // team color is yellow
