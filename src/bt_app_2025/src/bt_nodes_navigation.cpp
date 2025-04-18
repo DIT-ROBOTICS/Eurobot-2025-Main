@@ -271,7 +271,7 @@ bool Rotation::setGoal(RosActionNode::Goal& goal) {
     goal_.pose.orientation.w = q.w();
     goal.use_dock_id = false; // set use dock id
     goal.dock_pose = goal_; // send goal pose
-    goal.dock_type = "dock_x_fast_loose";    // determine the docking direction (x or y)
+    goal.dock_type = "dock_x_slow_loose";    // determine the docking direction (x or y)
     goal.max_staging_time = 1000.0; // set max staging time
     goal.navigate_to_staging_pose = 1;  // if it's pure docking, then don't need to navigate to staging pose
 
