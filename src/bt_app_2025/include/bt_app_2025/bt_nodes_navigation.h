@@ -117,15 +117,17 @@ private:
     std::string frame_id_;
 };
 
-class Rotation : public BT::RosActionNode<nav2_msgs::action::NavigateToPose> {
+class Rotation : public BT::RosActionNode<opennav_docking_msgs::action::DockRobot> {
 
 public:
     Rotation(const std::string& name, const NodeConfig& conf, const RosNodeParams& params)
-        : RosActionNode<nav2_msgs::action::NavigateToPose>(name, conf, params)
+        : RosActionNode<opennav_docking_msgs::action::DockRobot>(name, conf, params), tf_buffer_(params.nh.lock()->get_clock()), listener_(tf_buffer_)
     {
         node_ = params.nh.lock();
         nav_finished_ = false;
         nav_error_ = false;
+        node_->get_parameter("frame_id", frame_id_);
+        tf_buffer_.setUsingDedicatedThread(true);
     }
     /* Node remapping function */
     static PortsList providedPorts();
@@ -140,8 +142,12 @@ private:
     bool nav_finished_;
     bool nav_error_;
     int nav_recov_times_ = 0;
+    std::string dock_type_;
+    tf2_ros::Buffer tf_buffer_;
+    tf2_ros::TransformListener listener_;
+    std::string frame_id_;
     geometry_msgs::msg::PoseStamped goal_;
-    geometry_msgs::msg::PoseStamped current_pose_;
+    geometry_msgs::msg::PoseStamped robot_pose_;
 };
 
 class StopRobot : public BT::SyncActionNode
