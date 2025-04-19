@@ -207,42 +207,42 @@ public:
                 break;
             }
         }
-        else if (Robot_name_ == "Invisible") {
+        else if (Robot_name_ == "ByteBandit") {
             switch (code) {
             case 10:
                 start_pt_code = 13;
                 groot_filename = Bot2_YellowA_file;
-                RCLCPP_INFO(this->get_logger(), "[Bot2]: Yellow team plan A");
+                RCLCPP_INFO(this->get_logger(), "[BB]: Yellow team plan A");
                 break;
             case 20:
                 start_pt_code = 10;
                 groot_filename = Bot2_YellowB_file;
-                RCLCPP_INFO(this->get_logger(), "[Bot2]: Yellow team plan B");
+                RCLCPP_INFO(this->get_logger(), "[BB]: Yellow team plan B");
                 break;
             case 30: 
                 start_pt_code = 10;
                 groot_filename = Bot2_YellowC_file;
-                RCLCPP_INFO(this->get_logger(), "[Bot2]: Yellow team plan C");
+                RCLCPP_INFO(this->get_logger(), "[BB]: Yellow team plan C");
                 break;
             case 11:
                 start_pt_code = 17;
                 groot_filename = Bot2_BlueA_file;
-                RCLCPP_INFO(this->get_logger(), "[Bot2]: Blue team plan A");
+                RCLCPP_INFO(this->get_logger(), "[BB]: Blue team plan A");
                 break;
             case 21:
                 start_pt_code = 20;
                 groot_filename = Bot2_BlueB_file;
-                RCLCPP_INFO(this->get_logger(), "[Bot2]: Blue team plan B");
+                RCLCPP_INFO(this->get_logger(), "[BB]: Blue team plan B");
                 break;
             case 31: 
                 start_pt_code = 20;
                 groot_filename = Bot2_BlueC_file;
-                RCLCPP_INFO(this->get_logger(), "[Bot2]: Blue team plan C");
+                RCLCPP_INFO(this->get_logger(), "[BB]: Blue team plan C");
                 break;
             default:
                 start_pt_code = 17;
                 groot_filename = Bot2_BlueA_file;
-                RCLCPP_INFO(this->get_logger(), "[Bot2]: Blue team plan A");
+                RCLCPP_INFO(this->get_logger(), "[BB]: Blue team plan A");
                 break;
             }
         }
