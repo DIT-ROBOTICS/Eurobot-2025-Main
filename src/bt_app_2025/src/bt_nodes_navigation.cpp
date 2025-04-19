@@ -399,8 +399,10 @@ int VisionCheck::findBestTarget() {
         candidate_.pop_front();
     } while (!candidate_.empty());
     int min_index = candidate_.front();
-    if (last_mission_failed_)
+    if (last_mission_failed_) {
+        blackboard_->set<bool>("last_mission_failed", false);  
         return safestPointIndex_;
+    }
     else
         return minDistIndex_;
 }
@@ -514,8 +516,8 @@ NodeStatus MissionNearRival::tick() {
         }
     }
     // update mission_points_status_
-    // mission_points_status_[baseIndex_]++;
-    // blackboard_->set<std::vector<int>>("mission_points_status", mission_points_status_);
+    mission_points_status_[baseIndex_]++;
+    blackboard_->set<std::vector<int>>("mission_points_status", mission_points_status_);
 
     // set output port
     setOutput<geometry_msgs::msg::PoseStamped>("remap_base", base_);
