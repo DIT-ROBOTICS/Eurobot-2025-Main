@@ -447,7 +447,7 @@ NodeStatus VisionCheck::tick() {
         else
             dockTypeCode_ = -1;
         shift_ *= offset_ / abs(offset_) * dockTypeCode_; // use dock type to determine the shift direction
-        offset_ *= 0.8;
+        offset_ -= offset_ / abs(offset_) * 0.04;
     } else if (missionType_ == "back") {
         base_.pose.position.z = ((int)base_.pose.position.z / 2) ? base_.pose.position.z - 2 : base_.pose.position.z + 2;
         // offset_ *= -1;
