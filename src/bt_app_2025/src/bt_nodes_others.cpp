@@ -44,9 +44,18 @@ BT::PortsList BTStarter::providedPorts() {
 
 BT::NodeStatus BTStarter::tick() {
     subscription_ = node_->create_subscription<std_msgs::msg::Float32>("/robot/startup/time", 10, std::bind(&BTStarter::topic_callback, this, std::placeholders::_1));
+    keepout_zone_pub_ = node_->create_publisher<std_msgs::msg::String>("/keepout_zone", 20);
+    blackboard->get<std::string>("team", team_);
+    if (team_ == "y") {
+        keepout_zone_.data = "BCFGJ";
+    }
+    else if (team_ == "b") {
+        keepout_zone_.data = "ADEHI";
+    }
+    keepout_zone_pub_->publish(keepout_zone_);
+
     int game_status = 0;
     setOutput<int>("result", game_status);
-
     return BT::NodeStatus::SUCCESS;
 }
 
@@ -184,7 +193,7 @@ BT::NodeStatus BTFinisher::tick() {
     // Test solar
     // score = 0;
 
-    if (team_ == 0) {
+    if (team_ == "b") {
         // Blue team
         RCLCPP_INFO(node_->get_logger(), "[BTFinisher]: Blue team");
         for (int i = 0; i < 3; i++) {
@@ -451,7 +460,7 @@ BT::NodeStatus TimerChecker::tick() {
 
 //     switch (check_start_point_) {
 //         case 0:
-//             if (team_ == 0) {
+//             if (team_ == "b") {
 //                 /* Checking  Rival points with central point (blue team) */
 //                 if (rival_pose.twist.linear.x < 0.7) {
 //                     RCLCPP_INFO(logger(), "[RivalStart]: Rival is in the blue team central start point");

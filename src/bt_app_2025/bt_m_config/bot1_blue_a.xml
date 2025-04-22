@@ -2,44 +2,103 @@
 <root BTCPP_format="4">
   <BehaviorTree ID="BannerMission">
     <Sequence>
-      <Fallback>
-        <Switch2 case_1="0"
-                 case_2="1"
-                 variable="{BANNER_PLACE}">
+      <Switch2 case_1="0"
+               case_2="1"
+               variable="{BANNER_PLACE}">
+        <Fallback>
           <Docking final_pose="{PrevGoal}"
                    isPureDocking="0"
-                   dock_type="dock_y_slow_loose"
+                   dock_type="dock_y_slow_precise"
                    shift="0"
                    offset="-0.1"
                    base="0.25, 0.3, 0"/>
           <Docking final_pose="{PrevGoal}"
                    isPureDocking="0"
-                   dock_type="dock_y_slow_loose"
+                   dock_type="dock_y_slow_precise"
                    shift="0"
                    offset="-0.1"
                    base="1.75, 0.3, 0"/>
           <Docking final_pose="{PrevGoal}"
                    isPureDocking="0"
-                   dock_type="dock_y_slow_loose"
+                   dock_type="dock_y_slow_precise"
+                   shift="0"
+                   offset="-0.1"
+                   base="2.25, 0.3, 0"/>
+        </Fallback>
+        <Fallback>
+          <Docking final_pose="{PrevGoal}"
+                   isPureDocking="0"
+                   dock_type="dock_y_slow_precise"
+                   shift="0"
+                   offset="-0.1"
+                   base="1.75, 0.3, 0"/>
+          <Docking final_pose="{PrevGoal}"
+                   isPureDocking="0"
+                   dock_type="dock_y_slow_precise"
+                   shift="0"
+                   offset="-0.1"
+                   base="2.25, 0.3, 0"/>
+          <Docking final_pose="{PrevGoal}"
+                   isPureDocking="0"
+                   dock_type="dock_y_slow_precise"
+                   shift="0"
+                   offset="-0.1"
+                   base="0.25, 0.3, 0"/>
+        </Fallback>
+        <Fallback>
+          <Docking final_pose="{PrevGoal}"
+                   isPureDocking="0"
+                   dock_type="dock_y_slow_precise"
                    shift="0"
                    offset="-0.1"
                    base="2.25, 0.3, 0"
                    _description="go to place the banner"/>
-        </Switch2>
-        <Docking final_pose="{PrevGoal}"
-                 isPureDocking="0"
-                 dock_type="dock_y_slow_loose"
-                 shift="0"
-                 offset="-0.1"
-                 base="1.75, 0.3, 0"/>
-        <Docking final_pose="{PrevGoal}"
-                 isPureDocking="0"
-                 dock_type="dock_y_slow_loose"
-                 shift="0"
-                 offset="-0.1"
-                 base="0.25, 0.3, 0"/>
-      </Fallback>
+          <Docking final_pose="{PrevGoal}"
+                   isPureDocking="0"
+                   dock_type="dock_y_slow_precise"
+                   shift="0"
+                   offset="-0.1"
+                   base="1.75, 0.3, 0"/>
+          <Docking final_pose="{PrevGoal}"
+                   isPureDocking="0"
+                   dock_type="dock_y_slow_precise"
+                   shift="0"
+                   offset="-0.1"
+                   base="0.25, 0.3, 0"/>
+        </Fallback>
+      </Switch2>
       <Sleep msec="1000"/>
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="DockingSubTree">
+    <Sequence>
+      <SetBlackboard value="1"
+                     output_key="{notTimeout}"/>
+      <Inverter _skipIf="notTimeout">
+        <RetryUntilSuccessful num_attempts="{retry}">
+          <Fallback>
+            <Parallel failure_count="1"
+                      success_count="1">
+              <Docking final_pose="{final_pose}"
+                       isPureDocking="{isPureDocking}"
+                       dock_type="{dock_type}"
+                       shift="{shift}"
+                       offset="{offset}"
+                       base="{base}"
+                       _description="step back"/>
+              <Sequence>
+                <Sleep msec="{timeout}"/>
+                <SetBlackboard value="0"
+                               output_key="{notTimeout}"/>
+              </Sequence>
+            </Parallel>
+            <ForceFailure>
+              <Sleep msec="{sleep}"/>
+            </ForceFailure>
+          </Fallback>
+        </RetryUntilSuccessful>
+      </Inverter>
     </Sequence>
   </BehaviorTree>
 
@@ -167,7 +226,7 @@
           </ForceSuccess>
         </Sequence>
         <Delay delay_msec="197000">
-          <Sleep msec="1"/>
+          <AlwaysSuccess/>
         </Delay>
       </Parallel>
       <StopRobot/>
@@ -224,6 +283,7 @@
         <Parallel failure_count="1"
                   success_count="2">
           <SubTree ID="OneLevelBot1new"
+                   hasCompleteMaterial="{hasCompleteMaterial}"
                    _autoremap="true"/>
           <Fallback>
             <VisionCheck remap_offset="{offset}"
@@ -248,9 +308,25 @@
                      shift="0.055"
                      offset="0"
                      base="0.265, 0.415, 2"/>
+            <VisionCheck remap_offset="{offset}"
+                         remap_shift="{shift}"
+                         remap_dock_type="{dock_type}"
+                         remap_base="{base}"
+                         shift="0"
+                         offset="0"
+                         mission_type="front"
+                         dock_type="dock_x_slow_precise"
+                         base_index="-1">
+              <Docking final_pose="{PrevGoal}"
+                       isPureDocking="0"
+                       dock_type="{dock_type}"
+                       shift="{shift}"
+                       offset="{offset}"
+                       base="{base}"/>
+            </VisionCheck>
             <ForceFailure>
               <SetBlackboard value="1"
-                             output_key="last_mission_failed"/>
+                             output_key="{last_mission_failed}"/>
             </ForceFailure>
           </Fallback>
         </Parallel>
@@ -267,16 +343,23 @@
       </Sequence>
       <Sequence>
         <ForceSuccess>
-          <MissionNearRival remap_base="{base}"
-                            mission_type="back"
-                            base_index="15">
-            <Docking final_pose="{PrevGoal}"
-                     isPureDocking="0"
-                     dock_type="mission_dock_x"
-                     shift="0"
-                     offset="-0.1"
-                     base="{base}"/>
-          </MissionNearRival>
+          <RetryUntilSuccessful num_attempts="10">
+            <Fallback>
+              <MissionNearRival remap_base="{base}"
+                                mission_type="back"
+                                base_index="15">
+                <Docking final_pose="{PrevGoal}"
+                         isPureDocking="0"
+                         dock_type="mission_dock_x"
+                         shift="0"
+                         offset="-0.1"
+                         base="{base}"/>
+              </MissionNearRival>
+              <ForceFailure>
+                <Sleep msec="500"/>
+              </ForceFailure>
+            </Fallback>
+          </RetryUntilSuccessful>
         </ForceSuccess>
         <SubTree ID="ThreeLevelsBot1new"
                  BACK_L="0.2"
@@ -286,6 +369,7 @@
                  FORWARD_L="-0.15"
                  FORWARD_M="-0.11"
                  FORWARD_S="-0.065"
+                 hasCompleteMaterial="{hasCompleteMaterial}"
                  _autoremap="true"/>
       </Sequence>
     </Sequence>
@@ -293,40 +377,16 @@
 
   <BehaviorTree ID="MissionPointThree">
     <Sequence>
-      <VisionCheck remap_offset="{offset}"
-                   remap_shift="{shift}"
-                   remap_dock_type="{dock_type}"
-                   remap_base="{base}"
-                   shift="0"
-                   offset="-0.2"
-                   mission_type="back"
-                   dock_type="mission_dock_y"
-                   base_index="5">
-        <Docking final_pose="{PrevGoal}"
-                 isPureDocking="0"
-                 dock_type="{dock_type}"
-                 shift="{shift}"
-                 offset="{offset}"
-                 base="{base}"/>
-      </VisionCheck>
-      <Parallel failure_count="1"
-                success_count="2">
-        <SubTree ID="OneLevelBot1new"
-                 _autoremap="true"/>
-        <SubTree ID="BannerMission"
-                 BANNER_PLACE="0"
-                 _autoremap="true"/>
-      </Parallel>
-      <Sequence>
+      <Fallback>
         <VisionCheck remap_offset="{offset}"
                      remap_shift="{shift}"
                      remap_dock_type="{dock_type}"
                      remap_base="{base}"
                      shift="0"
                      offset="-0.2"
-                     mission_type="front"
+                     mission_type="back"
                      dock_type="mission_dock_y"
-                     base_index="4">
+                     base_index="5">
           <Docking final_pose="{PrevGoal}"
                    isPureDocking="0"
                    dock_type="{dock_type}"
@@ -334,6 +394,77 @@
                    offset="{offset}"
                    base="{base}"/>
         </VisionCheck>
+        <VisionCheck remap_offset="{offset}"
+                     remap_shift="{shift}"
+                     remap_dock_type="{dock_type}"
+                     remap_base="{base}"
+                     shift="0"
+                     offset="0"
+                     mission_type="back"
+                     dock_type="dock_x_fast_precise"
+                     base_index="-1">
+          <Docking final_pose="{PrevGoal}"
+                   isPureDocking="0"
+                   dock_type="{dock_type}"
+                   shift="{shift}"
+                   offset="{offset}"
+                   base="{base}"/>
+        </VisionCheck>
+        <ForceSuccess>
+          <SetBlackboard value="1"
+                         output_key="last_mission_failed"/>
+        </ForceSuccess>
+      </Fallback>
+      <Parallel failure_count="1"
+                success_count="2">
+        <SubTree ID="OneLevelBot1new"
+                 hasCompleteMaterial="{hasCompleteMaterial}"
+                 _autoremap="true"/>
+        <Delay delay_msec="700">
+          <SubTree ID="BannerMission"
+                   BANNER_PLACE="0"
+                   _autoremap="true"/>
+        </Delay>
+      </Parallel>
+      <Sequence>
+        <Fallback>
+          <VisionCheck remap_offset="{offset}"
+                       remap_shift="{shift}"
+                       remap_dock_type="{dock_type}"
+                       remap_base="{base}"
+                       shift="0"
+                       offset="-0.2"
+                       mission_type="front"
+                       dock_type="mission_dock_y"
+                       base_index="4">
+            <Docking final_pose="{PrevGoal}"
+                     isPureDocking="0"
+                     dock_type="{dock_type}"
+                     shift="{shift}"
+                     offset="{offset}"
+                     base="{base}"/>
+          </VisionCheck>
+          <VisionCheck remap_offset="{offset}"
+                       remap_shift="{shift}"
+                       remap_dock_type="{dock_type}"
+                       remap_base="{base}"
+                       shift="0"
+                       offset="0"
+                       mission_type="front"
+                       dock_type="dock_x_slow_precise"
+                       base_index="-1">
+            <Docking final_pose="{PrevGoal}"
+                     isPureDocking="0"
+                     dock_type="{dock_type}"
+                     shift="{shift}"
+                     offset="{offset}"
+                     base="{base}"/>
+          </VisionCheck>
+          <ForceFailure>
+            <SetBlackboard value="1"
+                           output_key="{last_mission_failed}"/>
+          </ForceFailure>
+        </Fallback>
         <SubTree ID="TwoLevelsBot1new"
                  BACK_L="0.2"
                  BACK_M="0.1"
@@ -346,16 +477,18 @@
                  _autoremap="true"/>
       </Sequence>
       <Sequence>
-        <MissionNearRival remap_base="{base}"
-                          mission_type="back"
-                          base_index="18">
-          <Docking final_pose="{PrevGoal}"
-                   isPureDocking="0"
-                   dock_type="mission_dock_y"
-                   shift="0"
-                   offset="-0.1"
-                   base="{base}"/>
-        </MissionNearRival>
+        <ForceSuccess>
+          <MissionNearRival remap_base="{base}"
+                            mission_type="back"
+                            base_index="18">
+            <Docking final_pose="{PrevGoal}"
+                     isPureDocking="0"
+                     dock_type="mission_dock_y"
+                     shift="0"
+                     offset="-0.1"
+                     base="{base}"/>
+          </MissionNearRival>
+        </ForceSuccess>
         <SubTree ID="ThreeLevelsBot1new"
                  BACK_L="0.2"
                  BACK_M="0.1"
@@ -364,6 +497,7 @@
                  FORWARD_L="-0.15"
                  FORWARD_M="-0.11"
                  FORWARD_S="-0.065"
+                 hasCompleteMaterial="{hasCompleteMaterial}"
                  _autoremap="true"/>
       </Sequence>
     </Sequence>
@@ -372,22 +506,44 @@
   <BehaviorTree ID="MissionPointTwo">
     <Sequence>
       <Sequence>
-        <VisionCheck remap_offset="{offset}"
-                     remap_shift="{shift}"
-                     remap_dock_type="{dock_type}"
-                     remap_base="{base}"
-                     shift="0.045"
-                     offset="0.2"
-                     mission_type="front"
-                     dock_type="mission_dock_y"
-                     base_index="6">
-          <Docking final_pose="{PrevGoal}"
-                   isPureDocking="0"
-                   dock_type="{dock_type}"
-                   shift="{shift}"
-                   offset="{offset}"
-                   base="{base}"/>
-        </VisionCheck>
+        <Fallback>
+          <VisionCheck remap_offset="{offset}"
+                       remap_shift="{shift}"
+                       remap_dock_type="{dock_type}"
+                       remap_base="{base}"
+                       shift="0.045"
+                       offset="0.2"
+                       mission_type="front"
+                       dock_type="mission_dock_y"
+                       base_index="6">
+            <Docking final_pose="{PrevGoal}"
+                     isPureDocking="0"
+                     dock_type="{dock_type}"
+                     shift="{shift}"
+                     offset="{offset}"
+                     base="{base}"/>
+          </VisionCheck>
+          <VisionCheck remap_offset="{offset}"
+                       remap_shift="{shift}"
+                       remap_dock_type="{dock_type}"
+                       remap_base="{base}"
+                       shift="0"
+                       offset="-0.2"
+                       mission_type="back"
+                       dock_type="dock_x_fast_precise"
+                       base_index="-1">
+            <Docking final_pose="{PrevGoal}"
+                     isPureDocking="0"
+                     dock_type="{dock_type}"
+                     shift="{shift}"
+                     offset="{offset}"
+                     base="{base}"/>
+          </VisionCheck>
+          <ForceSuccess>
+            <SetBlackboard value="1"
+                           output_key="{last_mission_failed}"/>
+          </ForceSuccess>
+        </Fallback>
         <SubTree ID="TwoLevelsBot1new"
                  BACK_L="-0.2"
                  BACK_M="-0.1"
@@ -420,6 +576,7 @@
                  FORWARD_L="-0.15"
                  FORWARD_M="-0.11"
                  FORWARD_S="-0.065"
+                 hasCompleteMaterial="{hasCompleteMaterial}"
                  _autoremap="true"/>
       </Sequence>
     </Sequence>
@@ -448,28 +605,59 @@
                            _description="lift front grabber"/>
         </Timeout>
       </ForceSuccess>
+      <SetBlackboard value="1"
+                     output_key="{hasCompleteMaterial}"/>
     </Sequence>
   </BehaviorTree>
 
   <BehaviorTree ID="ThreeLevelsBot1new">
     <Fallback>
       <Sequence>
-        <ForceSuccess>
-          <Timeout msec="6000">
-            <FirmwareMission mission_status="{x}"
-                             mission_type="20"
-                             _description="back put 1 level"/>
-          </Timeout>
-        </ForceSuccess>
+        <Switch2 case_1="1"
+                 case_2="0"
+                 variable="{hasCompleteMaterial}">
+          <ForceSuccess>
+            <Sequence>
+              <Timeout msec="6000">
+                <FirmwareMission mission_status="{x}"
+                                 mission_type="20"
+                                 _description="back put 1 level"/>
+              </Timeout>
+              <SetBlackboard value="0"
+                             output_key="{hasCompleteMaterial}"/>
+            </Sequence>
+          </ForceSuccess>
+          <Sequence>
+            <ForceSuccess>
+              <Timeout msec="6000">
+                <FirmwareMission mission_status="{x}"
+                                 mission_type="24"
+                                 _description="back put 1 level"/>
+              </Timeout>
+            </ForceSuccess>
+            <ForceSuccess>
+              <Timeout msec="6000">
+                <FirmwareMission mission_status="{x}"
+                                 mission_type="23"
+                                 _description="back put 1 level"/>
+              </Timeout>
+            </ForceSuccess>
+            <SetBlackboard value="0"
+                           output_key="{hasCompleteMaterial}"/>
+          </Sequence>
+          <AlwaysFailure/>
+        </Switch2>
         <RetryUntilSuccessful num_attempts="100">
           <Fallback>
-            <Docking final_pose="{PrevGoal}"
-                     isPureDocking="1"
-                     dock_type="{DOCK_DIR}"
-                     shift="0"
-                     offset="{BACK_L}"
-                     base="{PrevGoal}"
-                     _description="step back"/>
+            <Timeout msec="2000">
+              <Docking final_pose="{PrevGoal}"
+                       isPureDocking="1"
+                       dock_type="{DOCK_DIR}"
+                       shift="0"
+                       offset="{BACK_L}"
+                       base="{PrevGoal}"
+                       _description="step back"/>
+            </Timeout>
             <ForceFailure>
               <Sleep msec="100"/>
             </ForceFailure>
@@ -495,13 +683,20 @@
             </Timeout>
           </ForceSuccess>
           <RetryUntilSuccessful num_attempts="100">
-            <Docking final_pose="{PrevGoal}"
-                     isPureDocking="0"
-                     dock_type="{DOCK_DIR}"
-                     shift="0"
-                     offset="{FORWARD_M}"
-                     base="{PrevGoal}"
-                     _description="step back"/>
+            <Fallback>
+              <Timeout msec="2000">
+                <Docking final_pose="{PrevGoal}"
+                         isPureDocking="0"
+                         dock_type="{DOCK_DIR}"
+                         shift="0"
+                         offset="{FORWARD_M}"
+                         base="{PrevGoal}"
+                         _description="step back"/>
+              </Timeout>
+              <ForceFailure>
+                <Sleep msec="100"/>
+              </ForceFailure>
+            </Fallback>
           </RetryUntilSuccessful>
         </Parallel>
         <ForceSuccess>
@@ -513,13 +708,15 @@
         </ForceSuccess>
         <RetryUntilSuccessful num_attempts="100">
           <Fallback>
-            <Docking final_pose="{PrevGoal}"
-                     isPureDocking="1"
-                     dock_type="{DOCK_DIR}"
-                     shift="0"
-                     offset="{FORWARD_M}"
-                     base="{PrevGoal}"
-                     _description="forward to place two levels on one level"/>
+            <Timeout msec="2000">
+              <Docking final_pose="{PrevGoal}"
+                       isPureDocking="1"
+                       dock_type="{DOCK_DIR}"
+                       shift="0"
+                       offset="{FORWARD_M}"
+                       base="{PrevGoal}"
+                       _description="forward to place two levels on one level"/>
+            </Timeout>
             <ForceFailure>
               <Sleep msec="100"/>
             </ForceFailure>
@@ -541,13 +738,15 @@
         </ForceSuccess>
         <RetryUntilSuccessful num_attempts="100">
           <Fallback>
-            <Docking final_pose="{PrevGoal}"
-                     isPureDocking="1"
-                     dock_type="{DOCK_DIR}"
-                     shift="0"
-                     offset="{BACK_S}"
-                     base="{PrevGoal}"
-                     _description="step back"/>
+            <Timeout msec="2000">
+              <Docking final_pose="{PrevGoal}"
+                       isPureDocking="1"
+                       dock_type="{DOCK_DIR}"
+                       shift="0"
+                       offset="{BACK_S}"
+                       base="{PrevGoal}"
+                       _description="step back"/>
+            </Timeout>
             <ForceFailure>
               <Sleep msec="100"/>
             </ForceFailure>
@@ -580,20 +779,17 @@
         </ForceSuccess>
         <Parallel failure_count="1"
                   success_count="2">
-          <RetryUntilSuccessful num_attempts="100">
-            <Fallback>
-              <Docking final_pose="{PrevGoal}"
-                       isPureDocking="1"
-                       dock_type="{DOCK_DIR}"
-                       shift="0"
-                       offset="{BACK_S}"
-                       base="{PrevGoal}"
-                       _description="step back"/>
-              <ForceFailure>
-                <Sleep msec="100"/>
-              </ForceFailure>
-            </Fallback>
-          </RetryUntilSuccessful>
+          <SubTree ID="DockingSubTree"
+                   retry="100"
+                   timeout="2000"
+                   sleep="100"
+                   base="{PrevGoal}"
+                   offset="{BACK_S}"
+                   shift="0"
+                   isPureDocking="1"
+                   dock_type="{DOCK_DIR}"
+                   final_pose="{PrevGoal}"
+                   _autoremap="true"/>
           <ForceSuccess>
             <Timeout msec="6000">
               <FirmwareMission mission_status="{x}"
@@ -602,15 +798,17 @@
             </Timeout>
           </ForceSuccess>
         </Parallel>
-        <RetryUntilSuccessful num_attempts="100">
-          <Docking final_pose="{PrevGoal}"
-                   isPureDocking="1"
-                   dock_type="{DOCK_DIR}"
-                   shift="0"
-                   offset="{FORWARD_S}"
-                   base="{PrevGoal}"
-                   _description="go forward "/>
-        </RetryUntilSuccessful>
+        <SubTree ID="DockingSubTree"
+                 base="{PrevGoal}"
+                 dock_type="{DOCK_DIR}"
+                 final_pose="{PrevGoal}"
+                 isPureDocking="1"
+                 offset="{FORWARD_S}"
+                 retry="100"
+                 shift="0"
+                 sleep="100"
+                 timeout="2000"
+                 _autoremap="true"/>
         <ForceSuccess>
           <Timeout msec="6000">
             <FirmwareMission mission_status="{x}"
@@ -632,20 +830,17 @@
                              _description="place board"/>
           </Timeout>
         </ForceSuccess>
-        <RetryUntilSuccessful num_attempts="100">
-          <Fallback>
-            <Docking final_pose="{PrevGoal}"
-                     isPureDocking="0"
-                     dock_type="{DOCK_DIR}"
-                     shift="{SHIFT}"
-                     offset="0"
-                     base="{PrevGoal}"
-                     _description="step back "/>
-            <ForceFailure>
-              <Sleep msec="100"/>
-            </ForceFailure>
-          </Fallback>
-        </RetryUntilSuccessful>
+        <SubTree ID="DockingSubTree"
+                 base="{PrevGoal}"
+                 dock_type="{DOCK_DIR}"
+                 final_pose="{PrevGoal}"
+                 isPureDocking="0"
+                 offset="0"
+                 retry="100"
+                 shift="{SHIFT}"
+                 sleep="100"
+                 timeout="2000"
+                 _autoremap="true"/>
         <ForceSuccess>
           <Timeout msec="6000">
             <FirmwareMission mission_status="{x}"
@@ -667,20 +862,17 @@
                              _description="front place 1 level"/>
           </Timeout>
         </ForceSuccess>
-        <RetryUntilSuccessful num_attempts="100">
-          <Fallback>
-            <Docking final_pose="{PrevGoal}"
-                     isPureDocking="1"
-                     dock_type="{DOCK_DIR}"
-                     shift="0"
-                     offset="{BACK_M}"
-                     base="{PrevGoal}"
-                     _description="step back "/>
-            <ForceFailure>
-              <Sleep msec="100"/>
-            </ForceFailure>
-          </Fallback>
-        </RetryUntilSuccessful>
+        <SubTree ID="DockingSubTree"
+                 base="{PrevGoal}"
+                 dock_type="{DOCK_DIR}"
+                 final_pose="{PrevGoal}"
+                 isPureDocking="1"
+                 offset="{BACK_M}"
+                 retry="100"
+                 shift="0"
+                 sleep="100"
+                 timeout="2000"
+                 _autoremap="true"/>
         <ForceSuccess>
           <Timeout msec="6000">
             <FirmwareMission mission_status="{x}"
@@ -695,20 +887,17 @@
                              _description="arm down"/>
           </Timeout>
         </ForceSuccess>
-        <RetryUntilSuccessful num_attempts="100">
-          <Fallback>
-            <Docking final_pose="{PrevGoal}"
-                     isPureDocking="0"
-                     dock_type="{DOCK_DIR}"
-                     shift="0"
-                     offset="{FORWARD_M}"
-                     base="{PrevGoal}"
-                     _description="forward to take 2 levels"/>
-            <ForceFailure>
-              <Sleep msec="100"/>
-            </ForceFailure>
-          </Fallback>
-        </RetryUntilSuccessful>
+        <SubTree ID="DockingSubTree"
+                 base="{PrevGoal}"
+                 dock_type="{DOCK_DIR}"
+                 final_pose="{PrevGoal}"
+                 isPureDocking="1"
+                 offset="{FORWARD_M}"
+                 retry="100"
+                 shift="0"
+                 sleep="100"
+                 timeout="2000"
+                 _autoremap="true"/>
         <ForceSuccess>
           <Timeout msec="6000">
             <FirmwareMission mission_status="{x}"

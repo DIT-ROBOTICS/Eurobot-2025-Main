@@ -361,17 +361,17 @@ int VisionCheck::findBestTarget() {
     geometry_msgs::msg::Pose targetMaterialPose_;
     double safestDeltaDist_ = 5;
     int deltaDist_, safestPointIndex_, minDistIndex_;
-    bool team_;
-    blackboard_->get<bool>("team", team_);        // get team color
+    std::string team_;
+    blackboard_->get<std::string>("team", team_);        // get team color
 
     LocReceiver::UpdateRobotPose(robot_pose_, tf_buffer_, frame_id_);
     LocReceiver::UpdateRivalPose(rival_pose_, tf_buffer_, frame_id_);
     for (int i = 1; i < 9; i++)                  // delete empty materials point
         if (materials_info_.data[i])
             candidate_.push_back(i);
-    if (team_ && materials_info_.data[0])       // if it's blue team, then detect if the first point is empty
+    if (team_ == "b" && materials_info_.data[0])       // if it's blue team, then detect if the first point is empty
         candidate_.push_back(0);
-    else if (!team_ && materials_info_.data[9]) // if it's yellow team, then detect if the last point is empty
+    else if (team_ == "y" && materials_info_.data[9]) // if it's yellow team, then detect if the last point is empty
         candidate_.push_back(9);
     if (candidate_.empty()) {
         RCLCPP_INFO_STREAM(node_->get_logger(), "No material point detected");
@@ -515,9 +515,6 @@ NodeStatus MissionNearRival::tick() {
             base_.pose.position.y += (base_.pose.position.y - rival_pose_.pose.position.y)/abs(base_.pose.position.y - rival_pose_.pose.position.y)*(0.5 - abs(base_.pose.position.y - rival_pose_.pose.position.y));
         }
     }
-    // update mission_points_status_
-    mission_points_status_[baseIndex_]++;
-    blackboard_->set<std::vector<int>>("mission_points_status", mission_points_status_);
 
     // set output port
     setOutput<geometry_msgs::msg::PoseStamped>("remap_base", base_);
