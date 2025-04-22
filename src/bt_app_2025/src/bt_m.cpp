@@ -117,9 +117,9 @@ public:
         factory.registerNodeType<StopRobot>("StopRobot", params);
         factory.registerNodeType<VisionCheck>("VisionCheck", params, blackboard);
         factory.registerNodeType<MissionNearRival>("MissionNearRival", params, blackboard);
-        params.default_port_value = "navigate_to_pose";
-        factory.registerNodeType<Navigation>("Navigation", params);
+        // params.default_port_value = "navigate_to_pose";
         params.default_port_value = "dock_robot";
+        factory.registerNodeType<Navigation>("Navigation", params);
         factory.registerNodeType<Docking>("Docking", params);
         factory.registerNodeType<Rotation>("Rotation", params);
         /* firmware */

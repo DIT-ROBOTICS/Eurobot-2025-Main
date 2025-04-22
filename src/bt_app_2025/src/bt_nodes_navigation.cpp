@@ -65,14 +65,24 @@ geometry_msgs::msg::PoseStamped inline ConvertPoseFormat(geometry_msgs::msg::Pos
 BT::PortsList Navigation::providedPorts() {
     return {
         BT::InputPort<geometry_msgs::msg::PoseStamped>("goal"),
-        BT::InputPort<int>("type"),
+        BT::InputPort<geometry_msgs::msg::PoseStamped>("base"),
+        BT::InputPort<double>("offset"),
+        BT::InputPort<double>("shift"),
+        BT::InputPort<std::string>("dock_type"),
         BT::OutputPort<geometry_msgs::msg::PoseStamped>("final_pose")
     };
 }
 
 bool Navigation::setGoal(RosActionNode::Goal& goal) {
-    auto m = getInput<geometry_msgs::msg::PoseStamped>("goal");
-    nav_type_ = getInput<int>("type").value();
+    auto m_0 = getInput<geometry_msgs::msg::PoseStamped>("goal");
+    auto m_1 = getInput<geometry_msgs::msg::PoseStamped>("base");
+    auto m = (m_0) ? m_0 : m_1;
+    auto o = getInput<double>("offset");
+    auto s = getInput<double>("shift");
+    if (o) offset_ = o.value();
+    if (s) shift_ = s.value();
+    getInput<std::string>("dock_type", dock_type_);
+
     rclcpp::Time now = this->now();
     goal_.header.stamp = now;
     goal_.header.frame_id = "map";
@@ -84,15 +94,34 @@ bool Navigation::setGoal(RosActionNode::Goal& goal) {
     goal_.pose.orientation.y = q.y();
     goal_.pose.orientation.z = q.z();
     goal_.pose.orientation.w = q.w();
-    goal.pose = goal_;
+    goal_.pose.position.z = 0;
 
-    RCLCPP_INFO(logger(), "Start Nav to (%f, %f)", goal.pose.pose.position.x, goal.pose.pose.position.y);
+    if (!m_0) {
+        if (dock_type_ == "mission_dock_x" || dock_type_.substr(0, 6) == "dock_x") {
+            goal_.pose.position.x += offset_; // set staging point
+            goal_.pose.position.y += shift_;
+        } else if (dock_type_ == "mission_dock_y" || dock_type_.substr(0, 6) == "dock_y") {
+            goal_.pose.position.x += shift_;
+            goal_.pose.position.y += offset_; // set staging point
+        } else {
+            RCLCPP_ERROR(logger(), "Invalid offset value");
+            return false;
+        }
+        goal_.pose.position.z = offset_;
+    }
+    goal.use_dock_id = false; // set use dock id
+    goal.dock_pose = goal_; // send goal pose
+    goal.dock_type = dock_type_;    // determine the docking direction (x or y)
+    goal.max_staging_time = 1000.0; // set max staging time
+    goal.navigate_to_staging_pose = 1;  // if it's pure docking, then don't need to navigate to staging pose
+
+    RCLCPP_INFO(logger(), "Start Nav to (%f, %f)", goal.dock_pose.pose.position.x, goal.dock_pose.pose.position.y);
     return true;
 }
 
 NodeStatus Navigation::onFeedback(const std::shared_ptr<const Feedback> feedback) {
-    current_pose_ = feedback->current_pose;
-    nav_recov_times_ = feedback->number_of_recoveries;
+    // nav_recov_times_ = feedback->number_of_recoveries;
+    nav_recov_times_ = feedback->num_retries;
     if (nav_recov_times_ > 2) {
         // check the correctness of the final pose
         return goalErrorDetect();
@@ -106,14 +135,15 @@ NodeStatus Navigation::goalErrorDetect() {
     double nav_ang_error_ = node_->get_parameter("nav_ang_error").as_double();
 
     // check the correctness of the final pose
-    if (calculateDistance(current_pose_.pose, goal_.pose) < nav_dist_error_ && calculateAngleDifference(current_pose_.pose, goal_.pose) < nav_ang_error_) {
-        RCLCPP_INFO_STREAM(logger(), "success! final_pose: " << current_pose_.pose.position.x << ", " << current_pose_.pose.position.y << ", " << ConvertPoseFormat(current_pose_).pose.position.z);
+    LocReceiver::UpdateRobotPose(robot_pose_, tf_buffer_, frame_id_);
+    if (calculateDistance(robot_pose_.pose, goal_.pose) < nav_dist_error_ && calculateAngleDifference(robot_pose_.pose, goal_.pose) < nav_ang_error_) {
+        RCLCPP_INFO_STREAM(logger(), "success! final_pose: " << robot_pose_.pose.position.x << ", " << robot_pose_.pose.position.y << ", " << ConvertPoseFormat(robot_pose_).pose.position.z);
         RCLCPP_INFO_STREAM(logger(), "-----------------");
-        setOutput<geometry_msgs::msg::PoseStamped>("final_pose", ConvertPoseFormat(current_pose_));
+        setOutput<geometry_msgs::msg::PoseStamped>("final_pose", ConvertPoseFormat(robot_pose_));
         return NodeStatus::SUCCESS;
     } else {
         nav_error_ = true;
-        RCLCPP_INFO_STREAM(logger(), "fail! final_pose: " << current_pose_.pose.position.x << ", " << current_pose_.pose.position.y << ", " << ConvertPoseFormat(current_pose_).pose.position.z);
+        RCLCPP_INFO_STREAM(logger(), "fail! final_pose: " << robot_pose_.pose.position.x << ", " << robot_pose_.pose.position.y << ", " << ConvertPoseFormat(robot_pose_).pose.position.z);
         RCLCPP_INFO_STREAM(logger(), "z" << ConvertPoseFormat(goal_).pose.position.z);
         RCLCPP_INFO_STREAM(logger(), "-----------------");
         setOutput<geometry_msgs::msg::PoseStamped>("final_pose", ConvertPoseFormat(goal_));
@@ -144,7 +174,7 @@ NodeStatus Navigation::onResultReceived(const WrappedResult& wr) {
 NodeStatus Navigation::onFailure(ActionNodeErrorCode error) {
     nav_error_ = true;
     nav_finished_ = true;
-    RCLCPP_INFO_STREAM(logger(), "RETURN FAILURE! final_pose: " << current_pose_.pose.position.x << ", " << current_pose_.pose.position.y << ", " << current_pose_.pose.position.z);
+    RCLCPP_INFO_STREAM(logger(), "RETURN FAILURE! final_pose: " << robot_pose_.pose.position.x << ", " << robot_pose_.pose.position.y << ", " << robot_pose_.pose.position.z);
     RCLCPP_INFO_STREAM(logger(), "z" << ConvertPoseFormat(goal_).pose.position.z);
     RCLCPP_INFO_STREAM(logger(), "-----------------");
     setOutput<geometry_msgs::msg::PoseStamped>("final_pose", ConvertPoseFormat(goal_));
