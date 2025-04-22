@@ -45,7 +45,7 @@ BT::PortsList BTStarter::providedPorts() {
 BT::NodeStatus BTStarter::tick() {
     subscription_ = node_->create_subscription<std_msgs::msg::Float32>("/robot/startup/time", 10, std::bind(&BTStarter::topic_callback, this, std::placeholders::_1));
     keepout_zone_pub_ = node_->create_publisher<std_msgs::msg::String>("/keepout_zone", 20);
-    blackboard->get<std::string>("team", team_);
+    blackboard_->get<std::string>("team", team_);
     if (team_ == "y") {
         keepout_zone_.data = "BCFGJ";
     }

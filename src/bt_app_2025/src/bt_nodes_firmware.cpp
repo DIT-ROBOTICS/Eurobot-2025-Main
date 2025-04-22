@@ -88,7 +88,7 @@ PortsList MissionSuccess::providedPorts() {
 
 BT::NodeStatus MissionSuccess::tick() {
     int baseIndex_ = getInput<double>("base_index").value();
-    int lastMissionFailed_;
+    bool lastMissionFailed_;
 
     // update mission_points_status_
     blackboard_->get<std::vector<int>>("mission_points_status", mission_points_status_);
