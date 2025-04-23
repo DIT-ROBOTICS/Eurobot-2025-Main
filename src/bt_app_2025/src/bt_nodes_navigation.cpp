@@ -360,7 +360,8 @@ int VisionCheck::findBestTarget() {
     geometry_msgs::msg::PoseStamped rivalGoal;
     geometry_msgs::msg::Pose targetMaterialPose_;
     double safestDeltaDist_ = 5;
-    int deltaDist_, safestPointIndex_, minDistIndex_;
+    int dist_, deltaDist_, minDist_ = 5;
+    int safestPointIndex_, minDistIndex_;
     std::string team_;
     blackboard_->get<std::string>("team", team_);        // get team color
 
@@ -384,21 +385,21 @@ int VisionCheck::findBestTarget() {
         targetMaterialPose_.position.x = material_points_[candidate_.front() * 5];
         targetMaterialPose_.position.y = material_points_[candidate_.front() * 5 + 1];
         deltaDist_ = calculateDistance(targetMaterialPose_, rival_pose_.pose) - calculateDistance(targetMaterialPose_, robot_pose_.pose);
+        dist_ = calculateDistance(targetMaterialPose_, robot_pose_.pose);
         if (safestDeltaDist_ < deltaDist_) {     // iterate to find the safest material point
             safestDeltaDist_ = deltaDist_;
             safestPointIndex_ = candidate_.front();
         }
         if (deltaDist_ >= 0 || deltaDist_ == safestDeltaDist_) {         // iterate to find the closest material point
-            targetMaterialPose_.position.x = material_points_[minDistIndex_ * 5];
-            targetMaterialPose_.position.y = material_points_[minDistIndex_ * 5 + 1];
-            if (calculateDistance(targetMaterialPose_, robot_pose_.pose) > calculateDistance(targetMaterialPose_, robot_pose_.pose)) {
+            if (minDist_ > dist_) {
                 minDistIndex_ = candidate_.front();
+                minDist_ = dist_;
             }
             // candidate_.push_back(candidate_.front());
         }
         candidate_.pop_front();
     } while (!candidate_.empty());
-    int min_index = candidate_.front();
+    // int min_index = candidate_.front();
     if (last_mission_failed_) {
         blackboard_->set<bool>("last_mission_failed", false);  
         return safestPointIndex_;
@@ -433,6 +434,7 @@ NodeStatus VisionCheck::tick() {
         if (baseIndex_ == -1) { 
             return NodeStatus::FAILURE;
         }
+        dockType_ = (int(material_points_[baseIndex_ * 5 + 2]) % 2) ? "mission_dock_y" : "mission_dock_x";
     }
     // get base & offset from map_points[i]
     base_.pose.position.x = material_points_[baseIndex_ * 5];

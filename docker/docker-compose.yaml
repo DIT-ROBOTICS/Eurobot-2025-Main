@@ -47,3 +47,4 @@ services:
 
     entrypoint: ["/entrypoint.sh"]
     command: ["${CUSTOM_COMMAND:-/bin/bash}"]
+    # command: ["bash", "-c", " && ${CUSTOM_COMMAND:-/bin/bash}"]

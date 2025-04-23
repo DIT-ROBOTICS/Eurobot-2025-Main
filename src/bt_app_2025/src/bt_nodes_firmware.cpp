@@ -82,7 +82,7 @@ bool SIMAactivate::wakeUpSIMA() {
 /******************/
 PortsList MissionSuccess::providedPorts() {
     return { 
-        BT::InputPort<int>("baseIndex")
+        BT::InputPort<int>("base_index")
     };
 }
 
@@ -92,7 +92,7 @@ BT::NodeStatus MissionSuccess::tick() {
 
     // update mission_points_status_
     blackboard_->get<std::vector<int>>("mission_points_status", mission_points_status_);
-    mission_points_status_[baseIndex_]++;
+    mission_points_status_[baseIndex_ - 11]++;
     blackboard_->set<std::vector<int>>("mission_points_status", mission_points_status_);
 
     blackboard_->get<bool>("last_mission_failed", lastMissionFailed_);

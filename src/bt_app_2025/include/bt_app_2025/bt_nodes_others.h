@@ -43,6 +43,23 @@ namespace BT {
     template <> inline std::deque<int> convertFromString(StringView str);
 }
 
+class MySetBlackboard : public BT::SyncActionNode {
+
+public:
+    MySetBlackboard(const std::string& name, const BT::NodeConfig& config, const RosNodeParams& params, BT::Blackboard::Ptr blackboard)
+        : BT::SyncActionNode(name, config), node_(params.nh.lock()), blackboard_(blackboard)
+    {}
+
+    /* Node remapping function */
+    static BT::PortsList providedPorts();
+
+    /* Start and running function */
+    BT::NodeStatus tick() override;
+private:
+    std::shared_ptr<rclcpp::Node> node_;
+    BT::Blackboard::Ptr blackboard_;
+};
+
 /******************************/
 /* BTStarter - Start the tree */
 /******************************/

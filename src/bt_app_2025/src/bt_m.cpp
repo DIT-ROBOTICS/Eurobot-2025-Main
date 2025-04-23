@@ -75,6 +75,7 @@ public:
         blackboard->set<std::vector<int>>("mission_points_status", std::vector<int>{0, 0, 0, 0, 0, 0, 0, 0});
         blackboard->set<int>("mission_progress", 0);
         blackboard->set<bool>("last_mission_failed", false);
+        blackboard->set<bool>("notTimeout", true);
         blackboard->set<std::string>("team", "y");
         // Subscriber
         time_sub = this->create_subscription<std_msgs::msg::Float32>("/robot/startup/time", 2, std::bind(&MainClass::timeCallback, this, std::placeholders::_1));
@@ -131,6 +132,7 @@ public:
         factory.registerNodeType<MissionFinisher>("MissionFinisher", params, blackboard);
         /* others */
         factory.registerNodeType<BTStarter>("BTStarter", params, blackboard);
+        factory.registerNodeType<MySetBlackboard>("MySetBlackboard", params, blackboard);
         factory.registerNodeType<Comparator>("Comparator", params); // decorator
         factory.registerNodeType<TimerChecker>("TimerChecker", blackboard); // decorator
     }
@@ -159,7 +161,7 @@ public:
         }
         // create tree
         auto tree = factory.createTree(tree_name, blackboard);
-        BT::Groot2Publisher publisher(tree, 2227);
+        // BT::Groot2Publisher publisher(tree, 2227);
 
         BT::NodeStatus status = BT::NodeStatus::RUNNING;
         RCLCPP_INFO(this->get_logger(), "[BT Application]: Behavior Tree start running!");
