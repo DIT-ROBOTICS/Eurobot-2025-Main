@@ -1,7 +1,7 @@
 /**:
   ros__parameters:
-    Bot1_YellowA_config: "bt_plan_a_Yellow.xml"
-    Bot1_YellowB_config: "bt_plan_b_Yellow.xml"
+    Bot1_YellowA_config: "bot1_yellow_a.xml"
+    Bot1_YellowB_config: "bot1_yellow_b.xml"
     Bot1_YellowC_config: "bt_plan_c_Yellow.xml"
     Bot1_BlueA_config: "bot1_blue_a.xml"
     Bot1_BlueB_config: "bot1_blue_b.xml"

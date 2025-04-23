@@ -446,7 +446,7 @@ NodeStatus VisionCheck::tick() {
     // derive the position.z & offset & shift according to mission_type & map_points[i]
     if (missionType_ == "front") {
         int dockTypeCode_;
-        if (dockType_ == "mission_dock_y") // dock type code: 1 for y, -1 for x
+        if (dockType_ == "mission_dock_y" || dockType_.substr(0, 6) == "dock_y") // dock type code: 1 for y, -1 for x
             dockTypeCode_ = 1;
         else
             dockTypeCode_ = -1;
