@@ -100,7 +100,13 @@ PortsList CamReceiver::providedPorts() {
 
 void CamReceiver::materials_info_callback(const std_msgs::msg::Int32MultiArray::SharedPtr msg) {
     materials_info_ = *msg;
-    blackboard_->set<std_msgs::msg::Int32MultiArray>("materials_info", materials_info_);
+    if (msg != NULL) {
+        blackboard_->set<std_msgs::msg::Int32MultiArray>("materials_info", materials_info_);
+    }
+    // int material_array = 0;
+    // for (int i = 0; i < 10; i++)
+    //     material_array += materials_info_.data[i] * pow(10, (9 - i));
+    // RCLCPP_INFO_STREAM(rclcpp::get_logger("cam receiver"), material_array);
 }
 
 void CamReceiver::mission_info_callback(const std_msgs::msg::Int32::SharedPtr msg) {

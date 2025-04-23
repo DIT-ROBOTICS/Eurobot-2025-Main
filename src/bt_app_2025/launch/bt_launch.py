@@ -52,7 +52,7 @@ def generate_launch_description():
             nav_parameters,
             map_points,
             {"frame_id": "base_footprint"},
-            {"tree_name": "FuncTest"}, # "MissionPointOne"
+            {"tree_name": "MissionPointOne"}, # "MissionPointOne"
         ],
         package = 'bt_app_2025',
         executable = 'bt_m',
@@ -83,7 +83,7 @@ def generate_launch_description():
         map_points_arg,
         bt_m_node,
         startup_node,
-        # firmware_node
+        firmware_node
         # TimerAction(
         #     period = 1.0,
         #     actions = [Node(

@@ -76,9 +76,49 @@ bool SIMAactivate::wakeUpSIMA() {
         timer_.reset();
     return true;
 }
-/********************/
+
+/******************/
+/* MissionSuccess */
+/******************/
+PortsList MissionSuccess::providedPorts() {
+    return { 
+        BT::InputPort<int>("base_index")
+    };
+}
+
+BT::NodeStatus MissionSuccess::tick() {
+    int baseIndex_ = getInput<double>("base_index").value();
+    bool lastMissionFailed_;
+
+    // update mission_points_status_
+    blackboard_->get<std::vector<int>>("mission_points_status", mission_points_status_);
+    mission_points_status_[baseIndex_ - 11]++;
+    blackboard_->set<std::vector<int>>("mission_points_status", mission_points_status_);
+
+    blackboard_->get<bool>("last_mission_failed", lastMissionFailed_);
+    lastMissionFailed_ = false;
+    blackboard_->set<bool>("last_mission_failed", lastMissionFailed_);
+
+    vision_pub_ = node_->create_publisher<std_msgs::msg::Bool>("/on_robot_camera/finish_mission", 20);
+    is_mission_finished.data = true;
+    std::thread{std::bind(&MissionSuccess::timer_publisher, this)}.detach();
+    
+    return BT::NodeStatus::SUCCESS;
+}
+
+void MissionSuccess::timer_publisher() {
+    rclcpp::Rate rate(100);
+
+    while (rclcpp::ok() && publish_count < publish_times) { 
+        vision_pub_->publish(is_mission_finished);
+        publish_count++;
+        rate.sleep();
+    }
+}
+
+/*******************/
 /* MissionFinisher */
-/********************/
+/*******************/
 PortsList MissionFinisher::providedPorts() {
     return { 
         BT::InputPort<std::deque<int>>("step_results"),
