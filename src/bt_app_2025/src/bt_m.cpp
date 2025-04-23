@@ -75,7 +75,8 @@ public:
         blackboard->set<std::vector<int>>("mission_points_status", std::vector<int>{0, 0, 0, 0, 0, 0, 0, 0});
         blackboard->set<int>("mission_progress", 0);
         blackboard->set<bool>("last_mission_failed", false);
-        blackboard->set<bool>("team", false);
+        blackboard->set<bool>("notTimeout", true);
+        blackboard->set<std::string>("team", "y");
         // Subscriber
         time_sub = this->create_subscription<std_msgs::msg::Float32>("/robot/startup/time", 2, std::bind(&MainClass::timeCallback, this, std::placeholders::_1));
         sub = this->create_subscription<std_msgs::msg::String>("/robot/startup/ready_signal", 2, std::bind(&MainClass::readyCallback, this, std::placeholders::_1));
@@ -127,15 +128,16 @@ public:
         factory.registerNodeType<FirmwareMission>("FirmwareMission", params, blackboard);
         factory.registerNodeType<IntegratedMissionNode>("IntegratedMissionNode", params, blackboard);
         factory.registerNodeType<SIMAactivate>("SIMAactivate", params);
+        factory.registerNodeType<MissionSuccess>("MissionSuccess", params, blackboard);
         factory.registerNodeType<MissionFinisher>("MissionFinisher", params, blackboard);
         /* others */
         factory.registerNodeType<BTStarter>("BTStarter", params, blackboard);
+        factory.registerNodeType<MySetBlackboard>("MySetBlackboard", params, blackboard);
         factory.registerNodeType<Comparator>("Comparator", params); // decorator
         factory.registerNodeType<TimerChecker>("TimerChecker", blackboard); // decorator
     }
 
     void LoadXML() {
-        // RCLCPP_INFO(this->get_logger(), "3");
         shellCmd("whoami", user_name);   // command to get user name
         user_name.pop_back();
         // register tree xml
@@ -143,13 +145,9 @@ public:
         RCLCPP_INFO_STREAM(this->get_logger(), groot_filename);
         factory.registerBehaviorTreeFromFile(groot_filename); // translate new tree nodes into xml language
         // add new tree nodes into xml
-        // RCLCPP_INFO(this->get_logger(), "4");
         xml_models = BT::writeTreeNodesModelXML(factory);
-        // RCLCPP_INFO(this->get_logger(), "5");
         bt_tree_node_model = "/home/" + user_name + bt_tree_node_model;
-        // RCLCPP_INFO(this->get_logger(), "6");
         std::ofstream file(bt_tree_node_model);  // open the xml that store the tree nodes
-        // RCLCPP_INFO(this->get_logger(), "7");
         file << xml_models;
         file.close();
     }
@@ -163,7 +161,7 @@ public:
         }
         // create tree
         auto tree = factory.createTree(tree_name, blackboard);
-        BT::Groot2Publisher publisher(tree, 2227);
+        // BT::Groot2Publisher publisher(tree, 2227);
 
         BT::NodeStatus status = BT::NodeStatus::RUNNING;
         RCLCPP_INFO(this->get_logger(), "[BT Application]: Behavior Tree start running!");
@@ -234,9 +232,9 @@ void MainClass::readyCallback(const std_msgs::msg::String::SharedPtr msg) {
     // RCLCPP_INFO_STREAM(this->get_logger(), "in the callback: " << msg->data);
     team = msg->data.back();  // get team color
     if (team == '0')
-        blackboard->set<bool>("team", false); // team color is yellow
+        blackboard->set<std::string>("team", "y"); // team color is yellow
     else
-        blackboard->set<bool>("team", true); // team color is blue
+        blackboard->set<std::string>("team", "b"); // team color is blue
     msg->data.pop_back();   // delete the last char of string
     groot_filename = msg->data;  // the remain string is the plan xml file name
     isReady = true;   // set as received ready message

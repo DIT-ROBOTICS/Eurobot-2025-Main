@@ -20,6 +20,7 @@
 #include "std_srvs/srv/set_bool.hpp"
 #include "std_msgs/msg/float32.hpp"
 #include "std_msgs/msg/int32.hpp"
+#include "std_msgs/msg/bool.hpp"
 #include "geometry_msgs/msg/twist_stamped.hpp"
 #include "geometry_msgs/msg/pose_stamped.hpp"
 #include "geometry_msgs/msg/pose_array.hpp"
@@ -65,6 +66,32 @@ private:
   rclcpp::TimerBase::SharedPtr timer_;
   float current_time_;
   bool mission_finished_ = false;
+};
+
+class MissionSuccess : public BT::SyncActionNode
+{
+public:
+
+  MissionSuccess(const std::string& name, const BT::NodeConfig& config, const RosNodeParams& params, BT::Blackboard::Ptr blackboard)
+    : BT::SyncActionNode(name, config), node_(params.nh.lock()), blackboard_(blackboard)
+  {
+    publish_times = 100;
+    publish_count = 0;
+  }
+  /* Node remapping function */
+  static BT::PortsList providedPorts();
+  /* Start and running function */
+  BT::NodeStatus tick() override;
+  void timer_publisher();
+
+private:
+  BT::Blackboard::Ptr blackboard_;
+  rclcpp::Node::SharedPtr node_;
+  rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr vision_pub_;
+  std_msgs::msg::Bool is_mission_finished;
+  std::vector<int> mission_points_status_;
+  int publish_times;
+  int publish_count;
 };
 
 class MissionFinisher : public BT::StatefulActionNode

@@ -35,6 +35,25 @@ template <> inline std::deque<int> BT::convertFromString(StringView str) {
     return output;
 }
 
+BT::PortsList MySetBlackboard::providedPorts() {
+    return {
+        BT::InputPort<std::string>("blackboard_key"),
+        BT::InputPort<bool>("blackboard_value"),
+        BT::OutputPort<bool>("new_value")
+    };
+}
+
+BT::NodeStatus MySetBlackboard::tick() {
+    std::string blackboard_key_;
+    bool blackboard_value_;
+    getInput<std::string>("blackboard_key", blackboard_key_);
+    getInput<bool>("blackboard_value", blackboard_value_);
+
+    blackboard_->set<bool>(blackboard_key_, blackboard_value_);
+    setOutput<bool>("new_value", blackboard_value_);
+    return BT::NodeStatus::SUCCESS;
+}
+
 /*************/
 /* BTStarter */
 /*************/
@@ -44,9 +63,20 @@ BT::PortsList BTStarter::providedPorts() {
 
 BT::NodeStatus BTStarter::tick() {
     subscription_ = node_->create_subscription<std_msgs::msg::Float32>("/robot/startup/time", 10, std::bind(&BTStarter::topic_callback, this, std::placeholders::_1));
+    keepout_zone_pub_ = node_->create_publisher<std_msgs::msg::String>("/keepout_zone", rclcpp::QoS(20).reliable().transient_local());
+    blackboard_->get<std::string>("team", team_);
+    if (team_ == "y") {
+        keepout_zone_.data = "BCFGJ";
+        RCLCPP_INFO_STREAM(node_->get_logger(), keepout_zone_.data);
+    }
+    else {
+        keepout_zone_.data = "ADEHI";
+        RCLCPP_INFO_STREAM(node_->get_logger(), keepout_zone_.data);
+    }
+    keepout_zone_pub_->publish(keepout_zone_);
+
     int game_status = 0;
     setOutput<int>("result", game_status);
-
     return BT::NodeStatus::SUCCESS;
 }
 
@@ -184,7 +214,7 @@ BT::NodeStatus BTFinisher::tick() {
     // Test solar
     // score = 0;
 
-    if (team_ == 0) {
+    if (team_ == "b") {
         // Blue team
         RCLCPP_INFO(node_->get_logger(), "[BTFinisher]: Blue team");
         for (int i = 0; i < 3; i++) {
@@ -451,7 +481,7 @@ BT::NodeStatus TimerChecker::tick() {
 
 //     switch (check_start_point_) {
 //         case 0:
-//             if (team_ == 0) {
+//             if (team_ == "b") {
 //                 /* Checking  Rival points with central point (blue team) */
 //                 if (rival_pose.twist.linear.x < 0.7) {
 //                     RCLCPP_INFO(logger(), "[RivalStart]: Rival is in the blue team central start point");

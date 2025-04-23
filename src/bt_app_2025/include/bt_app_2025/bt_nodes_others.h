@@ -22,6 +22,7 @@
 // Use ros message
 #include "std_srvs/srv/set_bool.hpp"
 #include "std_msgs/msg/float32.hpp"
+#include "std_msgs/msg/string.hpp"
 #include "geometry_msgs/msg/twist_stamped.hpp"
 #include "geometry_msgs/msg/pose_stamped.hpp"
 #include "geometry_msgs/msg/pose_array.hpp"
@@ -41,6 +42,23 @@ namespace BT {
     template <> inline int convertFromString(StringView str);
     template <> inline std::deque<int> convertFromString(StringView str);
 }
+
+class MySetBlackboard : public BT::SyncActionNode {
+
+public:
+    MySetBlackboard(const std::string& name, const BT::NodeConfig& config, const RosNodeParams& params, BT::Blackboard::Ptr blackboard)
+        : BT::SyncActionNode(name, config), node_(params.nh.lock()), blackboard_(blackboard)
+    {}
+
+    /* Node remapping function */
+    static BT::PortsList providedPorts();
+
+    /* Start and running function */
+    BT::NodeStatus tick() override;
+private:
+    std::shared_ptr<rclcpp::Node> node_;
+    BT::Blackboard::Ptr blackboard_;
+};
 
 /******************************/
 /* BTStarter - Start the tree */
@@ -62,10 +80,12 @@ private:
     void topic_callback(const std_msgs::msg::Float32::SharedPtr msg);
 
     rclcpp::Subscription<std_msgs::msg::Float32>::SharedPtr subscription_;
+    rclcpp::Publisher<std_msgs::msg::String>::SharedPtr keepout_zone_pub_;
     std::shared_ptr<rclcpp::Node> node_;
     BT::Blackboard::Ptr blackboard_;
-
+    std_msgs::msg::String keepout_zone_;
     float current_time_;
+    std::string team_;
 };
 
 /******************************/
@@ -75,7 +95,7 @@ private:
 class BTFinisher : public BT::SyncActionNode {
 
 public:
-    BTFinisher(const std::string& name, const BT::NodeConfig& config, std::string file, int team, const RosNodeParams& params)
+    BTFinisher(const std::string& name, const BT::NodeConfig& config, std::string file, std::string team, const RosNodeParams& params)
         : BT::SyncActionNode(name, config), score_filepath(file), team_(team),  node_(params.nh.lock()){}
 
     /* Node remapping function */
@@ -86,7 +106,7 @@ public:
 
     std::string score_filepath;
 
-    int team_;
+    std::string team_;
     std::shared_ptr<rclcpp::Node> node_;
 };
 
@@ -154,7 +174,7 @@ private:
 // class RivalStart : public BT::SyncActionNode {
 
 // public:
-//     RivalStart(const std::string& name, const BT::NodeConfig& config, int team)
+//     RivalStart(const std::string& name, const BT::NodeConfig& config, std::string team)
 //         : BT::SyncActionNode(name, config), team_(team) {}
 
 //     /* Node remapping function */
@@ -166,7 +186,7 @@ private:
 // private:
 
 //     // Private variables
-//     int team_;
+//     std::string team_;
 //     int check_start_point_;
 
 //     // Kernel

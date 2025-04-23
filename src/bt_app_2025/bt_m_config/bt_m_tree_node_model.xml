@@ -39,6 +39,14 @@
             <input_port name="mission_type" type="std::string"/>
             <input_port name="base_index" type="int"/>
         </Decorator>
+        <Action ID="MissionSuccess">
+            <input_port name="base_index" type="int"/>
+        </Action>
+        <Action ID="MySetBlackboard">
+            <output_port name="new_value" type="bool"/>
+            <input_port name="blackboard_value" type="bool"/>
+            <input_port name="blackboard_key" type="std::string"/>
+        </Action>
         <Action ID="NavReceiver"/>
         <Action ID="Navigation">
             <output_port name="final_pose" type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
