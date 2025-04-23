@@ -11,19 +11,19 @@
                    dock_type="dock_y_slow_precise"
                    shift="0"
                    offset="-0.1"
-                   base="0.25, 0.3, 0"/>
+                   base="2.75, 0.3, 0"/>
           <Docking final_pose="{PrevGoal}"
                    isPureDocking="0"
                    dock_type="dock_y_slow_precise"
                    shift="0"
                    offset="-0.1"
-                   base="1.75, 0.3, 0"/>
+                   base="1.25, 0.3, 0"/>
           <Docking final_pose="{PrevGoal}"
                    isPureDocking="0"
                    dock_type="dock_y_slow_precise"
                    shift="0"
                    offset="-0.1"
-                   base="2.25, 0.3, 0"/>
+                   base="0.75, 0.3, 0"/>
         </Fallback>
         <Fallback>
           <Docking final_pose="{PrevGoal}"
@@ -31,19 +31,19 @@
                    dock_type="dock_y_slow_precise"
                    shift="0"
                    offset="-0.1"
-                   base="1.75, 0.3, 0"/>
+                   base="1.25, 0.3, 0"/>
           <Docking final_pose="{PrevGoal}"
                    isPureDocking="0"
                    dock_type="dock_y_slow_precise"
                    shift="0"
                    offset="-0.1"
-                   base="2.25, 0.3, 0"/>
+                   base="0.75, 0.3, 0"/>
           <Docking final_pose="{PrevGoal}"
                    isPureDocking="0"
                    dock_type="dock_y_slow_precise"
                    shift="0"
                    offset="-0.1"
-                   base="0.25, 0.3, 0"/>
+                   base="2.75, 0.3, 0"/>
         </Fallback>
         <Fallback>
           <Docking final_pose="{PrevGoal}"
@@ -51,20 +51,20 @@
                    dock_type="dock_y_slow_precise"
                    shift="0"
                    offset="-0.1"
-                   base="2.25, 0.3, 0"
+                   base="0.75, 0.3, 0"
                    _description="go to place the banner"/>
           <Docking final_pose="{PrevGoal}"
                    isPureDocking="0"
                    dock_type="dock_y_slow_precise"
                    shift="0"
                    offset="-0.1"
-                   base="1.75, 0.3, 0"/>
+                   base="1.25, 0.3, 0"/>
           <Docking final_pose="{PrevGoal}"
                    isPureDocking="0"
                    dock_type="dock_y_slow_precise"
                    shift="0"
                    offset="-0.1"
-                   base="0.25, 0.3, 0"/>
+                   base="2.75, 0.3, 0"/>
         </Fallback>
       </Switch2>
       <Sleep msec="1000"/>
@@ -211,7 +211,7 @@
                dock_type="mission_dock_y"
                shift="0"
                offset="0"
-               base="2.65, 1.6, 3"/>
+               base="0.35, 1.6, 3"/>
     </Sequence>
   </BehaviorTree>
 
@@ -225,10 +225,10 @@
                      remap_dock_type="{dock_type}"
                      remap_base="{base}"
                      shift="0"
-                     offset="-0.2"
+                     offset="0.2"
                      mission_type="back"
                      dock_type="dock_x_fast_precise"
-                     base_index="8">
+                     base_index="1">
           <Docking final_pose="{PrevGoal}"
                    isPureDocking="0"
                    dock_type="{dock_type}"
@@ -272,10 +272,10 @@
                           remap_dock_type="{dock_type}"
                           remap_base="{base}"
                           shift="0.045"
-                          offset="-0.2"
+                          offset="0.1"
                           mission_type="front"
                           dock_type="dock_x_slow_precise"
-                          base_index="7">
+                          base_index="2">
                 <Docking final_pose="{PrevGoal}"
                         isPureDocking="0"
                         dock_type="{dock_type}"
@@ -314,14 +314,14 @@
           </Sequence>
         </Parallel>
         <SubTree ID="TwoLevelsBot1new"
-                 BACK_L="0.2"
-                 BACK_M="0.1"
-                 BACK_S="0.05"
+                 BACK_L="-0.2"
+                 BACK_M="-0.1"
+                 BACK_S="-0.05"
                  DOCK_DIR="dock_x_fast_precise"
-                 FORWARD_L="-0.15"
-                 FORWARD_M="-0.13"
-                 FORWARD_S="-0.06"
-                 SHIFT="-0.11"
+                 FORWARD_L="0.15"
+                 FORWARD_M="0.13"
+                 FORWARD_S="0.06"
+                 SHIFT="0.11"
                  _autoremap="true"/>
       </Sequence>
       <Sequence>
@@ -330,12 +330,12 @@
             <Fallback>
               <MissionNearRival remap_base="{base}"
                                 mission_type="back"
-                                base_index="15">
+                                base_index="11">
                 <Docking final_pose="{PrevGoal}"
                          isPureDocking="0"
                          dock_type="mission_dock_x"
                          shift="0"
-                         offset="-0.1"
+                         offset="0.1"
                          base="{base}"/>
               </MissionNearRival>
               <ForceFailure>
@@ -345,16 +345,16 @@
           </RetryUntilSuccessful>
         </ForceSuccess>
         <SubTree ID="ThreeLevelsBot1new"
-                 BACK_L="0.2"
-                 BACK_M="0.1"
-                 BACK_S="0.05"
+                 BACK_L="-0.2"
+                 BACK_M="-0.1"
+                 BACK_S="-0.05"
                  DOCK_DIR="dock_x_fast_precise"
-                 FORWARD_L="-0.15"
-                 FORWARD_M="-0.11"
-                 FORWARD_S="-0.065"
+                 FORWARD_L="0.15"
+                 FORWARD_M="0.11"
+                 FORWARD_S="0.065"
                  hasCompleteMaterial="{hasCompleteMaterial}"
                  _autoremap="true"/>
-        <MissionSuccess base_index="15"/>
+        <MissionSuccess base_index="11"/>
       </Sequence>
     </Sequence>
   </BehaviorTree>
@@ -370,7 +370,7 @@
                      offset="-0.2"
                      mission_type="back"
                      dock_type="mission_dock_y"
-                     base_index="5">
+                     base_index="4">
           <Docking final_pose="{PrevGoal}"
                    isPureDocking="0"
                    dock_type="{dock_type}"
@@ -421,7 +421,7 @@
                        offset="-0.2"
                        mission_type="front"
                        dock_type="mission_dock_y"
-                       base_index="4">
+                       base_index="5">
             <Docking final_pose="{PrevGoal}"
                      isPureDocking="0"
                      dock_type="{dock_type}"
@@ -466,10 +466,10 @@
         <ForceSuccess>
           <MissionNearRival remap_base="{base}"
                             mission_type="back"
-                            base_index="18">
+                            base_index="14">
             <Docking final_pose="{PrevGoal}"
                      isPureDocking="0"
-                     dock_type="mission_dock_y"
+                     dock_type="dock_y_fast_loose"
                      shift="0"
                      offset="-0.1"
                      base="{base}"/>
@@ -479,13 +479,13 @@
                  BACK_L="0.2"
                  BACK_M="0.1"
                  BACK_S="0.05"
-                 DOCK_DIR="mission_dock_y"
+                 DOCK_DIR="dock_y_slow_precise"
                  FORWARD_L="-0.15"
                  FORWARD_M="-0.11"
                  FORWARD_S="-0.065"
                  hasCompleteMaterial="{hasCompleteMaterial}"
                  _autoremap="true"/>
-        <MissionSuccess base_index="18"/>
+        <MissionSuccess base_index="14"/>
       </Sequence>
     </Sequence>
   </BehaviorTree>
@@ -502,7 +502,7 @@
                        offset="0.2"
                        mission_type="front"
                        dock_type="mission_dock_y"
-                       base_index="6">
+                       base_index="3">
             <Docking final_pose="{PrevGoal}"
                      isPureDocking="0"
                      dock_type="{dock_type}"
@@ -536,7 +536,7 @@
                  BACK_L="-0.2"
                  BACK_M="-0.1"
                  BACK_S="-0.05"
-                 DOCK_DIR="mission_dock_y"
+                 DOCK_DIR="dock_y_slow_precise"
                  FORWARD_L="0.15"
                  FORWARD_M="0.13"
                  FORWARD_S="0.06"
@@ -547,7 +547,7 @@
         <ForceSuccess>
           <MissionNearRival remap_base="{base}"
                             mission_type="back"
-                            base_index="17">
+                            base_index="13">
             <Docking final_pose="{PrevGoal}"
                      isPureDocking="0"
                      dock_type="mission_dock_y"
@@ -566,7 +566,7 @@
                  FORWARD_S="-0.065"
                  hasCompleteMaterial="{hasCompleteMaterial}"
                  _autoremap="true"/>
-        <MissionSuccess base_index="17"/>
+        <MissionSuccess base_index="13"/>
       </Sequence>
     </Sequence>
   </BehaviorTree>
