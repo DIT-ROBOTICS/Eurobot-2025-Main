@@ -422,10 +422,19 @@ NodeStatus VisionCheck::tick() {
 
     blackboard_->get<std_msgs::msg::Int32MultiArray>("materials_info", materials_info_);  // use vision message to check the target
     blackboard_->get<bool>("last_mission_failed", last_mission_failed_);                  // see if last mission failed
-    
+    bool canPrintMessage;
+    blackboard_->get<bool>("can_print_message", canPrintMessage);     
+    // if (canPrintMessage) {
+    //     if (baseIndex_ != -1)
+    //         RCLCPP_INFO_STREAM(node_->get_logger(), "go to point " << baseIndex_ << " to get material");
+    //     else
+    //         RCLCPP_INFO_STREAM(node_->get_logger(), "find a good material point");
+    // }
     // If the target is not ok
     // use vision message to find the best new target `i` (new base)
     if (materials_info_.data[baseIndex_] == 0 || baseIndex_ == -1) {
+        // if (baseIndex_ != -1)
+        //     RCLCPP_INFO_STREAM(node_->get_logger(), "origin point empty, find a new point");
         baseIndex_ = findBestTarget();
         /**********************************************************/
         /* Notice!! this part need to be consider again carefully */
@@ -435,7 +444,11 @@ NodeStatus VisionCheck::tick() {
             return NodeStatus::FAILURE;
         }
         dockType_ = (int(material_points_[baseIndex_ * 5 + 2]) % 2) ? "mission_dock_y" : "mission_dock_x";
+        // if (canPrintMessage)
+        //     RCLCPP_INFO_STREAM(node_->get_logger(), "final goal is point " << baseIndex_);
     }
+    // if (canPrintMessage)
+    //     RCLCPP_INFO_STREAM(node_->get_logger(), "------------------------------------");
     // get base & offset from map_points[i]
     base_.pose.position.x = material_points_[baseIndex_ * 5];
     base_.pose.position.y = material_points_[baseIndex_ * 5 + 1];
@@ -459,6 +472,9 @@ NodeStatus VisionCheck::tick() {
     } else {
         throw "error mission direction for choosing nav goal!";
     }
+
+    // canPrintMessage = false;
+    // blackboard_->get<bool>("can_print_message", canPrintMessage);
 
     // set output port
     setOutput<geometry_msgs::msg::PoseStamped>("remap_base", base_);
@@ -489,7 +505,7 @@ NodeStatus MissionNearRival::tick() {
 
     // get parameters
     node_->get_parameter("material_points", material_points_);
-    blackboard_->get<std::vector<int>>("mission_points_status", mission_points_status_);
+    blackboard_->get<std_msgs::msg::Int32MultiArray>("mission_points_status", mission_points_status_);
     
     // get base & offset from map_points[i]
     base_.pose.position.x = material_points_[baseIndex_ * 5];
@@ -505,16 +521,22 @@ NodeStatus MissionNearRival::tick() {
         base_.pose.position.z = ((int)base_.pose.position.z / 2) ? base_.pose.position.z - 2 : base_.pose.position.z + 2;
     }
     if (base_.pose.position.z == 1.0 || base_.pose.position.z == 3.0) {
-        if (mission_points_status_[baseIndex_ - 11] != 0)   // check if this mission is already placed
-            base_.pose.position.y -= offset * 1.3;    // if yes, the placement point need to e changed
-        if (dist < 0.5 && abs(base_.pose.position.y - rival_pose_.pose.position.y) < 0.4) {
-            base_.pose.position.x += (base_.pose.position.x - rival_pose_.pose.position.x)/abs(base_.pose.position.x - rival_pose_.pose.position.x)*(0.5 - abs(base_.pose.position.x - rival_pose_.pose.position.x));
+        if (mission_points_status_.data[baseIndex_ - 11] != 0) {   // check if this mission is already placed
+            base_.pose.position.y -= offset * 1.5;    // if yes, the placement point need to be changed
+            RCLCPP_INFO_STREAM(node_->get_logger(), "step back 5 cm, and then place the materials");
+        }
+        if (dist < 0.3 && abs(base_.pose.position.y - rival_pose_.pose.position.y) < 0.2) {
+            base_.pose.position.x += (base_.pose.position.x - rival_pose_.pose.position.x)/abs(base_.pose.position.x - rival_pose_.pose.position.x)*(0.3 - abs(base_.pose.position.x - rival_pose_.pose.position.x));
+            RCLCPP_INFO_STREAM(node_->get_logger(), "rival near the bot when placing the materials");
         }
     } else {
-        if (mission_points_status_[baseIndex_ - 11] != 0)  // check if this mission is already placed
-            base_.pose.position.x -= offset * 1.3;   // if yes, the placement point need to e changed
-        if (dist < 0.5 && abs(base_.pose.position.x - rival_pose_.pose.position.x) < 0.4) {
-            base_.pose.position.y += (base_.pose.position.y - rival_pose_.pose.position.y)/abs(base_.pose.position.y - rival_pose_.pose.position.y)*(0.5 - abs(base_.pose.position.y - rival_pose_.pose.position.y));
+        if (mission_points_status_.data[baseIndex_ - 11] != 0) {  // check if this mission is already placed
+            base_.pose.position.x -= offset * 1.5;   // if yes, the placement point need to e changed
+            RCLCPP_INFO_STREAM(node_->get_logger(), "step back 5 cm, and then place the materials");
+        }
+        if (dist < 0.3 && abs(base_.pose.position.x - rival_pose_.pose.position.x) < 0.2) {
+            base_.pose.position.y += (base_.pose.position.y - rival_pose_.pose.position.y)/abs(base_.pose.position.y - rival_pose_.pose.position.y)*(0.3 - abs(base_.pose.position.y - rival_pose_.pose.position.y));
+            RCLCPP_INFO_STREAM(node_->get_logger(), "rival near the bot when placing the materials");
         }
     }
 

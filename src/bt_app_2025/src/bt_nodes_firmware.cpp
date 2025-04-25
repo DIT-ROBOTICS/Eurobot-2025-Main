@@ -91,15 +91,14 @@ BT::NodeStatus MissionSuccess::tick() {
     bool lastMissionFailed_;
 
     // update mission_points_status_
-    blackboard_->get<std::vector<int>>("mission_points_status", mission_points_status_);
-    mission_points_status_[baseIndex_ - 11]++;
-    blackboard_->set<std::vector<int>>("mission_points_status", mission_points_status_);
+    blackboard_->get<std_msgs::msg::Int32MultiArray>("mission_points_status", mission_points_status_);
+    mission_points_status_.data[baseIndex_ - 11]++;
+    blackboard_->set<std_msgs::msg::Int32MultiArray>("mission_points_status", mission_points_status_);
+    RCLCPP_INFO_STREAM(node_->get_logger(), "place materials at point " << baseIndex_ << "successfully, data: " << mission_points_status_.data[baseIndex_ - 11]);
 
-    // blackboard_->get<bool>("last_mission_failed", lastMissionFailed_);
     lastMissionFailed_ = false;
     blackboard_->set<bool>("last_mission_failed", lastMissionFailed_);
 
-    vision_pub_ = node_->create_publisher<std_msgs::msg::Bool>("/on_robot_camera/finish_mission", 20);
     is_mission_finished.data = true;
     std::thread{std::bind(&MissionSuccess::timer_publisher, this)}.detach();
     
@@ -292,7 +291,7 @@ PortsList FirmwareMission::providedPorts() {
 
 BT::NodeStatus FirmwareMission::stopStep() {
     if (mission_status_ == 1 && mission_received_) {
-        RCLCPP_INFO(node_->get_logger(), "Mission success");
+        // RCLCPP_INFO(node_->get_logger(), "Mission success");
         blackboard_->set<int>("mission_progress", ++mission_progress_);
         setOutput<int>("mission_status", mission_status_);
         mission_received_ = false;
@@ -302,13 +301,13 @@ BT::NodeStatus FirmwareMission::stopStep() {
     } else if (mission_status_ == 0 || (!mission_received_ && mission_status_ == 1)) {
         return BT::NodeStatus::RUNNING;
     } else if (mission_status_ == -1) {
-        RCLCPP_INFO(node_->get_logger(), "Mission failed");
+        // RCLCPP_INFO(node_->get_logger(), "Mission failed");
         setOutput<int>("mission_status", mission_status_);
         mission_received_ = false;
         subscription_.reset();
         return BT::NodeStatus::FAILURE;
     } else {
-        RCLCPP_INFO(node_->get_logger(), "Unknown status code, Stop mission");
+        // RCLCPP_INFO(node_->get_logger(), "Unknown status code, Stop mission");
         setOutput<int>("mission_status", -1);
         subscription_.reset();
         return BT::NodeStatus::FAILURE;
@@ -320,12 +319,12 @@ void FirmwareMission::mission_callback(const std_msgs::msg::Int32::SharedPtr sub
         if (sub_msg->data == 0)
             mission_received_ = true;
         mission_status_ = sub_msg->data;
-        RCLCPP_INFO(node_->get_logger(), "mission_received_: %d, mission type: '%d', heard: '%d'", mission_received_, mission_type_, mission_status_);
+        // RCLCPP_INFO(node_->get_logger(), "mission_received_: %d, mission type: '%d', heard: '%d'", mission_received_, mission_type_, mission_status_);
     }
 }
 
 BT::NodeStatus FirmwareMission::onStart() {
-    RCLCPP_INFO(node_->get_logger(), "Node start");
+    // RCLCPP_INFO(node_->get_logger(), "Node start");
     getInput<int>("mission_type", mission_type_);
     blackboard_->get<int>("mission_progress", mission_progress_);
 
@@ -335,8 +334,8 @@ BT::NodeStatus FirmwareMission::onStart() {
 BT::NodeStatus FirmwareMission::onRunning() {
     pub_msg.data = mission_type_;
     publisher_->publish(pub_msg);
-    RCLCPP_INFO(node_->get_logger(), "mission_progress: %d", mission_progress_);
-    RCLCPP_INFO(node_->get_logger(), "mission_type: %d", mission_type_);
+    // RCLCPP_INFO(node_->get_logger(), "mission_progress: %d", mission_progress_);
+    // RCLCPP_INFO(node_->get_logger(), "mission_type: %d", mission_type_);
     rate_.sleep();
     return stopStep();
     // **failure test**
@@ -346,7 +345,7 @@ BT::NodeStatus FirmwareMission::onRunning() {
 }
 
 void FirmwareMission::onHalted() {
-    RCLCPP_INFO(node_->get_logger(), "Testing Node halted");
+    // RCLCPP_INFO(node_->get_logger(), "Testing Node halted");
     setOutput<int>("mission_status", -1);
     return;
 }
