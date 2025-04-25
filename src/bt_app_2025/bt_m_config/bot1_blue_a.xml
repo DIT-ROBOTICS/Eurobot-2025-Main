@@ -265,7 +265,7 @@
                    hasCompleteMaterial="{hasCompleteMaterial}"
                    _autoremap="true"/>
           <Sequence>
-            <Sleep msec="700"/>
+            <Sleep msec="1500"/>
             <Fallback>
               <VisionCheck remap_offset="{offset}"
                           remap_shift="{shift}"
@@ -317,10 +317,10 @@
                  BACK_L="0.2"
                  BACK_M="0.1"
                  BACK_S="0.05"
-                 DOCK_DIR="dock_x_fast_precise"
+                 DOCK_DIR="dock_x_slow_precise"
                  FORWARD_L="-0.15"
                  FORWARD_M="-0.13"
-                 FORWARD_S="-0.06"
+                 FORWARD_S="-0.065"
                  SHIFT="-0.11"
                  _autoremap="true"/>
       </Sequence>
@@ -405,7 +405,7 @@
         <SubTree ID="OneLevelBot1new"
                  hasCompleteMaterial="{hasCompleteMaterial}"
                  _autoremap="true"/>
-        <Delay delay_msec="700">
+        <Delay delay_msec="1500">
           <SubTree ID="BannerMission"
                    BANNER_PLACE="0"
                    _autoremap="true"/>
