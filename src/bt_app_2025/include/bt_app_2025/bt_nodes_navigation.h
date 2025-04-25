@@ -220,7 +220,7 @@ private:
     geometry_msgs::msg::PoseStamped rival_pose_;
     // for input
     std_msgs::msg::Int32MultiArray materials_info_;
-    std::vector<int> mission_points_status_;
+    std_msgs::msg::Int32MultiArray mission_points_status_;
     geometry_msgs::msg::PoseStamped base_;
     std::vector<double> material_points_;
 };

@@ -21,6 +21,7 @@
 #include "std_msgs/msg/float32.hpp"
 #include "std_msgs/msg/int32.hpp"
 #include "std_msgs/msg/bool.hpp"
+#include "std_msgs/msg/int32_multi_array.hpp"
 #include "geometry_msgs/msg/twist_stamped.hpp"
 #include "geometry_msgs/msg/pose_stamped.hpp"
 #include "geometry_msgs/msg/pose_array.hpp"
@@ -77,6 +78,7 @@ public:
   {
     publish_times = 100;
     publish_count = 0;
+    vision_pub_ = node_->create_publisher<std_msgs::msg::Bool>("/on_robot_camera/finish_mission", 20);
   }
   /* Node remapping function */
   static BT::PortsList providedPorts();
@@ -89,7 +91,7 @@ private:
   rclcpp::Node::SharedPtr node_;
   rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr vision_pub_;
   std_msgs::msg::Bool is_mission_finished;
-  std::vector<int> mission_points_status_;
+  std_msgs::msg::Int32MultiArray mission_points_status_;
   int publish_times;
   int publish_count;
 };
