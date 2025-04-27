@@ -92,6 +92,7 @@ private:
   rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr vision_pub_;
   std_msgs::msg::Bool is_mission_finished;
   std_msgs::msg::Int32MultiArray mission_points_status_;
+  std_msgs::msg::Int32MultiArray materials_info_;
   int publish_times;
   int publish_count;
 };

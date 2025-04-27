@@ -51,7 +51,7 @@ int main(int argc, char** argv) {
     // action nodes
     params.default_port_value = "navigate_to_pose";
     factory.registerNodeType<Navigation>("Navigation", params, blackboard);
-    factory.registerNodeType<initPoints>("initPoints", node);
+    // factory.registerNodeType<initPoints>("initPoints", node);
     factory.registerNodeType<StateUpdater>("StateUpdater", node, blackboard);
     factory.registerNodeType<PublishPose>("PublishPose", node, blackboard);
 

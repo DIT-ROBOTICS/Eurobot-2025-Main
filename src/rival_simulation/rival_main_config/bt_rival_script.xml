@@ -3,7 +3,7 @@
   <BehaviorTree ID="MainTree">
     <Sequence>
       <PublishPose/>
-      <initPoints material_points="{Materials}"/>
+      <!-- <initPoints material_points="{Materials}"/> -->
       <Sequence>
         <Navigation final_pose="{PrevGoal}"
                     goal="0.8, 1.7, 0"

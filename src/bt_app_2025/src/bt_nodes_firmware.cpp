@@ -90,17 +90,22 @@ BT::NodeStatus MissionSuccess::tick() {
     int baseIndex_ = getInput<int>("base_index").value();
     bool lastMissionFailed_;
 
-    // update mission_points_status_
-    blackboard_->get<std_msgs::msg::Int32MultiArray>("mission_points_status", mission_points_status_);
-    mission_points_status_.data[baseIndex_ - 11]++;
-    blackboard_->set<std_msgs::msg::Int32MultiArray>("mission_points_status", mission_points_status_);
-    RCLCPP_INFO_STREAM(node_->get_logger(), "place materials at point " << baseIndex_ << "successfully, data: " << mission_points_status_.data[baseIndex_ - 11]);
-
     lastMissionFailed_ = false;
     blackboard_->set<bool>("last_mission_failed", lastMissionFailed_);
+    if (baseIndex_ < 10) {
+        materials_info_.data[baseIndex_] = 0;
+        blackboard_->set<std_msgs::msg::Int32MultiArray>("materials_info", materials_info_);
+        RCLCPP_INFO_STREAM(node_->get_logger(), "take materials at point " << baseIndex_ << " successfully");
+    } else {
+        // update mission_points_status_
+        blackboard_->get<std_msgs::msg::Int32MultiArray>("mission_points_status", mission_points_status_);
+        mission_points_status_.data[baseIndex_ - 11]++;
+        blackboard_->set<std_msgs::msg::Int32MultiArray>("mission_points_status", mission_points_status_);
+        RCLCPP_INFO_STREAM(node_->get_logger(), "place materials at point " << baseIndex_ << " successfully, data: " << mission_points_status_.data[baseIndex_ - 11]);
 
-    is_mission_finished.data = true;
-    std::thread{std::bind(&MissionSuccess::timer_publisher, this)}.detach();
+        is_mission_finished.data = true;
+        std::thread{std::bind(&MissionSuccess::timer_publisher, this)}.detach();
+    }
     
     return BT::NodeStatus::SUCCESS;
 }
