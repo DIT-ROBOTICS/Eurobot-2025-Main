@@ -71,9 +71,9 @@ inline geometry_msgs::msg::PoseStamped Navigation::ExportPose(const int index) {
 
 // Start function for the SimpleNavigation node
 BT::NodeStatus Navigation::onStart() {
-    auto g = &getInput<geometry_msgs::msg::PoseStamped>("goal");
-    auto g_i = &getInput<int>("goal_index");
-    goal = (g != NULL) ? g->value() : ExportPose(g_i->value());
+    auto g = getInput<geometry_msgs::msg::PoseStamped>("goal");
+    auto g_i = getInput<int>("goal_index");
+    goal_ = (g) ? g.value() : ExportPose(g_i.value());
     getInput<geometry_msgs::msg::PoseStamped>("start_pose", start_pose_);
     broadcaster_ = std::make_shared<tf2_ros::TransformBroadcaster>(node_);
     predict_goal_pub_ = node_->create_publisher<geometry_msgs::msg::PoseStamped>("rival/predict_goal", 20);
