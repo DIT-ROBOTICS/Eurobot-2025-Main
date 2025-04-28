@@ -40,6 +40,22 @@ install(TARGETS
   DESTINATION lib/${PROJECT_NAME}
 )
 
+# add_executable(game src/game.cpp)
+# target_link_libraries(game
+#   BTNODE_NAVIGATION
+#   ${ARMADILLO_LIBRARIES})
+# ament_target_dependencies(game
+#   ${THIS_PACKAGE_DEPS}
+#   "behaviortree_ros2"
+#   "behaviortree_cpp"
+#   "rclcpp"
+#   "geometry_msgs"
+# )
+# install(TARGETS
+#   game
+#   DESTINATION lib/${PROJECT_NAME}
+# )
+
 add_library(BTNODE_NAVIGATION src/rival_navigation.cpp)
 target_link_libraries(BTNODE_NAVIGATION  
   ${ARMADILLO_LIBRARIES})
