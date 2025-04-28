@@ -12,6 +12,10 @@
 #include <stdio.h>
 #include <string>
 
+#include "btcpp_ros2_interfaces/msg/obstacles.hpp"
+#include "btcpp_ros2_interfaces/msg/circle_obstacle.hpp"
+#include "btcpp_ros2_interfaces/msg/segment_obstacle.hpp"
+
 typedef enum StartUpState {
     INIT = 0,
     READY,
@@ -27,6 +31,7 @@ public:
         time_pub = this->create_publisher<std_msgs::msg::Float32>("/robot/startup/time", 2);
         start_sub = this->create_subscription<std_msgs::msg::Int32>("/robot/Start", 2, std::bind(&StartUp::StartCallback, this, std::placeholders::_1));
         // srv = this->create_service<btcpp_ros2_interfaces::srv::StartUpSrv>("/robot/startup/ready_signal_feedback",  &StartUp::ReadyFeedback);
+        obstacles_pub_ = this->create_publisher<btcpp_ros2_interfaces::msg::Obstacles>("ball_obstacles", 10);
         
         // file for bot1
         this->declare_parameter<std::string>("Bot1_YellowA_config", "bt_plan_a_Yellow.xml");
@@ -147,6 +152,20 @@ public:
         std_msgs::msg::Float32 msg;
         msg.data = current_time - starting_time;
         pub->publish(msg);
+
+        c.center.x = 1.5;
+        c.center.y = 1.0;
+        c.velocity.x = 0;
+        c.velocity.y = 0;
+        c.radius = 0.1;
+        
+        auto obstacles_msg = btcpp_ros2_interfaces::msg::Obstacles();
+        obstacles_msg.circles.push_back(c);
+        obstacles_msg.header.frame_id = "map";
+        obstacles_msg.header.stamp = this->get_clock()->now();
+        obstacles_pub_->publish(obstacles_msg);
+
+
 
         static bool is_published = false;
         static bool time_check = false;
@@ -272,6 +291,8 @@ private:
     rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr time_pub;
     rclcpp::Subscription<std_msgs::msg::Int32>::SharedPtr start_sub;
 
+    rclcpp::Publisher<btcpp_ros2_interfaces::msg::Obstacles>::SharedPtr obstacles_pub_;
+
     // Parameters
     std::string Bot1_YellowA_file, Bot1_YellowB_file, Bot1_YellowC_file, Bot1_YellowD_file, Bot1_YellowE_file, Bot1_YellowF_file, Bot1_YellowS_file;
     std::string Bot1_BlueA_file, Bot1_BlueB_file, Bot1_BlueC_file, Bot1_BlueD_file, Bot1_BlueE_file, Bot1_BlueF_file, Bot1_BlueS_file;
@@ -279,6 +300,8 @@ private:
     std::string Bot2_BlueA_file, Bot2_BlueB_file, Bot2_BlueC_file, Bot2_BlueD_file, Bot2_BlueE_file, Bot2_BlueF_file, Bot2_BlueS_file;
     std::string Robot_name_;
     std::string groot_filename;
+
+    btcpp_ros2_interfaces::msg::CircleObstacle c;
 
     int team_colcor_;
     int ready_feedback = 0;
