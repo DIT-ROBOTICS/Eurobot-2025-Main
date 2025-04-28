@@ -113,7 +113,7 @@
     <Sequence>
       <SetBlackboard value="0" output_key="hasCompleteMaterial" />
       <Fallback>
-        <VisionCheck remap_offset="{offset}" remap_shift="{shift}" remap_dock_type="{dock_type}" remap_base="{base}" remap_index="{index}" shift="0" offset="-0.2" mission_type="back" dock_type="dock_x_slow_precise" base_index="8">
+        <VisionCheck remap_offset="{offset}" remap_shift="{shift}" remap_dock_type="{dock_type}" remap_base="{base}" remap_index="{index}" shift="0" offset="-0.2" mission_type="back" dock_type="dock_y_slow_precise" base_index="0">
           <Docking final_pose="{PrevGoal}" isPureDocking="0" dock_type="{dock_type}" shift="{shift}" offset="{offset}" base="{base}" />
         </VisionCheck>
         <VisionCheck remap_offset="{offset}" remap_shift="{shift}" remap_dock_type="{dock_type}" remap_base="{base}" remap_index="{index}" shift="0" offset="-0.2" mission_type="back" dock_type="dock_x_fast_precise" base_index="-1">
@@ -129,7 +129,7 @@
           <Sequence>
             <Sleep msec="1500" />
             <Fallback>
-              <VisionCheck remap_offset="{offset}" remap_shift="{shift}" remap_dock_type="{dock_type}" remap_base="{base}" remap_index="{index}" shift="0.045" offset="-0.2" mission_type="front" dock_type="dock_x_slow_precise" base_index="7">
+              <VisionCheck remap_offset="{offset}" remap_shift="{shift}" remap_dock_type="{dock_type}" remap_base="{base}" remap_index="{index}" shift="0.045" offset="-0.2" mission_type="front" dock_type="dock_x_slow_precise" base_index="1">
                 <Docking final_pose="{PrevGoal}" isPureDocking="0" dock_type="{dock_type}" shift="{shift}" offset="{offset}" base="{base}" />
               </VisionCheck>
               <VisionCheck remap_offset="{offset}" remap_shift="{shift}" remap_dock_type="{dock_type}" remap_base="{base}" remap_index="{index}" shift="0" offset="0" mission_type="front" dock_type="dock_x_slow_precise" base_index="-1">
@@ -147,8 +147,8 @@
         <ForceSuccess>
           <RetryUntilSuccessful num_attempts="10">
             <Fallback>
-              <MissionNearRival remap_base="{base}" mission_type="back" base_index="15">
-                <Docking final_pose="{PrevGoal}" isPureDocking="0" dock_type="dock_x_slow_precise" shift="0" offset="-0.1" base="{base}" />
+              <MissionNearRival remap_base="{base}" mission_type="back" base_index="17">
+                <Docking final_pose="{PrevGoal}" isPureDocking="0" dock_type="dock_y_slow_precise" shift="0" offset="-0.1" base="{base}" />
               </MissionNearRival>
               <ForceFailure>
                 <Sleep msec="500" />
@@ -156,8 +156,8 @@
             </Fallback>
           </RetryUntilSuccessful>
         </ForceSuccess>
-        <SubTree ID="ThreeLevelsBot1new" back="0.2, 0.1, 0.05" forward="0.15, 0.09, 0.065" shift="0.11" dock_type="dock_x_slow_precise" hasCompleteMaterial="{hasCompleteMaterial}" _autoremap="true" />
-        <MissionSuccess base_index="15" />
+        <SubTree ID="ThreeLevelsBot1new" back="0.2, 0.1, 0.05" forward="0.15, 0.09, 0.065" shift="0.11" dock_type="dock_y_slow_precise" hasCompleteMaterial="{hasCompleteMaterial}" _autoremap="true" />
+        <MissionSuccess base_index="17" />
       </Sequence>
     </Sequence>
   </BehaviorTree>
@@ -166,7 +166,7 @@
     <Sequence>
       <Sequence>
         <Fallback>
-          <VisionCheck remap_offset="{offset}" remap_shift="{shift}" remap_dock_type="{dock_type}" remap_base="{base}" remap_index="{index}" shift="0.045" offset="0.2" mission_type="front" dock_type="dock_y_slow_precise" base_index="6">
+          <VisionCheck remap_offset="{offset}" remap_shift="{shift}" remap_dock_type="{dock_type}" remap_base="{base}" remap_index="{index}" shift="0.045" offset="0.2" mission_type="front" dock_type="dock_y_slow_precise" base_index="3">
             <Docking final_pose="{PrevGoal}" isPureDocking="0" dock_type="{dock_type}" shift="{shift}" offset="{offset}" base="{base}" />
           </VisionCheck>
           <VisionCheck remap_offset="{offset}" remap_shift="{shift}" remap_dock_type="{dock_type}" remap_base="{base}" remap_index="{index}" shift="0" offset="-0.2" mission_type="back" dock_type="dock_x_fast_precise" base_index="-1">
@@ -180,12 +180,12 @@
       </Sequence>
       <Sequence>
         <ForceSuccess>
-          <MissionNearRival remap_base="{base}" mission_type="back" base_index="15">
-            <Docking final_pose="{PrevGoal}" isPureDocking="0" dock_type="dock_x_slow_precise" shift="0" offset="-0.1" base="{base}" />
+          <MissionNearRival remap_base="{base}" mission_type="back" base_index="17">
+            <Docking final_pose="{PrevGoal}" isPureDocking="0" dock_type="dock_y_slow_precise" shift="0" offset="-0.1" base="{base}" />
           </MissionNearRival>
         </ForceSuccess>
-        <SubTree ID="ThreeLevelsBot1new" back="0.2, 0.1, 0.05" forward="0.15, 0.09, 0.065" shift="0.11" dock_type="dock_x_slow_precise" hasCompleteMaterial="{hasCompleteMaterial}" _autoremap="true" />
-        <MissionSuccess base_index="15" />
+        <SubTree ID="ThreeLevelsBot1new" back="0.2, 0.1, 0.05" forward="0.15, 0.09, 0.065" shift="0.11" dock_type="dock_y_slow_precise" hasCompleteMaterial="{hasCompleteMaterial}" _autoremap="true" />
+        <MissionSuccess base_index="17" />
       </Sequence>
     </Sequence>
   </BehaviorTree>
@@ -193,7 +193,7 @@
   <BehaviorTree ID="MissionPointThree">
     <Sequence>
       <Fallback>
-        <VisionCheck remap_offset="{offset}" remap_shift="{shift}" remap_dock_type="{dock_type}" remap_base="{base}" remap_index="{index}" shift="0" offset="-0.2" mission_type="back" dock_type="dock_y_slow_precise" base_index="5">
+        <VisionCheck remap_offset="{offset}" remap_shift="{shift}" remap_dock_type="{dock_type}" remap_base="{base}" remap_index="{index}" shift="0" offset="-0.2" mission_type="back" dock_type="dock_y_slow_precise" base_index="4">
           <Docking final_pose="{PrevGoal}" isPureDocking="0" dock_type="{dock_type}" shift="{shift}" offset="{offset}" base="{base}" />
         </VisionCheck>
         <VisionCheck remap_offset="{offset}" remap_shift="{shift}" remap_dock_type="{dock_type}" remap_base="{base}" remap_index="{index}" shift="0" offset="0" mission_type="back" dock_type="dock_x_fast_precise" base_index="-1">
@@ -211,7 +211,7 @@
       </Parallel>
       <Sequence>
         <Fallback>
-          <VisionCheck remap_offset="{offset}" remap_shift="{shift}" remap_dock_type="{dock_type}" remap_base="{base}" remap_index="{index}" shift="0" offset="-0.2" mission_type="front" dock_type="dock_y_slow_precise" base_index="3">
+          <VisionCheck remap_offset="{offset}" remap_shift="{shift}" remap_dock_type="{dock_type}" remap_base="{base}" remap_index="{index}" shift="0" offset="-0.2" mission_type="front" dock_type="dock_x_slow_precise" base_index="2">
             <Docking final_pose="{PrevGoal}" isPureDocking="0" dock_type="{dock_type}" shift="{shift}" offset="{offset}" base="{base}" />
           </VisionCheck>
           <VisionCheck remap_offset="{offset}" remap_shift="{shift}" remap_dock_type="{dock_type}" remap_base="{base}" remap_index="{index}" shift="0" offset="0" mission_type="front" dock_type="dock_x_slow_precise" base_index="-1">
@@ -225,12 +225,12 @@
       </Sequence>
       <Sequence>
         <ForceSuccess>
-          <MissionNearRival remap_base="{base}" mission_type="back" base_index="17">
+          <MissionNearRival remap_base="{base}" mission_type="back" base_index="18">
             <Docking final_pose="{PrevGoal}" isPureDocking="0" dock_type="dock_y_slow_precise" shift="0" offset="-0.1" base="{base}" />
           </MissionNearRival>
         </ForceSuccess>
         <SubTree ID="ThreeLevelsBot1new" back="0.2, 0.1, 0.05" forward="0.15, 0.09, 0.065" shift="0.11" dock_type="dock_y_slow_precise" hasCompleteMaterial="{hasCompleteMaterial}" _autoremap="true" />
-        <MissionSuccess base_index="17" />
+        <MissionSuccess base_index="18" />
       </Sequence>
     </Sequence>
   </BehaviorTree>
