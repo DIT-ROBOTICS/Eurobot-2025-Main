@@ -23,13 +23,13 @@ template <> inline int BT::convertFromString(StringView str) {
     return (int) value;
 }
 
-template <> inline std::deque<int> BT::convertFromString(StringView str) {
+template <> inline std::deque<double> BT::convertFromString(StringView str) {
 
     auto parts = splitString(str, ',');
-    std::deque<int> output;
+    std::deque<double> output;
 
     for (int i = 0; i < (int)parts.size(); i++) {
-        output.push_back(convertFromString<int>(parts[i]));
+        output.push_back(convertFromString<double>(parts[i]));
     }
 
     return output;
@@ -75,6 +75,64 @@ bool SIMAactivate::wakeUpSIMA() {
     if (mission_finished_)
         timer_.reset();
     return true;
+}
+
+/*****************/
+/* Mission Start */
+/*****************/
+PortsList MissionStart::providedPorts() {
+    return { 
+        BT::InputPort<std::deque<double>>("BACK_IN"),
+        BT::InputPort<std::deque<double>>("FORWARD_IN"),
+        BT::InputPort<double>("SHIFT_IN"),
+        BT::InputPort<int>("INDEX_IN"),
+        BT::OutputPort<double>("BACK_L"),
+        BT::OutputPort<double>("BACK_M"),
+        BT::OutputPort<double>("BACK_S"),
+        BT::OutputPort<double>("FORWARD_L"),
+        BT::OutputPort<double>("FORWARD_M"),
+        BT::OutputPort<double>("FORWARD_S"),
+        BT::OutputPort<double>("SHIFT"),
+        BT::OutputPort<std::string>("DOCK_DIR"),
+    };
+}
+
+BT::NodeStatus MissionStart::tick() {
+    auto back_ = getInput<std::deque<double>>("BACK_IN");
+    auto forward_ = getInput<std::deque<double>>("FORWARD_IN");
+    double shift_ = getInput<double>("SHIFT_IN").value();
+    int index_ = getInput<int>("INDEX_IN").value();
+    node_->get_parameter("material_points", material_points_);
+
+    int offset_dir_ = (int)(1 - 2 * ((int)(material_points_[index_ * 5 + 2]) % 2));
+    int offset_positivity_ = (int)(material_points_[index_ * 5 + 3] / abs(material_points_[index_ * 5 + 3]));
+
+    if (offset_dir_)
+        setOutput("DOCK_DIR", "dock_y_slow_precise");
+    else
+        setOutput("DOCK_DIR", "dock_x_slow_precise");
+    
+    if (offset_positivity_) {
+        back_.value()[0] *= -1;
+        back_.value()[1] *= -1;
+        back_.value()[2] *= -1;
+    }
+    else {
+        forward_.value()[0] *= -1;
+        forward_.value()[1] *= -1;
+        forward_.value()[2] *= -1;
+    }
+    shift_ *= offset_positivity_ * offset_dir_;
+
+    setOutput("BACK_L", back_.value()[0]);
+    setOutput("BACK_M", back_.value()[1]);
+    setOutput("BACK_S", back_.value()[2]);
+    setOutput("FORWARD_L", forward_.value()[0]);
+    setOutput("FORWARD_M", forward_.value()[1]);
+    setOutput("FORWARD_S", forward_.value()[2]);
+    setOutput("SHIFT", shift_);
+
+    return BT::NodeStatus::SUCCESS;
 }
 
 /******************/

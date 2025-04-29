@@ -114,13 +114,13 @@
                 back="0.2, 0.1, 0.05"
                 forward="0.15, 0.13, 0.065"
                 shift="0.11"
-                dock_type="{dock_type}"
+                index="7"
                 _autoremap="true"/>
       <SubTree ID="ThreeLevelsBot1new"
                 back="0.2, 0.1, 0.05"
                 forward="0.15, 0.09, 0.065"
-                shift="0.11"
-                dock_type="{dock_type}"
+                shift="0"
+                index="15"
                 _autoremap="true"/>
       <Sequence>
         <ForceSuccess>
@@ -194,9 +194,15 @@
                      _autoremap="true"/>
           </ForceSuccess>
         </Sequence>
-        <Delay delay_msec="197000">
-          <AlwaysSuccess/>
-        </Delay>
+        <Sequence>
+          <Sleep msec="70000"/>
+          <RetryUntilSuccessful num_attempts="40">
+            <Sequence>
+              <Sleep msec="1000"/>
+              <TimerChecker timer_sec="97000"/>
+            </Sequence>
+          </RetryUntilSuccessful>
+        </Sequence>
       </Parallel>
       <StopRobot/>
       <Docking final_pose="{PrevGoal}"
@@ -334,8 +340,8 @@
         <SubTree ID="ThreeLevelsBot1new"
                 back="0.2, 0.1, 0.05"
                 forward="0.15, 0.09, 0.065"
-                shift="0.11"
-                dock_type="mission_dock_x"
+                shift="0"
+                index="15"
                 hasCompleteMaterial="{hasCompleteMaterial}"
                 _autoremap="true"/>
         <MissionSuccess base_index="15"/>
@@ -410,8 +416,8 @@
         <SubTree ID="ThreeLevelsBot1new"
                   back="0.2, 0.1, 0.05"
                   forward="0.15, 0.09, 0.065"
-                  shift="0.11"
-                  dock_type="mission_dock_y"
+                  shift="0"
+                  index="17"
                   hasCompleteMaterial="{hasCompleteMaterial}"
                   _autoremap="true"/>
         <MissionSuccess base_index="17"/>
@@ -538,8 +544,8 @@
         <SubTree ID="ThreeLevelsBot1new"
                   back="0.2, 0.1, 0.05"
                   forward="0.15, 0.09, 0.065"
-                  shift="0.11"
-                  dock_type="mission_dock_y"
+                  shift="0"
+                  index="18"
                   hasCompleteMaterial="{hasCompleteMaterial}"
                   _autoremap="true"/>
         <MissionSuccess base_index="18"/>
@@ -581,7 +587,7 @@
         <MissionStart BACK_IN="{back}"
                       FORWARD_IN="{forward}"
                       SHIFT_IN="{shift}"
-                      DOCK_DIR_IN="{dock_type}"
+                      INDEX_IN="{index}"
                       BACK_L="{BACK_L}"
                       BACK_M="{BACK_M}"
                       BACK_S="{BACK_S}"
@@ -732,7 +738,7 @@
         <MissionStart BACK_IN="{back}"
                       FORWARD_IN="{forward}"
                       SHIFT_IN="{shift}"
-                      DOCK_DIR_IN="{dock_type}"
+                      INDEX_IN="{index}"
                       BACK_L="{BACK_L}"
                       BACK_M="{BACK_M}"
                       BACK_S="{BACK_S}"
@@ -1535,6 +1541,10 @@
                   type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
     </Action>
     <Action ID="StopRobot"/>
+    <Condition ID="TimerChecker">
+      <input_port name="timer_sec"
+                  type="int"/>
+    </Condition>
     <Decorator ID="VisionCheck">
       <output_port name="remap_offset"
                    type="double"/>

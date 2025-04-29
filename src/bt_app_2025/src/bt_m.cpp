@@ -35,9 +35,7 @@ class MainClass : public rclcpp::Node {
 public:
     MainClass() : Node("bt_app_2025"), rate(100) {}
     std::shared_ptr<rclcpp::Node> get_node() {
-        // RCLCPP_INFO(this->get_logger(), "in constructor");
         node_ = shared_from_this(); 
-        // RCLCPP_INFO(this->get_logger(), "0");
         return shared_from_this();  // Get a shared pointer to this node
     }
 
@@ -129,6 +127,7 @@ public:
         factory.registerNodeType<FirmwareMission>("FirmwareMission", params, blackboard);
         factory.registerNodeType<IntegratedMissionNode>("IntegratedMissionNode", params, blackboard);
         factory.registerNodeType<SIMAactivate>("SIMAactivate", params);
+        factory.registerNodeType<MissionStart>("MissionStart", params, blackboard);
         factory.registerNodeType<MissionSuccess>("MissionSuccess", params, blackboard);
         factory.registerNodeType<MissionFinisher>("MissionFinisher", params, blackboard);
         /* others */

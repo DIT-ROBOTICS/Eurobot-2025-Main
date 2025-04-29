@@ -142,29 +142,22 @@ private:
     tf2_ros::TransformListener listener_;
 };
 
-/****************************/
-/* TimerChecker - Decorator */
-/****************************/
-// No usage now
-class TimerChecker : public BT::DecoratorNode {
+/****************/
+/* TimerChecker */
+/****************/
+class TimerChecker : public BT::ConditionNode {
 
 public:
     TimerChecker(const std::string& name, const NodeConfig& config, BT::Blackboard::Ptr blackboard)
-        : BT::DecoratorNode(name, config), blackboard_(blackboard) {}
-
+        : BT::ConditionNode(name, config), blackboard_(blackboard) {}
     /* Node remapping function */
     static BT::PortsList providedPorts();
-
     /* Start and running function */
     BT::NodeStatus tick() override;
 
 private:
     BT::Blackboard::Ptr blackboard_;
-
-    double timeout_ = 0.0;
-    double start_time_ = 0.0;
     double current_time_;
-    bool first_log_;
 };
 
 

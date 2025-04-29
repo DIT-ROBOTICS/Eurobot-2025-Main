@@ -9,6 +9,11 @@ import glob
 
 output_file_name = 'bot1_blue_e.xml'
 points_list = []
+yellow_home = '0.35'
+blue_home = '2.65'
+banner = []
+yellow_banner = ['2.75', '1.25', '0.75']
+blue_banner = ['0.25', '1.75', '2.25']
 dock_type_list = ['dock_y_slow_precise', 'dock_x_slow_precise', 'dock_x_slow_precise', 'dock_y_slow_precise', 'dock_y_slow_precise', 'dock_y_slow_precise', 'dock_y_slow_precise', 'dock_x_slow_precise', 'dock_x_slow_precise', 'dock_y_slow_precise', 'dock_y_slow_precise', 'dock_x_slow_precise', 'dock_y_slow_precise', 'dock_y_slow_precise', 'dock_y_slow_precise', 'dock_x_slow_precise', 'dock_y_slow_precise', 'dock_y_slow_precise', 'dock_y_slow_precise', 'dock_y_slow_precise']
 offset_list = ['0.1', '-0.1', '-0.1', '-0.1', '-0.1', '-0.1', '-0.1', '-0.1']
 
@@ -17,6 +22,12 @@ def read_input(root):
     list_size = 5 + 3
 
     color = input('input team color: ')
+    if (color == 'blue'):
+        banner = blue_banner
+        home = blue_home
+    else:
+        banner = yellow_banner
+        home = yellow_home
     print('input points: ')
     for i in range(0, list_size):
         pt = int(input())
@@ -28,7 +39,30 @@ def read_input(root):
         points_list.append(str(pt))
 
     i = 0
+    j = 0
+    k = 0
     for elem in root:
+        if (elem.tag == "BehaviorTree" and elem.get('ID') == "BannerMission"):
+            fallback = elem[0][0][0]
+            for docking in fallback:
+                action.set('base', banner[(j + k) % 3] + ', 0.3, 0')
+                k = k + 1
+            j += 1
+            k = 0
+            fallback = elem[0][0][1]
+            for docking in fallback:
+                action.set('base', banner[(j + k) % 3] + ', 0.3, 0')
+                k = k + 1
+            j += 1
+            k = 0
+            fallback = elem[0][0][2]
+            for docking in fallback:
+                action.set('base', banner[(j + k) % 3] + ', 0.3, 0')
+                k = k + 1
+        if (elem.tag == "BehaviorTree" and elem.get('ID') == "MainTree"):
+            for action in elem[0]:
+                if (action.tag == "Docking"):
+                    action.set('base', home + ', 0.3, 0')
         if (elem.tag == "BehaviorTree" and elem.get('ID') == "MissionPointOne"):
             subtree = elem[0][1]
             for action in subtree:
@@ -52,7 +86,7 @@ def read_input(root):
                     docking.set('offset', offset_list[int(points_list[i - 1]) - 11])
             for action in subtree:
                 if (action.tag == "SubTree" and action.get('ID') == "ThreeLevelsBot1new"):
-                    action.set('dock_type', dock_type_list[int(points_list[i - 1])])
+                    action.set('index', points_list[i - 1])
                 if (action.tag == "MissionSuccess"):
                     action.set('base_index', points_list[i - 1])
         if (elem.tag == "BehaviorTree" and elem.get('ID') == "MissionPointTwo"):
@@ -72,7 +106,7 @@ def read_input(root):
                     docking.set('offset', offset_list[int(points_list[i - 1]) - 11])
             action = subtree[1]
             if (action.tag == "SubTree" and action.get('ID') == "ThreeLevelsBot1new"):
-                action.set('dock_type', dock_type_list[int(points_list[i - 1])])
+                action.set('index', points_list[i - 1])
             action = subtree[2]
             if (action.tag == "MissionSuccess"):
                 action.set('base_index', points_list[i - 1])
@@ -99,7 +133,7 @@ def read_input(root):
                     docking.set('offset', offset_list[int(points_list[i - 1]) - 11])
             action = subtree[1]
             if (action.tag == "SubTree" and action.get('ID') == "ThreeLevelsBot1new"):
-                action.set('dock_type', dock_type_list[int(points_list[i - 1])])
+                action.set('index', points_list[i - 1])
             action = subtree[2]
             if (action.tag == "MissionSuccess"):
                 action.set('base_index', points_list[i - 1])
@@ -107,7 +141,7 @@ def read_input(root):
     tree.write(output_file_name, encoding="utf-8", xml_declaration=True)
 
 def create_tree():
-    input_tree = ET.parse('bot1_blue_a.xml')
+    input_tree = ET.parse('template_bot1_blue_a.xml')
     root_in = input_tree.getroot()
     root_out = ET.Element("root", {"BTCPP_format": "4"})
     root_out.clear()

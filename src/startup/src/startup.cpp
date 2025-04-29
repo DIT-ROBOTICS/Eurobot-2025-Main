@@ -34,16 +34,16 @@ public:
         obstacles_pub_ = this->create_publisher<btcpp_ros2_interfaces::msg::Obstacles>("ball_obstacles", 10);
         
         // file for bot1
-        this->declare_parameter<std::string>("Bot1_YellowA_config", "bt_plan_a_Yellow.xml");
-        this->declare_parameter<std::string>("Bot1_YellowB_config", "bt_plan_b_Yellow.xml");
-        this->declare_parameter<std::string>("Bot1_YellowC_config", "bt_plan_c_Yellow.xml");
+        this->declare_parameter<std::string>("Bot1_YellowA_config", "bot1_yellow_a.xml");
+        this->declare_parameter<std::string>("Bot1_YellowB_config", "bot1_yellow_b.xml");
+        this->declare_parameter<std::string>("Bot1_YellowC_config", "bot1_yellow_c.xml");
         this->declare_parameter<std::string>("Bot1_YellowD_config", "");
         this->declare_parameter<std::string>("Bot1_YellowE_config", "");
         this->declare_parameter<std::string>("Bot1_YellowF_config", "");
         this->declare_parameter<std::string>("Bot1_YellowS_config", "");
-        this->declare_parameter<std::string>("Bot1_BlueA_config", "bt_plan_a_Blue.xml");
-        this->declare_parameter<std::string>("Bot1_BlueB_config", "bt_plan_b_Blue.xml");
-        this->declare_parameter<std::string>("Bot1_BlueC_config", "bt_plan_c_Blue.xml");
+        this->declare_parameter<std::string>("Bot1_BlueA_config", "bot1_blue_a.xml");
+        this->declare_parameter<std::string>("Bot1_BlueB_config", "bot1_blue_b.xml");
+        this->declare_parameter<std::string>("Bot1_BlueC_config", "bot1_blue_c.xml");
         this->declare_parameter<std::string>("Bot1_BlueD_config", "");
         this->declare_parameter<std::string>("Bot1_BlueE_config", "");
         this->declare_parameter<std::string>("Bot1_BlueF_config", "");
@@ -71,12 +71,31 @@ public:
         this->get_parameter("Bot1_YellowA_config", Bot1_YellowA_file);
         this->get_parameter("Bot1_YellowB_config", Bot1_YellowB_file);
         this->get_parameter("Bot1_YellowC_config", Bot1_YellowC_file);
+        this->get_parameter("Bot1_YellowD_config", Bot1_YellowD_file);
+        this->get_parameter("Bot1_YellowE_config", Bot1_YellowE_file);
+        this->get_parameter("Bot1_YellowF_config", Bot1_YellowF_file);
         this->get_parameter("Bot1_YellowS_config", Bot1_YellowS_file);
+        this->get_parameter("Bot2_YellowA_config", Bot2_YellowA_file);
+        this->get_parameter("Bot2_YellowB_config", Bot2_YellowB_file);
+        this->get_parameter("Bot2_YellowC_config", Bot2_YellowC_file);
+        this->get_parameter("Bot2_YellowD_config", Bot2_YellowD_file);
+        this->get_parameter("Bot2_YellowE_config", Bot2_YellowE_file);
+        this->get_parameter("Bot2_YellowF_config", Bot2_YellowF_file);
+        this->get_parameter("Bot2_YellowS_config", Bot2_YellowS_file);
         this->get_parameter("Bot1_BlueA_config", Bot1_BlueA_file);
         this->get_parameter("Bot1_BlueB_config", Bot1_BlueB_file);
         this->get_parameter("Bot1_BlueC_config", Bot1_BlueC_file);
+        this->get_parameter("Bot1_BlueD_config", Bot1_BlueD_file);
+        this->get_parameter("Bot1_BlueE_config", Bot1_BlueE_file);
+        this->get_parameter("Bot1_BlueF_config", Bot1_BlueF_file);
         this->get_parameter("Bot1_BlueS_config", Bot1_BlueS_file);
         this->get_parameter("Bot2_BlueA_config", Bot2_BlueA_file);
+        this->get_parameter("Bot2_BlueB_config", Bot2_BlueB_file);
+        this->get_parameter("Bot2_BlueC_config", Bot2_BlueC_file);
+        this->get_parameter("Bot2_BlueD_config", Bot2_BlueD_file);
+        this->get_parameter("Bot2_BlueE_config", Bot2_BlueE_file);
+        this->get_parameter("Bot2_BlueF_config", Bot2_BlueF_file);
+        this->get_parameter("Bot2_BlueS_config", Bot2_BlueS_file);
 
         start_up_state = INIT;
         timer_ = this->create_wall_timer(

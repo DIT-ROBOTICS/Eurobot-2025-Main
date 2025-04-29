@@ -426,33 +426,19 @@ BT::PortsList TimerChecker::providedPorts() {
     };
 }
 
-/****************************/
-/* TimerChecker - Decorator */
-/****************************/
+/****************/
+/* TimerChecker */
+/****************/
 BT::NodeStatus TimerChecker::tick() {
 
     int timer = getInput<int>("timer_sec").value();
 
     blackboard_->get("current_time", current_time_);
 
-    if (first_log_) {
-        RCLCPP_INFO_STREAM(rclcpp::get_logger("rclcpp"), "[TimerChecker]: Current time: " << current_time_ << ", Check Timeout: " << timer);
-        first_log_ = false;
-    }
-
-    const BT::NodeStatus status = child_node_->executeTick();
-
-    if (isStatusCompleted(status)) {
-        resetChild();
-    }
-
-    if (current_time_ < timer) {
-        return status;
-    }
-    else {
-        RCLCPP_ERROR_STREAM(rclcpp::get_logger("rclcpp"), "[TimerChecker]: Timeout" << timer);
+    if (current_time_ < timer)
         return BT::NodeStatus::FAILURE;
-    }
+    else
+        return BT::NodeStatus::SUCCESS;
 }
 
 // /****************************************************/

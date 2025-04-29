@@ -42,7 +42,7 @@ using namespace BT;
 namespace BT {
     template <> inline geometry_msgs::msg::PoseStamped convertFromString(StringView str);
     template <> inline int convertFromString(StringView str);
-    template <> inline std::deque<int> convertFromString(StringView str);
+    template <> inline std::deque<double> convertFromString(StringView str);
 }
 
 /********************************/
@@ -67,6 +67,24 @@ private:
   rclcpp::TimerBase::SharedPtr timer_;
   float current_time_;
   bool mission_finished_ = false;
+};
+
+class MissionStart : public BT::SyncActionNode
+{
+public:
+
+  MissionStart(const std::string& name, const BT::NodeConfig& config, const RosNodeParams& params, BT::Blackboard::Ptr blackboard)
+    : BT::SyncActionNode(name, config), node_(params.nh.lock()), blackboard_(blackboard)
+  {}
+  /* Node remapping function */
+  static BT::PortsList providedPorts();
+  /* Start and running function */
+  BT::NodeStatus tick() override;
+
+private:
+  BT::Blackboard::Ptr blackboard_;
+  rclcpp::Node::SharedPtr node_;
+  std::vector<double> material_points_;
 };
 
 class MissionSuccess : public BT::SyncActionNode
