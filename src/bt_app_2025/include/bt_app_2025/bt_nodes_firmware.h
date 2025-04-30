@@ -42,6 +42,7 @@ using namespace BT;
 namespace BT {
     template <> inline geometry_msgs::msg::PoseStamped convertFromString(StringView str);
     template <> inline int convertFromString(StringView str);
+    template <> inline std::deque<int> convertFromString(StringView str);
     template <> inline std::deque<double> convertFromString(StringView str);
 }
 

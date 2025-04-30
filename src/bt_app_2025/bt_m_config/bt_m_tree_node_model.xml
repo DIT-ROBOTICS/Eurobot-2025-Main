@@ -39,6 +39,20 @@
             <input_port name="mission_type" type="std::string"/>
             <input_port name="base_index" type="int"/>
         </Decorator>
+        <Action ID="MissionStart">
+            <output_port name="DOCK_DIR" type="std::string"/>
+            <output_port name="SHIFT" type="double"/>
+            <output_port name="FORWARD_S" type="double"/>
+            <output_port name="BACK_S" type="double"/>
+            <output_port name="BACK_M" type="double"/>
+            <output_port name="FORWARD_M" type="double"/>
+            <output_port name="FORWARD_L" type="double"/>
+            <output_port name="BACK_L" type="double"/>
+            <input_port name="INDEX_IN" type="int"/>
+            <input_port name="SHIFT_IN" type="double"/>
+            <input_port name="FORWARD_IN" type="std::deque&lt;double, std::allocator&lt;double&gt; &gt;"/>
+            <input_port name="BACK_IN" type="std::deque&lt;double, std::allocator&lt;double&gt; &gt;"/>
+        </Action>
         <Action ID="MissionSuccess">
             <input_port name="base_index" type="int"/>
         </Action>
@@ -50,7 +64,10 @@
         <Action ID="NavReceiver"/>
         <Action ID="Navigation">
             <output_port name="final_pose" type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
-            <input_port name="type" type="int"/>
+            <input_port name="dock_type" type="std::string"/>
+            <input_port name="shift" type="double"/>
+            <input_port name="offset" type="double"/>
+            <input_port name="base" type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
             <input_port name="goal" type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
         </Action>
         <Action ID="Rotation">
@@ -60,9 +77,9 @@
         </Action>
         <Action ID="SIMAactivate"/>
         <Action ID="StopRobot"/>
-        <Decorator ID="TimerChecker">
+        <Condition ID="TimerChecker">
             <input_port name="timer_sec" type="int"/>
-        </Decorator>
+        </Condition>
         <Action ID="TopicSubTest">
             <output_port name="sum" type="int"/>
         </Action>
@@ -70,6 +87,7 @@
             <output_port name="remap_offset" type="double"/>
             <output_port name="remap_shift" type="double"/>
             <output_port name="remap_dock_type" type="std::string"/>
+            <output_port name="remap_index" type="int"/>
             <output_port name="remap_base" type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
             <input_port name="shift" type="double"/>
             <input_port name="offset" type="double"/>

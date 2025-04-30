@@ -35,6 +35,18 @@ template <> inline std::deque<double> BT::convertFromString(StringView str) {
     return output;
 }
 
+template <> inline std::deque<int> BT::convertFromString(StringView str) {
+
+    auto parts = splitString(str, ',');
+    std::deque<int> output;
+
+    for (int i = 0; i < (int)parts.size(); i++) {
+        output.push_back(convertFromString<int>(parts[i]));
+    }
+
+    return output;
+}
+
 /********************************/
 /* Simple Node to activate SIMA */
 /********************************/
@@ -106,13 +118,14 @@ BT::NodeStatus MissionStart::tick() {
 
     int offset_dir_ = (int)(1 - 2 * ((int)(material_points_[index_ * 5 + 2]) % 2));
     int offset_positivity_ = (int)(material_points_[index_ * 5 + 3] / abs(material_points_[index_ * 5 + 3]));
+    RCLCPP_INFO_STREAM(node_->get_logger(), offset_positivity_);
 
-    if (offset_dir_)
-        setOutput("DOCK_DIR", "dock_y_slow_precise");
-    else
+    if (offset_dir_ == 1)
         setOutput("DOCK_DIR", "dock_x_slow_precise");
+    else if (offset_dir_ == -1)
+        setOutput("DOCK_DIR", "dock_y_slow_precise");
     
-    if (offset_positivity_) {
+    if (offset_positivity_ > 0) {
         back_.value()[0] *= -1;
         back_.value()[1] *= -1;
         back_.value()[2] *= -1;
@@ -123,6 +136,8 @@ BT::NodeStatus MissionStart::tick() {
         forward_.value()[2] *= -1;
     }
     shift_ *= offset_positivity_ * offset_dir_;
+    RCLCPP_INFO_STREAM(node_->get_logger(), back_.value()[0] << ", " << back_.value()[1] << ", " << back_.value()[2]);
+    RCLCPP_INFO_STREAM(node_->get_logger(), forward_.value()[0] << ", " << forward_.value()[1] << ", " << forward_.value()[2]);
 
     setOutput("BACK_L", back_.value()[0]);
     setOutput("BACK_M", back_.value()[1]);

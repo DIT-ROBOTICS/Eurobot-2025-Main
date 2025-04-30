@@ -1097,7 +1097,7 @@
                    retry="100"
                    shift="0"
                    sleep="100"
-                   timeout="2000"
+                   timeout="3000"
                    _autoremap="true"/>
         </Parallel>
         <ForceSuccess>
@@ -1116,7 +1116,7 @@
                  retry="100"
                  shift="0"
                  sleep="100"
-                 timeout="2000"
+                 timeout="3000"
                  _autoremap="true"/>
         <ForceSuccess>
           <Timeout msec="6000">
@@ -1209,7 +1209,7 @@
                  retry="100"
                  shift="0"
                  sleep="100"
-                 timeout="2000"
+                 timeout="3000"
                  _autoremap="true"/>
         <ForceSuccess>
           <Timeout msec="6000">
@@ -1241,7 +1241,7 @@
                  retry="100"
                  shift="{SHIFT}"
                  sleep="100"
-                 timeout="2000"
+                 timeout="3000"
                  _autoremap="true"/>
         <ForceSuccess>
           <Timeout msec="6000">
@@ -1298,7 +1298,7 @@
                  retry="100"
                  shift="0"
                  sleep="100"
-                 timeout="2000"
+                 timeout="3000"
                  _autoremap="true"/>
         <ForceSuccess>
           <Timeout msec="6000">

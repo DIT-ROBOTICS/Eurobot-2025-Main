@@ -381,7 +381,8 @@ PortsList VisionCheck::providedPorts() {
         BT::OutputPort<geometry_msgs::msg::PoseStamped>("remap_base"),
         BT::OutputPort<std::string>("remap_dock_type"),
         BT::OutputPort<double>("remap_offset"),
-        BT::OutputPort<double>("remap_shift")
+        BT::OutputPort<double>("remap_shift"),
+        BT::OutputPort<int>("remap_index"), 
     };
 }
 
@@ -511,6 +512,7 @@ NodeStatus VisionCheck::tick() {
     setOutput<std::string>("remap_dock_type", dockType_);
     setOutput<double>("remap_offset", offset_);
     setOutput<double>("remap_shift", shift_);
+    setOutput<int>("remap_index", baseIndex_);
 
     // Run the child node
     BT::NodeStatus child_status = child_node_->executeTick();
