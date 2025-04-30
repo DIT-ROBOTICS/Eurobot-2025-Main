@@ -4,6 +4,7 @@
 #include "std_msgs/msg/float32.hpp"
 #include "std_msgs/msg/string.hpp"
 #include "geometry_msgs/msg/point_stamped.hpp"
+#include "geometry_msgs/msg/pose_with_covariance_stamped.hpp"
 
 #include <jsoncpp/json/json.h>
 #include <fstream>
@@ -16,6 +17,8 @@
 #include "btcpp_ros2_interfaces/msg/circle_obstacle.hpp"
 #include "btcpp_ros2_interfaces/msg/segment_obstacle.hpp"
 
+#define PI 3.1415926
+
 typedef enum StartUpState {
     INIT = 0,
     READY,
@@ -27,6 +30,7 @@ class StartUp : public rclcpp::Node {
 public:
     StartUp() : Node("startup_node") {
         // RCLCPP_INFO(this->get_logger(), "1");
+        initial_pub = this->create_publisher<geometry_msgs::msg::PoseWithCovarianceStamped>("/initialpose", 2);
         pub = this->create_publisher<std_msgs::msg::String>("/robot/startup/ready_signal", 2);
         start_pub = this->create_publisher<std_msgs::msg::String>("/robot/startup/start_signal", 2);
         time_pub = this->create_publisher<std_msgs::msg::Float32>("/robot/startup/time", 2);
@@ -37,6 +41,8 @@ public:
         this->declare_parameter<std::string>("Robot_name", "Tongue");
         this->declare_parameter<std::vector<double>>("material_points", std::vector<double>{});
         this->declare_parameter<std::vector<double>>("number_of_plans", std::vector<double>{});
+        this->declare_parameter<std::vector<double>>("start_points_bot1", std::vector<double>{});
+        this->declare_parameter<std::vector<double>>("start_points_bot2", std::vector<double>{});
         this->declare_parameter<std::string>("Bot1_name", "");
         this->declare_parameter<std::string>("Bot2_name", "");
         for (int i = 0; i < 26; i++) {
@@ -67,6 +73,8 @@ public:
         this->get_parameter("number_of_plans", number_of_plans_double_);
         this->get_parameter("Bot1_name", Bot1_name_);
         this->get_parameter("Bot2_name", Bot2_name_);
+        this->get_parameter("start_points_bot1", start_points_bot1_);
+        this->get_parameter("start_points_bot2", start_points_bot2_);
         RCLCPP_INFO(this->get_logger(), "5");
         for (int i = 0; i < 4; i++) {
             RCLCPP_INFO_STREAM(this->get_logger(), number_of_plans_double_[i]);
@@ -138,7 +146,7 @@ public:
             }
             break;
         case READY:
-            PublishReadySignal(pub);
+            PublishReadySignal(pub, initial_pub);
             if (ready_feedback == 1) {
                 if (ready == false) {
                     RCLCPP_INFO(this->get_logger(), "[StartUp Program]: All of the programs are ready!");
@@ -150,7 +158,7 @@ public:
                 start_up_state = START;
                 RCLCPP_INFO(this->get_logger(), "[StartUp Program]: READY -> START");
                 /* Publish start signal */
-                PublishStartSignal(start_pub);
+                PublishStartSignal(start_pub, initial_pub);
                 /* Start the time */
                 starting_time = this->get_clock()->now().seconds();
             }
@@ -164,15 +172,15 @@ public:
         }
     }
 
-    void PublishReadySignal(rclcpp::Publisher<std_msgs::msg::String>::SharedPtr pub) {
-        // start_position.header.stamp = this->get_clock()->now();
-        // pub->publish(start_position);
+    void PublishReadySignal(rclcpp::Publisher<std_msgs::msg::String>::SharedPtr pub, rclcpp::Publisher<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr initial_pub) {
+        start_position.header.stamp = this->get_clock()->now();
+        initial_pub->publish(start_position);
         pub->publish(start_plan);
     }
 
-    void PublishStartSignal(rclcpp::Publisher<std_msgs::msg::String>::SharedPtr pub) {
-        // start_position.header.stamp = this->get_clock()->now();
-        // pub->publish(start_position);
+    void PublishStartSignal(rclcpp::Publisher<std_msgs::msg::String>::SharedPtr pub, rclcpp::Publisher<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr initial_pub) {
+        start_position.header.stamp = this->get_clock()->now();
+        initial_pub->publish(start_position);
         pub->publish(start_plan);
     }
 
@@ -223,6 +231,7 @@ public:
         if (Robot_name_ == Bot1_name_) {
             for (int i = 0; i < number_of_plans_[0] - 1; i ++) {
                 if (code == (i + 1) * 10) {
+                    start_pt_code = start_points_bot1_[i];
                     groot_filename = name_of_bot1_yellow_plans[i];
                     RCLCPP_INFO_STREAM(this->get_logger(), "[Bot1]: Yellow team plan " << (char)(i + 65));
                     isTreenameSet = true;
@@ -230,6 +239,7 @@ public:
                 }
             }
             if (code == 100 * 10) {
+                start_pt_code = start_points_bot1_[number_of_plans_[0] - 1];
                 groot_filename = name_of_bot1_yellow_plans[number_of_plans_[0] - 1];
                 isTreenameSet = true;
             }
@@ -237,6 +247,7 @@ public:
                 if (isTreenameSet)
                     break;
                 if (code == (i + 1) * 10 + 1) {
+                    start_pt_code = start_points_bot1_[i] + 4;
                     groot_filename = name_of_bot1_blue_plans[i];
                     RCLCPP_INFO_STREAM(this->get_logger(), "[Bot1]: Blue team plan " << (char)(i + 65));
                     isTreenameSet = true;
@@ -244,6 +255,7 @@ public:
                 }
             }
             if (code == 100 * 10 + 1) {
+                start_pt_code = start_points_bot1_[number_of_plans_[0] - 1] + 4;
                 groot_filename = name_of_bot1_blue_plans[number_of_plans_[1] - 1];
                 isTreenameSet = true;
             }
@@ -254,6 +266,7 @@ public:
             isTreenameSet = false;
             for (int i = 0; i < number_of_plans_[2] - 1; i++) {
                 if (code == (i + 1) * 10) {
+                    start_pt_code = start_points_bot2_[i];
                     groot_filename = name_of_bot2_yellow_plans[i];
                     RCLCPP_INFO_STREAM(this->get_logger(), "[Bot2]: Yellow team plan " << (char)(i + 65));
                     isTreenameSet = true;
@@ -261,6 +274,7 @@ public:
                 }
             }
             if (code == 100 * 10) {
+                start_pt_code = start_points_bot2_[number_of_plans_[0] - 1];
                 groot_filename = name_of_bot2_yellow_plans[number_of_plans_[2] - 1];
                 isTreenameSet = true;
             }
@@ -268,6 +282,7 @@ public:
                 if (isTreenameSet)
                     break;
                 if (code == (i + 1) * 10 + 1) {
+                    start_pt_code = start_points_bot2_[i] + 4;
                     groot_filename = name_of_bot2_blue_plans[i];
                     RCLCPP_INFO_STREAM(this->get_logger(), "[Bot2]: Blue team plan " << (char)(i + 65));
                     isTreenameSet = true;
@@ -275,15 +290,16 @@ public:
                 }
             }
             if (code == 100 * 10 + 1) {
+                start_pt_code = start_points_bot2_[number_of_plans_[0] - 1] + 4;
                 groot_filename = name_of_bot2_blue_plans[number_of_plans_[3] - 1];
                 isTreenameSet = true;
             }
             if (!isTreenameSet)
                 RCLCPP_ERROR_STREAM(this->get_logger(), "no plan match");
         }
-        start_position.point.x = material_points_[start_pt_code * 4];
-        start_position.point.y = material_points_[start_pt_code * 4 + 1];
-        start_position.point.z = material_points_[start_pt_code * 4 + 2];
+        start_position.pose.pose.position.x = material_points_[start_pt_code * 4];
+        start_position.pose.pose.position.y = material_points_[start_pt_code * 4 + 1];
+        start_position.pose.pose.position.z = material_points_[start_pt_code * 4 + 2] * PI / 2;
         start_plan.data = groot_filename + std::to_string(team_colcor_);
     }
 
@@ -302,6 +318,7 @@ public:
 
 private:
     rclcpp::TimerBase::SharedPtr timer_;
+    rclcpp::Publisher<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr initial_pub;
     rclcpp::Publisher<std_msgs::msg::String>::SharedPtr pub;
     rclcpp::Publisher<std_msgs::msg::String>::SharedPtr start_pub;
     rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr time_pub;
@@ -314,10 +331,6 @@ private:
     std::string* name_of_bot1_blue_plans = NULL;
     std::string* name_of_bot2_yellow_plans = NULL;
     std::string* name_of_bot2_blue_plans = NULL;
-    std::string Bot1_YellowA_file, Bot1_YellowB_file, Bot1_YellowC_file, Bot1_YellowD_file, Bot1_YellowE_file, Bot1_YellowF_file, Bot1_YellowS_file;
-    std::string Bot1_BlueA_file, Bot1_BlueB_file, Bot1_BlueC_file, Bot1_BlueD_file, Bot1_BlueE_file, Bot1_BlueF_file, Bot1_BlueS_file;
-    std::string Bot2_YellowA_file, Bot2_YellowB_file, Bot2_YellowC_file, Bot2_YellowD_file, Bot2_YellowE_file, Bot2_YellowF_file, Bot2_YellowS_file;
-    std::string Bot2_BlueA_file, Bot2_BlueB_file, Bot2_BlueC_file, Bot2_BlueD_file, Bot2_BlueE_file, Bot2_BlueF_file, Bot2_BlueS_file;
     std::string Robot_name_, Bot1_name_, Bot2_name_;
     std::string groot_filename;
 
@@ -334,7 +347,8 @@ private:
     double starting_time = 0;
     StartUpState start_up_state;
     std::vector<double> material_points_;
-    geometry_msgs::msg::PointStamped start_position;
+    std::vector<double> start_points_bot1_, start_points_bot2_;
+    geometry_msgs::msg::PoseWithCovarianceStamped start_position;
     std_msgs::msg::String start_plan;
 };
 

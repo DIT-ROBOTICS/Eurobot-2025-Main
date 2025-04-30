@@ -1,6 +1,7 @@
 /**:
   ros__parameters:
     number_of_plans: [6.0, 6.0, 4.0, 4.0]
+    start_points_bot1: [11, 10, 10, 13, 11, 11]
     Bot1_YellowA_config: "bot1_yellow_a.xml"
     Bot1_YellowB_config: "bot1_yellow_b.xml"
     Bot1_YellowC_config: "bot1_yellow_c.xml"
@@ -13,6 +14,7 @@
     Bot1_BlueD_config: "bot1_blue_d.xml"
     Bot1_BlueE_config: "bot1_blue_e.xml"
     Bot1_BlueSpetial_config: "template_bot1_blue_a.xml"
+    start_points_bot2: [13, 13, 13, 11]
     Bot2_YellowA_config: "bot2_yellow_a.xml"
     Bot2_YellowB_config: "bot2_yellow_b.xml"
     Bot2_YellowC_config: "bot2_yellow_c.xml"
