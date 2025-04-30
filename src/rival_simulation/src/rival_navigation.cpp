@@ -6,7 +6,14 @@ using namespace std;
 template <> inline geometry_msgs::msg::PoseStamped BT::convertFromString(StringView str) {
 
     auto parts = splitString(str, ',');
-    if (parts.size() != 3) {
+    if (parts.size() == 1) {
+        geometry_msgs::msg::PoseStamped output;
+        output.pose.position.x = 10;
+        output.pose.position.y = 10;
+        output.pose.position.z = -1;
+        return output;
+    }
+    else if (parts.size() != 3) {
         throw RuntimeError("invalid input)");
     }
     else {
@@ -55,7 +62,7 @@ BT::PortsList Navigation::providedPorts() {
     return {
         BT::InputPort<geometry_msgs::msg::PoseStamped>("start_pose"), 
         BT::InputPort<geometry_msgs::msg::PoseStamped>("goal"),
-        BT::InputPort<int>("goal_index"),
+        BT::InputPort<double>("goal_index"),
         BT::OutputPort<geometry_msgs::msg::PoseStamped>("final_pose")
     };
 }
@@ -72,8 +79,8 @@ inline geometry_msgs::msg::PoseStamped Navigation::ExportPose(const int index) {
 // Start function for the SimpleNavigation node
 BT::NodeStatus Navigation::onStart() {
     auto g = getInput<geometry_msgs::msg::PoseStamped>("goal");
-    auto g_i = getInput<int>("goal_index");
-    goal_ = (g) ? g.value() : ExportPose(g_i.value());
+    auto g_i = getInput<double>("goal_index");
+    goal_ = (g.value().pose.position.z != -1) ? g.value() : ExportPose(int(g_i.value()));
     getInput<geometry_msgs::msg::PoseStamped>("start_pose", start_pose_);
     broadcaster_ = std::make_shared<tf2_ros::TransformBroadcaster>(node_);
     predict_goal_pub_ = node_->create_publisher<geometry_msgs::msg::PoseStamped>("rival/predict_goal", 20);
@@ -179,13 +186,13 @@ void Navigation::onHalted() {
 
 BT::PortsList StateUpdater::providedPorts() {
     return {
-        BT::InputPort<int>("changed_point_code")
+        BT::InputPort<double>("changed_point_code")
     };
 }
 
 BT::NodeStatus StateUpdater::onStart() {
     RCLCPP_INFO(node_->get_logger(), "Start update state");
-    int pt_num_ = getInput<int>("changed_point_code").value();
+    int pt_num_ = int(getInput<double>("changed_point_code").value());
     blackboard_->get<std::vector<int>>("material_status", material_status_);
     material_status_[pt_num_] = 0;
     blackboard_->set<std::vector<int>>("material_status", material_status_);

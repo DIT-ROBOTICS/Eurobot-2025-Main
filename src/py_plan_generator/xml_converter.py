@@ -22,6 +22,7 @@ def read_input(root):
     list_size = 5 + 3
 
     color = input('input team color: ')
+    output_file_name = input('input file name: ')
     if (color == 'blue'):
         banner = blue_banner
         home = blue_home
@@ -29,6 +30,7 @@ def read_input(root):
         banner = yellow_banner
         home = yellow_home
     print('input points: ')
+    points_list.clear()
     for i in range(0, list_size):
         pt = int(input())
         if (color == 'blue'):
@@ -37,6 +39,7 @@ def read_input(root):
             else:
                 pt = pt + 4
         points_list.append(str(pt))
+    print(points_list)
 
     i = 0
     j = 0
@@ -45,19 +48,19 @@ def read_input(root):
         if (elem.tag == "BehaviorTree" and elem.get('ID') == "BannerMission"):
             fallback = elem[0][0][0]
             for docking in fallback:
-                action.set('base', banner[(j + k) % 3] + ', 0.3, 0')
+                docking.set('base', banner[(j + k) % 3] + ', 0.3, 0')
                 k = k + 1
             j += 1
             k = 0
             fallback = elem[0][0][1]
             for docking in fallback:
-                action.set('base', banner[(j + k) % 3] + ', 0.3, 0')
+                docking.set('base', banner[(j + k) % 3] + ', 0.3, 0')
                 k = k + 1
             j += 1
             k = 0
             fallback = elem[0][0][2]
             for docking in fallback:
-                action.set('base', banner[(j + k) % 3] + ', 0.3, 0')
+                docking.set('base', banner[(j + k) % 3] + ', 0.3, 0')
                 k = k + 1
         if (elem.tag == "BehaviorTree" and elem.get('ID') == "MainTree"):
             for action in elem[0]:
@@ -69,17 +72,20 @@ def read_input(root):
                 if (action.tag == "VisionCheck" and action.get('base_index') != "-1"):
                     action.set('base_index', points_list[i])
                     action.set('dock_type', dock_type_list[int(points_list[i])])
+                    print(points_list[i])
                     i += 1
             subtree = elem[0][2]
             for action in subtree[0][1][1]:
                 if (action.tag == "VisionCheck" and action.get('base_index') != "-1"):
                     action.set('base_index', points_list[i])
                     action.set('dock_type', dock_type_list[int(points_list[i])])
+                    print(points_list[i])
                     i += 1
             subtree = elem[0][3]
             for action in subtree[0][0][0]:
                 if (action.tag == "MissionNearRival"):
                     action.set('base_index', points_list[i])
+                    print(points_list[i])
                     i += 1
                     docking = action[0]
                     docking.set('dock_type', dock_type_list[int(points_list[i - 1])])
@@ -95,11 +101,13 @@ def read_input(root):
                 if (action.tag == "VisionCheck" and action.get('base_index') != "-1"):
                     action.set('base_index', points_list[i])
                     action.set('dock_type', dock_type_list[int(points_list[i])])
+                    print(points_list[i])
                     i += 1
             subtree = elem[0][1]
             for action in subtree[0]:
                 if (action.tag == "MissionNearRival"):
                     action.set('base_index', points_list[i])
+                    print(points_list[i])
                     i += 1
                     docking = action[0]
                     docking.set('dock_type', dock_type_list[int(points_list[i - 1])])
@@ -116,17 +124,20 @@ def read_input(root):
                 if (action.tag == "VisionCheck" and action.get('base_index') != "-1"):
                     action.set('base_index', points_list[i])
                     action.set('dock_type', dock_type_list[int(points_list[i])])
+                    print(points_list[i])
                     i += 1
             subtree = elem[0][2]
             for action in subtree[0]:
                 if (action.tag == "VisionCheck" and action.get('base_index') != "-1"):
                     action.set('base_index', points_list[i])
                     action.set('dock_type', dock_type_list[int(points_list[i])])
+                    print(points_list[i])
                     i += 1
             subtree = elem[0][3]
             for action in subtree[0]:
                 if (action.tag == "MissionNearRival"):
                     action.set('base_index', points_list[i])
+                    print(points_list[i])
                     i += 1
                     docking = action[0]
                     docking.set('dock_type', dock_type_list[int(points_list[i - 1])])
@@ -163,7 +174,9 @@ def create_tree():
     
 # Defining main function
 def main():
-    create_tree()
+    repeat = int(input('repeat times: '))
+    for i in range(0, repeat):
+        create_tree()
 
 # Using the special variable 
 # __name__

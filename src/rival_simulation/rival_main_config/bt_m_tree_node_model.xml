@@ -2,13 +2,13 @@
     <TreeNodesModel>
         <Action ID="Navigation">
             <output_port name="final_pose" type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
-            <input_port name="goal_index" type="int"/>
+            <input_port name="goal_index" type="double"/>
             <input_port name="goal" type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
             <input_port name="start_pose" type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
         </Action>
         <Action ID="PublishPose"/>
         <Action ID="StateUpdater">
-            <input_port name="changed_point_code" type="int"/>
+            <input_port name="changed_point_code" type="double"/>
         </Action>
     </TreeNodesModel>
 </root>

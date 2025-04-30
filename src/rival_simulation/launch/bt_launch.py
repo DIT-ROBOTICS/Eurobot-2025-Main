@@ -34,7 +34,7 @@ def generate_launch_description():
                 config_path, 
                 map_points, 
                 {"frame_id": "base_footprint"}, 
-                {"tree_name": "MainTree"}
+                {"tree_name": "EasyMainTree"}
             ]
         )
     ])
