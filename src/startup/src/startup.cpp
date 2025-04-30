@@ -6,6 +6,15 @@
 #include "geometry_msgs/msg/point_stamped.hpp"
 #include "geometry_msgs/msg/pose_with_covariance_stamped.hpp"
 
+// tf2 
+#include <tf2/LinearMath/Quaternion.h>
+#include <tf2/LinearMath/Vector3.h>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
+#include <tf2/impl/utils.h>
+#include <tf2_ros/transform_listener.h>
+#include <tf2_ros/buffer.h>
+#include <tf2/exceptions.h>
+
 #include <jsoncpp/json/json.h>
 #include <fstream>
 #include <iostream>
@@ -29,20 +38,24 @@ typedef enum StartUpState {
 class StartUp : public rclcpp::Node {
 public:
     StartUp() : Node("startup_node") {
-        // RCLCPP_INFO(this->get_logger(), "1");
         initial_pub = this->create_publisher<geometry_msgs::msg::PoseWithCovarianceStamped>("/initialpose", 2);
         pub = this->create_publisher<std_msgs::msg::String>("/robot/startup/ready_signal", 2);
         start_pub = this->create_publisher<std_msgs::msg::String>("/robot/startup/start_signal", 2);
         time_pub = this->create_publisher<std_msgs::msg::Float32>("/robot/startup/time", 2);
         start_sub = this->create_subscription<std_msgs::msg::Int32>("/robot/Start", 2, std::bind(&StartUp::StartCallback, this, std::placeholders::_1));
+        vision_sub = this->create_subscription<std_msgs::msg::Int32>("/robot/startup/vision_ready_signal", 2, std::bind(&StartUp::VisionCallback, this, std::placeholders::_1));
+        localization_sub = this->create_subscription<std_msgs::msg::Int32>("/robot/startup/localization_ready_signal", 2, std::bind(&StartUp::LocalizationCallback, this, std::placeholders::_1));
+        navigation_sub = this->create_subscription<std_msgs::msg::Int32>("/robot/startup/navigation_ready_signal", 2, std::bind(&StartUp::NavigationCallback, this, std::placeholders::_1));
         // srv = this->create_service<btcpp_ros2_interfaces::srv::StartUpSrv>("/robot/startup/ready_signal_feedback",  &StartUp::ReadyFeedback);
         obstacles_pub_ = this->create_publisher<btcpp_ros2_interfaces::msg::Obstacles>("ball_obstacles", 10);
         
         this->declare_parameter<std::string>("Robot_name", "Tongue");
         this->declare_parameter<std::vector<double>>("material_points", std::vector<double>{});
         this->declare_parameter<std::vector<double>>("number_of_plans", std::vector<double>{});
-        this->declare_parameter<std::vector<double>>("start_points_bot1", std::vector<double>{});
-        this->declare_parameter<std::vector<double>>("start_points_bot2", std::vector<double>{});
+        this->declare_parameter<std::vector<double>>("start_points_bot1_yellow", std::vector<double>{});
+        this->declare_parameter<std::vector<double>>("start_points_bot1_blue", std::vector<double>{});
+        this->declare_parameter<std::vector<double>>("start_points_bot2_yellow", std::vector<double>{});
+        this->declare_parameter<std::vector<double>>("start_points_bot2_blue", std::vector<double>{});
         this->declare_parameter<std::string>("Bot1_name", "");
         this->declare_parameter<std::string>("Bot2_name", "");
         for (int i = 0; i < 26; i++) {
@@ -73,14 +86,13 @@ public:
         this->get_parameter("number_of_plans", number_of_plans_double_);
         this->get_parameter("Bot1_name", Bot1_name_);
         this->get_parameter("Bot2_name", Bot2_name_);
-        this->get_parameter("start_points_bot1", start_points_bot1_);
-        this->get_parameter("start_points_bot2", start_points_bot2_);
-        RCLCPP_INFO(this->get_logger(), "5");
+        this->get_parameter("start_points_bot1_yellow", start_points_bot1_yellow_);
+        this->get_parameter("start_points_bot1_blue", start_points_bot1_blue_);
+        this->get_parameter("start_points_bot2_yellow", start_points_bot2_yellow_);
+        this->get_parameter("start_points_bot2_blue", start_points_bot2_blue_);
         for (int i = 0; i < 4; i++) {
-            RCLCPP_INFO_STREAM(this->get_logger(), number_of_plans_double_[i]);
             number_of_plans_[i] = int(number_of_plans_double_[i]);
         }
-        RCLCPP_INFO(this->get_logger(), "6");
         number_of_plans_[0] = 6;
         number_of_plans_[1] = 6;
         number_of_plans_[2] = 4;
@@ -147,14 +159,14 @@ public:
             break;
         case READY:
             PublishReadySignal(pub, initial_pub);
-            if (ready_feedback == 1) {
+            if (ready_feedback[0] || (ready_feedback[1] && ready_feedback[2] && ready_feedback[3])) {
                 if (ready == false) {
                     RCLCPP_INFO(this->get_logger(), "[StartUp Program]: All of the programs are ready!");
                 }
                 ready = true;
             }
             /* Press start signal */
-            if ( (ready_feedback == 1) && start) {
+            if ((ready_feedback[0] || (ready_feedback[1] && ready_feedback[2] && ready_feedback[3])) && start) {
                 start_up_state = START;
                 RCLCPP_INFO(this->get_logger(), "[StartUp Program]: READY -> START");
                 /* Publish start signal */
@@ -174,13 +186,13 @@ public:
 
     void PublishReadySignal(rclcpp::Publisher<std_msgs::msg::String>::SharedPtr pub, rclcpp::Publisher<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr initial_pub) {
         start_position.header.stamp = this->get_clock()->now();
-        initial_pub->publish(start_position);
+        // initial_pub->publish(start_position);
         pub->publish(start_plan);
     }
 
     void PublishStartSignal(rclcpp::Publisher<std_msgs::msg::String>::SharedPtr pub, rclcpp::Publisher<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr initial_pub) {
         start_position.header.stamp = this->get_clock()->now();
-        initial_pub->publish(start_position);
+        // initial_pub->publish(start_position);
         pub->publish(start_plan);
     }
 
@@ -231,7 +243,7 @@ public:
         if (Robot_name_ == Bot1_name_) {
             for (int i = 0; i < number_of_plans_[0] - 1; i ++) {
                 if (code == (i + 1) * 10) {
-                    start_pt_code = start_points_bot1_[i];
+                    start_pt_code = int(start_points_bot1_yellow_[i]);
                     groot_filename = name_of_bot1_yellow_plans[i];
                     RCLCPP_INFO_STREAM(this->get_logger(), "[Bot1]: Yellow team plan " << (char)(i + 65));
                     isTreenameSet = true;
@@ -239,7 +251,7 @@ public:
                 }
             }
             if (code == 100 * 10) {
-                start_pt_code = start_points_bot1_[number_of_plans_[0] - 1];
+                start_pt_code = int(start_points_bot1_yellow_[number_of_plans_[0] - 1]);
                 groot_filename = name_of_bot1_yellow_plans[number_of_plans_[0] - 1];
                 isTreenameSet = true;
             }
@@ -247,7 +259,7 @@ public:
                 if (isTreenameSet)
                     break;
                 if (code == (i + 1) * 10 + 1) {
-                    start_pt_code = start_points_bot1_[i] + 4;
+                    start_pt_code = int(start_points_bot1_blue_[i]) + 4;
                     groot_filename = name_of_bot1_blue_plans[i];
                     RCLCPP_INFO_STREAM(this->get_logger(), "[Bot1]: Blue team plan " << (char)(i + 65));
                     isTreenameSet = true;
@@ -255,7 +267,7 @@ public:
                 }
             }
             if (code == 100 * 10 + 1) {
-                start_pt_code = start_points_bot1_[number_of_plans_[0] - 1] + 4;
+                start_pt_code = int(start_points_bot1_blue_[number_of_plans_[0] - 1]) + 4;
                 groot_filename = name_of_bot1_blue_plans[number_of_plans_[1] - 1];
                 isTreenameSet = true;
             }
@@ -266,7 +278,7 @@ public:
             isTreenameSet = false;
             for (int i = 0; i < number_of_plans_[2] - 1; i++) {
                 if (code == (i + 1) * 10) {
-                    start_pt_code = start_points_bot2_[i];
+                    start_pt_code = int(start_points_bot2_yellow_[i]);
                     groot_filename = name_of_bot2_yellow_plans[i];
                     RCLCPP_INFO_STREAM(this->get_logger(), "[Bot2]: Yellow team plan " << (char)(i + 65));
                     isTreenameSet = true;
@@ -274,7 +286,7 @@ public:
                 }
             }
             if (code == 100 * 10) {
-                start_pt_code = start_points_bot2_[number_of_plans_[0] - 1];
+                start_pt_code = int(start_points_bot2_yellow_[number_of_plans_[0] - 1]);
                 groot_filename = name_of_bot2_yellow_plans[number_of_plans_[2] - 1];
                 isTreenameSet = true;
             }
@@ -282,7 +294,7 @@ public:
                 if (isTreenameSet)
                     break;
                 if (code == (i + 1) * 10 + 1) {
-                    start_pt_code = start_points_bot2_[i] + 4;
+                    start_pt_code = int(start_points_bot2_blue_[i] + 4);
                     groot_filename = name_of_bot2_blue_plans[i];
                     RCLCPP_INFO_STREAM(this->get_logger(), "[Bot2]: Blue team plan " << (char)(i + 65));
                     isTreenameSet = true;
@@ -290,30 +302,50 @@ public:
                 }
             }
             if (code == 100 * 10 + 1) {
-                start_pt_code = start_points_bot2_[number_of_plans_[0] - 1] + 4;
+                start_pt_code = int(start_points_bot2_blue_[number_of_plans_[0] - 1] + 4);
                 groot_filename = name_of_bot2_blue_plans[number_of_plans_[3] - 1];
                 isTreenameSet = true;
             }
             if (!isTreenameSet)
                 RCLCPP_ERROR_STREAM(this->get_logger(), "no plan match");
         }
-        start_position.pose.pose.position.x = material_points_[start_pt_code * 4];
-        start_position.pose.pose.position.y = material_points_[start_pt_code * 4 + 1];
-        start_position.pose.pose.position.z = material_points_[start_pt_code * 4 + 2] * PI / 2;
+        start_position.pose.pose.position.x = material_points_[start_pt_code * 5];
+        start_position.pose.pose.position.y = material_points_[start_pt_code * 5 + 1];
+        tf2::Quaternion q; // declare Quaternion
+        q.setRPY(0, 0, material_points_[start_pt_code * 5 + 2] * PI / 2); // change degree-z into Quaternion
+        start_position.pose.pose.orientation.x = q.x();
+        start_position.pose.pose.orientation.y = q.y();
+        start_position.pose.pose.orientation.z = q.z();
+        start_position.pose.pose.orientation.w = q.w();
         start_plan.data = groot_filename + std::to_string(team_colcor_);
     }
 
     void StartCallback(const std_msgs::msg::Int32::SharedPtr msg) {
-        static int prev_msg = 0;
-
-        if (msg->data == 1) {
-            if (prev_msg == 0) {
-                ready_feedback = 1;
-                start = true;
-                RCLCPP_INFO_STREAM(this->get_logger(), "start callback: " << ready_feedback << start);
-            }
+        if (msg->data == 1 && prev_msg[0] == 0) {
+            ready_feedback[0] = true;
+            start = true;               // will be trigger by the plug
+            RCLCPP_INFO_STREAM(this->get_logger(), "start callback: " << ready_feedback << start);
         }
-        prev_msg = msg->data;
+        prev_msg[0] = msg->data;
+    }
+
+    void VisionCallback(const std_msgs::msg::Int32::SharedPtr msg) {
+        if (msg->data == 1 && prev_msg[1] == 0) {
+            ready_feedback[1] = true;
+        }
+        prev_msg[1] = msg->data;
+    }
+    void LocalizationCallback(const std_msgs::msg::Int32::SharedPtr msg) {
+        if (msg->data == 1 && prev_msg[2] == 0) {
+            ready_feedback[2] = true;
+        }
+        prev_msg[2] = msg->data;
+    }
+    void NavigationCallback(const std_msgs::msg::Int32::SharedPtr msg) {
+        if (msg->data == 1 && prev_msg[3] == 0) {
+            ready_feedback[3] = true;
+        }
+        prev_msg[3] = msg->data;
     }
 
 private:
@@ -323,6 +355,9 @@ private:
     rclcpp::Publisher<std_msgs::msg::String>::SharedPtr start_pub;
     rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr time_pub;
     rclcpp::Subscription<std_msgs::msg::Int32>::SharedPtr start_sub;
+    rclcpp::Subscription<std_msgs::msg::Int32>::SharedPtr vision_sub;
+    rclcpp::Subscription<std_msgs::msg::Int32>::SharedPtr localization_sub;
+    rclcpp::Subscription<std_msgs::msg::Int32>::SharedPtr navigation_sub;
 
     rclcpp::Publisher<btcpp_ros2_interfaces::msg::Obstacles>::SharedPtr obstacles_pub_;
 
@@ -337,17 +372,18 @@ private:
     btcpp_ros2_interfaces::msg::CircleObstacle c;
 
     int team_colcor_;
-    int ready_feedback = 0;
-    std::vector<double> number_of_plans_double_;
-    int number_of_plans_[4];
-    int plan_code_;
+    bool ready_feedback[4] = {false};
+    int prev_msg[4] = {0};
+    int number_of_plans_[4];                           // plan numbers of different color and different bot
     bool ready = false;
     bool pub_ready = false;
     bool start = false;
+    int plan_code_;
     double starting_time = 0;
     StartUpState start_up_state;
     std::vector<double> material_points_;
-    std::vector<double> start_points_bot1_, start_points_bot2_;
+    std::vector<double> number_of_plans_double_;
+    std::vector<double> start_points_bot1_yellow_, start_points_bot1_blue_, start_points_bot2_yellow_, start_points_bot2_blue_;
     geometry_msgs::msg::PoseWithCovarianceStamped start_position;
     std_msgs::msg::String start_plan;
 };

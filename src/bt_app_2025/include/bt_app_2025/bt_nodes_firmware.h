@@ -97,7 +97,7 @@ public:
   {
     publish_times = 100;
     publish_count = 0;
-    vision_pub_ = node_->create_publisher<std_msgs::msg::Bool>("/on_robot_camera/finish_mission", 20);
+    vision_pub_ = node_->create_publisher<std_msgs::msg::Int32>("/main/mission/success", rclcpp::QoS(100).reliable().transient_local());
   }
   /* Node remapping function */
   static BT::PortsList providedPorts();
@@ -108,8 +108,9 @@ public:
 private:
   BT::Blackboard::Ptr blackboard_;
   rclcpp::Node::SharedPtr node_;
-  rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr vision_pub_;
+  rclcpp::Publisher<std_msgs::msg::Int32>::SharedPtr vision_pub_;
   std_msgs::msg::Bool is_mission_finished;
+  std_msgs::msg::Int32 mission_finished;
   std_msgs::msg::Int32MultiArray mission_points_status_;
   std_msgs::msg::Int32MultiArray materials_info_;
   int publish_times;

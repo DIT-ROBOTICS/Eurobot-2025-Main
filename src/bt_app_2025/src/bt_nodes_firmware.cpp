@@ -165,19 +165,21 @@ BT::NodeStatus MissionSuccess::tick() {
 
     lastMissionFailed_ = false;
     blackboard_->set<bool>("last_mission_failed", lastMissionFailed_);
-    if (baseIndex_ < 10) {
-        materials_info_.data[baseIndex_] = 0;
-        blackboard_->set<std_msgs::msg::Int32MultiArray>("materials_info", materials_info_);
-        RCLCPP_INFO_STREAM(node_->get_logger(), "take materials at point " << baseIndex_ << " successfully");
-    } else {
+    if (baseIndex_ > 10) {
         // update mission_points_status_
         blackboard_->get<std_msgs::msg::Int32MultiArray>("mission_points_status", mission_points_status_);
         mission_points_status_.data[baseIndex_ - 11]++;
         blackboard_->set<std_msgs::msg::Int32MultiArray>("mission_points_status", mission_points_status_);
         RCLCPP_INFO_STREAM(node_->get_logger(), "place materials at point " << baseIndex_ << " successfully, data: " << mission_points_status_.data[baseIndex_ - 11]);
-
-        is_mission_finished.data = true;
+        // is_mission_finished.data = true;
+        mission_finished.data = baseIndex_;
         std::thread{std::bind(&MissionSuccess::timer_publisher, this)}.detach();
+    } else if (baseIndex_ >= 0) {
+        materials_info_.data[baseIndex_] = 0;
+        blackboard_->set<std_msgs::msg::Int32MultiArray>("materials_info", materials_info_);
+        RCLCPP_INFO_STREAM(node_->get_logger(), "take materials at point " << baseIndex_ << " successfully");
+    } else {
+        mission_finished.data = baseIndex_;
     }
     
     return BT::NodeStatus::SUCCESS;
@@ -187,7 +189,7 @@ void MissionSuccess::timer_publisher() {
     rclcpp::Rate rate(100);
 
     while (rclcpp::ok() && publish_count < publish_times) { 
-        vision_pub_->publish(is_mission_finished);
+        vision_pub_->publish(mission_finished);
         publish_count++;
         rate.sleep();
     }
