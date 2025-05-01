@@ -350,7 +350,8 @@
                  index="15"
                  hasCompleteMaterial="{hasCompleteMaterial}"
                  _autoremap="true"/>
-        <MissionSuccess base_index="15"/>
+        <MissionSuccess base_index="15"
+                        levels="3"/>
       </Sequence>
     </Sequence>
   </BehaviorTree>
@@ -426,7 +427,8 @@
                  index="17"
                  hasCompleteMaterial="{hasCompleteMaterial}"
                  _autoremap="true"/>
-        <MissionSuccess base_index="17"/>
+        <MissionSuccess base_index="17"
+                        levels="3"/>
       </Sequence>
     </Sequence>
   </BehaviorTree>
@@ -554,7 +556,8 @@
                  index="18"
                  hasCompleteMaterial="{hasCompleteMaterial}"
                  _autoremap="true"/>
-        <MissionSuccess base_index="18"/>
+        <MissionSuccess base_index="18"
+                        levels="3"/>
       </Sequence>
     </Sequence>
   </BehaviorTree>
@@ -1091,7 +1094,7 @@
             <Timeout msec="6000">
               <FirmwareMission mission_status="{x}"
                                mission_type="35"
-                               _description="front take 2 levels"/>
+                               _description="shrink smd"/>
             </Timeout>
           </ForceSuccess>
           <SubTree ID="DockingSubTree"
@@ -1389,8 +1392,8 @@
       <output_port name="DOCK_DIR"/>
     </Action>
     <Action ID="MissionSuccess">
-      <input_port name="base_index"
-                  type="int"/>
+      <input_port name="levels" type="int"/>
+      <input_port name="base_index" type="int"/>
     </Action>
     <Action ID="MySetBlackboard">
       <output_port name="new_value"

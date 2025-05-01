@@ -38,10 +38,9 @@ public:
         node_ = shared_from_this(); 
         return shared_from_this();  // Get a shared pointer to this node
     }
-
     void timeCallback(const std_msgs::msg::Float32::SharedPtr msg);
-    
     void readyCallback(const std_msgs::msg::String::SharedPtr msg);
+    void startCallback(const std_msgs::msg::Bool::SharedPtr msg);
 
     bool shellCmd(const string &cmd, string &result) {
         char buffer[512];
@@ -202,6 +201,7 @@ public:
 private:
     rclcpp::Subscription<std_msgs::msg::Float32>::SharedPtr time_sub;
     rclcpp::Subscription<std_msgs::msg::String>::SharedPtr ready_sub;
+    rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr start_sub;
     rclcpp::Publisher<std_msgs::msg::Int32>::SharedPtr pub;
     BT::Blackboard::Ptr blackboard;
     std::shared_ptr<rclcpp::Node> node_;
@@ -251,6 +251,7 @@ void MainClass::startCallback(const std_msgs::msg::Bool::SharedPtr msg) {
     if (canStart) {
         return;
     }
+    RCLCPP_INFO_STREAM(this->get_logger(), "subscribe start signal: " << msg->data);
     canStart = msg->data;
 }
 

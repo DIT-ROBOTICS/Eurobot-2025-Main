@@ -174,9 +174,9 @@ BT::NodeStatus MissionSuccess::tick() {
         mission_points_status_.data[baseIndex_ - 11]++;
         blackboard_->set<std_msgs::msg::Int32MultiArray>("mission_points_status", mission_points_status_);
         // update score
-        blackboard->get<int>("score_from_main", score_);
+        blackboard_->get<int>("score_from_main", score_);
         score_ += pow(2, levels_ + 1);
-        blackboard->set<int>("score_from_main", score_);
+        blackboard_->set<int>("score_from_main", score_);
         RCLCPP_INFO_STREAM(node_->get_logger(), "place materials at point " << baseIndex_ << " successfully, data: " << mission_points_status_.data[baseIndex_ - 11]);
         // To Do: can merge the messages of mission_points_status & score_from_main in 1 parameter
 

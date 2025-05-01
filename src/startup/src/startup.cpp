@@ -160,7 +160,7 @@ public:
             break;
         case READY:
             PublishReadySignal(ready_pub, initial_pub);  // To Do: will change it into service
-            if (ready_feedback[0] == ready_feedback[1] == ready_feedback[2] == START) {
+            if (ready_feedback[0] == START && ready_feedback[1] == START && ready_feedback[2] == START) {
                 if (ready == false) {
                     RCLCPP_INFO(this->get_logger(), "[StartUp Program]: All of the programs are ready!");
                 }
@@ -168,7 +168,7 @@ public:
                 // might need to return ACK back to vision, localization & navigation
             }
             /* Plug out the plug */
-            if ((ready_feedback[0] == ready_feedback[1] == ready_feedback[2] == START) && start) {
+            if ((ready_feedback[0] == START && ready_feedback[1] == START && ready_feedback[2] == START) && start) {
                 start_up_state = START;
                 RCLCPP_INFO(this->get_logger(), "[StartUp Program]: READY -> START");
                 /* Publish start signal */
@@ -193,6 +193,7 @@ public:
     }
 
     void PublishStartSignal(rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr pub) {
+        RCLCPP_INFO_STREAM(this->get_logger(), "publish start signal: " << start);
         start_signal.data = start;
         pub->publish(start_signal);
     }
@@ -330,19 +331,19 @@ public:
         if (msg->data == 3 && (prev_msg[0] == READY || prev_msg[0] == INIT)) {
             ready_feedback[0] = START;
         }
-        prev_msg[0] = msg->data;
+        prev_msg[0] = StartUpState(msg->data);
     }
     void LocalizationCallback(const std_msgs::msg::Int32::SharedPtr msg) {
         if (msg->data == 3 && (prev_msg[1] == READY || prev_msg[1] == INIT)) {
             ready_feedback[1] = START;
         }
-        prev_msg[1] = msg->data;
+        prev_msg[1] = StartUpState(msg->data);
     }
     void NavigationCallback(const std_msgs::msg::Int32::SharedPtr msg) {
         if (msg->data == 3 && (prev_msg[1] == READY || prev_msg[1] == INIT)) {
             ready_feedback[2] = START;
         }
-        prev_msg[2] = msg->data;
+        prev_msg[2] = StartUpState(msg->data);
     }
 
 private:
@@ -351,7 +352,7 @@ private:
     rclcpp::Publisher<std_msgs::msg::String>::SharedPtr ready_pub;
     rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr start_pub;
     rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr time_pub;
-    rclcpp::Subscription<std_msgs::msg::Int32>::SharedPtr start_sub;
+    rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr start_sub;
     rclcpp::Subscription<std_msgs::msg::Int32>::SharedPtr vision_sub;
     rclcpp::Subscription<std_msgs::msg::Int32>::SharedPtr localization_sub;
     rclcpp::Subscription<std_msgs::msg::Int32>::SharedPtr navigation_sub;
@@ -372,8 +373,8 @@ private:
     int number_of_plans_[4];                           // plan numbers of different color and different bot
     int plan_code_;
     bool ready = false;
-    StartUpState prev_msg[3] = {INIT};                 // ready message from other programs
-    StartUpState ready_feedback[3] = {START};   // it should be INIT        // ready message from other programs
+    StartUpState prev_msg[3] = {INIT, INIT, INIT};                 // ready message from other programs
+    StartUpState ready_feedback[3] = {START, START, START};   // it should be INIT        // ready message from other programs
     bool prev_start_msg = false;                       // plug message
     bool start = true;  // it should be false          // plug message
     double starting_time = 0;
