@@ -155,33 +155,42 @@ BT::NodeStatus MissionStart::tick() {
 /******************/
 PortsList MissionSuccess::providedPorts() {
     return { 
-        BT::InputPort<int>("base_index")
+        BT::InputPort<int>("base_index"),
+        BT::InputPort<int>("levels")
     };
 }
 
 BT::NodeStatus MissionSuccess::tick() {
     int baseIndex_ = getInput<int>("base_index").value();
+    int levels_ = getInput<int>("levels").value();
     bool lastMissionFailed_;
+    int score_;
 
     lastMissionFailed_ = false;
     blackboard_->set<bool>("last_mission_failed", lastMissionFailed_);
-    if (baseIndex_ > 10) {
+    if (baseIndex_ > 10) {   // finish placement mission
         // update mission_points_status_
         blackboard_->get<std_msgs::msg::Int32MultiArray>("mission_points_status", mission_points_status_);
         mission_points_status_.data[baseIndex_ - 11]++;
         blackboard_->set<std_msgs::msg::Int32MultiArray>("mission_points_status", mission_points_status_);
+        // update score
+        blackboard->get<int>("score_from_main", score_);
+        score_ += pow(2, levels_ + 1);
+        blackboard->set<int>("score_from_main", score_);
         RCLCPP_INFO_STREAM(node_->get_logger(), "place materials at point " << baseIndex_ << " successfully, data: " << mission_points_status_.data[baseIndex_ - 11]);
-        // is_mission_finished.data = true;
+        // To Do: can merge the messages of mission_points_status & score_from_main in 1 parameter
+
+        // send the message to vision
         mission_finished.data = baseIndex_;
         std::thread{std::bind(&MissionSuccess::timer_publisher, this)}.detach();
-    } else if (baseIndex_ >= 0) {
+    } else if (baseIndex_ >= 0) {  // finish taking material
         materials_info_.data[baseIndex_] = 0;
         blackboard_->set<std_msgs::msg::Int32MultiArray>("materials_info", materials_info_);
         RCLCPP_INFO_STREAM(node_->get_logger(), "take materials at point " << baseIndex_ << " successfully");
-    } else {
+    } else { // finish banner mission
         mission_finished.data = baseIndex_;
+        std::thread{std::bind(&MissionSuccess::timer_publisher, this)}.detach();
     }
-    
     return BT::NodeStatus::SUCCESS;
 }
 

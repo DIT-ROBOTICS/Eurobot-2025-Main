@@ -1,5 +1,6 @@
 /* Simple rclcpp publisher */
 #include "rclcpp/rclcpp.hpp"
+#include "std_msgs/msg/bool.hpp"
 #include "std_msgs/msg/int32.hpp"
 #include "std_msgs/msg/float32.hpp"
 #include "std_msgs/msg/string.hpp"
@@ -39,10 +40,10 @@ class StartUp : public rclcpp::Node {
 public:
     StartUp() : Node("startup_node") {
         initial_pub = this->create_publisher<geometry_msgs::msg::PoseWithCovarianceStamped>("/initialpose", 2);
-        pub = this->create_publisher<std_msgs::msg::String>("/robot/startup/ready_signal", 2);
-        start_pub = this->create_publisher<std_msgs::msg::String>("/robot/startup/start_signal", 2);
+        ready_pub = this->create_publisher<std_msgs::msg::String>("/robot/startup/ready_signal", 2);
+        start_pub = this->create_publisher<std_msgs::msg::Bool>("/robot/startup/start_signal", 2);
         time_pub = this->create_publisher<std_msgs::msg::Float32>("/robot/startup/time", 2);
-        start_sub = this->create_subscription<std_msgs::msg::Int32>("/robot/Start", 2, std::bind(&StartUp::StartCallback, this, std::placeholders::_1));
+        start_sub = this->create_subscription<std_msgs::msg::Bool>("/robot/Start", 2, std::bind(&StartUp::StartCallback, this, std::placeholders::_1));
         vision_sub = this->create_subscription<std_msgs::msg::Int32>("/robot/startup/vision_ready_signal", 2, std::bind(&StartUp::VisionCallback, this, std::placeholders::_1));
         localization_sub = this->create_subscription<std_msgs::msg::Int32>("/robot/startup/localization_ready_signal", 2, std::bind(&StartUp::LocalizationCallback, this, std::placeholders::_1));
         navigation_sub = this->create_subscription<std_msgs::msg::Int32>("/robot/startup/navigation_ready_signal", 2, std::bind(&StartUp::NavigationCallback, this, std::placeholders::_1));
@@ -158,19 +159,20 @@ public:
             }
             break;
         case READY:
-            PublishReadySignal(pub, initial_pub);
-            if (ready_feedback[0] || (ready_feedback[1] && ready_feedback[2] && ready_feedback[3])) {
+            PublishReadySignal(ready_pub, initial_pub);  // To Do: will change it into service
+            if (ready_feedback[0] == ready_feedback[1] == ready_feedback[2] == START) {
                 if (ready == false) {
                     RCLCPP_INFO(this->get_logger(), "[StartUp Program]: All of the programs are ready!");
                 }
                 ready = true;
+                // might need to return ACK back to vision, localization & navigation
             }
-            /* Press start signal */
-            if ((ready_feedback[0] || (ready_feedback[1] && ready_feedback[2] && ready_feedback[3])) && start) {
+            /* Plug out the plug */
+            if ((ready_feedback[0] == ready_feedback[1] == ready_feedback[2] == START) && start) {
                 start_up_state = START;
                 RCLCPP_INFO(this->get_logger(), "[StartUp Program]: READY -> START");
                 /* Publish start signal */
-                PublishStartSignal(start_pub, initial_pub);
+                PublishStartSignal(start_pub);
                 /* Start the time */
                 starting_time = this->get_clock()->now().seconds();
             }
@@ -190,10 +192,9 @@ public:
         pub->publish(start_plan);
     }
 
-    void PublishStartSignal(rclcpp::Publisher<std_msgs::msg::String>::SharedPtr pub, rclcpp::Publisher<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr initial_pub) {
-        start_position.header.stamp = this->get_clock()->now();
-        // initial_pub->publish(start_position);
-        pub->publish(start_plan);
+    void PublishStartSignal(rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr pub) {
+        start_signal.data = start;
+        pub->publish(start_signal);
     }
 
     void PublishTime(rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr pub) {
@@ -216,8 +217,6 @@ public:
         obstacles_msg.header.frame_id = "map";
         obstacles_msg.header.stamp = this->get_clock()->now();
         obstacles_pub_->publish(obstacles_msg);
-
-
 
         static bool is_published = false;
         static bool time_check = false;
@@ -320,39 +319,37 @@ public:
         start_plan.data = groot_filename + std::to_string(team_colcor_);
     }
 
-    void StartCallback(const std_msgs::msg::Int32::SharedPtr msg) {
-        if (msg->data == 1 && prev_msg[0] == 0) {
-            ready_feedback[0] = true;
-            start = true;               // will be trigger by the plug
-            RCLCPP_INFO_STREAM(this->get_logger(), "start callback: " << ready_feedback << start);
+    // will be triggered by the plug
+    void StartCallback(const std_msgs::msg::Bool::SharedPtr msg) {
+        if (msg->data == true && prev_start_msg == false) {
+            start = true;               
+        }
+        prev_start_msg = msg->data;
+    }
+    void VisionCallback(const std_msgs::msg::Int32::SharedPtr msg) {
+        if (msg->data == 3 && (prev_msg[0] == READY || prev_msg[0] == INIT)) {
+            ready_feedback[0] = START;
         }
         prev_msg[0] = msg->data;
     }
-
-    void VisionCallback(const std_msgs::msg::Int32::SharedPtr msg) {
-        if (msg->data == 1 && prev_msg[1] == 0) {
-            ready_feedback[1] = true;
+    void LocalizationCallback(const std_msgs::msg::Int32::SharedPtr msg) {
+        if (msg->data == 3 && (prev_msg[1] == READY || prev_msg[1] == INIT)) {
+            ready_feedback[1] = START;
         }
         prev_msg[1] = msg->data;
     }
-    void LocalizationCallback(const std_msgs::msg::Int32::SharedPtr msg) {
-        if (msg->data == 1 && prev_msg[2] == 0) {
-            ready_feedback[2] = true;
+    void NavigationCallback(const std_msgs::msg::Int32::SharedPtr msg) {
+        if (msg->data == 3 && (prev_msg[1] == READY || prev_msg[1] == INIT)) {
+            ready_feedback[2] = START;
         }
         prev_msg[2] = msg->data;
-    }
-    void NavigationCallback(const std_msgs::msg::Int32::SharedPtr msg) {
-        if (msg->data == 1 && prev_msg[3] == 0) {
-            ready_feedback[3] = true;
-        }
-        prev_msg[3] = msg->data;
     }
 
 private:
     rclcpp::TimerBase::SharedPtr timer_;
     rclcpp::Publisher<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr initial_pub;
-    rclcpp::Publisher<std_msgs::msg::String>::SharedPtr pub;
-    rclcpp::Publisher<std_msgs::msg::String>::SharedPtr start_pub;
+    rclcpp::Publisher<std_msgs::msg::String>::SharedPtr ready_pub;
+    rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr start_pub;
     rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr time_pub;
     rclcpp::Subscription<std_msgs::msg::Int32>::SharedPtr start_sub;
     rclcpp::Subscription<std_msgs::msg::Int32>::SharedPtr vision_sub;
@@ -372,20 +369,22 @@ private:
     btcpp_ros2_interfaces::msg::CircleObstacle c;
 
     int team_colcor_;
-    bool ready_feedback[4] = {false};
-    int prev_msg[4] = {0};
     int number_of_plans_[4];                           // plan numbers of different color and different bot
-    bool ready = false;
-    bool pub_ready = false;
-    bool start = false;
     int plan_code_;
+    bool ready = false;
+    StartUpState prev_msg[3] = {INIT};                 // ready message from other programs
+    StartUpState ready_feedback[3] = {START};   // it should be INIT        // ready message from other programs
+    bool prev_start_msg = false;                       // plug message
+    bool start = true;  // it should be false          // plug message
     double starting_time = 0;
-    StartUpState start_up_state;
-    std::vector<double> material_points_;
+    StartUpState start_up_state;                       // state of startup program
+    std::vector<double> material_points_;              // prepared for choosing start point
     std::vector<double> number_of_plans_double_;
     std::vector<double> start_points_bot1_yellow_, start_points_bot1_blue_, start_points_bot2_yellow_, start_points_bot2_blue_;
+    // ROS message
     geometry_msgs::msg::PoseWithCovarianceStamped start_position;
     std_msgs::msg::String start_plan;
+    std_msgs::msg::Bool start_signal;
 };
 
 int main(int argc, char **argv) {

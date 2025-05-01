@@ -67,18 +67,20 @@ public:
         mission_points_status_.data = {0, 0, 0, 0, 0, 0, 0, 0};
         // Create a shared blackboard
         blackboard = BT::Blackboard::create();
-        blackboard->set<double>("current_time", 0);
-        blackboard->set<int>("front_materials", 0);
-        blackboard->set<int>("back_materials", 0);
-        blackboard->set<std_msgs::msg::Int32MultiArray>("materials_info", materials_info_);
-        blackboard->set<std_msgs::msg::Int32MultiArray>("mission_points_status", mission_points_status_);
-        blackboard->set<int>("mission_progress", 0);
+        blackboard->set<double>("current_time", 0);      // time from startup program
+        blackboard->set<int>("front_materials", 0);      // record materials on robot
+        blackboard->set<int>("back_materials", 0);       // record materials on robot
+        blackboard->set<int>("mission_progress", 0);     // count the steps of a mission subtree
+        blackboard->set<std_msgs::msg::Int32MultiArray>("materials_info", materials_info_);     // the condition of each material point
+        blackboard->set<std_msgs::msg::Int32MultiArray>("mission_points_status", mission_points_status_);  // record number of missions have done at each point
         blackboard->set<bool>("last_mission_failed", false);
         blackboard->set<bool>("notTimeout", true);
         blackboard->set<std::string>("team", "y");
+        blackboard->set<int>("score_from_main", 0);
         // Subscriber
         time_sub = this->create_subscription<std_msgs::msg::Float32>("/robot/startup/time", 2, std::bind(&MainClass::timeCallback, this, std::placeholders::_1));
-        sub = this->create_subscription<std_msgs::msg::String>("/robot/startup/ready_signal", 2, std::bind(&MainClass::readyCallback, this, std::placeholders::_1));
+        ready_sub = this->create_subscription<std_msgs::msg::String>("/robot/startup/ready_signal", 2, std::bind(&MainClass::readyCallback, this, std::placeholders::_1));
+        start_sub = this->create_subscription<std_msgs::msg::Bool>("/robot/startup/start_signal", 2, std::bind(&MainClass::startCallback, this, std::placeholders::_1));
         pub = this->create_publisher<std_msgs::msg::Int32>("/robot/Start", 2);
         // Read parameters
         this->declare_parameter<std::string>("groot_xml_config_directory", "/Eurobot-2025-Main/src/bt_app_2025/bt_m_config/");
@@ -154,9 +156,13 @@ public:
 
     void RunTheTree() {
         // Send feed back to startup
-        for (int j = 0; j < 20; j++) {
-            ready_feedback.data = 1;
-            pub->publish(ready_feedback);
+        // for (int j = 0; j < 20; j++) {
+        //     ready_feedback.data = 1;
+        //     pub->publish(ready_feedback);
+        //     rate.sleep();
+        // }
+        while (rclcpp::ok() && !canStart) {
+            rclcpp::spin_some(node_);
             rate.sleep();
         }
         // create tree
@@ -195,7 +201,7 @@ public:
     // }
 private:
     rclcpp::Subscription<std_msgs::msg::Float32>::SharedPtr time_sub;
-    rclcpp::Subscription<std_msgs::msg::String>::SharedPtr sub;
+    rclcpp::Subscription<std_msgs::msg::String>::SharedPtr ready_sub;
     rclcpp::Publisher<std_msgs::msg::Int32>::SharedPtr pub;
     BT::Blackboard::Ptr blackboard;
     std::shared_ptr<rclcpp::Node> node_;
@@ -211,6 +217,7 @@ private:
     std_msgs::msg::Int32MultiArray materials_info_, mission_points_status_;
     double game_time = 0.0;
     char team = '0';
+    bool canStart = false;
     std::string groot_filename;
     // Parameters
     std::string groot_xml_config_directory;
@@ -238,6 +245,13 @@ void MainClass::readyCallback(const std_msgs::msg::String::SharedPtr msg) {
     msg->data.pop_back();   // delete the last char of string
     groot_filename = msg->data;  // the remain string is the plan xml file name
     isReady = true;   // set as received ready message
+}
+
+void MainClass::startCallback(const std_msgs::msg::Bool::SharedPtr msg) {
+    if (canStart) {
+        return;
+    }
+    canStart = msg->data;
 }
 
 int main(int argc, char **argv) {

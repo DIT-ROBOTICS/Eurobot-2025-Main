@@ -6,6 +6,7 @@
 #include <deque>
 #include <bitset>
 #include <vector>
+#include <math.h> 
 
 // Use behavior tree
 #include <behaviortree_ros2/bt_action_node.hpp>
