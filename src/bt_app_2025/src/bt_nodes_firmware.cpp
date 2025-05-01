@@ -184,6 +184,7 @@ BT::NodeStatus MissionSuccess::tick() {
         mission_finished.data = baseIndex_;
         std::thread{std::bind(&MissionSuccess::timer_publisher, this)}.detach();
     } else if (baseIndex_ >= 0) {  // finish taking material
+        blackboard_->get<std_msgs::msg::Int32MultiArray>("materials_info", materials_info_);
         materials_info_.data[baseIndex_] = 0;
         blackboard_->set<std_msgs::msg::Int32MultiArray>("materials_info", materials_info_);
         RCLCPP_INFO_STREAM(node_->get_logger(), "take materials at point " << baseIndex_ << " successfully");

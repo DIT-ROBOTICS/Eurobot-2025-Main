@@ -38,7 +38,7 @@ typedef enum StartUpState {
 
 class StartUp : public rclcpp::Node {
 public:
-    StartUp() : Node("startup_node") {
+    StartUp() : Node("startup_node"), rate(100) {
         initial_pub = this->create_publisher<geometry_msgs::msg::PoseWithCovarianceStamped>("/initialpose", 2);
         ready_pub = this->create_publisher<std_msgs::msg::String>("/robot/startup/ready_signal", 2);
         start_pub = this->create_publisher<std_msgs::msg::Bool>("/robot/startup/start_signal", 2);
@@ -187,15 +187,21 @@ public:
     }
 
     void PublishReadySignal(rclcpp::Publisher<std_msgs::msg::String>::SharedPtr pub, rclcpp::Publisher<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr initial_pub) {
-        start_position.header.stamp = this->get_clock()->now();
-        // initial_pub->publish(start_position);
-        pub->publish(start_plan);
+        for (int i = 0; i < 100; i++) {
+            start_position.header.stamp = this->get_clock()->now();
+            // initial_pub->publish(start_position);
+            pub->publish(start_plan);
+            rate.sleep();
+        }
     }
 
     void PublishStartSignal(rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr pub) {
         RCLCPP_INFO_STREAM(this->get_logger(), "publish start signal: " << start);
         start_signal.data = start;
-        pub->publish(start_signal);
+        for (int i = 0; i < 100; i++) {
+            pub->publish(start_signal);
+            rate.sleep();
+        }
     }
 
     void PublishTime(rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr pub) {
@@ -368,6 +374,7 @@ private:
     std::string groot_filename;
 
     btcpp_ros2_interfaces::msg::CircleObstacle c;
+    rclcpp::Rate rate;
 
     int team_colcor_;
     int number_of_plans_[4];                           // plan numbers of different color and different bot

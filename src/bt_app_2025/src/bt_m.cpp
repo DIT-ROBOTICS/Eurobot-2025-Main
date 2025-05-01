@@ -16,6 +16,8 @@
 #include "std_srvs/srv/set_bool.hpp"
 #include "std_msgs/msg/float32.hpp"
 #include "std_msgs/msg/string.hpp"
+#include "std_msgs/msg/bool.hpp"
+#include "std_msgs/msg/int32.hpp"
 #include "geometry_msgs/msg/point_stamped.hpp"
 // BTaction nodes
 #include "bt_app_2025/bt_nodes_firmware.h"
@@ -154,18 +156,13 @@ public:
     }
 
     void RunTheTree() {
-        // Send feed back to startup
-        // for (int j = 0; j < 20; j++) {
-        //     ready_feedback.data = 1;
-        //     pub->publish(ready_feedback);
-        //     rate.sleep();
-        // }
         while (rclcpp::ok() && !canStart) {
             rclcpp::spin_some(node_);
             rate.sleep();
         }
+        RCLCPP_INFO(node_->get_logger(), "create tree");
         // create tree
-        auto tree = factory.createTree(tree_name, blackboard);
+        BT::Tree tree = factory.createTree(tree_name, blackboard);
         // BT::Groot2Publisher publisher(tree, 2227);
 
         BT::NodeStatus status = BT::NodeStatus::RUNNING;
