@@ -17,7 +17,7 @@ from ament_index_python.packages import get_package_share_directory
 def generate_launch_description():
 
 
-    pkg_dir = os.path.join('/home/ros/Eurobot-2025-Main/src/bt_app_2025')
+    pkg_dir = os.path.join('/home/user/Eurobot-2025-Main/src/bt_app_2025')
 
     config_path_arg = DeclareLaunchArgument(
         'params0',
