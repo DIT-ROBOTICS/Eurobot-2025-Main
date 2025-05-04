@@ -71,7 +71,7 @@ def generate_launch_description():
                     config_path,
                     map_points,
                     {"Robot_name": "Tongue"},  # Invisible or Tongue
-                    {"plan_code": 20} # 10e1: plan (start from 1), 10e0: color(0 for yellow, 1 for blue)
+                    {"plan_code": 1001} # 10e1: plan (start from 1), 10e0: color(0 for yellow, 1 for blue)
                 ],
                 package = 'startup',
                 executable = 'startup',
@@ -93,7 +93,7 @@ def generate_launch_description():
         finisher_arg,
         nav_parameters_arg,
         map_points_arg,
-        # firmware_node
+        firmware_node
         # TimerAction(
         #     period = 1.0,
         #     actions = [Node(

@@ -249,7 +249,7 @@
         </MissionNearRival>
         <SubTree ID="ThreeLevelsBot1new"
                 back="0.2, 0.1, 0.05"
-                forward="0.15, 0.09, 0.065"
+                forward="0.15, 0.1, 0.065"
                 shift="0"
                 index="15"
                 _autoremap="true"/>
@@ -374,8 +374,8 @@
                            shift="0.045"
                            offset="-0.2"
                            mission_type="front"
-                           dock_type="dock_x_slow_precise"
-                           base_index="7">
+                           dock_type="dock_y_slow_precise"
+                           base_index="5">
                 <Docking final_pose="{PrevGoal}"
                          isPureDocking="0"
                          dock_type="{dock_type}"
@@ -411,7 +411,7 @@
         <SubTree ID="TwoLevelsBot1new"
                  back="0.2, 0.1, 0.05"
                  forward="0.15, 0.13, 0.065"
-                 shift="0.11"
+                 shift="0.115"
                  index="{index}"
                  _autoremap="true"/>
         <MissionSuccess base_index="{index}"
@@ -439,7 +439,7 @@
         </ForceSuccess>
         <SubTree ID="ThreeLevelsBot1new"
                  back="0.2, 0.1, 0.05"
-                 forward="0.15, 0.09, 0.065"
+                 forward="0.15, 0.1, 0.065"
                  shift="0"
                  index="15"
                  hasCompleteMaterial="{hasCompleteMaterial}"
@@ -518,7 +518,7 @@
         </ForceSuccess>
         <SubTree ID="ThreeLevelsBot1new"
                  back="0.2, 0.1, 0.05"
-                 forward="0.15, 0.09, 0.065"
+                 forward="0.15, 0.1, 0.065"
                  shift="0"
                  index="17"
                  hasCompleteMaterial="{hasCompleteMaterial}"
@@ -540,8 +540,8 @@
                      shift="0"
                      offset="-0.2"
                      mission_type="back"
-                     dock_type="dock_y_slow_precise"
-                     base_index="5">
+                     dock_type="dock_x_slow_precise"
+                     base_index="7">
           <Docking final_pose="{PrevGoal}"
                    isPureDocking="0"
                    dock_type="{dock_type}"
@@ -649,7 +649,7 @@
         </ForceSuccess>
         <SubTree ID="ThreeLevelsBot1new"
                  back="0.2, 0.1, 0.05"
-                 forward="0.15, 0.09, 0.065"
+                 forward="0.15, 0.1, 0.065"
                  shift="0"
                  index="18"
                  hasCompleteMaterial="{hasCompleteMaterial}"
@@ -1223,27 +1223,24 @@
                              _description="enable back magnet "/>
           </Timeout>
         </ForceSuccess>
-        <Parallel failure_count="1"
-                  success_count="2">
-          <ForceSuccess>
-            <Timeout msec="6000">
-              <FirmwareMission mission_status="{x}"
-                               mission_type="35"
-                               _description="front take 2 levels"/>
-            </Timeout>
-          </ForceSuccess>
-          <SubTree ID="DockingSubTree"
-                   base="{PrevGoal}"
-                   dock_type="{DOCK_DIR}"
-                   final_pose="{PrevGoal}"
-                   isPureDocking="1"
-                   offset="{FORWARD_M}"
-                   retry="100"
-                   shift="0"
-                   sleep="100"
-                   timeout="3000"
-                   _autoremap="true"/>
-        </Parallel>
+        <SubTree ID="DockingSubTree"
+                  base="{PrevGoal}"
+                  dock_type="{DOCK_DIR}"
+                  final_pose="{PrevGoal}"
+                  isPureDocking="1"
+                  offset="{FORWARD_M}"
+                  retry="100"
+                  shift="0"
+                  sleep="100"
+                  timeout="1900"
+                  _autoremap="true"/>
+        <ForceSuccess>
+          <Timeout msec="6000">
+            <FirmwareMission mission_status="{x}"
+                              mission_type="35"
+                              _description="front take 2 levels"/>
+          </Timeout>
+        </ForceSuccess>
         <ForceSuccess>
           <Timeout msec="6000">
             <FirmwareMission mission_status="{x}"
@@ -1260,7 +1257,7 @@
                  retry="100"
                  shift="0"
                  sleep="100"
-                 timeout="3000"
+                 timeout="1900"
                  _autoremap="true"/>
         <ForceSuccess>
           <Timeout msec="6000">
@@ -1353,7 +1350,7 @@
                  retry="100"
                  shift="0"
                  sleep="100"
-                 timeout="3000"
+                 timeout="1900"
                  _autoremap="true"/>
         <ForceSuccess>
           <Timeout msec="6000">
@@ -1385,7 +1382,7 @@
                  retry="100"
                  shift="{SHIFT}"
                  sleep="100"
-                 timeout="3000"
+                 timeout="1900"
                  _autoremap="true"/>
         <ForceSuccess>
           <Timeout msec="6000">
@@ -1442,7 +1439,7 @@
                  retry="100"
                  shift="0"
                  sleep="100"
-                 timeout="3000"
+                 timeout="1900"
                  _autoremap="true"/>
         <ForceSuccess>
           <Timeout msec="6000">
