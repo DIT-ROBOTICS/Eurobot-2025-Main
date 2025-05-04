@@ -52,7 +52,7 @@ public:
         obstacles_pub_ = this->create_publisher<btcpp_ros2_interfaces::msg::Obstacles>("ball_obstacles", 10);
         
         this->declare_parameter<std::string>("Robot_name", "Tongue");
-        this->declare_parameter<std::vector<double>>("material_points", std::vector<double>{});
+        this->declare_parameter<std::vector<double>>("map_points_1", std::vector<double>{});
         this->declare_parameter<std::vector<double>>("number_of_plans", std::vector<double>{});
         this->declare_parameter<std::vector<double>>("start_points_bot1_yellow", std::vector<double>{});
         this->declare_parameter<std::vector<double>>("start_points_bot1_blue", std::vector<double>{});
@@ -84,7 +84,7 @@ public:
         this->declare_parameter<std::string>("Bot2_BlueSpetial_config", "nan");
 
         this->get_parameter("Robot_name", Robot_name_);
-        this->get_parameter("material_points", material_points_);
+        this->get_parameter("map_points_1", material_points_);
         this->get_parameter("number_of_plans", number_of_plans_double_);
         this->get_parameter("Bot1_name", Bot1_name_);
         this->get_parameter("Bot2_name", Bot2_name_);

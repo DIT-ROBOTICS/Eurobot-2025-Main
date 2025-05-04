@@ -280,15 +280,15 @@
             <CamReceiver/>
           </Sequence>
           <ForceSuccess>
-            <SubTree ID="MissionPointOne"
+            <SubTree ID="MissionPoint1"
                      _autoremap="true"/>
           </ForceSuccess>
           <ForceSuccess>
-            <SubTree ID="MissionPointTwo"
+            <SubTree ID="MissionPoint2"
                      _autoremap="true"/>
           </ForceSuccess>
           <ForceSuccess>
-            <SubTree ID="MissionPointThree"
+            <SubTree ID="MissionPoint3"
                      _autoremap="true"/>
           </ForceSuccess>
         </Sequence>
@@ -312,7 +312,7 @@
     </Sequence>
   </BehaviorTree>
 
-  <BehaviorTree ID="MissionPointOne">
+  <BehaviorTree ID="MissionPoint1">
     <Sequence>
       <SetBlackboard value="0"
                      output_key="hasCompleteMaterial"/>
@@ -450,7 +450,7 @@
     </Sequence>
   </BehaviorTree>
 
-  <BehaviorTree ID="MissionPointTwo">
+  <BehaviorTree ID="MissionPoint2">
     <Sequence>
       <Sequence>
         <Fallback>
@@ -529,7 +529,7 @@
     </Sequence>
   </BehaviorTree>
 
-  <BehaviorTree ID="MissionPointThree">
+  <BehaviorTree ID="MissionPoint3">
     <Sequence>
       <Fallback>
         <VisionCheck remap_offset="{offset}"

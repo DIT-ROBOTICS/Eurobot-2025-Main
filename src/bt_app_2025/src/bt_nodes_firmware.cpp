@@ -114,7 +114,11 @@ BT::NodeStatus MissionStart::tick() {
     auto forward_ = getInput<std::deque<double>>("FORWARD_IN");
     double shift_ = getInput<double>("SHIFT_IN").value();
     int index_ = getInput<int>("INDEX_IN").value();
-    node_->get_parameter("material_points", material_points_);
+
+    std::string map_points;
+    blackboard_->get<std::string>("bot", map_points); 
+    map_points = "map_points_" + map_points;
+    node_->get_parameter(map_points, material_points_);
 
     int offset_dir_ = (int)(1 - 2 * ((int)(material_points_[index_ * 5 + 2]) % 2));
     int offset_positivity_ = (int)(material_points_[index_ * 5 + 3] / abs(material_points_[index_ * 5 + 3]));

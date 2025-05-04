@@ -75,6 +75,7 @@ public:
         blackboard->set<bool>("last_mission_failed", false);
         blackboard->set<bool>("notTimeout", true);
         blackboard->set<std::string>("team", "y");
+        blackboard->set<std::string>("bot", "1"); 
         blackboard->set<int>("score_from_main", 0);
         // Subscriber
         time_sub = this->create_subscription<std_msgs::msg::Float32>("/robot/startup/time", 2, std::bind(&MainClass::timeCallback, this, std::placeholders::_1));
@@ -100,8 +101,8 @@ public:
         this->declare_parameter<std::vector<int>>("not_spin_construct_2", std::vector<int>{});
         this->declare_parameter<std::vector<int>>("not_spin_construct_3", std::vector<int>{});
         // map points
-        this->declare_parameter<std::vector<double>>("material_points", std::vector<double>{});
-        this->declare_parameter<std::vector<double>>("mission_points", std::vector<double>{});
+        this->declare_parameter<std::vector<double>>("map_points_1", std::vector<double>{});
+        this->declare_parameter<std::vector<double>>("map_points_2", std::vector<double>{});
         // get parameters
         this->get_parameter("groot_xml_config_directory", groot_xml_config_directory);
         this->get_parameter("tree_node_model_config_file", bt_tree_node_model);
@@ -236,8 +237,9 @@ void MainClass::readyCallback(const std_msgs::msg::String::SharedPtr msg) {
         blackboard->set<std::string>("team", "y");                             // team color is yellow
     else
         blackboard->set<std::string>("team", "b");                             // team color is blue
-    msg->data.pop_back();                                                      // delete the last char of string
+    msg->data.pop_back();                                                      // delete the last char of string 
     groot_filename = msg->data;                                                // the remain string is the plan xml file name
+    blackboard->set<std::string>("bot", std::to_string(groot_filename[3])); 
     isReady = true;                                                            // set as received ready message
     // RCLCPP_INFO_STREAM(this->get_logger(), "ready callback");
     sendReadySignal();

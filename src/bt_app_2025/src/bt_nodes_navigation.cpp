@@ -448,24 +448,18 @@ NodeStatus VisionCheck::tick() {
     double shift_ = getInput<double>("shift").value();
 
     // get parameters
-    node_->get_parameter("material_points", material_points_);
-    node_->get_parameter("mission_points", mission_points_);
+    std::string map_points;
+    blackboard_->get<std::string>("bot", map_points); 
+    map_points = "map_points_" + map_points;
+    node_->get_parameter(map_points, material_points_);
 
     blackboard_->get<std_msgs::msg::Int32MultiArray>("materials_info", materials_info_);  // use vision message to check the target
     blackboard_->get<bool>("last_mission_failed", last_mission_failed_);                  // see if last mission failed
     bool canPrintMessage;
     blackboard_->get<bool>("can_print_message", canPrintMessage);     
-    // if (canPrintMessage) {
-    //     if (baseIndex_ != -1)
-    //         RCLCPP_INFO_STREAM(node_->get_logger(), "go to point " << baseIndex_ << " to get material");
-    //     else
-    //         RCLCPP_INFO_STREAM(node_->get_logger(), "find a good material point");
-    // }
     // If the target is not ok
     // use vision message to find the best new target `i` (new base)
     if (materials_info_.data[baseIndex_] == 0 || baseIndex_ == -1) {
-        // if (baseIndex_ != -1)
-        //     RCLCPP_INFO_STREAM(node_->get_logger(), "origin point empty, find a new point");
         baseIndex_ = findBestTarget();
         /**********************************************************/
         /* Notice!! this part need to be consider again carefully */
@@ -475,12 +469,7 @@ NodeStatus VisionCheck::tick() {
             return NodeStatus::FAILURE;
         }
         dockType_ = (int(material_points_[baseIndex_ * 5 + 2]) % 2) ? "mission_dock_y" : "mission_dock_x";
-        // if (canPrintMessage)
-        //     RCLCPP_INFO_STREAM(node_->get_logger(), "final goal is point " << baseIndex_);
     }
-    // if (canPrintMessage)
-    //     RCLCPP_INFO_STREAM(node_->get_logger(), "------------------------------------");
-    // get base & offset from map_points[i]
     base_.pose.position.x = material_points_[baseIndex_ * 5];
     base_.pose.position.y = material_points_[baseIndex_ * 5 + 1];
     base_.pose.position.z = material_points_[baseIndex_ * 5 + 2];
@@ -536,7 +525,10 @@ NodeStatus MissionNearRival::tick() {
     double shift_ = 0;
 
     // get parameters
-    node_->get_parameter("material_points", material_points_);
+    std::string map_points;
+    blackboard_->get<std::string>("bot", map_points); 
+    map_points = "map_points_" + map_points;
+    node_->get_parameter(map_points, material_points_);
     blackboard_->get<std_msgs::msg::Int32MultiArray>("mission_points_status", mission_points_status_);
     
     // get base & offset from map_points[i]
