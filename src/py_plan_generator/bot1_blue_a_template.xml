@@ -249,11 +249,7 @@
         </MissionNearRival>
         <SubTree ID="ThreeLevelsBot1new"
                 back="0.2, 0.1, 0.05"
-<<<<<<< HEAD
                 forward="0.15, 0.1, 0.065"
-=======
-                forward="0.15, 0.09, 0.065"
->>>>>>> b4c627e84cb8999b391fed71ddbdd531317b4f45
                 shift="0"
                 index="15"
                 _autoremap="true"/>
@@ -414,7 +410,7 @@
         </Parallel>
         <SubTree ID="TwoLevelsBot1new"
                  back="0.2, 0.1, 0.05"
-                 forward="0.15, 0.13, 0.065"
+                 forward="0.15, 0.13, 0.07"
                  shift="0.115"
                  index="{index}"
                  _autoremap="true"/>
@@ -533,11 +529,7 @@
     </Sequence>
   </BehaviorTree>
 
-<<<<<<< HEAD
-  <BehaviorTree ID="MissionPointThree">
-=======
   <BehaviorTree ID="MissionPoint3">
->>>>>>> b4c627e84cb8999b391fed71ddbdd531317b4f45
     <Sequence>
       <Fallback>
         <VisionCheck remap_offset="{offset}"
@@ -548,13 +540,8 @@
                      shift="0"
                      offset="-0.2"
                      mission_type="back"
-<<<<<<< HEAD
                      dock_type="dock_x_slow_precise"
                      base_index="7">
-=======
-                     dock_type="dock_y_slow_precise"
-                     base_index="5">
->>>>>>> b4c627e84cb8999b391fed71ddbdd531317b4f45
           <Docking final_pose="{PrevGoal}"
                    isPureDocking="0"
                    dock_type="{dock_type}"
@@ -1203,6 +1190,7 @@
                                  _description="back put 1 level"/>
               </Timeout>
             </ForceSuccess>
+            <Sleep msec="200"/>
             <ForceSuccess>
               <Timeout msec="6000">
                 <FirmwareMission mission_status="{x}"
@@ -1236,7 +1224,6 @@
                              _description="enable back magnet "/>
           </Timeout>
         </ForceSuccess>
-<<<<<<< HEAD
         <SubTree ID="DockingSubTree"
                   base="{PrevGoal}"
                   dock_type="{DOCK_DIR}"
@@ -1255,29 +1242,6 @@
                               _description="front take 2 levels"/>
           </Timeout>
         </ForceSuccess>
-=======
-        <Parallel failure_count="1"
-                  success_count="2">
-          <ForceSuccess>
-            <Timeout msec="6000">
-              <FirmwareMission mission_status="{x}"
-                               mission_type="35"
-                               _description="front take 2 levels"/>
-            </Timeout>
-          </ForceSuccess>
-          <SubTree ID="DockingSubTree"
-                   base="{PrevGoal}"
-                   dock_type="{DOCK_DIR}"
-                   final_pose="{PrevGoal}"
-                   isPureDocking="1"
-                   offset="{FORWARD_M}"
-                   retry="100"
-                   shift="0"
-                   sleep="100"
-                   timeout="3000"
-                   _autoremap="true"/>
-        </Parallel>
->>>>>>> b4c627e84cb8999b391fed71ddbdd531317b4f45
         <ForceSuccess>
           <Timeout msec="6000">
             <FirmwareMission mission_status="{x}"
@@ -1414,7 +1378,7 @@
                  base="{PrevGoal}"
                  dock_type="{DOCK_DIR}"
                  final_pose="{PrevGoal}"
-                 isPureDocking="0"
+                 isPureDocking="1"
                  offset="0"
                  retry="100"
                  shift="{SHIFT}"
@@ -1476,7 +1440,7 @@
                  retry="100"
                  shift="0"
                  sleep="100"
-                 timeout="1900"
+                 timeout="2500"
                  _autoremap="true"/>
         <ForceSuccess>
           <Timeout msec="6000">

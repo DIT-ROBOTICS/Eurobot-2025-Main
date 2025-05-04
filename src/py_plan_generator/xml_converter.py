@@ -152,7 +152,7 @@ def read_input(root):
     tree.write(output_file_name, encoding="utf-8", xml_declaration=True)
 
 def create_tree():
-    input_tree = ET.parse('template_bot1_blue_a.xml')
+    input_tree = ET.parse('bot1_blue_a_template.xml')
     root_in = input_tree.getroot()
     root_out = ET.Element("root", {"BTCPP_format": "4"})
     root_out.clear()

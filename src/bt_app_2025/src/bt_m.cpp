@@ -239,7 +239,7 @@ void MainClass::readyCallback(const std_msgs::msg::String::SharedPtr msg) {
         blackboard->set<std::string>("team", "b");                             // team color is blue
     msg->data.pop_back();                                                      // delete the last char of string 
     groot_filename = msg->data;                                                // the remain string is the plan xml file name
-    blackboard->set<std::string>("bot", std::to_string(groot_filename[3])); 
+    blackboard->set<std::string>("bot", groot_filename.substr(3, 1)); 
     isReady = true;                                                            // set as received ready message
     // RCLCPP_INFO_STREAM(this->get_logger(), "ready callback");
     sendReadySignal();
