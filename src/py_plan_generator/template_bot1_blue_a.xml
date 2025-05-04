@@ -249,7 +249,11 @@
         </MissionNearRival>
         <SubTree ID="ThreeLevelsBot1new"
                 back="0.2, 0.1, 0.05"
+<<<<<<< HEAD
                 forward="0.15, 0.1, 0.065"
+=======
+                forward="0.15, 0.09, 0.065"
+>>>>>>> b4c627e84cb8999b391fed71ddbdd531317b4f45
                 shift="0"
                 index="15"
                 _autoremap="true"/>
@@ -280,15 +284,15 @@
             <CamReceiver/>
           </Sequence>
           <ForceSuccess>
-            <SubTree ID="MissionPointOne"
+            <SubTree ID="MissionPoint1"
                      _autoremap="true"/>
           </ForceSuccess>
           <ForceSuccess>
-            <SubTree ID="MissionPointTwo"
+            <SubTree ID="MissionPoint2"
                      _autoremap="true"/>
           </ForceSuccess>
           <ForceSuccess>
-            <SubTree ID="MissionPointThree"
+            <SubTree ID="MissionPoint3"
                      _autoremap="true"/>
           </ForceSuccess>
         </Sequence>
@@ -312,7 +316,7 @@
     </Sequence>
   </BehaviorTree>
 
-  <BehaviorTree ID="MissionPointOne">
+  <BehaviorTree ID="MissionPoint1">
     <Sequence>
       <SetBlackboard value="0"
                      output_key="hasCompleteMaterial"/>
@@ -450,7 +454,7 @@
     </Sequence>
   </BehaviorTree>
 
-  <BehaviorTree ID="MissionPointTwo">
+  <BehaviorTree ID="MissionPoint2">
     <Sequence>
       <Sequence>
         <Fallback>
@@ -529,7 +533,11 @@
     </Sequence>
   </BehaviorTree>
 
+<<<<<<< HEAD
   <BehaviorTree ID="MissionPointThree">
+=======
+  <BehaviorTree ID="MissionPoint3">
+>>>>>>> b4c627e84cb8999b391fed71ddbdd531317b4f45
     <Sequence>
       <Fallback>
         <VisionCheck remap_offset="{offset}"
@@ -540,8 +548,13 @@
                      shift="0"
                      offset="-0.2"
                      mission_type="back"
+<<<<<<< HEAD
                      dock_type="dock_x_slow_precise"
                      base_index="7">
+=======
+                     dock_type="dock_y_slow_precise"
+                     base_index="5">
+>>>>>>> b4c627e84cb8999b391fed71ddbdd531317b4f45
           <Docking final_pose="{PrevGoal}"
                    isPureDocking="0"
                    dock_type="{dock_type}"
@@ -1223,6 +1236,7 @@
                              _description="enable back magnet "/>
           </Timeout>
         </ForceSuccess>
+<<<<<<< HEAD
         <SubTree ID="DockingSubTree"
                   base="{PrevGoal}"
                   dock_type="{DOCK_DIR}"
@@ -1241,6 +1255,29 @@
                               _description="front take 2 levels"/>
           </Timeout>
         </ForceSuccess>
+=======
+        <Parallel failure_count="1"
+                  success_count="2">
+          <ForceSuccess>
+            <Timeout msec="6000">
+              <FirmwareMission mission_status="{x}"
+                               mission_type="35"
+                               _description="front take 2 levels"/>
+            </Timeout>
+          </ForceSuccess>
+          <SubTree ID="DockingSubTree"
+                   base="{PrevGoal}"
+                   dock_type="{DOCK_DIR}"
+                   final_pose="{PrevGoal}"
+                   isPureDocking="1"
+                   offset="{FORWARD_M}"
+                   retry="100"
+                   shift="0"
+                   sleep="100"
+                   timeout="3000"
+                   _autoremap="true"/>
+        </Parallel>
+>>>>>>> b4c627e84cb8999b391fed71ddbdd531317b4f45
         <ForceSuccess>
           <Timeout msec="6000">
             <FirmwareMission mission_status="{x}"
