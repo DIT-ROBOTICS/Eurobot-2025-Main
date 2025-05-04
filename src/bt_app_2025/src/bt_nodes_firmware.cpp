@@ -125,9 +125,9 @@ BT::NodeStatus MissionStart::tick() {
     RCLCPP_INFO_STREAM(node_->get_logger(), offset_positivity_);
 
     if (offset_dir_ == 1)
-        setOutput("DOCK_DIR", "dock_x_slow_precise");
+        setOutput("DOCK_DIR", "dock_x_slow_loose");
     else if (offset_dir_ == -1)
-        setOutput("DOCK_DIR", "dock_y_slow_precise");
+        setOutput("DOCK_DIR", "dock_y_slow_loose");
     
     if (offset_positivity_ > 0) {
         back_.value()[0] *= -1;

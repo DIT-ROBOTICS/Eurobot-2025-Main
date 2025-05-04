@@ -114,6 +114,7 @@ public:
     virtual NodeStatus onFailure(ActionNodeErrorCode error) override;
     NodeStatus onFeedback(const std::shared_ptr<const Feedback> feedback);
 private:
+    NodeStatus goalErrorDetect();
     std::shared_ptr<rclcpp::Node> node_;
     bool nav_finished_;
     bool nav_error_;

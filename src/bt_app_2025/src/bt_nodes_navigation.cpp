@@ -242,6 +242,27 @@ NodeStatus Docking::onFeedback(const std::shared_ptr<const Feedback> feedback) {
     return NodeStatus::RUNNING;
 }
 
+NodeStatus Docking::goalErrorDetect() {
+    double nav_dist_error_ = node_->get_parameter("nav_dist_error").as_double();
+    double nav_ang_error_ = node_->get_parameter("nav_ang_error").as_double();
+
+    // check the correctness of the final pose
+    LocReceiver::UpdateRobotPose(robot_pose_, tf_buffer_, frame_id_);
+    if (calculateDistance(robot_pose_.pose, goal_.pose) < nav_dist_error_ && calculateAngleDifference(robot_pose_.pose, goal_.pose) < nav_ang_error_) {
+        RCLCPP_INFO_STREAM(logger(), "success! final_pose: " << robot_pose_.pose.position.x << ", " << robot_pose_.pose.position.y << ", " << ConvertPoseFormat(robot_pose_).pose.position.z);
+        RCLCPP_INFO_STREAM(logger(), "-----------------");
+        setOutput<geometry_msgs::msg::PoseStamped>("final_pose", ConvertPoseFormat(robot_pose_));
+        return NodeStatus::SUCCESS;
+    } else {
+        nav_error_ = true;
+        RCLCPP_INFO_STREAM(logger(), "fail! final_pose: " << robot_pose_.pose.position.x << ", " << robot_pose_.pose.position.y << ", " << ConvertPoseFormat(robot_pose_).pose.position.z);
+        RCLCPP_INFO_STREAM(logger(), "z" << ConvertPoseFormat(goal_).pose.position.z);
+        RCLCPP_INFO_STREAM(logger(), "-----------------");
+        setOutput<geometry_msgs::msg::PoseStamped>("final_pose", ConvertPoseFormat(goal_));
+        return NodeStatus::SUCCESS;
+    }
+}
+
 NodeStatus Docking::onResultReceived(const WrappedResult& wr) {
     nav_finished_ = true;
     switch (wr.result->success) {
@@ -256,11 +277,7 @@ NodeStatus Docking::onResultReceived(const WrappedResult& wr) {
             RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Unknown result code");
             return NodeStatus::FAILURE;
     }
-    LocReceiver::UpdateRobotPose(robot_pose_, tf_buffer_, frame_id_);
-    RCLCPP_INFO_STREAM(logger(), "success! final_pose: " << robot_pose_.pose.position.x << ", " << robot_pose_.pose.position.y << ", " << ConvertPoseFormat(robot_pose_).pose.position.z);
-    RCLCPP_INFO_STREAM(logger(), "-----------------");
-    setOutput<geometry_msgs::msg::PoseStamped>("final_pose", ConvertPoseFormat(robot_pose_));
-    return NodeStatus::SUCCESS;
+    return goalErrorDetect();
 }
 
 NodeStatus Docking::onFailure(ActionNodeErrorCode error) {
@@ -268,7 +285,7 @@ NodeStatus Docking::onFailure(ActionNodeErrorCode error) {
     nav_finished_ = true;
     LocReceiver::UpdateRobotPose(robot_pose_, tf_buffer_, frame_id_);
     setOutput<geometry_msgs::msg::PoseStamped>("final_pose", ConvertPoseFormat(robot_pose_));
-    RCLCPP_INFO_STREAM(logger(), "RETURN FAILURE! final_pose: " << robot_pose_.pose.position.x << ", " << robot_pose_.pose.position.y << ", " << robot_pose_.pose.position.z);
+    RCLCPP_INFO_STREAM(logger(), "error code: " << error << "RETURN FAILURE! final_pose: " << robot_pose_.pose.position.x << ", " << robot_pose_.pose.position.y << ", " << robot_pose_.pose.position.z);
     RCLCPP_INFO_STREAM(logger(), "-----------------");
     return NodeStatus::FAILURE;
 }

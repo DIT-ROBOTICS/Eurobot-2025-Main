@@ -249,7 +249,7 @@
         </MissionNearRival>
         <SubTree ID="ThreeLevelsBot1new"
                 back="0.2, 0.1, 0.05"
-                forward="0.15, 0.1, 0.065"
+                forward="0.15, 0.095, 0.065"
                 shift="0"
                 index="15"
                 _autoremap="true"/>
@@ -411,7 +411,7 @@
         <SubTree ID="TwoLevelsBot1new"
                  back="0.2, 0.1, 0.05"
                  forward="0.15, 0.13, 0.07"
-                 shift="0.115"
+                 shift="0.12"
                  index="{index}"
                  _autoremap="true"/>
         <MissionSuccess base_index="{index}"
@@ -439,7 +439,7 @@
         </ForceSuccess>
         <SubTree ID="ThreeLevelsBot1new"
                  back="0.2, 0.1, 0.05"
-                 forward="0.15, 0.1, 0.065"
+                 forward="0.15, 0.095, 0.065"
                  shift="0"
                  index="15"
                  hasCompleteMaterial="{hasCompleteMaterial}"
@@ -518,7 +518,7 @@
         </ForceSuccess>
         <SubTree ID="ThreeLevelsBot1new"
                  back="0.2, 0.1, 0.05"
-                 forward="0.15, 0.1, 0.065"
+                 forward="0.15, 0.095, 0.065"
                  shift="0"
                  index="17"
                  hasCompleteMaterial="{hasCompleteMaterial}"
@@ -649,7 +649,7 @@
         </ForceSuccess>
         <SubTree ID="ThreeLevelsBot1new"
                  back="0.2, 0.1, 0.05"
-                 forward="0.15, 0.1, 0.065"
+                 forward="0.15, 0.095, 0.065"
                  shift="0"
                  index="18"
                  hasCompleteMaterial="{hasCompleteMaterial}"
@@ -1378,7 +1378,7 @@
                  base="{PrevGoal}"
                  dock_type="{DOCK_DIR}"
                  final_pose="{PrevGoal}"
-                 isPureDocking="1"
+                 isPureDocking="0"
                  offset="0"
                  retry="100"
                  shift="{SHIFT}"
