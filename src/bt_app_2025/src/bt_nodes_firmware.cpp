@@ -139,7 +139,6 @@ BT::NodeStatus MissionStart::tick() {
         forward_.value()[1] *= -1;
         forward_.value()[2] *= -1;
     }
-    shift_ *= offset_positivity_ * offset_dir_;
     RCLCPP_INFO_STREAM(node_->get_logger(), back_.value()[0] << ", " << back_.value()[1] << ", " << back_.value()[2]);
     RCLCPP_INFO_STREAM(node_->get_logger(), forward_.value()[0] << ", " << forward_.value()[1] << ", " << forward_.value()[2]);
 

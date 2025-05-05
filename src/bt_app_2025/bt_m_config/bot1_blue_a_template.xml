@@ -2,76 +2,93 @@
 <root BTCPP_format="4">
   <BehaviorTree ID="BannerMission">
     <Sequence>
-      <Switch2 case_1="0"
-               case_2="1"
-               variable="{BANNER_PLACE}">
-        <Fallback>
-          <Docking final_pose="{PrevGoal}"
-                   isPureDocking="0"
-                   dock_type="dock_y_slow_precise"
-                   shift="0"
-                   offset="-0.1"
-                   base="0.25, 0.3, 0"/>
-          <Docking final_pose="{PrevGoal}"
-                   isPureDocking="0"
-                   dock_type="dock_y_slow_precise"
-                   shift="0"
-                   offset="-0.1"
-                   base="1.75, 0.3, 0"/>
-          <Docking final_pose="{PrevGoal}"
-                   isPureDocking="0"
-                   dock_type="dock_y_slow_precise"
-                   shift="0"
-                   offset="-0.1"
-                   base="2.25, 0.3, 0"/>
-        </Fallback>
-        <Fallback>
-          <Docking final_pose="{PrevGoal}"
-                   isPureDocking="0"
-                   dock_type="dock_y_slow_precise"
-                   shift="0"
-                   offset="-0.1"
-                   base="1.75, 0.3, 0"/>
-          <Docking final_pose="{PrevGoal}"
-                   isPureDocking="0"
-                   dock_type="dock_y_slow_precise"
-                   shift="0"
-                   offset="-0.1"
-                   base="2.25, 0.3, 0"/>
-          <Docking final_pose="{PrevGoal}"
-                   isPureDocking="0"
-                   dock_type="dock_y_slow_precise"
-                   shift="0"
-                   offset="-0.1"
-                   base="0.25, 0.3, 0"/>
-        </Fallback>
-        <Fallback>
-          <Docking final_pose="{PrevGoal}"
-                   isPureDocking="0"
-                   dock_type="dock_y_slow_precise"
-                   shift="0"
-                   offset="-0.1"
-                   base="2.25, 0.3, 0"
-                   _description="go to place the banner"/>
-          <Docking final_pose="{PrevGoal}"
-                   isPureDocking="0"
-                   dock_type="dock_y_slow_precise"
-                   shift="0"
-                   offset="-0.1"
-                   base="1.75, 0.3, 0"/>
-          <Docking final_pose="{PrevGoal}"
-                   isPureDocking="0"
-                   dock_type="dock_y_slow_precise"
-                   shift="0"
-                   offset="-0.1"
-                   base="0.25, 0.3, 0"/>
-        </Fallback>
-      </Switch2>
+      <Parallel failure_count="1"
+                success_count="2">
+        <ForceSuccess>
+          <Timeout msec="6000">
+            <FirmwareMission mission_status="{x}"
+                             mission_type="81"
+                             _description="lift the front grabber"/>
+          </Timeout>
+        </ForceSuccess>
+        <Switch2 case_1="0"
+                case_2="1"
+                variable="{BANNER_PLACE}">
+          <Fallback>
+            <Docking final_pose="{PrevGoal}"
+                    isPureDocking="0"
+                    dock_type="dock_y_slow_precise"
+                    shift="0"
+                    offset="-0.1"
+                    base="0.25, 0.3, 0"/>
+            <Docking final_pose="{PrevGoal}"
+                    isPureDocking="0"
+                    dock_type="dock_y_slow_precise"
+                    shift="0"
+                    offset="-0.1"
+                    base="1.75, 0.3, 0"/>
+            <Docking final_pose="{PrevGoal}"
+                    isPureDocking="0"
+                    dock_type="dock_y_slow_precise"
+                    shift="0"
+                    offset="-0.1"
+                    base="2.25, 0.3, 0"/>
+          </Fallback>
+          <Fallback>
+            <Docking final_pose="{PrevGoal}"
+                    isPureDocking="0"
+                    dock_type="dock_y_slow_precise"
+                    shift="0"
+                    offset="-0.1"
+                    base="1.75, 0.3, 0"/>
+            <Docking final_pose="{PrevGoal}"
+                    isPureDocking="0"
+                    dock_type="dock_y_slow_precise"
+                    shift="0"
+                    offset="-0.1"
+                    base="2.25, 0.3, 0"/>
+            <Docking final_pose="{PrevGoal}"
+                    isPureDocking="0"
+                    dock_type="dock_y_slow_precise"
+                    shift="0"
+                    offset="-0.1"
+                    base="0.25, 0.3, 0"/>
+          </Fallback>
+          <Fallback>
+            <Docking final_pose="{PrevGoal}"
+                    isPureDocking="0"
+                    dock_type="dock_y_slow_precise"
+                    shift="0"
+                    offset="-0.1"
+                    base="2.25, 0.3, 0"
+                    _description="go to place the banner"/>
+            <Docking final_pose="{PrevGoal}"
+                    isPureDocking="0"
+                    dock_type="dock_y_slow_precise"
+                    shift="0"
+                    offset="-0.1"
+                    base="1.75, 0.3, 0"/>
+            <Docking final_pose="{PrevGoal}"
+                    isPureDocking="0"
+                    dock_type="dock_y_slow_precise"
+                    shift="0"
+                    offset="-0.1"
+                    base="0.25, 0.3, 0"/>
+          </Fallback>
+        </Switch2>
+      </Parallel>
       <ForceSuccess>
-        <Timeout msec="1000">
+        <Timeout msec="6000">
           <FirmwareMission mission_status="{x}"
-                            mission_type="81"
+                            mission_type="82"
                             _description="lift the front grabber"/>
+        </Timeout>
+      </ForceSuccess>
+      <ForceSuccess>
+        <Timeout msec="6000">
+          <FirmwareMission mission_status="{x}"
+                           mission_type="80"
+                           _description="lift the front grabber"/>
         </Timeout>
       </ForceSuccess>
       <Docking final_pose="{PrevGoal}"
@@ -87,7 +104,7 @@
 
   <BehaviorTree ID="DockingSubTree">
     <Sequence>
-      <MySetBlackboard new_value="{notTimeout}"
+      <MySetBlackboard new_value="{Timeout}"
                        blackboard_value="false"
                        blackboard_key="Timeout"/>
       <RetryUntilSuccessful num_attempts="{retry}"
@@ -104,12 +121,12 @@
                      _description="step back"/>
             <Sequence>
               <Sleep msec="{timeout}"/>
-              <MySetBlackboard new_value="{notTimeout}"
+              <MySetBlackboard new_value="{Timeout}"
                                blackboard_value="true"
                                blackboard_key="Timeout"/>
             </Sequence>
           </Parallel>
-          <ForceFailure>
+          <ForceFailure _successIf="Timeout">
             <Sleep msec="{sleep}"/>
           </ForceFailure>
         </Fallback>
@@ -145,8 +162,6 @@
         </VisionCheck>
         <SubTree ID="OneLevelBot1new"
                   _autoremap="true"/>
-        <MissionSuccess base_index="8"
-                        levels="1"/>
       </Sequence>
       <!-- take two levels -->
       <Sequence>
@@ -173,8 +188,6 @@
                 shift="0.11"
                 index="7"
                 _autoremap="true"/>
-        <MissionSuccess base_index="7"
-                        levels="2"/>
       </Sequence>
       <!-- place one level -->
       <Sequence>
@@ -253,8 +266,6 @@
                 shift="0"
                 index="15"
                 _autoremap="true"/>
-        <MissionSuccess base_index="15"
-                        levels="3"/>
       </Sequence>
       <Sequence>
         <SubTree ID="BannerMission"
@@ -325,7 +336,7 @@
                      shift="0"
                      offset="-0.2"
                      mission_type="back"
-                     dock_type="dock_x_slow_precise"
+                     dock_type="slow_precise"
                      base_index="8">
           <Docking final_pose="{PrevGoal}"
                    isPureDocking="0"
@@ -342,7 +353,7 @@
                      shift="0"
                      offset="-0.2"
                      mission_type="back"
-                     dock_type="dock_x_slow_precise"
+                     dock_type="slow_precise"
                      base_index="-1">
           <Docking final_pose="{PrevGoal}"
                    isPureDocking="0"
@@ -374,7 +385,7 @@
                            shift="0.045"
                            offset="-0.2"
                            mission_type="front"
-                           dock_type="dock_y_slow_precise"
+                           dock_type="slow_precise"
                            base_index="5">
                 <Docking final_pose="{PrevGoal}"
                          isPureDocking="0"
@@ -391,7 +402,7 @@
                            shift="0"
                            offset="0"
                            mission_type="front"
-                           dock_type="dock_x_slow_precise"
+                           dock_type="slow_precise"
                            base_index="-1">
                 <Docking final_pose="{PrevGoal}"
                          isPureDocking="0"
@@ -414,8 +425,6 @@
                  shift="0.12"
                  index="{index}"
                  _autoremap="true"/>
-        <MissionSuccess base_index="{index}"
-                        levels="2"/>
       </Sequence>
       <Sequence>
         <ForceSuccess>
@@ -444,8 +453,6 @@
                  index="15"
                  hasCompleteMaterial="{hasCompleteMaterial}"
                  _autoremap="true"/>
-        <MissionSuccess base_index="15"
-                        levels="3"/>
       </Sequence>
     </Sequence>
   </BehaviorTree>
@@ -462,7 +469,7 @@
                        shift="0.045"
                        offset="0.2"
                        mission_type="front"
-                       dock_type="dock_y_slow_precise"
+                       dock_type="slow_precise"
                        base_index="6">
             <Docking final_pose="{PrevGoal}"
                      isPureDocking="0"
@@ -478,8 +485,8 @@
                        remap_index="{index}"
                        shift="0"
                        offset="-0.2"
-                       mission_type="back"
-                       dock_type="dock_x_slow_precise"
+                       mission_type="front"
+                       dock_type="slow_precise"
                        base_index="-1">
             <Docking final_pose="{PrevGoal}"
                      isPureDocking="0"
@@ -500,8 +507,6 @@
                  shift="0.11"
                  index="{index}"
                  _autoremap="true"/>
-        <MissionSuccess base_index="{index}"
-                        levels="2"/>
       </Sequence>
       <Sequence>
         <ForceSuccess>
@@ -523,8 +528,6 @@
                  index="17"
                  hasCompleteMaterial="{hasCompleteMaterial}"
                  _autoremap="true"/>
-        <MissionSuccess base_index="17"
-                        levels="3"/>
       </Sequence>
     </Sequence>
   </BehaviorTree>
@@ -540,7 +543,7 @@
                      shift="0"
                      offset="-0.2"
                      mission_type="back"
-                     dock_type="dock_x_slow_precise"
+                     dock_type="slow_precise"
                      base_index="7">
           <Docking final_pose="{PrevGoal}"
                    isPureDocking="0"
@@ -557,7 +560,7 @@
                      shift="0"
                      offset="0"
                      mission_type="back"
-                     dock_type="dock_x_slow_precise"
+                     dock_type="slow_precise"
                      base_index="-1">
           <Docking final_pose="{PrevGoal}"
                    isPureDocking="0"
@@ -593,7 +596,7 @@
                        shift="0"
                        offset="-0.2"
                        mission_type="front"
-                       dock_type="dock_y_slow_precise"
+                       dock_type="slow_precise"
                        base_index="4">
             <Docking final_pose="{PrevGoal}"
                      isPureDocking="0"
@@ -610,7 +613,7 @@
                        shift="0"
                        offset="0"
                        mission_type="front"
-                       dock_type="dock_x_slow_precise"
+                       dock_type="slow_precise"
                        base_index="-1">
             <Docking final_pose="{PrevGoal}"
                      isPureDocking="0"
@@ -631,8 +634,6 @@
                  shift="0.11"
                  index="{index}"
                  _autoremap="true"/>
-        <MissionSuccess base_index="{index}"
-                        levels="2"/>
       </Sequence>
       <Sequence>
         <ForceSuccess>
@@ -654,474 +655,146 @@
                  index="18"
                  hasCompleteMaterial="{hasCompleteMaterial}"
                  _autoremap="true"/>
-        <MissionSuccess base_index="18"
-                        levels="3"/>
       </Sequence>
     </Sequence>
   </BehaviorTree>
 
   <BehaviorTree ID="NavTest">
     <Sequence>
-      <Docking final_pose="{PrevGoal}"
-               isPureDocking="0"
-               dock_type="dock_y_slow_precise"
-               shift="0"
-               offset="-0.2"
-               base="0.778, 0.6, 1"
-               _description="material point 5"/>
-      <Sequence>
-        <ForceSuccess>
-          <Timeout msec="6000">
-            <FirmwareMission mission_status="{x}"
-                             mission_type="21"
-                             _description="take the raw material"/>
-          </Timeout>
-        </ForceSuccess>
-        <Docking final_pose="{PrevGoal}"
-                 isPureDocking="1"
-                 dock_type="dock_y_slow_precise"
-                 shift="0"
-                 offset="0.2"
-                 base="{PrevGoal}"
-                 _description="step back to release"/>
-        <ForceSuccess>
-          <Timeout msec="6000">
-            <FirmwareMission mission_status="{x}"
-                             mission_type="20"
-                             _description="take the raw material"/>
-          </Timeout>
-        </ForceSuccess>
-        <ForceSuccess>
-          <Timeout msec="6000">
-            <FirmwareMission mission_status="{x}"
-                             mission_type="24"
-                             _description="take the raw material"/>
-          </Timeout>
-        </ForceSuccess>
-      </Sequence>
-      <Docking final_pose="{PrevGoal}"
-               isPureDocking="0"
-               dock_type="dock_y_slow_precise"
-               shift="0"
-               offset="0.18"
-               base="1.105, 0.6, 3"
-               _description="material point 6"/>
-      <Sequence>
-        <ForceSuccess>
-          <Timeout msec="6000">
-            <FirmwareMission mission_status="{x}"
-                             mission_type="21"
-                             _description="take the raw material"/>
-          </Timeout>
-        </ForceSuccess>
-        <Docking final_pose="{PrevGoal}"
-                 isPureDocking="1"
-                 dock_type="dock_y_slow_precise"
-                 shift="0"
-                 offset="-0.2"
-                 base="{PrevGoal}"
-                 _description="step back to release"/>
-        <ForceSuccess>
-          <Timeout msec="6000">
-            <FirmwareMission mission_status="{x}"
-                             mission_type="20"
-                             _description="take the raw material"/>
-          </Timeout>
-        </ForceSuccess>
-        <ForceSuccess>
-          <Timeout msec="6000">
-            <FirmwareMission mission_status="{x}"
-                             mission_type="24"
-                             _description="take the raw material"/>
-          </Timeout>
-        </ForceSuccess>
-      </Sequence>
+      <LoopInt value="{index}"
+               if_empty="SUCCESS"
+               queue="0, 1, 2, 3, 4, 5, 6, 7, 8, 9">
+        <Sequence>
+          <VisionCheck remap_offset="{offset}"
+                       remap_shift="{shift}"
+                       remap_dock_type="{dock_type}"
+                       remap_base="{base}"
+                       remap_index="{index}"
+                       shift="0"
+                       offset="0"
+                       mission_type="back"
+                       dock_type="slow_precise"
+                       base_index="{index}">
+            <Docking final_pose="{PrevGoal}"
+                     isPureDocking="0"
+                     dock_type="{dock_type}"
+                     shift="{shift}"
+                     offset="{offset}"
+                     base="{base}"/>
+          </VisionCheck>
+          <ForceSuccess>
+            <Timeout msec="6000">
+              <FirmwareMission mission_status="{x}"
+                               mission_type="21"
+                               _description="take the raw material"/>
+            </Timeout>
+          </ForceSuccess>
+          <Rotation final_pose="{PrevGoal}"
+                    degree="3"
+                    base="{PrevGoal}"/>
+          <Rotation final_pose="{PrevGoal}"
+                    degree="-3"
+                    base="{PrevGoal}"/>
+          <ForceSuccess>
+            <Timeout msec="6000">
+              <FirmwareMission mission_status="{x}"
+                               mission_type="20"
+                               _description="take the raw material"/>
+            </Timeout>
+          </ForceSuccess>
+          <ForceSuccess>
+            <Timeout msec="6000">
+              <FirmwareMission mission_status="{x}"
+                               mission_type="24"
+                               _description="take the raw material"/>
+            </Timeout>
+          </ForceSuccess>
+          <Sleep msec="200"/>
+        </Sequence>
+      </LoopInt>
       <Docking final_pose="{PrevGoal}"
                isPureDocking="0"
                dock_type="dock_x_slow_precise"
                shift="0"
-               offset="-0.1"
-               base="0.325, 0.38, 0"
-               _description="material point 7"/>
-      <Sequence>
-        <ForceSuccess>
-          <Timeout msec="6000">
-            <FirmwareMission mission_status="{x}"
-                             mission_type="21"
-                             _description="take the raw material"/>
-          </Timeout>
-        </ForceSuccess>
-        <Docking final_pose="{PrevGoal}"
-                 isPureDocking="1"
-                 dock_type="dock_x_slow_precise"
-                 shift="0"
-                 offset="0.2"
-                 base="{PrevGoal}"
-                 _description="step back to release"/>
-        <ForceSuccess>
-          <Timeout msec="6000">
-            <FirmwareMission mission_status="{x}"
-                             mission_type="20"
-                             _description="take the raw material"/>
-          </Timeout>
-        </ForceSuccess>
-        <ForceSuccess>
-          <Timeout msec="6000">
-            <FirmwareMission mission_status="{x}"
-                             mission_type="24"
-                             _description="take the raw material"/>
-          </Timeout>
-        </ForceSuccess>
-      </Sequence>
-      <Docking final_pose="{PrevGoal}"
-               isPureDocking="0"
-               dock_type="dock_x_slow_precise"
-               shift="0"
-               offset="-0.175"
-               base="0.425, 1.31, 0"
-               _description="material point 8"/>
-      <Sequence>
-        <ForceSuccess>
-          <Timeout msec="6000">
-            <FirmwareMission mission_status="{x}"
-                             mission_type="21"
-                             _description="take the raw material"/>
-          </Timeout>
-        </ForceSuccess>
-        <Docking final_pose="{PrevGoal}"
-                 isPureDocking="1"
-                 dock_type="dock_x_slow_precise"
-                 shift="0"
-                 offset="0.2"
-                 base="{PrevGoal}"
-                 _description="step back to release"/>
-        <ForceSuccess>
-          <Timeout msec="6000">
-            <FirmwareMission mission_status="{x}"
-                             mission_type="20"
-                             _description="take the raw material"/>
-          </Timeout>
-        </ForceSuccess>
-        <ForceSuccess>
-          <Timeout msec="6000">
-            <FirmwareMission mission_status="{x}"
-                             mission_type="24"
-                             _description="take the raw material"/>
-          </Timeout>
-        </ForceSuccess>
-      </Sequence>
-      <Docking final_pose="{PrevGoal}"
-               isPureDocking="0"
-               dock_type="dock_y_slow_precise"
-               shift="0"
-               offset="0.15"
-               base="0.822, 1.38, 3.0"
-               _description="material point 9"/>
-      <Sequence>
-        <ForceSuccess>
-          <Timeout msec="6000">
-            <FirmwareMission mission_status="{x}"
-                             mission_type="21"
-                             _description="take the raw material"/>
-          </Timeout>
-        </ForceSuccess>
-        <Docking final_pose="{PrevGoal}"
-                 isPureDocking="1"
-                 dock_type="dock_y_slow_precise"
-                 shift="0"
-                 offset="-0.2"
-                 base="{PrevGoal}"
-                 _description="step back to release"/>
-        <ForceSuccess>
-          <Timeout msec="6000">
-            <FirmwareMission mission_status="{x}"
-                             mission_type="20"
-                             _description="take the raw material"/>
-          </Timeout>
-        </ForceSuccess>
-        <ForceSuccess>
-          <Timeout msec="6000">
-            <FirmwareMission mission_status="{x}"
-                             mission_type="24"
-                             _description="take the raw material"/>
-          </Timeout>
-        </ForceSuccess>
-      </Sequence>
+               offset="0"
+               base="1.5, 1.0, 0"
+               _description="step back to release"/>
     </Sequence>
   </BehaviorTree>
 
   <BehaviorTree ID="NavTest1">
     <Sequence>
-      <Docking final_pose="{PrevGoal}"
-               isPureDocking="0"
-               dock_type="dock_y_slow_precise"
-               shift="0"
-               offset="0.2"
-               base="2.235, 1.375, 1"
-               _description="material point 0"/>
-      <Sequence>
-        <ForceSuccess>
-          <Timeout msec="6000">
-            <FirmwareMission mission_status="{x}"
-                             mission_type="21"
-                             _description="take the raw material"/>
-          </Timeout>
-        </ForceSuccess>
-        <Docking final_pose="{PrevGoal}"
-                 isPureDocking="0"
-                 dock_type="dock_y_slow_precise"
-                 shift="0"
-                 offset="-0.2"
-                 base="{PrevGoal}"
-                 _description="step back to release"/>
-        <ForceSuccess>
-          <Timeout msec="6000">
-            <FirmwareMission mission_status="{x}"
-                             mission_type="20"
-                             _description="take the raw material"/>
-          </Timeout>
-        </ForceSuccess>
-      </Sequence>
-      <Docking final_pose="{PrevGoal}"
-               isPureDocking="0"
-               dock_type="dock_x_slow_precise"
-               shift="0"
-               offset="0.2"
-               base="2.575, 1.265, 0"
-               _description="material point 1"/>
-      <Sequence>
-        <ForceSuccess>
-          <Timeout msec="6000">
-            <FirmwareMission mission_status="{x}"
-                             mission_type="21"
-                             _description="take the raw material"/>
-          </Timeout>
-        </ForceSuccess>
-        <Docking final_pose="{PrevGoal}"
-                 isPureDocking="0"
-                 dock_type="dock_x_slow_precise"
-                 shift="0"
-                 offset="-0.2"
-                 base="{PrevGoal}"
-                 _description="step back to release"/>
-        <ForceSuccess>
-          <Timeout msec="6000">
-            <FirmwareMission mission_status="{x}"
-                             mission_type="20"
-                             _description="take the raw material"/>
-          </Timeout>
-        </ForceSuccess>
-      </Sequence>
-      <Docking final_pose="{PrevGoal}"
-               isPureDocking="0"
-               dock_type="dock_x_slow_precise"
-               shift="0"
-               offset="0.2"
-               base="2.575, 0.355, 0"
-               _description="material point 2"/>
-      <Sequence>
-        <ForceSuccess>
-          <Timeout msec="6000">
-            <FirmwareMission mission_status="{x}"
-                             mission_type="21"
-                             _description="take the raw material"/>
-          </Timeout>
-        </ForceSuccess>
-        <Docking final_pose="{PrevGoal}"
-                 isPureDocking="0"
-                 dock_type="dock_x_slow_precise"
-                 shift="0"
-                 offset="-0.2"
-                 base="{PrevGoal}"
-                 _description="step back to release"/>
-        <ForceSuccess>
-          <Timeout msec="6000">
-            <FirmwareMission mission_status="{x}"
-                             mission_type="20"
-                             _description="take the raw material"/>
-          </Timeout>
-        </ForceSuccess>
-      </Sequence>
-      <Docking final_pose="{PrevGoal}"
-               isPureDocking="0"
-               dock_type="dock_y_slow_precise"
-               shift="0"
-               offset="0.2"
-               base="1.96, 0.6, 1"
-               _description="material point 3"/>
-      <Sequence>
-        <ForceSuccess>
-          <Timeout msec="6000">
-            <FirmwareMission mission_status="{x}"
-                             mission_type="21"
-                             _description="take the raw material"/>
-          </Timeout>
-        </ForceSuccess>
-        <Docking final_pose="{PrevGoal}"
-                 isPureDocking="0"
-                 dock_type="dock_y_slow_precise"
-                 shift="0"
-                 offset="-0.2"
-                 base="{PrevGoal}"
-                 _description="step back to release"/>
-        <ForceSuccess>
-          <Timeout msec="6000">
-            <FirmwareMission mission_status="{x}"
-                             mission_type="20"
-                             _description="take the raw material"/>
-          </Timeout>
-        </ForceSuccess>
-      </Sequence>
-      <Docking final_pose="{PrevGoal}"
-               isPureDocking="0"
-               dock_type="dock_y_slow_precise"
-               shift="0"
-               offset="-0.2"
-               base="2.165, 0.6, 3"
-               _description="material point 4"/>
-      <Sequence>
-        <ForceSuccess>
-          <Timeout msec="6000">
-            <FirmwareMission mission_status="{x}"
-                             mission_type="21"
-                             _description="take the raw material"/>
-          </Timeout>
-        </ForceSuccess>
-        <Docking final_pose="{PrevGoal}"
-                 isPureDocking="0"
-                 dock_type="dock_y_slow_precise"
-                 shift="0"
-                 offset="0.2"
-                 base="{PrevGoal}"
-                 _description="step back to release"/>
-      </Sequence>
-      <Docking final_pose="{PrevGoal}"
-               isPureDocking="0"
-               dock_type="dock_y_slow_precise"
-               shift="0"
-               offset="-0.2"
-               base="0.72, 0.6, 3"
-               _description="material point 5"/>
-      <Sequence>
-        <ForceSuccess>
-          <Timeout msec="6000">
-            <FirmwareMission mission_status="{x}"
-                             mission_type="11"
-                             _description="take the raw material"/>
-          </Timeout>
-        </ForceSuccess>
-        <Docking final_pose="{PrevGoal}"
-                 isPureDocking="0"
-                 dock_type="dock_y_slow_precise"
-                 shift="0"
-                 offset="0.2"
-                 base="{PrevGoal}"
-                 _description="step back to release"/>
-        <ForceSuccess>
-          <Timeout msec="6000">
-            <FirmwareMission mission_status="{x}"
-                             mission_type="10"
-                             _description="take the raw material"/>
-          </Timeout>
-        </ForceSuccess>
-      </Sequence>
-      <Docking final_pose="{PrevGoal}"
-               isPureDocking="0"
-               dock_type="dock_y_slow_precise"
-               shift="0"
-               offset="0.2"
-               base="1.16, 0.6, 1"
-               _description="material point 6"/>
-      <Sequence>
-        <ForceSuccess>
-          <Timeout msec="6000">
-            <FirmwareMission mission_status="{x}"
-                             mission_type="11"
-                             _description="take the raw material"/>
-          </Timeout>
-        </ForceSuccess>
-        <Docking final_pose="{PrevGoal}"
-                 isPureDocking="0"
-                 dock_type="dock_y_slow_precise"
-                 shift="0"
-                 offset="-0.2"
-                 base="{PrevGoal}"
-                 _description="step back to release"/>
-        <ForceSuccess>
-          <Timeout msec="6000">
-            <FirmwareMission mission_status="{x}"
-                             mission_type="10"
-                             _description="take the raw material"/>
-          </Timeout>
-        </ForceSuccess>
-      </Sequence>
+      <SetBlackboard value="0"
+                     output_key="dontDoMission"/>
+      <SetBlackboard value="1"
+                     output_key="dontLift"/>
+      <LoopInt value="{index}"
+               if_empty="SUCCESS"
+               queue="0, 1, 2, 3, 4, 5, 6, 7, 8, 9">
+        <Sequence>
+          <VisionCheck remap_offset="{offset}"
+                       remap_shift="{shift}"
+                       remap_dock_type="{dock_type}"
+                       remap_base="{base}"
+                       remap_index="{index}"
+                       shift="0"
+                       offset="0"
+                       mission_type="front"
+                       dock_type="slow_precise"
+                       base_index="{index}">
+            <Docking final_pose="{PrevGoal}"
+                     isPureDocking="0"
+                     dock_type="{dock_type}"
+                     shift="{shift}"
+                     offset="{offset}"
+                     base="{base}"/>
+          </VisionCheck>
+          <Sequence _successIf="dontLift">
+            <ForceSuccess>
+              <Timeout msec="6000">
+                <FirmwareMission mission_status="{x}"
+                                 mission_type="21"
+                                 _description="take the raw material"/>
+              </Timeout>
+            </ForceSuccess>
+            <ForceSuccess>
+              <Timeout msec="6000">
+                <FirmwareMission mission_status="{x}"
+                                 mission_type="31"
+                                 _description="take the raw material"/>
+              </Timeout>
+            </ForceSuccess>
+            <ForceSuccess>
+              <Timeout msec="6000">
+                <FirmwareMission mission_status="{x}"
+                                 mission_type="30"
+                                 _description="take the raw material"/>
+              </Timeout>
+            </ForceSuccess>
+            <ForceSuccess>
+              <Timeout msec="6000">
+                <FirmwareMission mission_status="{x}"
+                                 mission_type="20"
+                                 _description="take the raw material"/>
+              </Timeout>
+            </ForceSuccess>
+          </Sequence>
+          <SubTree ID="TwoLevelsBot1new"
+                   back="0.2, 0.1, 0.05"
+                   forward="0.15, 0.13, 0.07"
+                   index="{index}"
+                   shift="0.11"
+                   _successIf="dontDoMission"
+                   _autoremap="true"/>
+        </Sequence>
+      </LoopInt>
       <Docking final_pose="{PrevGoal}"
                isPureDocking="0"
                dock_type="dock_x_slow_precise"
                shift="0"
-               offset="-0.2"
-               base="0.425, 0.47, 2"
-               _description="material point 7"/>
-      <Sequence>
-        <ForceSuccess>
-          <Timeout msec="6000">
-            <FirmwareMission mission_status="{x}"
-                             mission_type="11"
-                             _description="take the raw material"/>
-          </Timeout>
-        </ForceSuccess>
-        <Docking final_pose="{PrevGoal}"
-                 isPureDocking="0"
-                 dock_type="dock_x_slow_precise"
-                 shift="0"
-                 offset="0.2"
-                 base="{PrevGoal}"
-                 _description="step back to release"/>
-        <ForceSuccess>
-          <Timeout msec="6000">
-            <FirmwareMission mission_status="{x}"
-                             mission_type="10"
-                             _description="take the raw material"/>
-          </Timeout>
-        </ForceSuccess>
-      </Sequence>
-      <Docking final_pose="{PrevGoal}"
-               isPureDocking="0"
-               dock_type="dock_x_slow_precise"
-               shift="0"
-               offset="-0.2"
-               base="0.425, 1.4, 2"
-               _description="material point 8"/>
-      <Sequence>
-        <ForceSuccess>
-          <Timeout msec="6000">
-            <FirmwareMission mission_status="{x}"
-                             mission_type="11"
-                             _description="take the raw material"/>
-          </Timeout>
-        </ForceSuccess>
-        <Docking final_pose="{PrevGoal}"
-                 isPureDocking="0"
-                 dock_type="dock_x_slow_precise"
-                 shift="0"
-                 offset="0.2"
-                 base="{PrevGoal}"
-                 _description="step back to release"/>
-        <ForceSuccess>
-          <Timeout msec="6000">
-            <FirmwareMission mission_status="{x}"
-                             mission_type="10"
-                             _description="take the raw material"/>
-          </Timeout>
-        </ForceSuccess>
-      </Sequence>
-      <Docking final_pose="{PrevGoal}"
-               isPureDocking="0"
-               dock_type="dock_y_slow_precise"
-               shift="0"
-               offset="0.2"
-               base="0.875, 1.375, 1"
-               _description="material point 9"/>
+               offset="0"
+               base="1.5, 1.0, 0"
+               _description="step back to release"/>
     </Sequence>
   </BehaviorTree>
 
@@ -1148,6 +821,8 @@
                            _description="lift front grabber"/>
         </Timeout>
       </ForceSuccess>
+      <MissionSuccess levels="1"
+                      base_index="{index}"/>
       <SetBlackboard value="1"
                      output_key="hasCompleteMaterial"/>
     </Sequence>
@@ -1292,7 +967,12 @@
                              _description="enable front magnet "/>
           </Timeout>
         </ForceSuccess>
+        <MissionSuccess levels="2"
+                        base_index="{index}"/>
       </Sequence>
+      <MySetBlackboard new_value="{last_mission_failed}"
+                       blackboard_value="true"
+                       blackboard_key="last_mission_failed"/>
       <ForceFailure>
         <MissionFinisher failed_levels="{a}"
                          success_levels="{b}"
@@ -1456,11 +1136,18 @@
                              _description="smd strenght"/>
           </Timeout>
         </ForceSuccess>
+        <MissionSuccess levels="2"
+                        base_index="{index}"/>
       </Sequence>
-      <MissionFinisher failed_levels="{a}"
-                       success_levels="{b}"
-                       robot_type="1"
-                       step_results="4"/>
+      <MySetBlackboard new_value="{last_mission_failed}"
+                       blackboard_value="true"
+                       blackboard_key="last_mission_failed"/>
+      <ForceFailure>
+        <MissionFinisher failed_levels="{a}"
+                        success_levels="{b}"
+                        robot_type="1"
+                        step_results="4"/>
+      </ForceFailure>
     </Fallback>
   </BehaviorTree>
 
@@ -1508,6 +1195,15 @@
                   type="std::string"/>
       <input_port name="base_index"
                   type="int"/>
+    </Decorator>
+    <Decorator ID="LoopInt">
+      <output_port name="value"
+                   type="std_msgs::msg::Int32_&lt;std::allocator&lt;void&gt; &gt;"/>
+      <input_port name="if_empty"
+                  default="SUCCESS"
+                  type="BT::NodeStatus">Status to return if queue is empty: SUCCESS, FAILURE, SKIPPED</input_port>
+      <inout_port name="queue"
+                  type="std::shared_ptr&lt;std::deque&lt;std_msgs::msg::Int32_&lt;std::allocator&lt;void&gt; &gt;, std::allocator&lt;std_msgs::msg::Int32_&lt;std::allocator&lt;void&gt; &gt; &gt; &gt; &gt;"/>
     </Decorator>
     <Action ID="MissionStart"
             editable="true">

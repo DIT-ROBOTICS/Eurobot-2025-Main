@@ -96,8 +96,8 @@ private:
 class Docking : public BT::RosActionNode<opennav_docking_msgs::action::DockRobot> {
 
 public:
-    Docking(const std::string& name, const NodeConfig& conf, const RosNodeParams& params)
-        : RosActionNode<opennav_docking_msgs::action::DockRobot>(name, conf, params), tf_buffer_(params.nh.lock()->get_clock()), listener_(tf_buffer_)
+    Docking(const std::string& name, const NodeConfig& conf, const RosNodeParams& params, BT::Blackboard::Ptr blackboard)
+        : RosActionNode<opennav_docking_msgs::action::DockRobot>(name, conf, params), blackboard_(blackboard), tf_buffer_(params.nh.lock()->get_clock()), listener_(tf_buffer_)
     {
         node_ = params.nh.lock();
         node_->get_parameter("frame_id", frame_id_);
@@ -115,6 +115,7 @@ public:
     NodeStatus onFeedback(const std::shared_ptr<const Feedback> feedback);
 private:
     NodeStatus goalErrorDetect();
+    BT::Blackboard::Ptr blackboard_;
     std::shared_ptr<rclcpp::Node> node_;
     bool nav_finished_;
     bool nav_error_;
@@ -209,6 +210,7 @@ private:
     // for vision
     std::deque<int> candidate_;
     bool last_mission_failed_;
+    double safety_dist_;
 };
 
 class MissionNearRival : public BT::DecoratorNode
@@ -236,4 +238,5 @@ private:
     std_msgs::msg::Int32MultiArray mission_points_status_;
     geometry_msgs::msg::PoseStamped base_;
     std::vector<double> material_points_;
+    double safety_dist_;
 };

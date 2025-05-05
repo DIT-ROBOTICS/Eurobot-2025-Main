@@ -73,7 +73,7 @@ public:
         blackboard->set<std_msgs::msg::Int32MultiArray>("materials_info", materials_info_);     // the condition of each material point
         blackboard->set<std_msgs::msg::Int32MultiArray>("mission_points_status", mission_points_status_);  // record number of missions have done at each point
         blackboard->set<bool>("last_mission_failed", false);
-        blackboard->set<bool>("notTimeout", true);
+        blackboard->set<bool>("Timeout", false);
         blackboard->set<std::string>("team", "y");
         blackboard->set<std::string>("bot", "1"); 
         blackboard->set<int>("score_from_main", 0);
@@ -92,6 +92,7 @@ public:
         this->declare_parameter<double>("nav_ang_error", 0.4);
         this->declare_parameter<double>("rotate_dist_error", 0.03);
         this->declare_parameter<double>("rotate_ang_error", 0.4);
+        this->declare_parameter<double>("safety_dist", 0.33);
         // MissionFInisher params
         this->declare_parameter<std::vector<int>>("front_collect", std::vector<int>{});
         this->declare_parameter<std::vector<int>>("back_collect", std::vector<int>{});
@@ -122,7 +123,7 @@ public:
         factory.registerNodeType<MissionNearRival>("MissionNearRival", params, blackboard);
         params.default_port_value = "dock_robot";
         factory.registerNodeType<Navigation>("Navigation", params);
-        factory.registerNodeType<Docking>("Docking", params);
+        factory.registerNodeType<Docking>("Docking", params, blackboard);
         factory.registerNodeType<Rotation>("Rotation", params);
         /* firmware */
         params.default_port_value = "firmware_mission";
@@ -165,7 +166,7 @@ public:
         }
         RCLCPP_INFO(node_->get_logger(), "--Create tree--");
         // create tree
-        BT::Tree tree = factory.createTree(tree_name, blackboard);
+        tree = factory.createTree(tree_name, blackboard);
         // BT::Groot2Publisher publisher(tree, 2227);
 
         BT::NodeStatus status = BT::NodeStatus::RUNNING;
@@ -185,7 +186,7 @@ private:
     BT::Blackboard::Ptr blackboard;
     std::shared_ptr<rclcpp::Node> node_;
 
-    // BT::Tree tree;
+    BT::Tree tree;
     rclcpp::Rate rate;
     std::string xml_models; // new tree nodes string
     // Behavior Tree Factory
