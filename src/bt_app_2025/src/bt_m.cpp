@@ -119,8 +119,8 @@ public:
         factory.registerNodeType<CamReceiver>("CamReceiver", params, blackboard);
         /* navigation */
         factory.registerNodeType<StopRobot>("StopRobot", params);
-        factory.registerNodeType<VisionCheck>("VisionCheck", params, blackboard);
-        factory.registerNodeType<MissionNearRival>("MissionNearRival", params, blackboard);
+        factory.registerNodeType<MaterialChecker>("MaterialChecker", params, blackboard);
+        factory.registerNodeType<MissionChecker>("MissionChecker", params, blackboard);
         params.default_port_value = "dock_robot";
         factory.registerNodeType<Navigation>("Navigation", params);
         factory.registerNodeType<Docking>("Docking", params, blackboard);
@@ -132,7 +132,7 @@ public:
         factory.registerNodeType<SIMAactivate>("SIMAactivate", params);
         factory.registerNodeType<MissionStart>("MissionStart", params, blackboard);
         factory.registerNodeType<MissionSuccess>("MissionSuccess", params, blackboard);
-        factory.registerNodeType<MissionFinisher>("MissionFinisher", params, blackboard);
+        factory.registerNodeType<MissionFailure>("MissionFailure", params, blackboard);
         /* others */
         factory.registerNodeType<BTStarter>("BTStarter", params, blackboard);
         factory.registerNodeType<MySetBlackboard>("MySetBlackboard", params, blackboard);

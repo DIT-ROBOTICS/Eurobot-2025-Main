@@ -5,7 +5,19 @@ using namespace std;
 
 template <> inline int BT::convertFromString(StringView str) {
     auto value = convertFromString<double>(str);
-    return (int) value;
+    return (int)value;
+}
+
+template <> inline std::deque<int> BT::convertFromString(StringView str) {
+
+    auto parts = splitString(str, ',');
+    std::deque<int> output;
+
+    for (int i = 0; i < (int)parts.size(); i++) {
+        output.push_back(convertFromString<int>(parts[i]));
+    }
+
+    return output;
 }
 
 BT::PortsList MySetBlackboard::providedPorts() {
@@ -417,7 +429,8 @@ BT::NodeStatus TimerChecker::tick() {
 PortsList LoopInt32::providedPorts()
 {
     return {
-        BT::InputPort<std::string>("queue"),
+        // BT::InputPort<std::string>("queue"),
+        BT::InputPort<std::deque<int>>("queue"),
         BT::InputPort<BT::NodeStatus>("if_empty"),
         BT::OutputPort<int>("value")
     };
@@ -425,14 +438,15 @@ PortsList LoopInt32::providedPorts()
 
 NodeStatus LoopInt32::tick()
 {
-    std::string str;
-    getInput<std::string>("queue", str);
-    auto parts = splitString(str, '|');
+    // std::string str;
+    // getInput<std::string>("queue", str);
+    // auto parts = splitString(str, ',');
     std::deque<int> deque;
+    getInput<std::deque<int>>("queue", deque);
 
-    for (int i = 0; i < (int)parts.size(); i++) {
-        deque.push_back(std::stoi(parts[i].data()));
-    }
+    // for (int i = 0; i < (int)parts.size(); i++) {
+    //     deque.push_back(std::stoi(parts[i].data()));
+    // }
 
     BT::NodeStatus child_status;
     // Generate the path points

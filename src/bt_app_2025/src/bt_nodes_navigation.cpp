@@ -407,7 +407,7 @@ BT::NodeStatus StopRobot::tick() {
     return BT::NodeStatus::SUCCESS;
 }
 
-PortsList VisionCheck::providedPorts() {
+PortsList MaterialChecker::providedPorts() {
     return {
         BT::InputPort<int>("base_index"),           // if base index is -1, then plan new goal directly
         BT::InputPort<std::string>("dock_type"),
@@ -422,7 +422,7 @@ PortsList VisionCheck::providedPorts() {
     };
 }
 
-int VisionCheck::findBestTarget() {
+int MaterialChecker::findBestTarget() {
     double robotVelocity_, rivalVelocity;
     geometry_msgs::msg::PoseStamped rivalGoal;
     geometry_msgs::msg::Pose targetMaterialPose_;
@@ -476,7 +476,7 @@ int VisionCheck::findBestTarget() {
         return minDistIndex_;
 }
 
-NodeStatus VisionCheck::tick() {
+NodeStatus MaterialChecker::tick() {
     // get input
     int baseIndex_ = getInput<double>("base_index").value();
     std::string dockType_ = getInput<std::string>("dock_type").value();
@@ -548,7 +548,7 @@ NodeStatus VisionCheck::tick() {
     return child_status;
 }
 
-PortsList MissionNearRival::providedPorts() {
+PortsList MissionChecker::providedPorts() {
     return {
         BT::InputPort<int>("base_index"),
         BT::InputPort<std::string>("mission_type"), // front grabber or back grabber
@@ -557,7 +557,7 @@ PortsList MissionNearRival::providedPorts() {
     };
 }
 
-NodeStatus MissionNearRival::tick() {
+NodeStatus MissionChecker::tick() {
     // get input
     int baseIndex_ = getInput<double>("base_index").value();
     std::string missionType_ = getInput<std::string>("mission_type").value();

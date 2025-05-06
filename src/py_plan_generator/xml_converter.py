@@ -44,110 +44,132 @@ def read_input(root):
     i = 0
     j = 0
     k = 0
-    for elem in root:
-        if (elem.tag == "BehaviorTree" and elem.get('ID') == "BannerMission"):
-            fallback = elem[0][0][0]
-            for docking in fallback:
-                docking.set('base', banner[(j + k) % 3] + ', 0.3, 0')
-                k = k + 1
-            j += 1
-            k = 0
-            fallback = elem[0][0][1]
-            for docking in fallback:
-                docking.set('base', banner[(j + k) % 3] + ', 0.3, 0')
-                k = k + 1
-            j += 1
-            k = 0
-            fallback = elem[0][0][2]
-            for docking in fallback:
-                docking.set('base', banner[(j + k) % 3] + ', 0.3, 0')
-                k = k + 1
-        if (elem.tag == "BehaviorTree" and elem.get('ID') == "MainTree"):
-            for action in elem[0]:
-                if (action.tag == "Docking"):
-                    action.set('base', home + ', 0.3, 0')
-        if (elem.tag == "BehaviorTree" and elem.get('ID') == "MissionPointOne"):
-            subtree = elem[0][1]
-            for action in subtree:
-                if (action.tag == "VisionCheck" and action.get('base_index') != "-1"):
-                    action.set('base_index', points_list[i])
-                    action.set('dock_type', dock_type_list[int(points_list[i])])
+    l = 0
+    for elt in root.iter():
+        if (elt.tag == "BehaviorTree" and elt.get('ID') == "BannerMission"):
+            for dock in elt.iter():
+                if (dock.tag == "Docking" and l < 11):
+                    dock.set('base', banner[l % 3] + ', 0.3, 0')
+                    l += 1
+                    if (l == 3 or l == 7):
+                        l += 1
+        elif (elt.tag == "BehaviorTree" and elt.get('ID') == "MainTree"):
+            for dock in elt.iter():
+                if (dock.tag == "Docking"):
+                    dock.set('base', home + ', 1.6, 0')
+        elif (elt.tag == "BehaviorTree" and (elt.get('ID') == "MissionPoint1" or elt.get('ID') == "MissionPoint2" or elt.get('ID') == "MissionPoint3")):
+            for decorator in elt.iter():
+                if (decorator.tag == "MaterialChecker" and decorator.get('base_index') != "-1"):
+                    decorator.set('base_index', points_list[i])
                     print(points_list[i])
                     i += 1
-            subtree = elem[0][2]
-            for action in subtree[0][1][1]:
-                if (action.tag == "VisionCheck" and action.get('base_index') != "-1"):
-                    action.set('base_index', points_list[i])
-                    action.set('dock_type', dock_type_list[int(points_list[i])])
+                if (decorator.tag == "MissionChecker"):
+                    decorator.set('base_index', points_list[i])
                     print(points_list[i])
                     i += 1
-            subtree = elem[0][3]
-            for action in subtree[0][0][0]:
-                if (action.tag == "MissionNearRival"):
-                    action.set('base_index', points_list[i])
-                    print(points_list[i])
-                    i += 1
-                    docking = action[0]
+                    docking = decorator[0]
                     docking.set('dock_type', dock_type_list[int(points_list[i - 1])])
                     docking.set('offset', offset_list[int(points_list[i - 1]) - 11])
-            for action in subtree:
-                if (action.tag == "SubTree" and action.get('ID') == "ThreeLevelsBot1new"):
-                    action.set('index', points_list[i - 1])
-                if (action.tag == "MissionSuccess"):
-                    action.set('base_index', points_list[i - 1])
-        if (elem.tag == "BehaviorTree" and elem.get('ID') == "MissionPointTwo"):
-            subtree = elem[0][0]
-            for action in subtree[0]:
-                if (action.tag == "VisionCheck" and action.get('base_index') != "-1"):
-                    action.set('base_index', points_list[i])
-                    action.set('dock_type', dock_type_list[int(points_list[i])])
-                    print(points_list[i])
-                    i += 1
-            subtree = elem[0][1]
-            for action in subtree[0]:
-                if (action.tag == "MissionNearRival"):
-                    action.set('base_index', points_list[i])
-                    print(points_list[i])
-                    i += 1
-                    docking = action[0]
-                    docking.set('dock_type', dock_type_list[int(points_list[i - 1])])
-                    docking.set('offset', offset_list[int(points_list[i - 1]) - 11])
-            action = subtree[1]
-            if (action.tag == "SubTree" and action.get('ID') == "ThreeLevelsBot1new"):
-                action.set('index', points_list[i - 1])
-            action = subtree[2]
-            if (action.tag == "MissionSuccess"):
-                action.set('base_index', points_list[i - 1])
-        if (elem.tag == "BehaviorTree" and elem.get('ID') == "MissionPointThree"):
-            subtree = elem[0][0]
-            for action in subtree:
-                if (action.tag == "VisionCheck" and action.get('base_index') != "-1"):
-                    action.set('base_index', points_list[i])
-                    action.set('dock_type', dock_type_list[int(points_list[i])])
-                    print(points_list[i])
-                    i += 1
-            subtree = elem[0][2]
-            for action in subtree[0]:
-                if (action.tag == "VisionCheck" and action.get('base_index') != "-1"):
-                    action.set('base_index', points_list[i])
-                    action.set('dock_type', dock_type_list[int(points_list[i])])
-                    print(points_list[i])
-                    i += 1
-            subtree = elem[0][3]
-            for action in subtree[0]:
-                if (action.tag == "MissionNearRival"):
-                    action.set('base_index', points_list[i])
-                    print(points_list[i])
-                    i += 1
-                    docking = action[0]
-                    docking.set('dock_type', dock_type_list[int(points_list[i - 1])])
-                    docking.set('offset', offset_list[int(points_list[i - 1]) - 11])
-            action = subtree[1]
-            if (action.tag == "SubTree" and action.get('ID') == "ThreeLevelsBot1new"):
-                action.set('index', points_list[i - 1])
-            action = subtree[2]
-            if (action.tag == "MissionSuccess"):
-                action.set('base_index', points_list[i - 1])
+                if (decorator.tag == "SubTree" and decorator.get('ID') == "ThreeLevelsBot1new"):
+                    decorator.set('index', points_list[i - 1])
+        # print(elt.tag, elt.text)
+
+    # for elem in root:
+    #     if (elem.tag == "BehaviorTree" and elem.get('ID') == "BannerMission"):
+    #         fallback = elem[0][0][0]
+    #         for docking in fallback:
+    #             docking.set('base', banner[(j + k) % 3] + ', 0.3, 0')
+    #             k = k + 1
+    #         j += 1
+    #         k = 0
+    #         fallback = elem[0][0][1]
+    #         for docking in fallback:
+    #             docking.set('base', banner[(j + k) % 3] + ', 0.3, 0')
+    #             k = k + 1
+    #         j += 1
+    #         k = 0
+    #         fallback = elem[0][0][2]
+    #         for docking in fallback:
+    #             docking.set('base', banner[(j + k) % 3] + ', 0.3, 0')
+    #             k = k + 1
+    #     if (elem.tag == "BehaviorTree" and elem.get('ID') == "MainTree"):
+    #         for action in elem[0]:
+    #             if (action.tag == "Docking"):
+    #                 action.set('base', home + ', 0.3, 0')
+    #     if (elem.tag == "BehaviorTree" and elem.get('ID') == "MissionPointOne"):
+    #         subtree = elem[0][1]
+    #         for action in subtree:
+    #             if (action.tag == "MaterialChecker" and action.get('base_index') != "-1"):
+    #                 action.set('base_index', points_list[i])
+    #                 action.set('dock_type', dock_type_list[int(points_list[i])])
+    #                 print(points_list[i])
+    #                 i += 1
+    #         subtree = elem[0][2]
+    #         for action in subtree[0][1][1]:
+    #             if (action.tag == "MaterialChecker" and action.get('base_index') != "-1"):
+    #                 action.set('base_index', points_list[i])
+    #                 action.set('dock_type', dock_type_list[int(points_list[i])])
+    #                 print(points_list[i])
+    #                 i += 1
+    #         subtree = elem[0][3]
+    #         for action in subtree[0][0][0]:
+    #             if (action.tag == "MissionChecker"):
+    #                 action.set('base_index', points_list[i])
+    #                 print(points_list[i])
+    #                 i += 1
+    #                 docking = action[0]
+    #                 docking.set('dock_type', dock_type_list[int(points_list[i - 1])])
+    #                 docking.set('offset', offset_list[int(points_list[i - 1]) - 11])
+    #         for action in subtree:
+    #             if (action.tag == "SubTree" and action.get('ID') == "ThreeLevelsBot1new"):
+    #                 action.set('index', points_list[i - 1])
+    #     if (elem.tag == "BehaviorTree" and elem.get('ID') == "MissionPointTwo"):
+    #         subtree = elem[0][0]
+    #         for action in subtree[0]:
+    #             if (action.tag == "MaterialChecker" and action.get('base_index') != "-1"):
+    #                 action.set('base_index', points_list[i])
+    #                 action.set('dock_type', dock_type_list[int(points_list[i])])
+    #                 print(points_list[i])
+    #                 i += 1
+    #         subtree = elem[0][1]
+    #         for action in subtree[0]:
+    #             if (action.tag == "MissionChecker"):
+    #                 action.set('base_index', points_list[i])
+    #                 print(points_list[i])
+    #                 i += 1
+    #                 docking = action[0]
+    #                 docking.set('dock_type', dock_type_list[int(points_list[i - 1])])
+    #                 docking.set('offset', offset_list[int(points_list[i - 1]) - 11])
+    #         action = subtree[1]
+    #         if (action.tag == "SubTree" and action.get('ID') == "ThreeLevelsBot1new"):
+    #             action.set('index', points_list[i - 1])
+    #     if (elem.tag == "BehaviorTree" and elem.get('ID') == "MissionPointThree"):
+    #         subtree = elem[0][0]
+    #         for action in subtree:
+    #             if (action.tag == "MaterialChecker" and action.get('base_index') != "-1"):
+    #                 action.set('base_index', points_list[i])
+    #                 action.set('dock_type', dock_type_list[int(points_list[i])])
+    #                 print(points_list[i])
+    #                 i += 1
+    #         subtree = elem[0][2]
+    #         for action in subtree[0]:
+    #             if (action.tag == "MaterialChecker" and action.get('base_index') != "-1"):
+    #                 action.set('base_index', points_list[i])
+    #                 action.set('dock_type', dock_type_list[int(points_list[i])])
+    #                 print(points_list[i])
+    #                 i += 1
+    #         subtree = elem[0][3]
+    #         for action in subtree[0]:
+    #             if (action.tag == "MissionChecker"):
+    #                 action.set('base_index', points_list[i])
+    #                 print(points_list[i])
+    #                 i += 1
+    #                 docking = action[0]
+    #                 docking.set('dock_type', dock_type_list[int(points_list[i - 1])])
+    #                 docking.set('offset', offset_list[int(points_list[i - 1]) - 11])
+    #         action = subtree[1]
+    #         if (action.tag == "SubTree" and action.get('ID') == "ThreeLevelsBot1new"):
+    #             action.set('index', points_list[i - 1])
     tree = ET.ElementTree(root)
     tree.write(output_file_name, encoding="utf-8", xml_declaration=True)
 

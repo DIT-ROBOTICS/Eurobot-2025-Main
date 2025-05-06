@@ -120,11 +120,11 @@ private:
   int back_materials_;
 };
 
-class MissionFinisher : public BT::StatefulActionNode
+class MissionFailure : public BT::StatefulActionNode
 {
 public:
 
-  MissionFinisher(const std::string& name, const BT::NodeConfig& config, const RosNodeParams& params, BT::Blackboard::Ptr blackboard)
+  MissionFailure(const std::string& name, const BT::NodeConfig& config, const RosNodeParams& params, BT::Blackboard::Ptr blackboard)
     : BT::StatefulActionNode(name, config), node_(params.nh.lock()), blackboard_(blackboard)
   {
     matreials_accord_ = 0;

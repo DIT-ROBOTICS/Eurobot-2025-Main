@@ -241,9 +241,9 @@ void MissionSuccess::timer_publisher() {
 }
 
 /*******************/
-/* MissionFinisher */
+/* MissionFailure */
 /*******************/
-PortsList MissionFinisher::providedPorts() {
+PortsList MissionFailure::providedPorts() {
     return { 
         BT::InputPort<std::deque<int>>("step_results"),
         BT::InputPort<bool>("robot_type"),
@@ -252,7 +252,7 @@ PortsList MissionFinisher::providedPorts() {
     };
 }
 
-BT::NodeStatus MissionFinisher::onStart()
+BT::NodeStatus MissionFailure::onStart()
 {
     getInput<std::deque<int>>("step_results", step_results_);
     getInput<bool>("robot_type", robot_type_);
@@ -267,7 +267,7 @@ BT::NodeStatus MissionFinisher::onStart()
     return BT::NodeStatus::RUNNING;
 }
 
-BT::NodeStatus MissionFinisher::onRunning()
+BT::NodeStatus MissionFailure::onRunning()
 {
     auto front_collect_ = node_->get_parameter("front_collect").as_integer_array();
     auto back_collect_ = node_->get_parameter("back_collect").as_integer_array();
@@ -363,7 +363,7 @@ BT::NodeStatus MissionFinisher::onRunning()
         return BT::NodeStatus::FAILURE;
 }
 
-void MissionFinisher::onHalted()
+void MissionFailure::onHalted()
 {
     // Reset the output port
     setOutput("success_levels", 0); 
