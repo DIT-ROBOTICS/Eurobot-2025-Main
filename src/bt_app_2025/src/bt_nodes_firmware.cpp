@@ -184,12 +184,12 @@ BT::NodeStatus MissionSuccess::tick() {
         blackboard_->set<std_msgs::msg::Int32MultiArray>("mission_points_status", mission_points_status_);
         // update score
         blackboard_->get<int>("score_from_main", score_);
-        score_ += pow(2, levels_ + 1);
+        score_ += (pow(2, levels_) - 1) * 4;
         blackboard_->set<int>("score_from_main", score_);
         switch (levels_) {
             case 1:
                 back_materials_ -= 1;
-                breack;
+                break;
             case 2:
                 front_materials_ -= 2;
                 break;
@@ -213,7 +213,7 @@ BT::NodeStatus MissionSuccess::tick() {
         switch (levels_) {
             case 1:
                 back_materials_ += 2;
-                breack;
+                break;
             case 2:
                 front_materials_ += 2;
                 break;
