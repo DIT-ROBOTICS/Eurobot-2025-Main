@@ -117,17 +117,21 @@ BT::NodeStatus MissionStart::tick() {
 
     std::string map_points;
     blackboard_->get<std::string>("bot", map_points); 
+    std_msgs::msg::Int32MultiArray materials_info_;
+    blackboard_->get<std_msgs::msg::Int32MultiArray>("materials_info", materials_info_);
+    RCLCPP_INFO_STREAM(node_->get_logger(), materials_info_.data[0] << materials_info_.data[1] << materials_info_.data[2] << materials_info_.data[3] << materials_info_.data[4] << materials_info_.data[5] << materials_info_.data[6] << materials_info_.data[7] << materials_info_.data[8] << materials_info_.data[9]);
     map_points = "map_points_" + map_points;
     node_->get_parameter(map_points, material_points_);
 
     int offset_dir_ = (int)(1 - 2 * ((int)(material_points_[index_ * 5 + 2]) % 2));
     int offset_positivity_ = (int)(material_points_[index_ * 5 + 3] / abs(material_points_[index_ * 5 + 3]));
     RCLCPP_INFO_STREAM(node_->get_logger(), offset_positivity_);
+    shift_ *= offset_dir_ * offset_positivity_;
 
     if (offset_dir_ == 1)
-        setOutput("DOCK_DIR", "dock_x_slow_loose");
+        setOutput("DOCK_DIR", "dock_x_slow_precise");
     else if (offset_dir_ == -1)
-        setOutput("DOCK_DIR", "dock_y_slow_loose");
+        setOutput("DOCK_DIR", "dock_y_slow_precise");
     
     if (offset_positivity_ > 0) {
         back_.value()[0] *= -1;

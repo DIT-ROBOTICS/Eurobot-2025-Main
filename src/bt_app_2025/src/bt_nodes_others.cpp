@@ -3,36 +3,9 @@
 using namespace BT;
 using namespace std;
 
-template <> inline geometry_msgs::msg::PoseStamped BT::convertFromString(StringView str) {
-
-    auto parts = splitString(str, ',');
-    if (parts.size() != 3) {
-        throw RuntimeError("invalid input)");
-    }
-    else {
-        geometry_msgs::msg::PoseStamped output;
-        output.pose.position.x = convertFromString<double>(parts[0]);
-        output.pose.position.y = convertFromString<double>(parts[1]);
-        output.pose.position.z = convertFromString<double>(parts[2]);
-        return output;
-    }
-}
-
 template <> inline int BT::convertFromString(StringView str) {
     auto value = convertFromString<double>(str);
     return (int) value;
-}
-
-template <> inline std::deque<int> BT::convertFromString(StringView str) {
-
-    auto parts = splitString(str, ',');
-    std::deque<int> output;
-
-    for (int i = 0; i < (int)parts.size(); i++) {
-        output.push_back(convertFromString<int>(parts[i]));
-    }
-
-    return output;
 }
 
 BT::PortsList MySetBlackboard::providedPorts() {
@@ -439,6 +412,50 @@ BT::NodeStatus TimerChecker::tick() {
         return BT::NodeStatus::FAILURE;
     else
         return BT::NodeStatus::SUCCESS;
+}
+
+PortsList LoopInt32::providedPorts()
+{
+    return {
+        BT::InputPort<std::string>("queue"),
+        BT::InputPort<BT::NodeStatus>("if_empty"),
+        BT::OutputPort<int>("value")
+    };
+}
+
+NodeStatus LoopInt32::tick()
+{
+    std::string str;
+    getInput<std::string>("queue", str);
+    auto parts = splitString(str, '|');
+    std::deque<int> deque;
+
+    for (int i = 0; i < (int)parts.size(); i++) {
+        deque.push_back(std::stoi(parts[i].data()));
+    }
+
+    BT::NodeStatus child_status;
+    // Generate the path points
+    while (!deque.empty()) {
+        child_status = child_node_->executeTick();
+        switch (child_status)
+        {
+            case BT::NodeStatus::SUCCESS:
+                RCLCPP_INFO_STREAM(node_->get_logger(), "Success");
+                setOutput("value", deque.front());
+                deque.pop_front();
+                break;
+            case BT::NodeStatus::FAILURE:
+                RCLCPP_INFO_STREAM(node_->get_logger(), "Fail");
+                return BT::NodeStatus::FAILURE;
+            case BT::NodeStatus::RUNNING:
+                RCLCPP_INFO_STREAM(node_->get_logger(), "Running");
+                return BT::NodeStatus::RUNNING;
+            default:
+                break;
+        }
+    }
+    return BT::NodeStatus::SUCCESS;
 }
 
 // /****************************************************/
