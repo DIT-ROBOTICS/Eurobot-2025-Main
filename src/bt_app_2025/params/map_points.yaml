@@ -2,7 +2,7 @@
   ros__parameters:
   # reprecent `x position`, `y position`, `initial facing direction`, `offset dist` in order
     map_points_1: [
-      2.18, 1.375, 1.0, 0.2, 0.055,
+      2.18, 1.365, 1.0, 0.2, 0.055,
       2.575, 1.32, 0.0, 0.2, -0.055,
       2.675, 0.41, 0.0, 0.1, -0.055,
       1.905, 0.6, 1.0, 0.2, 0.055,

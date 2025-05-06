@@ -28,6 +28,11 @@
             <input_port name="base" type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
             <input_port name="mission_set_name" type="std::string"/>
         </Action>
+        <Decorator ID="LoopInt32">
+            <output_port name="value" type="int"/>
+            <input_port name="if_empty" type="BT::NodeStatus"/>
+            <input_port name="queue" type="std::string"/>
+        </Decorator>
         <Action ID="MissionFinisher">
             <output_port name="failed_levels" type="int"/>
             <output_port name="success_levels" type="int"/>
