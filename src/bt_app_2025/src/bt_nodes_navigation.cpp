@@ -198,6 +198,7 @@ bool Docking::setGoal(RosActionNode::Goal& goal) {
     getInput<double>("shift", shift_);
     getInput<bool>("isPureDocking", isPureDocking_);
     getInput<std::string>("dock_type", dock_type_);
+    blackboard_->set<bool>("Timeout", false);
 
     rclcpp::Time now = this->now(); // get current time
     goal_.header.stamp = now; // set header time
@@ -245,6 +246,7 @@ NodeStatus Docking::onFeedback(const std::shared_ptr<const Feedback> feedback) {
 NodeStatus Docking::goalErrorDetect() {
     double nav_dist_error_ = node_->get_parameter("nav_dist_error").as_double();
     double nav_ang_error_ = node_->get_parameter("nav_ang_error").as_double();
+    blackboard_->set<bool>("enable_vision_check", true);
 
     // check the correctness of the final pose
     LocReceiver::UpdateRobotPose(robot_pose_, tf_buffer_, frame_id_);
@@ -264,17 +266,32 @@ NodeStatus Docking::goalErrorDetect() {
 }
 
 NodeStatus Docking::onResultReceived(const WrappedResult& wr) {
+    RCLCPP_INFO_STREAM(node_->get_logger(), "get dock result");
     nav_finished_ = true;
     switch (wr.result->success) {
         case true:
             break;
         case false:
             nav_error_ = true;
-            RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Goal was aborted");
+            nav_finished_ = true;
+            if (wr.result->error_code == 905)
+                blackboard_->set<bool>("Timeout", true);
+            blackboard_->set<bool>("enable_vision_check", true);
+            LocReceiver::UpdateRobotPose(robot_pose_, tf_buffer_, frame_id_);
+            setOutput<geometry_msgs::msg::PoseStamped>("final_pose", ConvertPoseFormat(robot_pose_));
+            RCLCPP_INFO_STREAM(logger(), "error code: " << wr.result->error_code << " RETURN FAILURE! final_pose: " << robot_pose_.pose.position.x << ", " << robot_pose_.pose.position.y << ", " << robot_pose_.pose.position.z);
+            RCLCPP_INFO_STREAM(logger(), "-----------------");
             return NodeStatus::FAILURE;
         default:
             nav_error_ = true;
-            RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Unknown result code");
+            nav_finished_ = true;
+            if (wr.result->error_code == 905)
+                blackboard_->set<bool>("Timeout", true);
+            blackboard_->set<bool>("enable_vision_check", true);
+            LocReceiver::UpdateRobotPose(robot_pose_, tf_buffer_, frame_id_);
+            setOutput<geometry_msgs::msg::PoseStamped>("final_pose", ConvertPoseFormat(robot_pose_));
+            RCLCPP_INFO_STREAM(logger(), "error code: " << wr.result->error_code << " RETURN FAILURE! final_pose: " << robot_pose_.pose.position.x << ", " << robot_pose_.pose.position.y << ", " << robot_pose_.pose.position.z);
+            RCLCPP_INFO_STREAM(logger(), "-----------------");
             return NodeStatus::FAILURE;
     }
     return goalErrorDetect();
@@ -283,8 +300,8 @@ NodeStatus Docking::onResultReceived(const WrappedResult& wr) {
 NodeStatus Docking::onFailure(ActionNodeErrorCode error) {
     nav_error_ = true;
     nav_finished_ = true;
-    if (error == 3)
-        blackboard_->set<bool>("Timeout", true);
+
+    blackboard_->set<bool>("enable_vision_check", true);
     LocReceiver::UpdateRobotPose(robot_pose_, tf_buffer_, frame_id_);
     setOutput<geometry_msgs::msg::PoseStamped>("final_pose", ConvertPoseFormat(robot_pose_));
     RCLCPP_INFO_STREAM(logger(), "error code: " << error << "RETURN FAILURE! final_pose: " << robot_pose_.pose.position.x << ", " << robot_pose_.pose.position.y << ", " << robot_pose_.pose.position.z);
@@ -417,9 +434,10 @@ int VisionCheck::findBestTarget() {
 
     LocReceiver::UpdateRobotPose(robot_pose_, tf_buffer_, frame_id_);
     LocReceiver::UpdateRivalPose(rival_pose_, tf_buffer_, frame_id_);
-    for (int i = 1; i < 9; i++)                  // delete empty materials point
+    for (int i = 1; i < 9; i++) {                 // delete empty materials point
         if (materials_info_.data[i])
             candidate_.push_back(i);
+    }
     if (team_ == "b" && materials_info_.data[0])       // if it's blue team, then detect if the first point is empty
         candidate_.push_back(0);
     else if (team_ == "y" && materials_info_.data[9]) // if it's yellow team, then detect if the last point is empty
@@ -475,8 +493,8 @@ NodeStatus VisionCheck::tick() {
 
     blackboard_->get<std_msgs::msg::Int32MultiArray>("materials_info", materials_info_);  // use vision message to check the target
     blackboard_->get<bool>("last_mission_failed", last_mission_failed_);                  // see if last mission failed
-    bool canPrintMessage;
-    blackboard_->get<bool>("can_print_message", canPrintMessage);     
+    bool enable_vision_check_;
+    blackboard_->get<bool>("enable_vision_check", enable_vision_check_);
     // If the target is not ok
     // use vision message to find the best new target `i` (new base)
     LocReceiver::UpdateRivalPose(rival_pose_, tf_buffer_, frame_id_);
@@ -491,6 +509,11 @@ NodeStatus VisionCheck::tick() {
         if (baseIndex_ == -1) { 
             return NodeStatus::FAILURE;
         }
+    }
+    if (!enable_vision_check_) {
+        blackboard_->get<int>("current_index", baseIndex_); 
+    } else {
+        blackboard_->set<bool>("enable_vision_check", false);
     }
     base_.pose.position.x = material_points_[baseIndex_ * 5];
     base_.pose.position.y = material_points_[baseIndex_ * 5 + 1];
@@ -512,10 +535,12 @@ NodeStatus VisionCheck::tick() {
     }
 
     // set output port
+    blackboard_->set<int>("current_index", baseIndex_); 
     setOutput<geometry_msgs::msg::PoseStamped>("remap_base", base_);
     setOutput<std::string>("remap_dock_type", dockType_);
     setOutput<double>("remap_offset", offset_);
     setOutput<double>("remap_shift", shift_);
+    RCLCPP_INFO_STREAM(node_->get_logger(), baseIndex_);
     setOutput<int>("remap_index", baseIndex_);
 
     // Run the child node

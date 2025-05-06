@@ -77,6 +77,8 @@ public:
         blackboard->set<std::string>("team", "y");
         blackboard->set<std::string>("bot", "1"); 
         blackboard->set<int>("score_from_main", 0);
+        blackboard->set<bool>("enable_vision_check", true);
+        blackboard->set<int>("current_index", 0);   
         // Subscriber
         time_sub = this->create_subscription<std_msgs::msg::Float32>("/robot/startup/time", 2, std::bind(&MainClass::timeCallback, this, std::placeholders::_1));
         ready_sub = this->create_subscription<std_msgs::msg::String>("/robot/startup/plan", 2, std::bind(&MainClass::readyCallback, this, std::placeholders::_1));
@@ -138,6 +140,7 @@ public:
         factory.registerNodeType<MySetBlackboard>("MySetBlackboard", params, blackboard);
         factory.registerNodeType<Comparator>("Comparator", params);            // decorator
         factory.registerNodeType<TimerChecker>("TimerChecker", blackboard);    // condition node
+        factory.registerNodeType<LoopInt32>("LoopInt32", params);
     }
 
     void LoadXML() {
