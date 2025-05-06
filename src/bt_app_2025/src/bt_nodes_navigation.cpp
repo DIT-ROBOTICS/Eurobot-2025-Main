@@ -553,7 +553,7 @@ PortsList MissionChecker::providedPorts() {
         BT::InputPort<int>("base_index"),
         BT::InputPort<std::string>("mission_type"), // front grabber or back grabber
         BT::OutputPort<geometry_msgs::msg::PoseStamped>("remap_base"),
-        BT::OutputPort<int>("level")
+        BT::OutputPort<std::string>("level")
     };
 }
 
@@ -608,13 +608,13 @@ NodeStatus MissionChecker::tick() {
         }
     }
     if (back_materials_ != 0 && front_materials_ == 2) {
-        setOutput<int>("level", 3);
+        setOutput<std::string>("level", "3");
     } else if (back_materials_ == 0 && front_materials_ == 2) {
-        setOutput<int>("level", 2);
+        setOutput<std::string>("level", "2");
     } else if (back_materials_ != 0 && front_materials_ != 2) {
-        setOutput<int>("level", 1);
+        setOutput<std::string>("level", "1");
     } else {
-        setOutput<int>("level", 1);
+        setOutput<std::string>("level", "1");
     }
 
     // set output port

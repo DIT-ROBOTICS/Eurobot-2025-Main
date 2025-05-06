@@ -31,19 +31,32 @@
         <Decorator ID="LoopInt32">
             <output_port name="value" type="int"/>
             <input_port name="if_empty" type="BT::NodeStatus"/>
-            <input_port name="queue" type="std::string"/>
+            <input_port name="queue" type="std::deque&lt;int, std::allocator&lt;int&gt; &gt;"/>
         </Decorator>
-        <Action ID="MissionFinisher">
+        <Decorator ID="MaterialChecker">
+            <output_port name="remap_offset" type="double"/>
+            <output_port name="remap_shift" type="double"/>
+            <output_port name="remap_dock_type" type="std::string"/>
+            <output_port name="remap_index" type="int"/>
+            <output_port name="remap_base" type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+            <input_port name="shift" type="double"/>
+            <input_port name="offset" type="double"/>
+            <input_port name="mission_type" type="std::string"/>
+            <input_port name="dock_type" type="std::string"/>
+            <input_port name="base_index" type="int"/>
+        </Decorator>
+        <Decorator ID="MissionChecker">
+            <output_port name="level" type="std::string"/>
+            <output_port name="remap_base" type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+            <input_port name="mission_type" type="std::string"/>
+            <input_port name="base_index" type="int"/>
+        </Decorator>
+        <Action ID="MissionFailure">
             <output_port name="failed_levels" type="int"/>
             <output_port name="success_levels" type="int"/>
             <input_port name="robot_type" type="bool"/>
             <input_port name="step_results" type="std::deque&lt;int, std::allocator&lt;int&gt; &gt;"/>
         </Action>
-        <Decorator ID="MissionNearRival">
-            <output_port name="remap_base" type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
-            <input_port name="mission_type" type="std::string"/>
-            <input_port name="base_index" type="int"/>
-        </Decorator>
         <Action ID="MissionStart">
             <output_port name="DOCK_DIR" type="std::string"/>
             <output_port name="SHIFT" type="double"/>
@@ -89,17 +102,5 @@
         <Action ID="TopicSubTest">
             <output_port name="sum" type="int"/>
         </Action>
-        <Decorator ID="VisionCheck">
-            <output_port name="remap_offset" type="double"/>
-            <output_port name="remap_shift" type="double"/>
-            <output_port name="remap_dock_type" type="std::string"/>
-            <output_port name="remap_index" type="int"/>
-            <output_port name="remap_base" type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
-            <input_port name="shift" type="double"/>
-            <input_port name="offset" type="double"/>
-            <input_port name="mission_type" type="std::string"/>
-            <input_port name="dock_type" type="std::string"/>
-            <input_port name="base_index" type="int"/>
-        </Decorator>
     </TreeNodesModel>
 </root>
