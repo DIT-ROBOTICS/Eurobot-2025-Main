@@ -514,6 +514,7 @@ NodeStatus VisionCheck::tick() {
         blackboard_->get<int>("current_index", baseIndex_); 
     } else {
         blackboard_->set<bool>("enable_vision_check", false);
+        RCLCPP_INFO_STREAM(node_->get_logger(), "index: " << baseIndex_ << " offset: " << material_points_[baseIndex_ * 5 + 3] << " missionType_: " << missionType_);
     }
     base_.pose.position.x = material_points_[baseIndex_ * 5];
     base_.pose.position.y = material_points_[baseIndex_ * 5 + 1];
@@ -540,7 +541,6 @@ NodeStatus VisionCheck::tick() {
     setOutput<std::string>("remap_dock_type", dockType_);
     setOutput<double>("remap_offset", offset_);
     setOutput<double>("remap_shift", shift_);
-    RCLCPP_INFO_STREAM(node_->get_logger(), baseIndex_);
     setOutput<int>("remap_index", baseIndex_);
 
     // Run the child node
@@ -553,6 +553,7 @@ PortsList MissionNearRival::providedPorts() {
         BT::InputPort<int>("base_index"),
         BT::InputPort<std::string>("mission_type"), // front grabber or back grabber
         BT::OutputPort<geometry_msgs::msg::PoseStamped>("remap_base"),
+        BT::OutputPort<int>("level")
     };
 }
 
@@ -571,6 +572,8 @@ NodeStatus MissionNearRival::tick() {
     node_->get_parameter(map_points, material_points_);
     node_->get_parameter("safety_dist", safety_dist_);
     blackboard_->get<std_msgs::msg::Int32MultiArray>("mission_points_status", mission_points_status_);
+    blackboard_->get<int>("front_materials", front_materials_);
+    blackboard_->get<int>("back_materials", back_materials_);
     
     // get base & offset from map_points[i]
     base_.pose.position.x = material_points_[baseIndex_ * 5];
@@ -582,7 +585,7 @@ NodeStatus MissionNearRival::tick() {
     LocReceiver::UpdateRivalPose(rival_pose_, tf_buffer_, frame_id_);
     dist = calculateDistance(base_.pose, rival_pose_.pose);
 
-    if (missionType_ == "back") {
+    if (missionType_ == "back" && back_materials_ != 0) {
         base_.pose.position.z = ((int)base_.pose.position.z / 2) ? base_.pose.position.z - 2 : base_.pose.position.z + 2;
     }
     if (base_.pose.position.z == 1.0 || base_.pose.position.z == 3.0) {
@@ -603,6 +606,15 @@ NodeStatus MissionNearRival::tick() {
             base_.pose.position.y += (base_.pose.position.y - rival_pose_.pose.position.y)/abs(base_.pose.position.y - rival_pose_.pose.position.y)*(safety_dist_ - abs(base_.pose.position.y - rival_pose_.pose.position.y));
             RCLCPP_INFO_STREAM(node_->get_logger(), "rival near the bot when placing the materials");
         }
+    }
+    if (back_materials_ != 0 && front_materials_ == 2) {
+        setOutput<int>("level", 3);
+    } else if (back_materials_ == 0 && front_materials_ == 2) {
+        setOutput<int>("level", 2);
+    } else if (back_materials_ != 0 && front_materials_ != 2) {
+        setOutput<int>("level", 1);
+    } else {
+        setOutput<int>("level", 1);
     }
 
     // set output port

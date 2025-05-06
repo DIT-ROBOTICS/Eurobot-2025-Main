@@ -175,6 +175,8 @@ BT::NodeStatus MissionSuccess::tick() {
 
     lastMissionFailed_ = false;
     blackboard_->set<bool>("last_mission_failed", lastMissionFailed_);
+    blackboard_->get<int>("front_materials", front_materials_);
+    blackboard_->get<int>("back_materials", back_materials_);
     if (baseIndex_ > 10) {   // finish placement mission
         // update mission_points_status_
         blackboard_->get<std_msgs::msg::Int32MultiArray>("mission_points_status", mission_points_status_);
@@ -184,6 +186,20 @@ BT::NodeStatus MissionSuccess::tick() {
         blackboard_->get<int>("score_from_main", score_);
         score_ += pow(2, levels_ + 1);
         blackboard_->set<int>("score_from_main", score_);
+        switch (levels_) {
+            case 1:
+                back_materials_ -= 1;
+                breack;
+            case 2:
+                front_materials_ -= 2;
+                break;
+            case 3:
+                front_materials_ -= 2;
+                back_materials_ -= 1;
+                break;
+            default:
+                break;
+        }
         RCLCPP_INFO_STREAM(node_->get_logger(), "place materials at point " << baseIndex_ << " successfully, data: " << mission_points_status_.data[baseIndex_ - 11]);
         // To Do: can merge the messages of mission_points_status & score_from_main in 1 parameter
 
@@ -194,11 +210,23 @@ BT::NodeStatus MissionSuccess::tick() {
         blackboard_->get<std_msgs::msg::Int32MultiArray>("materials_info", materials_info_);
         materials_info_.data[baseIndex_] = 0;
         blackboard_->set<std_msgs::msg::Int32MultiArray>("materials_info", materials_info_);
+        switch (levels_) {
+            case 1:
+                back_materials_ += 2;
+                breack;
+            case 2:
+                front_materials_ += 2;
+                break;
+            default:
+                break;
+        }
         RCLCPP_INFO_STREAM(node_->get_logger(), "take materials at point " << baseIndex_ << " successfully");
     } else { // finish banner mission
         mission_finished.data = baseIndex_;
         std::thread{std::bind(&MissionSuccess::timer_publisher, this)}.detach();
     }
+    blackboard_->set<int>("front_materials", front_materials_);
+    blackboard_->set<int>("back_materials", back_materials_);
     return BT::NodeStatus::SUCCESS;
 }
 
@@ -244,17 +272,15 @@ BT::NodeStatus MissionFinisher::onRunning()
     auto front_collect_ = node_->get_parameter("front_collect").as_integer_array();
     auto back_collect_ = node_->get_parameter("back_collect").as_integer_array();
     auto construct_1_ = node_->get_parameter("construct_1").as_integer_array();
-    auto not_spin_construct_2_ = node_->get_parameter("not_spin_construct_2").as_integer_array();
-    auto spin_construct_2_ = node_->get_parameter("spin_construct_2").as_integer_array();
-    auto not_spin_construct_3_ = node_->get_parameter("not_spin_construct_3").as_integer_array();
-    auto spin_construct_3_ = node_->get_parameter("spin_construct_3").as_integer_array();
+    auto construct_2_ = node_->get_parameter("construct_2").as_integer_array();
+    auto construct_3_ = node_->get_parameter("construct_3").as_integer_array();
     
     switch(step_results_.back()){
 
         // front_collect
         case 1:
-            front_materials_ += front_collect_[1];
-            back_materials_ += front_collect_[2];
+            // front_materials_ += front_collect_[1];
+            // back_materials_ += front_collect_[2];
             success_levels_ = 0;
             failed_levels_ = 0;
 
@@ -264,8 +290,8 @@ BT::NodeStatus MissionFinisher::onRunning()
             break;
         // back_collect
         case 2:
-            front_materials_ += back_collect_[1];
-            back_materials_ += back_collect_[2];
+            // front_materials_ += back_collect_[1];
+            // back_materials_ += back_collect_[2];
             success_levels_ = 0;
             failed_levels_ = 0;
 
@@ -275,8 +301,8 @@ BT::NodeStatus MissionFinisher::onRunning()
             break;
         // construct_1
         case 3:
-            front_materials_ = construct_1_[1];
-            back_materials_ = construct_1_[2];
+            // front_materials_ = construct_1_[1];
+            // back_materials_ = construct_1_[2];
             success_levels_ = construct_1_[3];
             failed_levels_ = 1 - success_levels_;
 
@@ -286,20 +312,10 @@ BT::NodeStatus MissionFinisher::onRunning()
             break;
         // construct_2
         case 4:
-            if(robot_type_)
-            {
-                front_materials_ = not_spin_construct_2_[mission_progress_ * 4 + 1];
-                back_materials_ = not_spin_construct_2_[mission_progress_ * 4 + 2];
-                success_levels_ = not_spin_construct_2_[mission_progress_ * 4 + 3];
-                failed_levels_ = 2 - success_levels_;
-            }
-            else
-            {
-                front_materials_ = spin_construct_2_[mission_progress_ * 4 + 1];
-                back_materials_ = spin_construct_2_[mission_progress_ * 4 + 2];
-                success_levels_ = spin_construct_2_[mission_progress_ * 4 + 3];
-                failed_levels_ = 2 - success_levels_;
-            }
+            // front_materials_ = construct_2_[mission_progress_ * 4 + 1];
+            // back_materials_ = construct_2_[mission_progress_ * 4 + 2];
+            success_levels_ = construct_2_[mission_progress_ * 4 + 3];
+            failed_levels_ = 2 - success_levels_;
 
             if (front_materials_ == 0 && back_materials_ == 0)
                 matreials_accord_ = 1;
@@ -307,40 +323,21 @@ BT::NodeStatus MissionFinisher::onRunning()
             break;
         // construct_3
         case 5:
-            if(robot_type_)
+            // front_materials_ = construct_3_[mission_progress_ * 4 + 1];
+            // back_materials_ = construct_3_[mission_progress_ * 4 + 2];
+            
+            if (construct_3_[mission_progress_ * 4 + 3] != 4)
             {
-                front_materials_ = not_spin_construct_3_[mission_progress_ * 4 + 1];
-                back_materials_ = not_spin_construct_3_[mission_progress_ * 4 + 2];
-                
-                if (not_spin_construct_3_[mission_progress_ * 4 + 3] != 4)
-                {
-                    success_levels_ = not_spin_construct_3_[mission_progress_ * 4 + 3];
-                    failed_levels_ = 3 - success_levels_;
-                }
-                // 疊三層時，過程中兩層的成功與否受到建造區影響
-                else
-                {
-                    success_levels_ = 1;
-                    failed_levels_ = 2;
-                }
+                success_levels_ = construct_3_[mission_progress_ * 4 + 3];
+                failed_levels_ = 3 - success_levels_;
             }
+            // 疊三層時，過程中兩層的成功與否受到建造區影響
             else
             {
-                front_materials_ = spin_construct_3_[mission_progress_ * 4 + 1];
-                back_materials_ = spin_construct_3_[mission_progress_ * 4 + 2];
-                
-                if (spin_construct_3_[mission_progress_ * 4 + 3] != 4)
-                {
-                    success_levels_ = spin_construct_3_[mission_progress_ * 4 + 3];
-                    failed_levels_ = 3 - success_levels_;
-                }
-                // 疊三層時，過程中兩層的成功與否受到建造區影響
-                else
-                {
-                    success_levels_ = 1;
-                    failed_levels_ = 2;
-                }
+                success_levels_ = 1;
+                failed_levels_ = 2;
             }
+        
 
             if (front_materials_ == 0 && back_materials_ == 0)
                 matreials_accord_ = 1;

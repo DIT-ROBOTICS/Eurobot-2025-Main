@@ -46,7 +46,7 @@ def generate_launch_description():
     map_points = LaunchConfiguration('params3')
 
     bt_m_node = TimerAction(
-        period=1.0,
+        period=2.0,
         actions=[
             Node(
                 parameters=[
@@ -64,7 +64,7 @@ def generate_launch_description():
         ]
     )
     startup_node = TimerAction(
-        period=1.0,
+        period=2.0,
         actions=[
             Node(
                 parameters=[

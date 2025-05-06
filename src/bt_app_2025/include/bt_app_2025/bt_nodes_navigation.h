@@ -239,4 +239,6 @@ private:
     geometry_msgs::msg::PoseStamped base_;
     std::vector<double> material_points_;
     double safety_dist_;
+    int front_materials_;
+    int back_materials_;
 };

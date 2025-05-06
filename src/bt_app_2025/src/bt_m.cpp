@@ -99,10 +99,8 @@ public:
         this->declare_parameter<std::vector<int>>("front_collect", std::vector<int>{});
         this->declare_parameter<std::vector<int>>("back_collect", std::vector<int>{});
         this->declare_parameter<std::vector<int>>("construct_1", std::vector<int>{});
-        this->declare_parameter<std::vector<int>>("spin_construct_2", std::vector<int>{});
-        this->declare_parameter<std::vector<int>>("spin_construct_3", std::vector<int>{});
-        this->declare_parameter<std::vector<int>>("not_spin_construct_2", std::vector<int>{});
-        this->declare_parameter<std::vector<int>>("not_spin_construct_3", std::vector<int>{});
+        this->declare_parameter<std::vector<int>>("construct_2", std::vector<int>{});
+        this->declare_parameter<std::vector<int>>("construct_3", std::vector<int>{});
         // map points
         this->declare_parameter<std::vector<double>>("map_points_1", std::vector<double>{});
         this->declare_parameter<std::vector<double>>("map_points_2", std::vector<double>{});
@@ -163,16 +161,16 @@ public:
     }
 
     void RunTheTree() {
-        RCLCPP_INFO_STREAM(this->get_logger(), "--Going to run tree--");
+        // create tree
+        RCLCPP_INFO(node_->get_logger(), "--Create tree--");
+        tree = factory.createTree(tree_name, blackboard);
+        // BT::Groot2Publisher publisher(tree, 2227);
+        BT::NodeStatus status = BT::NodeStatus::RUNNING;
+        RCLCPP_INFO_STREAM(this->get_logger(), "i");
         while (rclcpp::ok() && !canStart) {
             rate.sleep();
         }
-        RCLCPP_INFO(node_->get_logger(), "--Create tree--");
-        // create tree
-        tree = factory.createTree(tree_name, blackboard);
-        // BT::Groot2Publisher publisher(tree, 2227);
-
-        BT::NodeStatus status = BT::NodeStatus::RUNNING;
+        RCLCPP_INFO_STREAM(this->get_logger(), "ii");
         RCLCPP_INFO(this->get_logger(), "[BT Application]: Behavior Tree start running!");
         while (rclcpp::ok() && status == BT::NodeStatus::RUNNING) {
             rate.sleep();

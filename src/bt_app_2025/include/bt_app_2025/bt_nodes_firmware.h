@@ -116,6 +116,8 @@ private:
   std_msgs::msg::Int32MultiArray materials_info_;
   int publish_times;
   int publish_count;
+  int front_materials_;
+  int back_materials_;
 };
 
 class MissionFinisher : public BT::StatefulActionNode
