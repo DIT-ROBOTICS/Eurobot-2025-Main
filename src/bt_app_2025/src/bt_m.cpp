@@ -139,6 +139,7 @@ public:
         factory.registerNodeType<Comparator>("Comparator", params);            // decorator
         factory.registerNodeType<TimerChecker>("TimerChecker", blackboard);    // condition node
         factory.registerNodeType<LoopInt32>("LoopInt32", params);
+        factory.registerNodeType<Double2Int>("Double2Int", params);
     }
 
     void LoadXML() {
@@ -158,12 +159,13 @@ public:
         std::ofstream file(bt_tree_node_model);                                // open the xml that store the tree nodes
         file << xml_models;
         file.close();
-    }
-
-    void RunTheTree() {
         // create tree
         RCLCPP_INFO(node_->get_logger(), "--Create tree--");
         tree = factory.createTree(tree_name, blackboard);
+        sendReadySignal();
+    }
+
+    void RunTheTree() {
         // BT::Groot2Publisher publisher(tree, 2227);
         BT::NodeStatus status = BT::NodeStatus::RUNNING;
         RCLCPP_INFO_STREAM(this->get_logger(), "i");
@@ -172,10 +174,10 @@ public:
         }
         RCLCPP_INFO_STREAM(this->get_logger(), "ii");
         RCLCPP_INFO(this->get_logger(), "[BT Application]: Behavior Tree start running!");
-        while (rclcpp::ok() && status == BT::NodeStatus::RUNNING) {
+        do {
             rate.sleep();
             status = tree.rootNode()->executeTick();
-        }
+        } while (rclcpp::ok() && status == BT::NodeStatus::RUNNING);
     }
 
 private:
@@ -244,7 +246,6 @@ void MainClass::readyCallback(const std_msgs::msg::String::SharedPtr msg) {
     blackboard->set<std::string>("bot", groot_filename.substr(3, 1)); 
     isReady = true;                                                            // set as received ready message
     // RCLCPP_INFO_STREAM(this->get_logger(), "ready callback");
-    sendReadySignal();
 }
 
 void MainClass::startCallback(const std::shared_ptr<std_srvs::srv::SetBool::Request> request,

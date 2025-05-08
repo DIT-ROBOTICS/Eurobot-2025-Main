@@ -1,8 +1,8 @@
 <launch>
     <!-- Declare arguments -->
-    <arg name='name_of_bag_file' default='yayaya' />
+    <arg name='name_of_bag_file' default='0508-1'/>
 
     <!-- record bag -->
-    <executable cmd="ros2 bag record --output /home/ros/Eurobot-2025-Main/bag/$(var name_of_bag_file) /local_filter /final_pose /lidar_pose /raw_obstacles /raw_obstacles_visualization_pcl /rival/final_pose" />
+    <executable cmd="ros2 bag record --output /home/ros/Eurobot-2025-Main/bag/$(var name_of_bag_file) /candidates /local_filter /final_pose /lidar_pose /raw_obstacles /raw_obstacles_visualization_pcl /rival/final_pose /tf_static /tf" />
     <executable cmd="ros2 bag record --output /home/ros/Eurobot-2025-Main/bag/wow /cmd_vel /goal_pose /mission_type /mission_status" />
 </launch>

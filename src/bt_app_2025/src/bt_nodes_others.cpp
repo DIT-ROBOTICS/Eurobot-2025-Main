@@ -441,7 +441,6 @@ NodeStatus LoopInt32::tick()
     // std::string str;
     // getInput<std::string>("queue", str);
     // auto parts = splitString(str, ',');
-    std::deque<int> deque;
     getInput<std::deque<int>>("queue", deque);
 
     // for (int i = 0; i < (int)parts.size(); i++) {
@@ -472,6 +471,22 @@ NodeStatus LoopInt32::tick()
     return BT::NodeStatus::SUCCESS;
 }
 
+PortsList Double2Int::providedPorts()
+{
+    return {
+        // BT::InputPort<std::string>("queue"),
+        BT::InputPort<double>("double"),
+        BT::OutputPort<int>("int")
+    };
+}
+
+NodeStatus Double2Int::tick()
+{
+    getInput<double>("double", double_);
+    RCLCPP_INFO_STREAM(node_->get_logger(), double_ << ", " << int(double_));
+    setOutput("int", int(double_));
+    return BT::NodeStatus::SUCCESS;
+}
 // /****************************************************/
 // /* Simple Node for finding the rival start position */
 // /****************************************************/

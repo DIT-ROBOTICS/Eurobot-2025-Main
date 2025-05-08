@@ -18,6 +18,10 @@
             <input_port name="offset" type="double"/>
             <input_port name="base" type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
         </Action>
+        <Action ID="Double2Int">
+            <output_port name="int" type="int"/>
+            <input_port name="double" type="double"/>
+        </Action>
         <Action ID="FirmwareMission">
             <output_port name="mission_status" type="int"/>
             <input_port name="mission_type" type="int"/>

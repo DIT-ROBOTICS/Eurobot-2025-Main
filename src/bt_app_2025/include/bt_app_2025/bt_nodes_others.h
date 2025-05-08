@@ -171,8 +171,22 @@ public:
     BT::NodeStatus tick() override;
 private:
     std::shared_ptr<rclcpp::Node> node_;
-    std::deque<int> dequeue_;
+    std::deque<int> deque;
     int index_;
+};
+
+class Double2Int : public BT::SyncActionNode
+{
+public:
+    Double2Int(const std::string &name, const BT::NodeConfig &config, const RosNodeParams& params)
+        : BT::SyncActionNode(name, config), node_(params.nh.lock())
+    {}
+    static BT::PortsList providedPorts();
+    BT::NodeStatus tick() override;
+private:
+    std::shared_ptr<rclcpp::Node> node_;
+    int int_;
+    double double_;
 };
 
 // /****************************************************/

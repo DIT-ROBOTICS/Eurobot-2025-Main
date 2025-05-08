@@ -17,19 +17,19 @@
           <Fallback>
             <Docking final_pose="{PrevGoal}"
                      isPureDocking="0"
-                     dock_type="dock_y_slow_precise"
+                     dock_type="dock_y_fast_precise"
                      shift="0"
                      offset="-0.1"
                      base="0.25, 0.3, 0"/>
             <Docking final_pose="{PrevGoal}"
                      isPureDocking="0"
-                     dock_type="dock_y_slow_precise"
+                     dock_type="dock_y_fast_precise"
                      shift="0"
                      offset="-0.1"
                      base="1.75, 0.3, 0"/>
             <Docking final_pose="{PrevGoal}"
                      isPureDocking="0"
-                     dock_type="dock_y_slow_precise"
+                     dock_type="dock_y_fast_precise"
                      shift="0"
                      offset="-0.1"
                      base="2.25, 0.3, 0"/>
@@ -37,19 +37,19 @@
           <Fallback>
             <Docking final_pose="{PrevGoal}"
                      isPureDocking="0"
-                     dock_type="dock_y_slow_precise"
+                     dock_type="dock_y_fast_precise"
                      shift="0"
                      offset="-0.1"
                      base="1.75, 0.3, 0"/>
             <Docking final_pose="{PrevGoal}"
                      isPureDocking="0"
-                     dock_type="dock_y_slow_precise"
+                     dock_type="dock_y_fast_precise"
                      shift="0"
                      offset="-0.1"
                      base="2.25, 0.3, 0"/>
             <Docking final_pose="{PrevGoal}"
                      isPureDocking="0"
-                     dock_type="dock_y_slow_precise"
+                     dock_type="dock_y_fast_precise"
                      shift="0"
                      offset="-0.1"
                      base="0.25, 0.3, 0"/>
@@ -57,20 +57,20 @@
           <Fallback>
             <Docking final_pose="{PrevGoal}"
                      isPureDocking="0"
-                     dock_type="dock_y_slow_precise"
+                     dock_type="dock_y_fast_precise"
                      shift="0"
                      offset="-0.1"
                      base="2.25, 0.3, 0"
                      _description="go to place the banner"/>
             <Docking final_pose="{PrevGoal}"
                      isPureDocking="0"
-                     dock_type="dock_y_slow_precise"
+                     dock_type="dock_y_fast_precise"
                      shift="0"
                      offset="-0.1"
                      base="1.75, 0.3, 0"/>
             <Docking final_pose="{PrevGoal}"
                      isPureDocking="0"
-                     dock_type="dock_y_slow_precise"
+                     dock_type="dock_y_fast_precise"
                      shift="0"
                      offset="-0.1"
                      base="0.25, 0.3, 0"/>
@@ -93,7 +93,7 @@
       </ForceSuccess>
       <Docking final_pose="{PrevGoal}"
                isPureDocking="1"
-               dock_type="dock_y_slow_precise"
+               dock_type="dock_y_fast_precise"
                shift="0"
                offset="0.15"
                base="{PrevGoal}"/>
@@ -142,6 +142,13 @@
              case_5="5"
              variable="5">
       <Sequence>
+        <ForceSuccess>
+          <Timeout msec="6000">
+            <FirmwareMission mission_status="{x}"
+                            mission_type="22"
+                            _description="backward stretch out"/>
+          </Timeout>
+        </ForceSuccess>
         <MaterialChecker remap_offset="{offset}"
                      remap_shift="{shift}"
                      remap_dock_type="{dock_type}"
@@ -150,7 +157,7 @@
                      shift="0"
                      offset="-0.2"
                      mission_type="back"
-                     dock_type="dock_x_slow_precise"
+                     dock_type="dock_x_fast_precise"
                      base_index="8">
           <Docking final_pose="{PrevGoal}"
                    isPureDocking="0"
@@ -171,7 +178,7 @@
                      shift="0"
                      offset="-0.2"
                      mission_type="front"
-                     dock_type="dock_x_slow_precise"
+                     dock_type="dock_x_fast_precise"
                      base_index="7">
           <Docking final_pose="{PrevGoal}"
                    isPureDocking="0"
@@ -194,7 +201,7 @@
                           base_index="15">
           <Docking final_pose="{PrevGoal}"
                    isPureDocking="0"
-                   dock_type="dock_x_slow_precise"
+                   dock_type="dock_x_fast_precise"
                    shift="0"
                    offset="-0.1"
                    base="{base}"/>
@@ -216,7 +223,7 @@
                           base_index="15">
           <Docking final_pose="{PrevGoal}"
                    isPureDocking="0"
-                   dock_type="dock_x_slow_precise"
+                   dock_type="dock_x_fast_precise"
                    shift="0"
                    offset="-0.1"
                    base="{base}"/>
@@ -237,7 +244,7 @@
         </ForceSuccess>
         <Docking final_pose="{PrevGoal}"
                  isPureDocking="1"
-                 dock_type="dock_x_slow_precise"
+                 dock_type="dock_x_fast_precise"
                  shift="0"
                  offset="0.1"
                  base="{PrevGoal}"/>
@@ -260,7 +267,7 @@
                           base_index="15">
           <Docking final_pose="{PrevGoal}"
                    isPureDocking="0"
-                   dock_type="dock_x_slow_precise"
+                   dock_type="dock_x_fast_precise"
                    shift="0"
                    offset="-0.1"
                    base="{base}"/>
@@ -293,8 +300,15 @@
         <Sequence>
           <Sequence>
             <BTStarter result="{STATUS}"/>
-            <CamReceiver/>
+            <!-- <CamReceiver/> -->
           </Sequence>
+          <ForceSuccess>
+            <Timeout msec="6000">
+              <FirmwareMission mission_status="{x}"
+                              mission_type="22"
+                              _description="backward stretch out"/>
+            </Timeout>
+          </ForceSuccess>
           <ForceSuccess>
             <SubTree ID="MissionPoint1"
                      _autoremap="true"/>
@@ -321,7 +335,7 @@
       <StopRobot/>
       <Docking final_pose="{PrevGoal}"
                isPureDocking="0"
-               dock_type="dock_y_slow_precise"
+               dock_type="dock_y_fast_precise"
                shift="0"
                offset="0"
                base="2.65, 1.6, 3"/>
@@ -380,7 +394,7 @@
                  hasCompleteMaterial="{hasCompleteMaterial}"
                  _autoremap="true"/>
         <Sequence>
-          <Sleep msec="1500"/>
+          <Sleep msec="700"/>
           <Fallback>
             <MaterialChecker remap_offset="{offset}"
                          remap_shift="{shift}"
@@ -439,7 +453,7 @@
                                 base_index="15">
                 <Docking final_pose="{PrevGoal}"
                          isPureDocking="0"
-                         dock_type="dock_x_slow_precise"
+                         dock_type="dock_x_fast_precise"
                          shift="0"
                          offset="-0.1"
                          base="{base}"/>
@@ -482,7 +496,7 @@
                      offset="0.2"
                      mission_type="front"
                      dock_type="slow_loose"
-                     base_index="6">
+                     base_index="9">
           <Docking final_pose="{PrevGoal}"
                    isPureDocking="0"
                    dock_type="{dock_type}"
@@ -527,7 +541,7 @@
                             base_index="17">
             <Docking final_pose="{PrevGoal}"
                      isPureDocking="0"
-                     dock_type="dock_y_slow_precise"
+                     dock_type="dock_y_fast_precise"
                      shift="0"
                      offset="-0.1"
                      base="{base}"/>
@@ -664,7 +678,7 @@
                                 base_index="18">
                 <Docking final_pose="{PrevGoal}"
                          isPureDocking="0"
-                         dock_type="dock_y_slow_precise"
+                         dock_type="dock_y_fast_precise"
                          shift="0"
                          offset="-0.1"
                          base="{base}"/>
@@ -697,10 +711,12 @@
 
   <BehaviorTree ID="NavTest">
     <Sequence>
-      <LoopInt32 value="{index}"
-                 if_empty="SUCCESS"
-                 queue="7, 8, 9">
+      <LoopDouble value="{index_double}"
+                  if_empty="SUCCESS"
+                  queue="5, 6, 7, 8, 9">
         <Sequence>
+          <Double2Int double="{index_double}"
+                      int="{index}"/>
           <MaterialChecker remap_offset="{offset}"
                        remap_shift="{shift}"
                        remap_dock_type="{dock_type}"
@@ -747,10 +763,10 @@
           </ForceSuccess>
           <Sleep msec="200"/>
         </Sequence>
-      </LoopInt32>
+      </LoopDouble>
       <Docking final_pose="{PrevGoal}"
                isPureDocking="0"
-               dock_type="dock_x_slow_precise"
+               dock_type="dock_x_fast_precise"
                shift="0"
                offset="0"
                base="1.5, 1.0, 0"
@@ -826,7 +842,7 @@
       </LoopInt32>
       <Docking final_pose="{PrevGoal}"
                isPureDocking="0"
-               dock_type="dock_x_slow_precise"
+               dock_type="dock_x_fast_precise"
                shift="0"
                offset="0"
                base="1.5, 1.0, 0"
@@ -836,13 +852,13 @@
 
   <BehaviorTree ID="OneLevelBot1new">
     <Sequence>
-      <ForceSuccess>
+      <!-- <ForceSuccess>
         <Timeout msec="6000">
           <FirmwareMission mission_status="{x}"
                            mission_type="22"
                            _description="backward stretch out"/>
         </Timeout>
-      </ForceSuccess>
+      </ForceSuccess> -->
       <ForceSuccess>
         <Timeout msec="4000">
           <FirmwareMission mission_status="{x}"
@@ -893,13 +909,13 @@
           </Timeout>
         </ForceSuccess>
         <Sleep msec="200"/>
-        <ForceSuccess>
+        <!-- <ForceSuccess>
           <Timeout msec="6000">
             <FirmwareMission mission_status="{x}"
                              mission_type="23"
                              _description="back put 1 level"/>
           </Timeout>
-        </ForceSuccess>
+        </ForceSuccess> -->
         <SetBlackboard value="0"
                        output_key="hasCompleteMaterial"/>
       </Sequence>
@@ -964,13 +980,13 @@
                      sleep="100"
                      timeout="6000"
                      _autoremap="true"/>
-            <ForceSuccess>
+            <!-- <ForceSuccess>
               <Timeout msec="6000">
                 <FirmwareMission mission_status="{x}"
                                  mission_type="25"
                                  _description="back put 1 level"/>
               </Timeout>
-            </ForceSuccess>
+            </ForceSuccess> -->
             <SetBlackboard value="0"
                            output_key="hasCompleteMaterial"/>
           </Sequence>
@@ -994,13 +1010,13 @@
                      sleep="100"
                      timeout="6000"
                      _autoremap="true"/>
-            <ForceSuccess>
+            <!-- <ForceSuccess>
               <Timeout msec="6000">
                 <FirmwareMission mission_status="{x}"
                                  mission_type="23"
                                  _description="back put 1 level"/>
               </Timeout>
-            </ForceSuccess>
+            </ForceSuccess> -->
             <SetBlackboard value="0"
                            output_key="hasCompleteMaterial"/>
           </Sequence>
@@ -1013,7 +1029,7 @@
                    retry="100"
                    shift="0"
                    sleep="100"
-                   timeout="6000"
+                   timeout="2000"
                    _autoremap="true"/>
         </Switch2>
         <Rotation final_pose="{PrevGoal}"
@@ -1091,6 +1107,13 @@
           <Timeout msec="6000">
             <FirmwareMission mission_status="{x}"
                              mission_type="90"
+                             _description="enable front magnet "/>
+          </Timeout>
+        </ForceSuccess>
+        <ForceSuccess>
+          <Timeout msec="6000">
+            <FirmwareMission mission_status="{x}"
+                             mission_type="32"
                              _description="enable front magnet "/>
           </Timeout>
         </ForceSuccess>
@@ -1311,7 +1334,7 @@
       <input_port name="if_empty"
                   type="BT::NodeStatus"/>
       <input_port name="queue"
-                  type="std::string"/>
+                  type="std::deque&lt;int, std::allocator&lt;int&gt; &gt;"/>
     </Decorator>
     <Action ID="MissionFailure">
       <output_port name="failed_levels"
@@ -1347,6 +1370,10 @@
       <output_port name="FORWARD_S"/>
       <output_port name="SHIFT"/>
       <output_port name="DOCK_DIR"/>
+    </Action>
+    <Action ID="Double2Int">
+      <output_port name="int" type="int"/>
+      <input_port name="double" type="double"/>
     </Action>
     <Action ID="MissionSuccess">
       <input_port name="levels"
