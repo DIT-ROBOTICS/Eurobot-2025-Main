@@ -483,10 +483,10 @@ NodeStatus MaterialChecker::tick() {
     double shift_ = getInput<double>("shift").value();
 
     // get parameters
-    std::string map_points;
-    blackboard_->get<std::string>("bot", map_points); 
-    map_points = "map_points_" + map_points;
-    node_->get_parameter(map_points, material_points_);
+    std::string mapPointsFile_, bot_;
+    blackboard_->get<std::string>("bot", bot_); 
+    mapPointsFile_ = "map_points_" + bot_;
+    node_->get_parameter(mapPointsFile_, material_points_);
     node_->get_parameter("safety_dist", safety_dist_);
 
     blackboard_->get<std_msgs::msg::Int32MultiArray>("materials_info", materials_info_);  // use vision message to check the target
@@ -525,7 +525,8 @@ NodeStatus MaterialChecker::tick() {
     int offset_dir_ = (int)(1 - 2 * int(base_.pose.position.z) % 2);
     int offset_positivity_ = (int)(offset_ / abs(offset_));
     if (missionType_ == "front") {
-        offset_ -= offset_ / abs(offset_) * 0.04;
+        if (bot_ == "1")
+            offset_ -= offset_ / abs(offset_) * 0.04;
         shift_ = material_points_[baseIndex_ * 5 + 4];
     } else if (missionType_ == "back") {
         base_.pose.position.z = ((int)base_.pose.position.z / 2) ? base_.pose.position.z - 2 : base_.pose.position.z + 2;

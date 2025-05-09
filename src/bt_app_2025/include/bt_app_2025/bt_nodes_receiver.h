@@ -112,15 +112,19 @@ public:
 private:
   void materials_info_callback(const std_msgs::msg::Int32MultiArray::SharedPtr msg);
   void mission_info_callback(const std_msgs::msg::Int32::SharedPtr msg);
+  void score_callback(const std_msgs::msg::Int32::SharedPtr msg);
 
   rclcpp::Subscription<std_msgs::msg::Int32MultiArray>::SharedPtr sub_materials_info_;
   rclcpp::Subscription<std_msgs::msg::Int32>::SharedPtr sub_mission_info_;
+  rclcpp::Subscription<std_msgs::msg::Int32>::SharedPtr sub_score_;
 
   std_msgs::msg::Int32MultiArray materials_info_;
-  std_msgs::msg::Int32 mission_info_;
+  std_msgs::msg::Int32 score_;
 
   std::shared_ptr<rclcpp::Node> node_;
   BT::Blackboard::Ptr blackboard_;
+  int mission_info_;
+  int score_main_, score_vision_;
 };
 
 class TopicSubTest : public BT::StatefulActionNode
