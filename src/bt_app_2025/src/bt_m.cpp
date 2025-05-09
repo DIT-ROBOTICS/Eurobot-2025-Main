@@ -72,13 +72,13 @@ public:
         blackboard->set<int>("mission_progress", 0);                           // count the steps of a mission subtree
         blackboard->set<std_msgs::msg::Int32MultiArray>("materials_info", materials_info_);     // the condition of each material point
         blackboard->set<std_msgs::msg::Int32MultiArray>("mission_points_status", mission_points_status_);  // record number of missions have done at each point
-        blackboard->set<bool>("last_mission_failed", false);
-        blackboard->set<bool>("Timeout", false);
-        blackboard->set<std::string>("team", "y");
-        blackboard->set<std::string>("bot", "1"); 
-        blackboard->set<int>("score_from_main", 0);
-        blackboard->set<bool>("enable_vision_check", true);
-        blackboard->set<int>("current_index", 0);   
+        blackboard->set<bool>("last_mission_failed", false);                   // set as true if any mission fail
+        blackboard->set<bool>("Timeout", false);                               // a timeout param for docking sub tree
+        blackboard->set<std::string>("team", "y");                             // team color
+        blackboard->set<std::string>("bot", "1");                              // bot name code
+        blackboard->set<int>("score_from_main", 0);                            // calculate score in main
+        blackboard->set<bool>("enable_vision_check", true);                    // limit the decorator to be executed only 1 time
+        blackboard->set<int>("current_index", 0);                              // record the result of decorator, pass as result if enable_vision_check is false
         // Subscriber
         time_sub = this->create_subscription<std_msgs::msg::Float32>("/robot/startup/time", 2, std::bind(&MainClass::timeCallback, this, std::placeholders::_1));
         ready_sub = this->create_subscription<std_msgs::msg::String>("/robot/startup/plan", 2, std::bind(&MainClass::readyCallback, this, std::placeholders::_1));
@@ -90,9 +90,9 @@ public:
         this->declare_parameter<std::string>("tree_node_model_config_file", "/Eurobot-2025-Main/src/bt_app_2025/bt_m_config/bt_m_tree_node_model.xml");
         this->declare_parameter<std::string>("tree_name", "FuncTest");
         this->declare_parameter<std::string>("frame_id", "base_link");
-        this->declare_parameter<double>("nav_dist_error", 0.03);
+        this->declare_parameter<double>("nav_dist_error", 0.005);
         this->declare_parameter<double>("nav_ang_error", 0.4);
-        this->declare_parameter<double>("rotate_dist_error", 0.03);
+        this->declare_parameter<double>("rotate_dist_error", 0.005);
         this->declare_parameter<double>("rotate_ang_error", 0.4);
         this->declare_parameter<double>("safety_dist", 0.33);
         // MissionFInisher params
@@ -101,7 +101,7 @@ public:
         this->declare_parameter<std::vector<int>>("construct_1", std::vector<int>{});
         this->declare_parameter<std::vector<int>>("construct_2", std::vector<int>{});
         this->declare_parameter<std::vector<int>>("construct_3", std::vector<int>{});
-        // map points
+        // map points for 2 robots
         this->declare_parameter<std::vector<double>>("map_points_1", std::vector<double>{});
         this->declare_parameter<std::vector<double>>("map_points_2", std::vector<double>{});
         // get parameters
@@ -114,25 +114,26 @@ public:
         // action nodes
         params.nh = node_;
         /* receiver */
-        factory.registerNodeType<TopicSubTest>("TopicSubTest", params);
+        factory.registerNodeType<TopicSubTest>("TopicSubTest", params);    // only a test node totally
         factory.registerNodeType<NavReceiver>("NavReceiver", params, blackboard);
         factory.registerNodeType<CamReceiver>("CamReceiver", params, blackboard);
         /* navigation */
         factory.registerNodeType<StopRobot>("StopRobot", params);
         factory.registerNodeType<MaterialChecker>("MaterialChecker", params, blackboard);
         factory.registerNodeType<MissionChecker>("MissionChecker", params, blackboard);
-        params.default_port_value = "dock_robot";
+        params.default_port_value = "dock_robot";  // ros action name for all three navigation BT actions
         factory.registerNodeType<Navigation>("Navigation", params);
         factory.registerNodeType<Docking>("Docking", params, blackboard);
         factory.registerNodeType<Rotation>("Rotation", params);
         /* firmware */
-        params.default_port_value = "firmware_mission";
+        params.default_port_value = "firmware_mission"; // ros action name for IntegratedMissionNode (no use for now)
         factory.registerNodeType<FirmwareMission>("FirmwareMission", params, blackboard);
         factory.registerNodeType<IntegratedMissionNode>("IntegratedMissionNode", params, blackboard);
         factory.registerNodeType<SIMAactivate>("SIMAactivate", params);
         factory.registerNodeType<MissionStart>("MissionStart", params, blackboard);
         factory.registerNodeType<MissionSuccess>("MissionSuccess", params, blackboard);
         factory.registerNodeType<MissionFailure>("MissionFailure", params, blackboard);
+        factory.registerNodeType<BannerChecker>("BannerChecker", params, blackboard);
         /* others */
         factory.registerNodeType<BTStarter>("BTStarter", params, blackboard);
         factory.registerNodeType<MySetBlackboard>("MySetBlackboard", params, blackboard);
@@ -142,7 +143,7 @@ public:
         factory.registerNodeType<Double2Int>("Double2Int", params);
     }
 
-    void LoadXML() {
+    void CreatTree() {
         RCLCPP_INFO_STREAM(this->get_logger(), "--Loading XML--");
         while (rclcpp::ok() && !isReady) {
             rate.sleep();
@@ -265,7 +266,7 @@ int main(int argc, char **argv) {
     node->InitParam();
     node->CreateTreeNodes();
     std::thread spin_thread([&]() { rclcpp::spin(node); });                    // create a thread to spin the node
-    node->LoadXML();
+    node->CreatTree();
     node->RunTheTree();
     rclcpp::shutdown();
     return 0;

@@ -47,6 +47,14 @@ template <> inline std::deque<int> BT::convertFromString(StringView str) {
     return output;
 }
 
+double inline calculateDistance(const geometry_msgs::msg::Pose &pose1, const geometry_msgs::msg::Pose &pose2) {
+    tf2::Vector3 position1(pose1.position.x, pose1.position.y, 0);
+    tf2::Vector3 position2(pose2.position.x, pose2.position.y, 0);
+    double dist = position1.distance(position2);
+    // RCLCPP_INFO_STREAM(rclcpp::get_logger("rclcpp"), "distance: " << dist);
+    return dist;
+}
+
 /********************************/
 /* Simple Node to activate SIMA */
 /********************************/
@@ -442,6 +450,56 @@ void FirmwareMission::onHalted() {
     // RCLCPP_INFO(node_->get_logger(), "Testing Node halted");
     setOutput<int>("mission_status", -1);
     return;
+}
+
+BT::PortsList BannerChecker::providedPorts() {
+    return {
+        BT::InputPort<int>("banner_place"),
+        BT::OutputPort<int>("remap_banner_place")
+    };
+}
+
+void BannerChecker::onStart() {
+    getInput<int>("banner_place", banner_place_);
+    blackboard_->get<std::string>("team", team_);
+    blackboard_->get<std_msgs::msg::Int32MultiArray>("mission_points_status", mission_points_status_);
+    // get correspond map points according to bot name
+    std::string map_points;
+    blackboard_->get<std::string>("bot", map_points); 
+    map_points = "map_points_" + map_points;
+    node_->get_parameter(map_points, material_points_);
+    // node_->get_parameter("safety_dist", safety_dist_);
+    // LocReceiver::UpdateRobotPose(robot_pose_, tf_buffer_, frame_id_);
+    // LocReceiver::UpdateRivalPose(rival_pose_, tf_buffer_, frame_id_);
+}
+
+int BannerChecker::DecodeBannerIndex(const int index) {
+    if (team_ == "y")
+        return index + 12;
+    else if (team_ == "b")
+        return index + 16;
+    else
+        throw("error team color");
+}
+
+BT::NodeStatus BannerChecker::tick() {
+    geometry_msgs::msg::Pose ptPose_;
+    int mapPoint_;
+    int initPlace_ = banner_place_;
+
+    onStart();
+    do {
+        mapPoint_ = DecodeBannerIndex(banner_place_);
+        banner_place_ = (banner_place_ + 1) % 3;
+    } while (mission_points_status_.data[mapPoint_] && banner_place_ != initPlace_);
+    
+    // pt_pose_.position.x = material_points_[(index + 12) * 5];
+    // pt_pose_.position.y = material_points_[(index + 12) * 5 + 1];
+    // if (calculateDistance(ptPose_, rival_pose_.pose) < safety_dist_) {
+    // }
+    
+    setOutput("remap_banner_place", banner_place_);
+    return BT::NodeStatus::SUCCESS;
 }
 
 /***************************/

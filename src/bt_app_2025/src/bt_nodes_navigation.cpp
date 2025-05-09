@@ -463,11 +463,9 @@ int MaterialChecker::findBestTarget() {
                 minDistIndex_ = candidate_.front();
                 minDist_ = dist_;
             }
-            // candidate_.push_back(candidate_.front());
         }
         candidate_.pop_front();
     } while (!candidate_.empty());
-    // int min_index = candidate_.front();
     if (last_mission_failed_) {
         blackboard_->set<bool>("last_mission_failed", false);  
         return safestPointIndex_;

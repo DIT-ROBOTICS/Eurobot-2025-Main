@@ -26,6 +26,7 @@
 #include "geometry_msgs/msg/twist_stamped.hpp"
 #include "geometry_msgs/msg/pose_stamped.hpp"
 #include "geometry_msgs/msg/pose_array.hpp"
+#include "geometry_msgs/msg/pose.hpp"
 
 // tf2 
 #include <tf2/LinearMath/Quaternion.h>
@@ -161,15 +162,6 @@ private:
 /****************/
 /* Topic Mission*/  
 /****************/
-typedef enum {
-  IDLE,
-  RECEIVED,
-  RUNNING1,
-  RUNNING2,
-  RUNNING3,
-  FINISH,
-  FAILED
-} MissionState;
 
 class FirmwareMission : public BT::StatefulActionNode
 {
@@ -205,6 +197,36 @@ private:
   int mission_status_ = 0;
   bool mission_received_ = false;
   bool mission_finished_ = false;
+};
+
+class BannerChecker : public BT::SyncActionNode
+{
+public:
+    BannerChecker(const std::string &name, const BT::NodeConfig &config, const RosNodeParams& params, BT::Blackboard::Ptr blackboard)
+        : BT::SyncActionNode(name, config), node_(params.nh.lock()), blackboard_(blackboard), tf_buffer_(params.nh.lock()->get_clock()), listener_(tf_buffer_)
+    {
+        node_->get_parameter("frame_id", frame_id_);
+        tf_buffer_.setUsingDedicatedThread(true);
+    }
+    static BT::PortsList providedPorts();
+    BT::NodeStatus tick() override;
+private:
+    void onStart();
+    geometry_msgs::msg::Pose DecodeBannerIndex(const int index);
+    BT::Blackboard::Ptr blackboard_;
+    rclcpp::Node::SharedPtr node_;
+    // for tf listener
+    tf2_ros::Buffer tf_buffer_;
+    tf2_ros::TransformListener listener_;
+    std::string frame_id_;
+    geometry_msgs::msg::PoseStamped robot_pose_;
+    geometry_msgs::msg::PoseStamped rival_pose_;
+    // for input
+    std_msgs::msg::Int32MultiArray mission_points_status_;
+    std::vector<double> material_points_;
+    std::string team_;
+    int banner_place_;
+    double safety_dist_;
 };
 
 /***************************/

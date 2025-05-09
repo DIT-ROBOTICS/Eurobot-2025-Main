@@ -9,6 +9,7 @@ bot1_yellow_a.xml
 4
 5
 14
+1
 yellow
 bot1_yellow_b.xml
 8
@@ -19,6 +20,7 @@ bot1_yellow_b.xml
 5
 7
 14
+1
 yellow
 bot1_yellow_c.xml
 9
@@ -29,6 +31,7 @@ bot1_yellow_c.xml
 5
 7
 14
+1
 yellow
 bot1_yellow_d.xml
 6
@@ -39,6 +42,7 @@ bot1_yellow_d.xml
 1
 9
 13
+2
 yellow
 bot1_yellow_e.xml
 1
@@ -49,6 +53,7 @@ bot1_yellow_e.xml
 4
 6
 13
+0
 blue
 bot1_blue_a.xml
 1
@@ -59,6 +64,7 @@ bot1_blue_a.xml
 4
 5
 14
+1
 blue
 bot1_blue_b.xml
 8
@@ -69,6 +75,7 @@ bot1_blue_b.xml
 5
 7
 14
+1
 blue
 bot1_blue_c.xml
 9
@@ -79,6 +86,7 @@ bot1_blue_c.xml
 5
 7
 14
+1
 blue
 bot1_blue_d.xml
 6
@@ -89,6 +97,7 @@ bot1_blue_d.xml
 1
 9
 13
+2
 blue
 bot1_blue_e.xml
 1
@@ -99,3 +108,4 @@ bot1_blue_e.xml
 4
 6
 13
+0
