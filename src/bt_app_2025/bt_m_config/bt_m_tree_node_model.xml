@@ -3,6 +3,10 @@
         <Action ID="BTStarter">
             <output_port name="result" type="int"/>
         </Action>
+        <Action ID="BannerChecker">
+            <output_port name="remap_banner_place" type="int"/>
+            <input_port name="banner_place" type="int"/>
+        </Action>
         <Action ID="CamReceiver"/>
         <Condition ID="Comparator">
             <input_port name="game_status" type="int"/>
