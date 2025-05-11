@@ -392,20 +392,20 @@ PortsList FirmwareMission::providedPorts() {
 }
 
 BT::NodeStatus FirmwareMission::stopStep() {
-    if (mission_status_ == 1 && mission_received_) {
+    if (mission_status_ == 1 && mission_stamp_ == mission_type_) {
         // RCLCPP_INFO(node_->get_logger(), "Mission success");
         blackboard_->set<int>("mission_progress", ++mission_progress_);
         setOutput<int>("mission_status", mission_status_);
-        mission_received_ = false;
+        // mission_received_ = false;
         mission_status_ = 0;
         subscription_.reset();
         return BT::NodeStatus::SUCCESS;
-    } else if (mission_status_ == 0 || (!mission_received_ && mission_status_ == 1)) {
+    } else if (mission_status_ == 0 || (mission_status_ == 1 && mission_stamp_ != mission_type_)) {
         return BT::NodeStatus::RUNNING;
     } else if (mission_status_ == -1) {
         // RCLCPP_INFO(node_->get_logger(), "Mission failed");
         setOutput<int>("mission_status", mission_status_);
-        mission_received_ = false;
+        // mission_received_ = false;
         subscription_.reset();
         return BT::NodeStatus::FAILURE;
     } else {
@@ -418,10 +418,12 @@ BT::NodeStatus FirmwareMission::stopStep() {
 void FirmwareMission::mission_callback(const std_msgs::msg::Int32::SharedPtr sub_msg) {
     if (mission_type_)
     {
-        if (sub_msg->data == 0)
-            mission_received_ = true;
-        mission_status_ = sub_msg->data;
-        // RCLCPP_INFO(node_->get_logger(), "mission_received_: %d, mission type: '%d', heard: '%d'", mission_received_, mission_type_, mission_status_);
+        // if (sub_msg->data == 0)
+            // mission_received_ = true;
+        int temp_ = sub_msg->data;
+        mission_stamp_ = temp_ / 10;
+        mission_status_ = temp_ % 10;
+        // RCLCPP_INFO(node_->get_logger(), "mission type: %d, return: %d, status: %d", mission_type_, mission_stamp_, mission_status_);
     }
 }
 
@@ -485,14 +487,18 @@ int BannerChecker::DecodeBannerIndex(const int index) {
 BT::NodeStatus BannerChecker::tick() {
     geometry_msgs::msg::Pose ptPose_;
     int mapPoint_;
-    int initPlace_ = banner_place_;
+    int i = 0;
 
     onStart();
-    do {
-        mapPoint_ = DecodeBannerIndex(banner_place_);
+    mapPoint_ = DecodeBannerIndex(banner_place_);
+    while (mission_points_status_.data[mapPoint_] && i < 3) {
+        RCLCPP_INFO_STREAM(node_->get_logger(), "considering banner_place_: " << banner_place_ << ", status: " << mission_points_status_.data[mapPoint_]);
         banner_place_ = (banner_place_ + 1) % 3;
-    } while (mission_points_status_.data[mapPoint_] && banner_place_ != initPlace_);
+        mapPoint_ = DecodeBannerIndex(banner_place_);
+        i++;
+    }
     
+    RCLCPP_INFO_STREAM(node_->get_logger(), "final decision: " << banner_place_);
     // pt_pose_.position.x = material_points_[(index + 12) * 5];
     // pt_pose_.position.y = material_points_[(index + 12) * 5 + 1];
     // if (calculateDistance(ptPose_, rival_pose_.pose) < safety_dist_) {

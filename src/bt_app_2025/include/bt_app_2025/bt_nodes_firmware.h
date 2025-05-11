@@ -195,6 +195,7 @@ private:
   int mission_progress_ = 0;
   int mission_type_ = 0;
   int mission_status_ = 0;
+  int mission_stamp_ = 0;
   bool mission_received_ = false;
   bool mission_finished_ = false;
 };
@@ -212,7 +213,7 @@ public:
     BT::NodeStatus tick() override;
 private:
     void onStart();
-    geometry_msgs::msg::Pose DecodeBannerIndex(const int index);
+    int DecodeBannerIndex(const int index);
     BT::Blackboard::Ptr blackboard_;
     rclcpp::Node::SharedPtr node_;
     // for tf listener
@@ -232,6 +233,16 @@ private:
 /***************************/
 /* Integrated Mission Node */
 /***************************/
+typedef enum {
+  IDLE,
+  RECEIVED,
+  RUNNING1,
+  RUNNING2,
+  RUNNING3,
+  FINISH,
+  FAILED
+} MissionState;
+
 class IntegratedMissionNode : public BT::StatefulActionNode
 {
 public:
