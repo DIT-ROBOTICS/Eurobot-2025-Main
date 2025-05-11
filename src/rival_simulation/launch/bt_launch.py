@@ -21,7 +21,7 @@ def generate_launch_description():
         'config_path.yaml'
     )
     map_points = os.path.join(
-        get_package_share_directory('bt_app_2025'),
+        get_package_share_directory('rival_simulation'),
         'params',
         'map_points.yaml'
     )

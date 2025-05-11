@@ -36,7 +36,6 @@ int main(int argc, char** argv) {
     node->declare_parameter<std::string>("tree_name", "MainTree");
     node->declare_parameter<std::string>("frame_id", "base_link");
     node->declare_parameter<std::vector<double>>("material_points", std::vector<double>{});
-    node->declare_parameter<std::vector<double>>("mission_points", std::vector<double>{});
     node->get_parameter("script_file_directory", script_file_directory);
     node->get_parameter("tree_node_model_config_file", bt_tree_node_model);
     node->get_parameter("tree_name", tree_name);
