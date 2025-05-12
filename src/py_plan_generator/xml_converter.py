@@ -19,7 +19,7 @@ offset_list = ['0.1', '-0.1', '-0.1', '-0.1', '-0.1', '-0.1', '-0.1', '-0.1']
 
 def read_input(root):
     i = 0
-    list_size = 5 + 3
+    list_size = 4 + 4
 
     color = input('input team color: ')
     output_file_name = input('input file name: ')
@@ -40,12 +40,14 @@ def read_input(root):
                 pt = pt + 4
         points_list.append(str(pt))
     banner_pt = input()
+    banner_time = input()
     print(points_list)
 
     i = 0
     j = 0
     k = 0
     l = 0
+    c = 0
     for elt in root.iter():
         if (elt.tag == "BehaviorTree" and elt.get('ID') == "BannerMission"):
             for dock in elt.iter():
@@ -55,10 +57,16 @@ def read_input(root):
                     if (l == 3 or l == 7):
                         l += 1
         elif (elt.tag == "BehaviorTree" and elt.get('ID') == "MainTree"):
-            for dock in elt.iter():
-                if (dock.tag == "Docking"):
-                    dock.set('base', home + ', 1.6, 0')
-        elif (elt.tag == "BehaviorTree" and (elt.get('ID') == "MissionPoint1" or elt.get('ID') == "MissionPoint2" or elt.get('ID') == "MissionPoint3")):
+            for node in elt.iter():
+                if (node.tag == "SubTree" and (node.get('ID') == "MissionPoint1" or node.get('ID') == "MissionPoint2" or node.get('ID') == "MissionPoint3new")):
+                    c += 1
+                    print(c, node.get('ID'))
+                    node.set('NOT_NOW', "true")
+                elif (node.tag == "SubTree" and node.get('ID') == banner_time):
+                    node.set('NOT_NOW', "false")
+                if (node.tag == "Docking"):
+                    node.set('base', home + ', 1.6, 0')
+        elif (elt.tag == "BehaviorTree" and (elt.get('ID') == "MissionPoint1" or elt.get('ID') == "MissionPoint2" or elt.get('ID') == "MissionPoint3new")):
             for node in elt.iter():
                 if (node.tag == "MaterialChecker" and node.get('base_index') != "-1"):
                     node.set('base_index', points_list[i])
