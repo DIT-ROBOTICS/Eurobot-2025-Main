@@ -33,6 +33,7 @@ BT::NodeStatus MySetBlackboard::tick() {
     bool blackboard_value_;
     getInput<std::string>("blackboard_key", blackboard_key_);
     getInput<bool>("blackboard_value", blackboard_value_);
+    RCLCPP_INFO_STREAM(node_->get_logger(), blackboard_key_ << ": " << blackboard_value_);
 
     blackboard_->set<bool>(blackboard_key_, blackboard_value_);
     setOutput<bool>("new_value", blackboard_value_);

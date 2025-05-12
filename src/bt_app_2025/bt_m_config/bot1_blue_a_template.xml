@@ -1,71 +1,73 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <root BTCPP_format="4">
   <BehaviorTree ID="BannerMission">
-    <Sequence _successIf="not_now">
-      <MySetBlackboard new_value="{not_now}"
-                       blackboard_value="{NOT_NOW}"
-                       blackboard_key="NOT_NOW"/>
-      <BannerChecker remap_banner_place="{remap_banner_place}"
-                     banner_place="{BANNER_PLACE}"/>
-      <Parallel failure_count="1"
-                success_count="2">
+    <Sequence>
+      <MySetBlackboard new_value="{NOT_NOW}"
+                      blackboard_value="{NOT_NOW}"
+                      blackboard_key="NOT_NOW"/>
+      <Sequence _successIf="NOT_NOW">
+        <BannerChecker remap_banner_place="{remap_banner_place}"
+                       banner_place="{BANNER_PLACE}"/>
+        <Parallel failure_count="1"
+                  success_count="2">
+          <ForceSuccess>
+            <Timeout msec="100">
+              <FirmwareMission mission_status="{x}"
+                              mission_type="81"
+                              _description="lift the front grabber"/>
+            </Timeout>
+          </ForceSuccess>
+          <Switch2 case_1="0"
+                  case_2="1"
+                  variable="{BANNER_PLACE}">
+            <Docking final_pose="{PrevGoal}"
+                    isPureDocking="0"
+                    dock_type="dock_y_precise_linearBoost"
+                    shift="0"
+                    offset="-0.1"
+                    base="0.25, 0.3, 0"/>
+            <Docking final_pose="{PrevGoal}"
+                    isPureDocking="0"
+                    dock_type="dock_y_precise_linearBoost"
+                    shift="0"
+                    offset="-0.1"
+                    base="1.75, 0.3, 0"/>
+            <Docking final_pose="{PrevGoal}"
+                    isPureDocking="0"
+                    dock_type="dock_y_precise_linearBoost"
+                    shift="0"
+                    offset="-0.1"
+                    base="2.25, 0.3, 0"/>
+          </Switch2>
+        </Parallel>
         <ForceSuccess>
           <Timeout msec="100">
             <FirmwareMission mission_status="{x}"
-                             mission_type="81"
-                             _description="lift the front grabber"/>
+                            mission_type="82"
+                            _description="lift the front grabber"/>
           </Timeout>
         </ForceSuccess>
-        <Switch2 case_1="0"
-                 case_2="1"
-                 variable="{BANNER_PLACE}">
-          <Docking final_pose="{PrevGoal}"
-                   isPureDocking="0"
-                   dock_type="dock_y_precise_linearBoost"
-                   shift="0"
-                   offset="-0.1"
-                   base="0.25, 0.3, 0"/>
-          <Docking final_pose="{PrevGoal}"
-                   isPureDocking="0"
-                   dock_type="dock_y_precise_linearBoost"
-                   shift="0"
-                   offset="-0.1"
-                   base="1.75, 0.3, 0"/>
-          <Docking final_pose="{PrevGoal}"
-                   isPureDocking="0"
-                   dock_type="dock_y_precise_linearBoost"
-                   shift="0"
-                   offset="-0.1"
-                   base="2.25, 0.3, 0"/>
-        </Switch2>
-      </Parallel>
-      <ForceSuccess>
-        <Timeout msec="100">
-          <FirmwareMission mission_status="{x}"
-                           mission_type="82"
-                           _description="lift the front grabber"/>
-        </Timeout>
-      </ForceSuccess>
-      <ForceSuccess>
-        <Timeout msec="100">
-          <FirmwareMission mission_status="{x}"
-                           mission_type="80"
-                           _description="lift the front grabber"/>
-        </Timeout>
-      </ForceSuccess>
-      <SubTree ID="DockingSubTree"
-                base="{PrevGoal}"
-                dock_type="dock_y_precise_linearBoost"
-                final_pose="{PrevGoal}"
-                isPureDocking="1"
-                offset="0.1"
-                retry="100"
-                shift="0"
-                sleep="100"
-                timeout="6000"
-                _autoremap="true"/>
-      <MissionSuccess levels="0"
-                      base_index="-2"/>
+        <ForceSuccess>
+          <Timeout msec="100">
+            <FirmwareMission mission_status="{x}"
+                            mission_type="80"
+                            _description="lift the front grabber"/>
+          </Timeout>
+        </ForceSuccess>
+        <SubTree ID="DockingSubTree"
+                  base="{PrevGoal}"
+                  dock_type="dock_y_precise_linearBoost"
+                  final_pose="{PrevGoal}"
+                  isPureDocking="1"
+                  offset="0.1"
+                  retry="100"
+                  shift="0"
+                  sleep="100"
+                  timeout="6000"
+                  _autoremap="true"/>
+        <MissionSuccess levels="0"
+                        base_index="-2"/>
+      </Sequence>
     </Sequence>
   </BehaviorTree>
 
@@ -281,6 +283,13 @@
         </Timeout>
       </ForceSuccess>
       <ForceSuccess>
+        <Timeout msec="6000">
+          <FirmwareMission mission_status="{x}"
+                            mission_type="10"
+                            _description=""/>
+        </Timeout>
+      </ForceSuccess>
+      <!-- <ForceSuccess>
         <Parallel failure_count="1"
                   success_count="2">
           <Docking final_pose="{PrevGoal}"
@@ -297,7 +306,7 @@
               dock_type="dock_x_precise_linearBoost"
               shift="0"
               offset="0.5"
-              base="1.0, 1.0, 0"/>
+              base="1.0, 1.0, 0"/> -->
       <Sleep msec="50000"/>
     </Sequence>
   </BehaviorTree>

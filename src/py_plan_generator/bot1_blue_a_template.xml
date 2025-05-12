@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <root BTCPP_format="4">
   <BehaviorTree ID="BannerMission">
-    <Sequence _successIf="not_now">
+    <Sequence>
       <MySetBlackboard new_value="{not_now}"
                        blackboard_value="{NOT_NOW}"
                        blackboard_key="NOT_NOW"/>
-      <BannerChecker remap_banner_place="{remap_banner_place}"
+      <BannerChecker _successIf="not_now"
+                     remap_banner_place="{remap_banner_place}"
                      banner_place="{BANNER_PLACE}"/>
       <Parallel failure_count="1"
                 success_count="2">
@@ -21,19 +22,19 @@
                  variable="{BANNER_PLACE}">
           <Docking final_pose="{PrevGoal}"
                    isPureDocking="0"
-                   dock_type="dock_y_slow_precise_linearBoost"
+                   dock_type="dock_y_precise_linearBoost"
                    shift="0"
                    offset="-0.1"
                    base="0.25, 0.3, 0"/>
           <Docking final_pose="{PrevGoal}"
                    isPureDocking="0"
-                   dock_type="dock_y_slow_precise_linearBoost"
+                   dock_type="dock_y_precise_linearBoost"
                    shift="0"
                    offset="-0.1"
                    base="1.75, 0.3, 0"/>
           <Docking final_pose="{PrevGoal}"
                    isPureDocking="0"
-                   dock_type="dock_y_slow_precise_linearBoost"
+                   dock_type="dock_y_precise_linearBoost"
                    shift="0"
                    offset="-0.1"
                    base="2.25, 0.3, 0"/>
@@ -54,16 +55,16 @@
         </Timeout>
       </ForceSuccess>
       <SubTree ID="DockingSubTree"
-               base="{PrevGoal}"
-               dock_type="dock_y_slow_precise_linearBoost"
-               final_pose="{PrevGoal}"
-               isPureDocking="1"
-               offset="0.1"
-               retry="100"
-               shift="0"
-               sleep="100"
-               timeout="6000"
-               _autoremap="true"/>
+                base="{PrevGoal}"
+                dock_type="dock_y_precise_linearBoost"
+                final_pose="{PrevGoal}"
+                isPureDocking="1"
+                offset="0.1"
+                retry="100"
+                shift="0"
+                sleep="100"
+                timeout="6000"
+                _autoremap="true"/>
       <MissionSuccess levels="0"
                       base_index="-2"/>
     </Sequence>
@@ -124,7 +125,7 @@
                          shift="0"
                          offset="-0.2"
                          mission_type="back"
-                         dock_type="dock_x_slow_precise_linearBoost"
+                         dock_type="dock_x_precise_linearBoost"
                          base_index="8">
           <Docking final_pose="{PrevGoal}"
                    isPureDocking="0"
@@ -145,7 +146,7 @@
                          shift="0"
                          offset="-0.2"
                          mission_type="front"
-                         dock_type="dock_x_slow_precise_linearBoost"
+                         dock_type="dock_x_precise_linearBoost"
                          base_index="7">
           <Docking final_pose="{PrevGoal}"
                    isPureDocking="0"
@@ -168,7 +169,7 @@
                         base_index="15">
           <Docking final_pose="{PrevGoal}"
                    isPureDocking="0"
-                   dock_type="dock_x_slow_precise_linearBoost"
+                   dock_type="dock_x_precise_linearBoost"
                    shift="0"
                    offset="-0.1"
                    base="{base}"/>
@@ -190,7 +191,7 @@
                         base_index="15">
           <Docking final_pose="{PrevGoal}"
                    isPureDocking="0"
-                   dock_type="dock_x_slow_precise_linearBoost"
+                   dock_type="dock_x_precise_linearBoost"
                    shift="0"
                    offset="-0.1"
                    base="{base}"/>
@@ -211,7 +212,7 @@
         </ForceSuccess>
         <Docking final_pose="{PrevGoal}"
                  isPureDocking="1"
-                 dock_type="dock_x_slow_precise_linearBoost"
+                 dock_type="dock_x_precise_linearBoost"
                  shift="0"
                  offset="0.1"
                  base="{PrevGoal}"/>
@@ -243,7 +244,7 @@
                         base_index="15">
           <Docking final_pose="{PrevGoal}"
                    isPureDocking="0"
-                   dock_type="dock_x_slow_precise_linearBoost"
+                   dock_type="dock_x_precise_linearBoost"
                    shift="0"
                    offset="-0.1"
                    base="{base}"/>
@@ -269,45 +270,35 @@
       <ForceSuccess>
         <Timeout msec="6000">
           <FirmwareMission mission_status="{x}"
-                           mission_type="22"
-                           _description="put back material"/>
+                            mission_type="11"
+                            _description=""/>
         </Timeout>
       </ForceSuccess>
       <ForceSuccess>
         <Timeout msec="6000">
           <FirmwareMission mission_status="{x}"
-                           mission_type="21"
-                           _description="put back material"/>
+                            mission_type="21"
+                            _description=""/>
         </Timeout>
       </ForceSuccess>
       <ForceSuccess>
-        <Timeout msec="6000">
-          <FirmwareMission mission_status="{x}"
-                           mission_type=""
-                           _description="put back material"/>
-        </Timeout>
+        <Parallel failure_count="1"
+                  success_count="2">
+          <Docking final_pose="{PrevGoal}"
+                  isPureDocking="1"
+                  dock_type="dock_x_precise_linearBoost"
+                  shift="0"
+                  offset="0.5"
+                  base="0.5, 1.0, 0"/>
+          <StopRobot/>
+        </Parallel>
       </ForceSuccess>
-      <ForceSuccess>
-        <Timeout msec="6000">
-          <FirmwareMission mission_status="{x}"
-                           mission_type="21"
-                           _description="put back material"/>
-        </Timeout>
-      </ForceSuccess>
-      <ForceSuccess>
-        <Timeout msec="100">
-          <FirmwareMission mission_status="{x}"
-                           mission_type="20"
-                           _description="put back material"/>
-        </Timeout>
-      </ForceSuccess>
-      <ForceSuccess>
-        <Timeout msec="6000">
-          <FirmwareMission mission_status="{x}"
-                           mission_type="32"
-                           _description="put back material"/>
-        </Timeout>
-      </ForceSuccess>
+      <Docking final_pose="{PrevGoal}"
+              isPureDocking="0"
+              dock_type="dock_x_precise_linearBoost"
+              shift="0"
+              offset="0.5"
+              base="1.0, 1.0, 0"/>
       <Sleep msec="50000"/>
     </Sequence>
   </BehaviorTree>
@@ -351,12 +342,22 @@
         </Sequence>
       </Parallel>
       <StopRobot/>
-      <Docking final_pose="{PrevGoal}"
-               isPureDocking="0"
-               dock_type="dock_y_slow_precise_linearBoost"
-               shift="0"
-               offset="0"
-               base="2.65, 1.6, 3"/>
+      <Parallel failure_count="2"
+                success_count="2">
+        <ForceSuccess>
+          <Timeout msec="6000">
+            <FirmwareMission mission_status="{x}"
+                             mission_type="0"
+                             _description="backward stretch out"/>
+          </Timeout>
+        </ForceSuccess>
+        <Docking final_pose="{PrevGoal}"
+                isPureDocking="0"
+                dock_type="dock_y_precise_linearBoost"
+                shift="0"
+                offset="0"
+                base="2.65, 1.6, 3"/>
+      </Parallel>
     </Sequence>
   </BehaviorTree>
 
@@ -484,7 +485,7 @@
                               base_index="15">
                 <Docking final_pose="{PrevGoal}"
                          isPureDocking="0"
-                         dock_type="dock_x_slow_precise_linearBoost"
+                         dock_type="dock_x_precise_linearBoost"
                          shift="0"
                          offset="-0.1"
                          base="{base}"/>
@@ -582,7 +583,7 @@
                           base_index="17">
             <Docking final_pose="{PrevGoal}"
                      isPureDocking="0"
-                     dock_type="dock_y_slow_precise_linearBoost"
+                     dock_type="dock_y_precise_linearBoost"
                      shift="0"
                      offset="-0.1"
                      base="{base}"/>
@@ -721,7 +722,7 @@
                               base_index="18">
                 <Docking final_pose="{PrevGoal}"
                          isPureDocking="0"
-                         dock_type="dock_y_slow_precise_linearBoost"
+                         dock_type="dock_y_precise_linearBoost"
                          shift="0"
                          offset="-0.1"
                          base="{base}"/>
@@ -831,7 +832,7 @@
                               base_index="16">
                 <Docking final_pose="{PrevGoal}"
                          isPureDocking="0"
-                         dock_type="dock_y_slow_precise_linearBoost"
+                         dock_type="dock_y_precise_linearBoost"
                          shift="0"
                          offset="-0.1"
                          base="{base}"/>
@@ -872,7 +873,7 @@
                               base_index="17">
                 <Docking final_pose="{PrevGoal}"
                          isPureDocking="0"
-                         dock_type="dock_y_slow_precise_linearBoost"
+                         dock_type="dock_y_precise_linearBoost"
                          shift="0"
                          offset="-0.1"
                          base="{base}"/>
@@ -965,7 +966,7 @@
       </LoopDouble>
       <Docking final_pose="{PrevGoal}"
                isPureDocking="0"
-               dock_type="dock_x_slow_precise_linearBoost"
+               dock_type="dock_x_precise_linearBoost"
                shift="0"
                offset="0"
                base="1.5, 1.0, 0"
@@ -1041,7 +1042,7 @@
       </LoopInt32>
       <Docking final_pose="{PrevGoal}"
                isPureDocking="0"
-               dock_type="dock_x_slow_precise_linearBoost"
+               dock_type="dock_x_precise_linearBoost"
                shift="0"
                offset="0"
                base="1.5, 1.0, 0"
