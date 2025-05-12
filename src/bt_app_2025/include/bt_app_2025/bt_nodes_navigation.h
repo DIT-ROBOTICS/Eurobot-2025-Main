@@ -168,7 +168,7 @@ class StopRobot : public BT::SyncActionNode
 {
 public:
     StopRobot(const std::string& name, const BT::NodeConfig& config, const RosNodeParams& params)
-    : BT::SyncActionNode(name, config), node_(params.nh.lock())
+    : BT::SyncActionNode(name, config), node_(params.nh.lock()), rate_(30)
     {
         publisher_ = node_->create_publisher<std_msgs::msg::Bool>("/stopRobot", rclcpp::QoS(10).reliable().transient_local());
     }
@@ -177,6 +177,7 @@ public:
 private:
     std::shared_ptr<rclcpp::Node> node_;
     BT::Blackboard::Ptr blackboard_;
+    rclcpp::Rate rate_;
     rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr publisher_;
     std_msgs::msg::Bool stop_msg;
 };
