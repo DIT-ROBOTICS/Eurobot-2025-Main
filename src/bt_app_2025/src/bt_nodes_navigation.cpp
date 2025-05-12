@@ -399,11 +399,15 @@ PortsList StopRobot::providedPorts() {
 
 BT::NodeStatus StopRobot::tick() {
     stop_msg.data = true;
-    for (int i = 0; i < 10; i++)
+    for (int i = 0; i < 10; i++) {
         publisher_->publish(stop_msg);
+        rate_.sleep();
+    }
     stop_msg.data = false;
-    for (int i = 0; i < 10; i++)
+    for (int i = 0; i < 10; i++) {
         publisher_->publish(stop_msg);
+        rate_.sleep();
+    }
     return BT::NodeStatus::SUCCESS;
 }
 
