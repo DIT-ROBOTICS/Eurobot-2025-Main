@@ -285,7 +285,7 @@
                 dock_type="dock_y_slow_precise_linearBoost"
                 shift="0"
                 offset="0.1"
-                base="2.0, 1.0, 3"/>
+                base="2.65, 1.6, 3"/>
       </Parallel>
       <Sleep msec="50000"/>
     </Sequence>
