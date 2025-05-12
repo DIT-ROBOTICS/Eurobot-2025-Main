@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <root BTCPP_format="4">
   <BehaviorTree ID="BannerMission">
-    <Sequence>
+    <Sequence _successIf="not_now">
+      <MySetBlackboard new_value="{not_now}"
+                       blackboard_value="{NOT_NOW}"
+                       blackboard_key="NOT_NOW"/>
       <BannerChecker remap_banner_place="{remap_banner_place}"
                      banner_place="{BANNER_PLACE}"/>
       <Parallel failure_count="1"
@@ -51,16 +54,16 @@
         </Timeout>
       </ForceSuccess>
       <SubTree ID="DockingSubTree"
-                base="{PrevGoal}"
-                dock_type="dock_y_slow_precise_linearBoost"
-                final_pose="{PrevGoal}"
-                isPureDocking="1"
-                offset="0.1"
-                retry="100"
-                shift="0"
-                sleep="100"
-                timeout="6000"
-                _autoremap="true"/>
+               base="{PrevGoal}"
+               dock_type="dock_y_slow_precise_linearBoost"
+               final_pose="{PrevGoal}"
+               isPureDocking="1"
+               offset="0.1"
+               retry="100"
+               shift="0"
+               sleep="100"
+               timeout="6000"
+               _autoremap="true"/>
       <MissionSuccess levels="0"
                       base_index="-2"/>
     </Sequence>
@@ -322,14 +325,17 @@
                          output_key="hasCompleteMaterial"/>
           <ForceSuccess>
             <SubTree ID="MissionPoint1"
+                     NOT_NOW="true"
                      _autoremap="true"/>
           </ForceSuccess>
           <ForceSuccess>
             <SubTree ID="MissionPoint2"
+                     NOT_NOW="false"
                      _autoremap="true"/>
           </ForceSuccess>
           <ForceSuccess>
             <SubTree ID="MissionPoint3new"
+                     NOT_NOW="true"
                      _autoremap="true"/>
           </ForceSuccess>
         </Sequence>
@@ -462,6 +468,12 @@
                index="{index}"
                _skipIf="last_mission_failed"
                _autoremap="true"/>
+      <ForceSuccess>
+        <SubTree ID="BannerMission"
+                 BANNER_PLACE="1"
+                 NOT_NOW="{NOT_NOW}"
+                 _autoremap="true"/>
+      </ForceSuccess>
       <Sequence>
         <ForceSuccess>
           <RetryUntilSuccessful num_attempts="10">
@@ -559,6 +571,7 @@
       <ForceSuccess>
         <SubTree ID="BannerMission"
                  BANNER_PLACE="1"
+                 NOT_NOW="{NOT_NOW}"
                  _autoremap="true"/>
       </ForceSuccess>
       <Sequence>
@@ -802,6 +815,12 @@
                hasCompleteMaterial="{hasCompleteMaterial}"
                _successIf="last_mission_failed"
                _autoremap="true"/>
+      <ForceSuccess>
+        <SubTree ID="BannerMission"
+                 BANNER_PLACE="1"
+                 NOT_NOW="{NOT_NOW}"
+                 _autoremap="true"/>
+      </ForceSuccess>
       <Sequence>
         <ForceSuccess>
           <RetryUntilSuccessful num_attempts="10">
