@@ -593,7 +593,7 @@ NodeStatus MissionChecker::tick() {
     }
     if (base_.pose.position.z == 1.0 || base_.pose.position.z == 3.0) {
         if (mission_points_status_.data[baseIndex_ - 11] != 0) {   // check if this mission is already placed
-            base_.pose.position.y -= offset * 1.5 * mission_points_status_.data[baseIndex_ - 11];    // if yes, the placement point need to be changed
+            base_.pose.position.y -= offset * 1.1 * mission_points_status_.data[baseIndex_ - 11];    // if yes, the placement point need to be changed
             // RCLCPP_INFO_STREAM(node_->get_logger(), "step back 5 cm, and then place the materials");
         }
         if (dist < safety_dist_ && abs(base_.pose.position.y - rival_pose_.pose.position.y) < safety_dist_ * 2/3) {
@@ -602,7 +602,7 @@ NodeStatus MissionChecker::tick() {
         }
     } else {
         if (mission_points_status_.data[baseIndex_ - 11] != 0) {  // check if this mission is already placed
-            base_.pose.position.x -= offset * 1.5 * mission_points_status_.data[baseIndex_ - 11];   // if yes, the placement point need to e changed
+            base_.pose.position.x -= offset * 1.1 * mission_points_status_.data[baseIndex_ - 11];   // if yes, the placement point need to e changed
             // RCLCPP_INFO_STREAM(node_->get_logger(), "step back 5 cm, and then place the materials");
         }
         if (dist < safety_dist_ && abs(base_.pose.position.x - rival_pose_.pose.position.x) < safety_dist_ * 2/3) {
