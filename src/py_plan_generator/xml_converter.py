@@ -9,11 +9,11 @@ import glob
 
 output_file_name = 'bot1_blue_e.xml'
 points_list = []
-yellow_home = '0.35'
-blue_home = '2.65'
+yellow_home = '0.45'
+blue_home = '2.55'
 banner = []
-yellow_banner = ['2.75', '1.25', '0.75']
-blue_banner = ['0.25', '1.75', '2.25']
+yellow_banner = ['2.7', '1.25', '0.75']
+blue_banner = ['0.3', '1.75', '2.25']
 dock_type_list = ['dock_y_slow_precise', 'dock_x_slow_precise', 'dock_x_slow_precise', 'dock_y_slow_precise', 'dock_y_slow_precise', 'dock_y_slow_precise', 'dock_y_slow_precise', 'dock_x_slow_precise', 'dock_x_slow_precise', 'dock_y_slow_precise', 'dock_y_slow_precise', 'dock_x_slow_precise', 'dock_y_slow_precise', 'dock_y_slow_precise', 'dock_y_slow_precise', 'dock_x_slow_precise', 'dock_y_slow_precise', 'dock_y_slow_precise', 'dock_y_slow_precise', 'dock_y_slow_precise']
 offset_list = ['0.1', '-0.1', '-0.1', '-0.1', '-0.1', '-0.1', '-0.1', '-0.1']
 
@@ -52,7 +52,7 @@ def read_input(root):
         if (elt.tag == "BehaviorTree" and elt.get('ID') == "BannerMission"):
             for dock in elt.iter():
                 if (dock.tag == "Docking" and l < 11):
-                    dock.set('base', banner[l % 3] + ', 0.3, 0')
+                    dock.set('base', banner[l % 3] + ', 0.3, 3')
                     l += 1
                     if (l == 3 or l == 7):
                         l += 1

@@ -169,7 +169,7 @@
           </ForceSuccess>
         </Sequence>
         <Sequence>
-          <Sleep msec="97000" />
+          <Sleep msec="98000" />
           <ForceSuccess>
             <RetryUntilSuccessful num_attempts="40">
               <Sequence>
@@ -365,8 +365,8 @@
         <ForceSuccess>
           <RetryUntilSuccessful num_attempts="10">
             <Fallback>
-              <MissionChecker level="{level}" remap_base="{base}" mission_type="back" base_index="13">
-                <Docking final_pose="{PrevGoal}" isPureDocking="0" dock_type="dock_y_slow_precise" shift="0" offset="-0.1" base="{base}" />
+              <MissionChecker level="{level}" remap_base="{base}" mission_type="back" base_index="11">
+                <Docking final_pose="{PrevGoal}" isPureDocking="0" dock_type="dock_x_slow_precise" shift="0" offset="0.1" base="{base}" />
               </MissionChecker>
               <ForceFailure>
                 <Sleep msec="500" />
@@ -380,12 +380,12 @@
             <Rotation final_pose="{PrevGoal}" degree="180" base="{PrevGoal}" />
             <SubTree ID="PlaceTwoLevels" _autoremap="true" />
           </Sequence>
-          <SubTree ID="ThreeLevelsBot1new" back="0.2, 0.1, 0.05" forward="0.15, 0.095, 0.065" hasCompleteMaterial="{hasCompleteMaterial}" index="13" shift="0" _autoremap="true" />
+          <SubTree ID="ThreeLevelsBot1new" back="0.2, 0.1, 0.05" forward="0.15, 0.095, 0.065" hasCompleteMaterial="{hasCompleteMaterial}" index="11" shift="0" _autoremap="true" />
         </Switch2>
         <ForceSuccess>
           <RetryUntilSuccessful num_attempts="10">
             <Fallback>
-              <MissionChecker level="{level}" remap_base="{base}" mission_type="back" base_index="13">
+              <MissionChecker level="{level}" remap_base="{base}" mission_type="back" base_index="12">
                 <Docking final_pose="{PrevGoal}" isPureDocking="0" dock_type="dock_y_slow_precise" shift="0" offset="-0.1" base="{base}" />
               </MissionChecker>
               <ForceFailure>
@@ -400,7 +400,7 @@
             <Rotation final_pose="{PrevGoal}" degree="180" base="{PrevGoal}" />
             <SubTree ID="PlaceTwoLevels" _autoremap="true" />
           </Sequence>
-          <SubTree ID="ThreeLevelsBot1new" back="0.2, 0.1, 0.05" forward="0.15, 0.095, 0.065" hasCompleteMaterial="{hasCompleteMaterial}" index="13" shift="0" _autoremap="true" />
+          <SubTree ID="ThreeLevelsBot1new" back="0.2, 0.1, 0.05" forward="0.15, 0.095, 0.065" hasCompleteMaterial="{hasCompleteMaterial}" index="12" shift="0" _autoremap="true" />
         </Switch2>
       </Sequence>
     </Sequence>
