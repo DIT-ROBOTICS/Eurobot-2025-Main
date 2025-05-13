@@ -2,7 +2,7 @@
 <root><BehaviorTree ID="BannerMission">
     <Sequence>
       <MySetBlackboard new_value="{not_now}" blackboard_value="{NOT_NOW}" blackboard_key="NOT_NOW" />
-      <BannerChecker _successIf="not_now" remap_banner_place="{remap_banner_place}" banner_place="{BANNER_PLACE}" />
+      <BannerChecker remap_banner_place="{remap_banner_place}" banner_place="{BANNER_PLACE}" _successIf="not_now" />
       <Parallel failure_count="1" success_count="2">
         <ForceSuccess>
           <Timeout msec="100">
@@ -125,12 +125,12 @@
     <Sequence>
       <ForceSuccess>
         <Timeout msec="6000">
-          <FirmwareMission mission_status="{x}" mission_type="11" _description="" />
+          <FirmwareMission mission_status="{x}" mission_type="11" />
         </Timeout>
       </ForceSuccess>
       <ForceSuccess>
         <Timeout msec="6000">
-          <FirmwareMission mission_status="{x}" mission_type="21" _description="" />
+          <FirmwareMission mission_status="{x}" mission_type="21" />
         </Timeout>
       </ForceSuccess>
       <ForceSuccess>
@@ -154,7 +154,7 @@
           </Sequence>
           <SetBlackboard value="0" output_key="hasCompleteMaterial" />
           <ForceSuccess>
-            <SubTree ID="MissionPoint1" NOT_NOW="true" _autoremap="true" />
+            <SubTree ID="MissionPoint1" NOT_NOW="false" _autoremap="true" />
           </ForceSuccess>
           <ForceSuccess>
             <SubTree ID="MissionPoint2" NOT_NOW="true" _autoremap="true" />
@@ -205,6 +205,9 @@
         </Fallback>
       </Parallel>
       <MissionSuccess levels="1" base_index="{index}" _skipIf="last_mission_failed" />
+      <ForceSuccess>
+        <SubTree ID="BannerMission" BANNER_PLACE="1" NOT_NOW="{NOT_NOW}" _autoremap="true" />
+      </ForceSuccess>
       <Parallel failure_count="1" success_count="2">
         <SubTree ID="OneLevelBot1new" hasCompleteMaterial="{hasCompleteMaterial}" _autoremap="true" />
         <Delay delay_msec="700">
@@ -220,9 +223,6 @@
         </Delay>
       </Parallel>
       <SubTree ID="TwoLevelsBot1new" back="0.2, 0.1, 0.05" forward="0.15, 0.105, 0.065" shift="0.10" index="{index}" _skipIf="last_mission_failed" _autoremap="true" />
-      <ForceSuccess>
-        <SubTree ID="BannerMission" BANNER_PLACE="1" NOT_NOW="{NOT_NOW}" _autoremap="true" />
-      </ForceSuccess>
       <Sequence>
         <ForceSuccess>
           <RetryUntilSuccessful num_attempts="10">

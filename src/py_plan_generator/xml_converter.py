@@ -62,7 +62,7 @@ def read_input(root):
                     c += 1
                     print(c, node.get('ID'))
                     node.set('NOT_NOW', "true")
-                elif (node.tag == "SubTree" and node.get('ID') == banner_time):
+                if (node.tag == "SubTree" and node.get('ID') == banner_time):
                     node.set('NOT_NOW', "false")
                 if (node.tag == "Docking"):
                     node.set('base', home + ', 1.6, 0')

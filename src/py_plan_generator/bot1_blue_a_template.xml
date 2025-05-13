@@ -5,9 +5,9 @@
       <MySetBlackboard new_value="{not_now}"
                        blackboard_value="{NOT_NOW}"
                        blackboard_key="NOT_NOW"/>
-      <BannerChecker _successIf="not_now"
-                     remap_banner_place="{remap_banner_place}"
-                     banner_place="{BANNER_PLACE}"/>
+      <BannerChecker remap_banner_place="{remap_banner_place}"
+                     banner_place="{BANNER_PLACE}"
+                     _successIf="not_now"/>
       <Parallel failure_count="1"
                 success_count="2">
         <ForceSuccess>
@@ -55,16 +55,16 @@
         </Timeout>
       </ForceSuccess>
       <SubTree ID="DockingSubTree"
-                base="{PrevGoal}"
-                dock_type="dock_y_precise_linearBoost"
-                final_pose="{PrevGoal}"
-                isPureDocking="1"
-                offset="0.1"
-                retry="100"
-                shift="0"
-                sleep="100"
-                timeout="6000"
-                _autoremap="true"/>
+               base="{PrevGoal}"
+               dock_type="dock_y_precise_linearBoost"
+               final_pose="{PrevGoal}"
+               isPureDocking="1"
+               offset="0.1"
+               retry="100"
+               shift="0"
+               sleep="100"
+               timeout="6000"
+               _autoremap="true"/>
       <MissionSuccess levels="0"
                       base_index="-2"/>
     </Sequence>
@@ -270,35 +270,33 @@
       <ForceSuccess>
         <Timeout msec="6000">
           <FirmwareMission mission_status="{x}"
-                            mission_type="11"
-                            _description=""/>
+                           mission_type="11"/>
         </Timeout>
       </ForceSuccess>
       <ForceSuccess>
         <Timeout msec="6000">
           <FirmwareMission mission_status="{x}"
-                            mission_type="21"
-                            _description=""/>
+                           mission_type="21"/>
         </Timeout>
       </ForceSuccess>
       <ForceSuccess>
         <Parallel failure_count="1"
                   success_count="2">
           <Docking final_pose="{PrevGoal}"
-                  isPureDocking="1"
-                  dock_type="dock_x_precise_linearBoost"
-                  shift="0"
-                  offset="0.5"
-                  base="0.5, 1.0, 0"/>
+                   isPureDocking="1"
+                   dock_type="dock_x_precise_linearBoost"
+                   shift="0"
+                   offset="0.5"
+                   base="0.5, 1.0, 0"/>
           <StopRobot/>
         </Parallel>
       </ForceSuccess>
       <Docking final_pose="{PrevGoal}"
-              isPureDocking="0"
-              dock_type="dock_x_precise_linearBoost"
-              shift="0"
-              offset="0.5"
-              base="1.0, 1.0, 0"/>
+               isPureDocking="0"
+               dock_type="dock_x_precise_linearBoost"
+               shift="0"
+               offset="0.5"
+               base="1.0, 1.0, 0"/>
       <Sleep msec="50000"/>
     </Sequence>
   </BehaviorTree>
@@ -352,11 +350,11 @@
           </Timeout>
         </ForceSuccess>
         <Docking final_pose="{PrevGoal}"
-                isPureDocking="0"
-                dock_type="dock_y_precise_linearBoost"
-                shift="0"
-                offset="0"
-                base="2.65, 1.6, 3"/>
+                 isPureDocking="0"
+                 dock_type="dock_y_precise_linearBoost"
+                 shift="0"
+                 offset="0"
+                 base="2.65, 1.6, 3"/>
       </Parallel>
     </Sequence>
   </BehaviorTree>
@@ -415,6 +413,12 @@
       <MissionSuccess levels="1"
                       base_index="{index}"
                       _skipIf="last_mission_failed"/>
+      <ForceSuccess>
+        <SubTree ID="BannerMission"
+                 BANNER_PLACE="1"
+                 NOT_NOW="{NOT_NOW}"
+                 _autoremap="true"/>
+      </ForceSuccess>
       <Parallel failure_count="1"
                 success_count="2">
         <SubTree ID="OneLevelBot1new"
@@ -469,12 +473,6 @@
                index="{index}"
                _skipIf="last_mission_failed"
                _autoremap="true"/>
-      <ForceSuccess>
-        <SubTree ID="BannerMission"
-                 BANNER_PLACE="1"
-                 NOT_NOW="{NOT_NOW}"
-                 _autoremap="true"/>
-      </ForceSuccess>
       <Sequence>
         <ForceSuccess>
           <RetryUntilSuccessful num_attempts="10">
