@@ -79,7 +79,7 @@ def read_input(root):
                     docking = node[0]
                     docking.set('dock_type', dock_type_list[int(points_list[i - 1])])
                     docking.set('offset', offset_list[int(points_list[i - 1]) - 11])
-                if (node.tag == "SubTree" and node.get('ID') == "ThreeLevelsBot1new"):
+                if (node.tag == "SubTree" and (node.get('ID') == "PlaceOneLevel" or node.get('ID') == "PlaceTwoLevels" or node.get('ID') == "ThreeLevelsBot1new")):
                     node.set('index', points_list[i - 1])
                 if (node.tag == "SubTree" and node.get('ID') == "BannerMission"):
                     node.set('BANNER_PLACE', banner_pt)

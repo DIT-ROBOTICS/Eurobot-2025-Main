@@ -457,7 +457,7 @@ void FirmwareMission::onHalted() {
 BT::PortsList BannerChecker::providedPorts() {
     return {
         BT::InputPort<int>("banner_place"),
-        BT::OutputPort<int>("remap_banner_place")
+        BT::OutputPort<std::string>("remap_banner_place")
     };
 }
 
@@ -491,8 +491,8 @@ BT::NodeStatus BannerChecker::tick() {
 
     onStart();
     mapPoint_ = DecodeBannerIndex(banner_place_);
-    while (mission_points_status_.data[mapPoint_] && i < 3) {
-        RCLCPP_INFO_STREAM(node_->get_logger(), "considering banner_place_: " << banner_place_ << ", status: " << mission_points_status_.data[mapPoint_]);
+    while (mission_points_status_.data[mapPoint_ - 11] && i < 3) {
+        RCLCPP_INFO_STREAM(node_->get_logger(), "considering banner_place_: " << banner_place_ << ", status: " << mission_points_status_.data[mapPoint_ - 11]);
         banner_place_ = (banner_place_ + 1) % 3;
         mapPoint_ = DecodeBannerIndex(banner_place_);
         i++;
@@ -504,7 +504,7 @@ BT::NodeStatus BannerChecker::tick() {
     // if (calculateDistance(ptPose_, rival_pose_.pose) < safety_dist_) {
     // }
     
-    setOutput("remap_banner_place", banner_place_);
+    setOutput("remap_banner_place", to_string(banner_place_));
     return BT::NodeStatus::SUCCESS;
 }
 

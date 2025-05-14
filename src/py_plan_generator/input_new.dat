@@ -1,4 +1,4 @@
-12
+13
 yellow
 bot1_yellow_a.xml
 1
@@ -141,5 +141,17 @@ bot1_blue_f.xml
 4
 11
 12
+1
+MissionPoint1
+yellow
+bot1_yellow_a_template.xml
+1
+4
+11
+0
+11
+2
+12
+13
 1
 MissionPoint1
