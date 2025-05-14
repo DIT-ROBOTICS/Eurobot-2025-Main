@@ -186,7 +186,7 @@
             <FirmwareMission mission_status="{x}" mission_type="0" _description="backward stretch out" />
           </Timeout>
         </ForceSuccess>
-        <Docking final_pose="{PrevGoal}" isPureDocking="0" dock_type="dock_y_precise_linearBoost" shift="0" offset="0" base="0.35, 1.6, 0" />
+        <Docking final_pose="{PrevGoal}" isPureDocking="0" dock_type="dock_y_precise_linearBoost" shift="0" offset="0" base="0.45, 1.5, 0" />
       </Parallel>
     </Sequence>
   </BehaviorTree>
