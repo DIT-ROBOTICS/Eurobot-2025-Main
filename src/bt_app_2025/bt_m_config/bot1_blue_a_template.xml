@@ -415,13 +415,6 @@
       </Parallel>
       <Parallel failure_count="1"
                 success_count="2">
-        <ForceSuccess>
-          <Timeout msec="6000">
-            <FirmwareMission mission_status="{x}"
-                             mission_type="32"
-                             _description="arm up"/>
-          </Timeout>
-        </ForceSuccess>
         <Fallback>
           <MaterialChecker remap_offset="{offset}"
                            remap_shift="{shift}"
@@ -461,6 +454,13 @@
                            blackboard_value="true"
                            blackboard_key="last_mission_failed"/>
         </Fallback>
+        <ForceSuccess>
+          <Timeout msec="6000">
+            <FirmwareMission mission_status="{x}"
+                             mission_type="32"
+                             _description="arm up"/>
+          </Timeout>
+        </ForceSuccess>
       </Parallel>
       <SubTree ID="TwoLevelsBot1new"
                back="0.2, 0.1, 0.05"
