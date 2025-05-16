@@ -37,10 +37,10 @@ using namespace BT;
 #include "rclcpp/service.hpp"
 #include "btcpp_ros2_interfaces/srv/start_up_srv.hpp"
 
-class ReadySignal : public rclcpp::Node {
+class ReadySignal : virtual public rclcpp::Node {
 public:
     ReadySignal() : Node("main_ready") {
-        ready_sub = this->create_subscription<std_msgs::msg::String>("/robot/startup/plan", 2, std::bind(&MainClass::readyCallback, this, std::placeholders::_1));
+        ready_sub = this->create_subscription<std_msgs::msg::String>("/robot/startup/plan", 2, std::bind(&ReadySignal::readyCallback, this, std::placeholders::_1));
         ready_srv_client = this->create_client<btcpp_ros2_interfaces::srv::StartUpSrv>("/robot/startup/ready_signal");
         is_main_ready = false;
     }
@@ -50,12 +50,12 @@ protected:
         if (msg != NULL && !is_main_ready)
             is_main_ready = true;
     }
-    void sendReadySignal() {
+    void sendReadySignal(int group_, int state_) {
         RCLCPP_INFO_STREAM(this->get_logger(), "send ready signal");
 
         auto request = std::make_shared<btcpp_ros2_interfaces::srv::StartUpSrv::Request>();
-        request->group = 0;
-        request->state = 3;
+        request->group = group_;
+        request->state = state_;
 
         ready_srv_client->async_send_request(request, 
             [this](rclcpp::Client<btcpp_ros2_interfaces::srv::StartUpSrv>::SharedFuture future) {
@@ -69,7 +69,7 @@ protected:
     bool is_main_ready;
 };
 
-class MainClass : public rclcpp::Node, public ReadySignal {
+class MainClass : virtual public rclcpp::Node, public ReadySignal {
 public:
     MainClass() : Node("bt_app_2025"), rate(100) {}
     std::shared_ptr<rclcpp::Node> get_node() {
@@ -77,7 +77,7 @@ public:
         return shared_from_this();                                             // Get a shared pointer to this node
     }
     void timeCallback(const std_msgs::msg::Float32::SharedPtr msg);
-    // void sendReadySignal();
+    // void sendReadySignal(int group_, int state_);
     void readyCallback(const std_msgs::msg::String::SharedPtr msg) override;
     void startCallback(const std::shared_ptr<std_srvs::srv::SetBool::Request> request,
         std::shared_ptr<std_srvs::srv::SetBool::Response> response);
@@ -200,7 +200,7 @@ public:
         // create tree
         RCLCPP_INFO(node_->get_logger(), "--Create tree--");
         tree = factory.createTree(tree_name, blackboard);
-        sendReadySignal();
+        sendReadySignal(0, 3);
     }
 
     void RunTheTree() {
@@ -254,12 +254,12 @@ void MainClass::timeCallback(const std_msgs::msg::Float32::SharedPtr msg) {
     game_time = msg->data;
 }
 
-// void MainClass::sendReadySignal() {
+// void MainClass::sendReadySignal(int group_, int state_) {
 //     RCLCPP_INFO_STREAM(this->get_logger(), "send ready signal");
 
 //     auto request = std::make_shared<btcpp_ros2_interfaces::srv::StartUpSrv::Request>();
-//     request->group = 0;
-//     request->state = 3;
+//     request->group = group_;
+//     request->state = state_;
 
 //     ready_srv_client->async_send_request(request, 
 //         [this](rclcpp::Client<btcpp_ros2_interfaces::srv::StartUpSrv>::SharedFuture future) {
