@@ -4,9 +4,12 @@
 #include <filesystem>
 #include <fstream>
 #include <deque>
+#include <string>
 #include <bitset>
+#include <math.h>
 
 // Use behavior tree
+#include "behaviortree_ros2/bt_action_node.hpp"
 #include "behaviortree_cpp/decorators/loop_node.h"
 #include "behaviortree_cpp/bt_factory.h"
 #include "behaviortree_cpp/behavior_tree.h"
@@ -19,7 +22,9 @@
 
 // Use ros message
 #include "std_srvs/srv/set_bool.hpp"
+#include "std_msgs/msg/int32.hpp"
 #include "std_msgs/msg/float32.hpp"
+#include "std_msgs/msg/string.hpp"
 #include "geometry_msgs/msg/twist_stamped.hpp"
 #include "geometry_msgs/msg/pose_stamped.hpp"
 #include "geometry_msgs/msg/pose_array.hpp"
@@ -32,25 +37,18 @@
 #include <tf2_ros/buffer.h>
 #include <tf2/exceptions.h>
 
-// Use self define message
-
-
 using namespace BT;
 
 namespace BT {
-    template <> inline geometry_msgs::msg::PoseStamped convertFromString(StringView str);
     template <> inline int convertFromString(StringView str);
     template <> inline std::deque<int> convertFromString(StringView str);
 }
 
-/******************************/
-/* BTStarter - Start the tree */
-/******************************/
-class PointProvider : public BT::SyncActionNode {
+class MySetBlackboard : public BT::SyncActionNode {
 
 public:
-    PointProvider(const std::string& name, const BT::NodeConfig& config)
-        : BT::SyncActionNode(name, config)
+    MySetBlackboard(const std::string& name, const BT::NodeConfig& config, const RosNodeParams& params, BT::Blackboard::Ptr blackboard)
+        : BT::SyncActionNode(name, config), node_(params.nh.lock()), blackboard_(blackboard)
     {}
 
     /* Node remapping function */
@@ -59,16 +57,19 @@ public:
     /* Start and running function */
     BT::NodeStatus tick() override;
 private:
-    geometry_msgs::msg::PoseStamped point;
+    std::shared_ptr<rclcpp::Node> node_;
+    BT::Blackboard::Ptr blackboard_;
 };
+
 /******************************/
 /* BTStarter - Start the tree */
 /******************************/
+// continuous update the current time
 class BTStarter : public BT::SyncActionNode {
 
 public:
-    BTStarter(const std::string& name, const BT::NodeConfig& config, std::shared_ptr<rclcpp::Node> node, BT::Blackboard::Ptr blackboard)
-        : BT::SyncActionNode(name, config), node_(node), blackboard_(blackboard)
+    BTStarter(const std::string& name, const BT::NodeConfig& config, const RosNodeParams& params, BT::Blackboard::Ptr blackboard)
+        : BT::SyncActionNode(name, config), node_(params.nh.lock()), blackboard_(blackboard)
     {}
 
     /* Node remapping function */
@@ -80,18 +81,23 @@ private:
     void topic_callback(const std_msgs::msg::Float32::SharedPtr msg);
 
     rclcpp::Subscription<std_msgs::msg::Float32>::SharedPtr subscription_;
+    rclcpp::Publisher<std_msgs::msg::String>::SharedPtr keepout_zone_pub_;
     std::shared_ptr<rclcpp::Node> node_;
     BT::Blackboard::Ptr blackboard_;
-
+    std_msgs::msg::String keepout_zone_;
     float current_time_;
+    std::string team_;
 };
 
+/******************************/
 /* BTFinisher - Send mission type to kernel */
+/******************************/
+// No useage now
 class BTFinisher : public BT::SyncActionNode {
 
 public:
-    BTFinisher(const std::string& name, const BT::NodeConfig& config, std::string file, int team, std::shared_ptr<rclcpp::Node> node)
-        : BT::SyncActionNode(name, config), score_filepath(file), team_(team),  node_(node){}
+    BTFinisher(const std::string& name, const BT::NodeConfig& config, std::string file, std::string team, const RosNodeParams& params)
+        : BT::SyncActionNode(name, config), score_filepath(file), team_(team),  node_(params.nh.lock()){}
 
     /* Node remapping function */
     static BT::PortsList providedPorts();
@@ -101,18 +107,19 @@ public:
 
     std::string score_filepath;
 
-    int team_;
+    std::string team_;
     std::shared_ptr<rclcpp::Node> node_;
 };
 
 /*****************************************/
 /* Comparator to check the state is safe */
 /*****************************************/
+// No usage now
 class Comparator : public BT::ConditionNode {
 
 public:
-    Comparator(const std::string& name, const BT::NodeConfig& config, std::shared_ptr<rclcpp::Node> node)
-        : BT::ConditionNode(name, config), node_(node), tf_buffer_(node_->get_clock()), listener_(tf_buffer_)
+    Comparator(const std::string& name, const BT::NodeConfig& config, const RosNodeParams& params)
+        : BT::ConditionNode(name, config), node_(params.nh.lock()), tf_buffer_(node_->get_clock()), listener_(tf_buffer_)
     {}
 
     /* Node remapping function */
@@ -136,30 +143,51 @@ private:
     tf2_ros::TransformListener listener_;
 };
 
-/****************************/
-/* TimerChecker - Decorator */
-/****************************/
-class TimerChecker : public BT::DecoratorNode {
+/****************/
+/* TimerChecker */
+/****************/
+class TimerChecker : public BT::ConditionNode {
 
 public:
     TimerChecker(const std::string& name, const NodeConfig& config, BT::Blackboard::Ptr blackboard)
-        : BT::DecoratorNode(name, config), blackboard_(blackboard) {}
-
+        : BT::ConditionNode(name, config), blackboard_(blackboard) {}
     /* Node remapping function */
     static BT::PortsList providedPorts();
-
     /* Start and running function */
     BT::NodeStatus tick() override;
 
 private:
     BT::Blackboard::Ptr blackboard_;
-
-    double timeout_ = 0.0;
-    double start_time_ = 0.0;
     double current_time_;
-    bool first_log_;
 };
 
+class LoopInt32 : public BT::DecoratorNode
+{
+public:
+    LoopInt32(const std::string &name, const BT::NodeConfig &config, const RosNodeParams& params)
+        : BT::DecoratorNode(name, config), node_(params.nh.lock())
+    {}
+    static BT::PortsList providedPorts();
+    BT::NodeStatus tick() override;
+private:
+    std::shared_ptr<rclcpp::Node> node_;
+    std::deque<int> deque;
+    int index_;
+};
+
+class Double2Int : public BT::SyncActionNode
+{
+public:
+    Double2Int(const std::string &name, const BT::NodeConfig &config, const RosNodeParams& params)
+        : BT::SyncActionNode(name, config), node_(params.nh.lock())
+    {}
+    static BT::PortsList providedPorts();
+    BT::NodeStatus tick() override;
+private:
+    std::shared_ptr<rclcpp::Node> node_;
+    int int_;
+    double double_;
+};
 
 // /****************************************************/
 // /* Simple Node for finding the rival start position */
@@ -167,7 +195,7 @@ private:
 // class RivalStart : public BT::SyncActionNode {
 
 // public:
-//     RivalStart(const std::string& name, const BT::NodeConfig& config, int team)
+//     RivalStart(const std::string& name, const BT::NodeConfig& config, std::string team)
 //         : BT::SyncActionNode(name, config), team_(team) {}
 
 //     /* Node remapping function */
@@ -179,7 +207,7 @@ private:
 // private:
 
 //     // Private variables
-//     int team_;
+//     std::string team_;
 //     int check_start_point_;
 
 //     // Kernel

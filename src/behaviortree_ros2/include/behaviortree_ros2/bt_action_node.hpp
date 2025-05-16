@@ -459,6 +459,7 @@ inline NodeStatus RosActionNode<T>::tick()
       {
         if((now() - time_goal_sent_) > timeout)
         {
+          onResultReceived(result_);
           return CheckStatus(onFailure(SEND_GOAL_TIMEOUT));
         }
         else
@@ -490,10 +491,11 @@ inline NodeStatus RosActionNode<T>::tick()
     {
       if(result_.code == rclcpp_action::ResultCode::ABORTED)
       {
-        return CheckStatus(onFailure(ACTION_ABORTED));
+        return CheckStatus(onResultReceived(result_));
       }
       else if(result_.code == rclcpp_action::ResultCode::CANCELED)
       {
+        onResultReceived(result_);
         return CheckStatus(onFailure(ACTION_CANCELLED));
       }
       else

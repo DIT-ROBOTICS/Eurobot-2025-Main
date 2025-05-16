@@ -9,7 +9,6 @@ endif()
 # find_package(ament_cmake REQUIRED)
 # uncomment the following section in order to fill in
 # further dependencies manually.
-# find_package(<dependency> REQUIRED)
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_action REQUIRED)
@@ -23,7 +22,9 @@ find_package(tf2_ros REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
+find_package(nav2_msgs REQUIRED)
 find_package(btcpp_ros2_interfaces REQUIRED)
+find_package(example_interfaces REQUIRED)
 
 # Include directories
 include_directories(
@@ -50,22 +51,37 @@ install(TARGETS
   DESTINATION lib/${PROJECT_NAME}
 )
 
-add_executable(topicPubServer src/node/topicPubServer.cpp)
+add_executable(main_script
+  src/main_script.cpp
+)
+ament_target_dependencies(main_script
+  ${THIS_PACKAGE_DEPS}
+  "tf2"
+  "tf2_geometry_msgs"
+  "nav2_msgs"
+  "geometry_msgs"
+  "rclcpp"
+  "rclcpp_action"
+)
+target_link_libraries(main_script
+  ${ARMADILLO_LIBRARIES}
+)
+install(TARGETS
+  main_script
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+add_executable(topicPubServer src/test_server/topicPubServer.cpp)
 ament_target_dependencies(topicPubServer
   ${THIS_PACKAGE_DEPS}
-  "behaviortree_ros2"
-  "behaviortree_cpp"
+  "std_msgs"
   "rclcpp"
 )
 target_link_libraries(topicPubServer
 )
-install(TARGETS
-  topicPubServer
-  DESTINATION lib/${PROJECT_NAME}
-)
 
 add_library(navigationServer SHARED
-  src/node/navigationServer.cpp)
+  src/test_server/navigationServer.cpp)
 target_include_directories(navigationServer PRIVATE
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>)
@@ -73,28 +89,19 @@ target_compile_definitions(navigationServer
   PRIVATE "ACTION_TUTORIALS_CPP_BUILDING_DLL")
 ament_target_dependencies(navigationServer
   "btcpp_ros2_interfaces"
-  "behaviortree_ros2"
-  "behaviortree_cpp"
   "std_msgs"
-  "std_srvs"
   "tf2"
   "tf2_ros"
   "tf2_geometry_msgs"
   "nav_msgs"
   "geometry_msgs"
-  "nav_msgs"
   "rclcpp"
   "rclcpp_action"
   "rclcpp_components")
 rclcpp_components_register_node(navigationServer PLUGIN "bt_app_test::TestNavServer" EXECUTABLE test_nav_server)
-install(TARGETS
-  navigationServer
-  ARCHIVE DESTINATION lib
-  LIBRARY DESTINATION lib
-  RUNTIME DESTINATION bin)
 
 add_library(localizationServer SHARED
-  src/node/localizationServer.cpp)
+  src/test_server/localizationServer.cpp)
 target_include_directories(localizationServer PRIVATE
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>)
@@ -102,8 +109,6 @@ target_compile_definitions(localizationServer
   PRIVATE "ACTION_TUTORIALS_CPP_BUILDING_DLL")
 ament_target_dependencies(localizationServer
   "btcpp_ros2_interfaces"
-  "behaviortree_ros2"
-  "behaviortree_cpp"
   "std_msgs"
   "std_srvs"
   "tf2"
@@ -117,19 +122,43 @@ ament_target_dependencies(localizationServer
   "rclcpp_components")
 rclcpp_components_register_node(localizationServer PLUGIN "bt_app_test::TestLocServer" EXECUTABLE test_loc_server)
 
+add_library(actionServer SHARED
+  src/test_server/actionServer.cpp)
+ament_target_dependencies(actionServer
+  "btcpp_ros2_interfaces"
+  "example_interfaces"
+  "std_msgs"
+  "rclcpp"
+  "rclcpp_action"
+  "rclcpp_components")
+rclcpp_components_register_node(actionServer PLUGIN "FibonacciActionServer" EXECUTABLE example_action_server)
+
+add_library(actionClient SHARED
+  src/test_server/actionClient.cpp)
+ament_target_dependencies(actionClient
+  "btcpp_ros2_interfaces"
+  "example_interfaces"
+  "std_msgs"
+  "rclcpp"
+  "rclcpp_action"
+  "rclcpp_components")
+rclcpp_components_register_node(actionClient PLUGIN "FibonacciActionClient" EXECUTABLE example_action_client)
+
 add_library(BT_ACTION_NODE src/bt_action_node_lib.cpp)
 target_link_libraries(BT_ACTION_NODE 
   ${ARMADILLO_LIBRARIES})
 ament_target_dependencies(BT_ACTION_NODE 
   "btcpp_ros2_interfaces"
+  "example_interfaces"
+  "nav2_msgs"
   "behaviortree_ros2"
   "behaviortree_cpp"
+  "std_msgs"
+  "geometry_msgs"
   "tf2"
   "tf2_ros"
   "tf2_geometry_msgs"
   "rclcpp"
-  "rclcpp_action"
-  "rclcpp_components"
   ${THIS_PACKAGE_DEPS})
 
 add_library(BT_DECORATOR_NODE src/bt_decorator_node_lib.cpp)
@@ -140,8 +169,6 @@ ament_target_dependencies(BT_DECORATOR_NODE
   "behaviortree_ros2"
   "behaviortree_cpp"
   "rclcpp"
-  "rclcpp_action"
-  "rclcpp_components"
   ${THIS_PACKAGE_DEPS})
 
 add_library(BT_UTILS_NODE_NODE src/bt_utils_node_lib.cpp)
@@ -151,18 +178,18 @@ ament_target_dependencies(BT_UTILS_NODE_NODE
   "btcpp_ros2_interfaces"
   "behaviortree_ros2"
   "behaviortree_cpp"
-  "std_msgs"
-  "std_srvs"
   "geometry_msgs"
   "nav_msgs"
   "rclcpp"
-  "rclcpp_action"
-  "rclcpp_components"
   ${THIS_PACKAGE_DEPS})
 
 install(TARGETS
   navigationServer
   localizationServer
+  actionServer
+  actionClient
+  topicPubServer
+  RUNTIME DESTINATION lib
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin)
