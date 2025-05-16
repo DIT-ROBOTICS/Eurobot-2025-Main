@@ -31,12 +31,11 @@ int main(int argc, char** argv) {
     std::vector<double> material_points;
 
     // Read parameters
-    node->declare_parameter<std::string>("script_file_directory", "/home/user/Eurobot-2025-Main/src/rival_simulation/rival_main_config/bt_rival_script.xml");
-    node->declare_parameter<std::string>("tree_node_model_config_file", "/home/user/Eurobot-2025-Main/src/rival_simulation/rival_main_config/bt_m_tree_node_model.xml");
+    node->declare_parameter<std::string>("script_file_directory", "/home/ros/Eurobot-2025-Main/src/rival_simulation/rival_main_config/bt_rival_script.xml");
+    node->declare_parameter<std::string>("tree_node_model_config_file", "/home/ros/Eurobot-2025-Main/src/rival_simulation/rival_main_config/bt_m_tree_node_model.xml");
     node->declare_parameter<std::string>("tree_name", "MainTree");
     node->declare_parameter<std::string>("frame_id", "base_link");
     node->declare_parameter<std::vector<double>>("material_points", std::vector<double>{});
-    node->declare_parameter<std::vector<double>>("mission_points", std::vector<double>{});
     node->get_parameter("script_file_directory", script_file_directory);
     node->get_parameter("tree_node_model_config_file", bt_tree_node_model);
     node->get_parameter("tree_name", tree_name);
@@ -51,7 +50,7 @@ int main(int argc, char** argv) {
     // action nodes
     params.default_port_value = "navigate_to_pose";
     factory.registerNodeType<Navigation>("Navigation", params, blackboard);
-    factory.registerNodeType<initPoints>("initPoints", node);
+    // factory.registerNodeType<initPoints>("initPoints", node);
     factory.registerNodeType<StateUpdater>("StateUpdater", node, blackboard);
     factory.registerNodeType<PublishPose>("PublishPose", node, blackboard);
 

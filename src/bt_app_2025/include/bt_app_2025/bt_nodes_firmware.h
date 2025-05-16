@@ -6,6 +6,7 @@
 #include <deque>
 #include <bitset>
 #include <vector>
+#include <math.h> 
 
 // Use behavior tree
 #include <behaviortree_ros2/bt_action_node.hpp>
@@ -21,9 +22,11 @@
 #include "std_msgs/msg/float32.hpp"
 #include "std_msgs/msg/int32.hpp"
 #include "std_msgs/msg/bool.hpp"
+#include "std_msgs/msg/int32_multi_array.hpp"
 #include "geometry_msgs/msg/twist_stamped.hpp"
 #include "geometry_msgs/msg/pose_stamped.hpp"
 #include "geometry_msgs/msg/pose_array.hpp"
+#include "geometry_msgs/msg/pose.hpp"
 
 // tf2 
 #include <tf2/LinearMath/Quaternion.h>
@@ -42,6 +45,7 @@ namespace BT {
     template <> inline geometry_msgs::msg::PoseStamped convertFromString(StringView str);
     template <> inline int convertFromString(StringView str);
     template <> inline std::deque<int> convertFromString(StringView str);
+    template <> inline std::deque<double> convertFromString(StringView str);
 }
 
 /********************************/
@@ -68,6 +72,24 @@ private:
   bool mission_finished_ = false;
 };
 
+class MissionStart : public BT::SyncActionNode
+{
+public:
+
+  MissionStart(const std::string& name, const BT::NodeConfig& config, const RosNodeParams& params, BT::Blackboard::Ptr blackboard)
+    : BT::SyncActionNode(name, config), node_(params.nh.lock()), blackboard_(blackboard)
+  {}
+  /* Node remapping function */
+  static BT::PortsList providedPorts();
+  /* Start and running function */
+  BT::NodeStatus tick() override;
+
+private:
+  BT::Blackboard::Ptr blackboard_;
+  rclcpp::Node::SharedPtr node_;
+  std::vector<double> material_points_;
+};
+
 class MissionSuccess : public BT::SyncActionNode
 {
 public:
@@ -77,6 +99,7 @@ public:
   {
     publish_times = 100;
     publish_count = 0;
+    vision_pub_ = node_->create_publisher<std_msgs::msg::Int32>("/main/mission/success", rclcpp::QoS(100).reliable().transient_local());
   }
   /* Node remapping function */
   static BT::PortsList providedPorts();
@@ -87,18 +110,22 @@ public:
 private:
   BT::Blackboard::Ptr blackboard_;
   rclcpp::Node::SharedPtr node_;
-  rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr vision_pub_;
+  rclcpp::Publisher<std_msgs::msg::Int32>::SharedPtr vision_pub_;
   std_msgs::msg::Bool is_mission_finished;
-  std::vector<int> mission_points_status_;
+  std_msgs::msg::Int32 mission_finished;
+  std_msgs::msg::Int32MultiArray mission_points_status_;
+  std_msgs::msg::Int32MultiArray materials_info_;
   int publish_times;
   int publish_count;
+  int front_materials_;
+  int back_materials_;
 };
 
-class MissionFinisher : public BT::StatefulActionNode
+class MissionFailure : public BT::StatefulActionNode
 {
 public:
 
-  MissionFinisher(const std::string& name, const BT::NodeConfig& config, const RosNodeParams& params, BT::Blackboard::Ptr blackboard)
+  MissionFailure(const std::string& name, const BT::NodeConfig& config, const RosNodeParams& params, BT::Blackboard::Ptr blackboard)
     : BT::StatefulActionNode(name, config), node_(params.nh.lock()), blackboard_(blackboard)
   {
     matreials_accord_ = 0;
@@ -135,15 +162,6 @@ private:
 /****************/
 /* Topic Mission*/  
 /****************/
-typedef enum {
-  IDLE,
-  RECEIVED,
-  RUNNING1,
-  RUNNING2,
-  RUNNING3,
-  FINISH,
-  FAILED
-} MissionState;
 
 class FirmwareMission : public BT::StatefulActionNode
 {
@@ -177,13 +195,54 @@ private:
   int mission_progress_ = 0;
   int mission_type_ = 0;
   int mission_status_ = 0;
+  int mission_stamp_ = 0;
   bool mission_received_ = false;
   bool mission_finished_ = false;
+};
+
+class BannerChecker : public BT::SyncActionNode
+{
+public:
+    BannerChecker(const std::string &name, const BT::NodeConfig &config, const RosNodeParams& params, BT::Blackboard::Ptr blackboard)
+        : BT::SyncActionNode(name, config), node_(params.nh.lock()), blackboard_(blackboard), tf_buffer_(params.nh.lock()->get_clock()), listener_(tf_buffer_)
+    {
+        node_->get_parameter("frame_id", frame_id_);
+        tf_buffer_.setUsingDedicatedThread(true);
+    }
+    static BT::PortsList providedPorts();
+    BT::NodeStatus tick() override;
+private:
+    void onStart();
+    int DecodeBannerIndex(const int index);
+    BT::Blackboard::Ptr blackboard_;
+    rclcpp::Node::SharedPtr node_;
+    // for tf listener
+    tf2_ros::Buffer tf_buffer_;
+    tf2_ros::TransformListener listener_;
+    std::string frame_id_;
+    geometry_msgs::msg::PoseStamped robot_pose_;
+    geometry_msgs::msg::PoseStamped rival_pose_;
+    // for input
+    std_msgs::msg::Int32MultiArray mission_points_status_;
+    std::vector<double> material_points_;
+    std::string team_;
+    int banner_place_;
+    double safety_dist_;
 };
 
 /***************************/
 /* Integrated Mission Node */
 /***************************/
+typedef enum {
+  IDLE,
+  RECEIVED,
+  RUNNING1,
+  RUNNING2,
+  RUNNING3,
+  FINISH,
+  FAILED
+} MissionState;
+
 class IntegratedMissionNode : public BT::StatefulActionNode
 {
 public:

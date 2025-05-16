@@ -1,12 +1,25 @@
 /* Simple rclcpp publisher */
 #include "rclcpp/rclcpp.hpp"
+#include "std_srvs/srv/set_bool.hpp"
+#include "std_msgs/msg/bool.hpp"
 #include "std_msgs/msg/int32.hpp"
 #include "std_msgs/msg/float32.hpp"
 #include "std_msgs/msg/string.hpp"
 #include "geometry_msgs/msg/point_stamped.hpp"
+#include "geometry_msgs/msg/pose_with_covariance_stamped.hpp"
+#include "btcpp_ros2_interfaces/srv/start_up_srv.hpp" 
 
-#include <jsoncpp/json/json.h>
-#include <fstream>
+// tf2 
+#include <tf2/LinearMath/Quaternion.h>
+#include <tf2/LinearMath/Vector3.h>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
+#include <tf2/impl/utils.h>
+#include <tf2_ros/transform_listener.h>
+#include <tf2_ros/buffer.h>
+#include <tf2/exceptions.h>
+
+// #include <jsoncpp/json/json.h>
+// #include <fstream>
 #include <iostream>
 #include <stdexcept>
 #include <stdio.h>
@@ -15,6 +28,8 @@
 #include "btcpp_ros2_interfaces/msg/obstacles.hpp"
 #include "btcpp_ros2_interfaces/msg/circle_obstacle.hpp"
 #include "btcpp_ros2_interfaces/msg/segment_obstacle.hpp"
+
+#define PI 3.1415926
 
 typedef enum StartUpState {
     INIT = 0,
@@ -25,62 +40,97 @@ typedef enum StartUpState {
 
 class StartUp : public rclcpp::Node {
 public:
-    StartUp() : Node("startup_node") {
-        pub = this->create_publisher<std_msgs::msg::String>("/robot/startup/ready_signal", 2);
-        start_pub = this->create_publisher<std_msgs::msg::String>("/robot/startup/start_signal", 2);
+    StartUp() : Node("startup_node"), rate(100) {
+        // initial_pub = this->create_publisher<geometry_msgs::msg::PoseWithCovarianceStamped>("/initialpose", 2);
+        ready_pub = this->create_publisher<std_msgs::msg::String>("/robot/startup/plan", 2);
         time_pub = this->create_publisher<std_msgs::msg::Float32>("/robot/startup/time", 2);
-        start_sub = this->create_subscription<std_msgs::msg::Int32>("/robot/Start", 2, std::bind(&StartUp::StartCallback, this, std::placeholders::_1));
-        // srv = this->create_service<btcpp_ros2_interfaces::srv::StartUpSrv>("/robot/startup/ready_signal_feedback",  &StartUp::ReadyFeedback);
+        plan_sub = this->create_subscription<std_msgs::msg::Int32>("/robot/startup/plan_code", 2, std::bind(&StartUp::PlanCallback, this, std::placeholders::_1));
+        start_sub = this->create_subscription<std_msgs::msg::Bool>("/robot/startup/plug", 2, std::bind(&StartUp::StartCallback, this, std::placeholders::_1));
+        ready_srv_server = this->create_service<btcpp_ros2_interfaces::srv::StartUpSrv>(
+            "/robot/startup/ready_signal", std::bind(&StartUp::ReadyFeedback, this, std::placeholders::_1, std::placeholders::_2));
+        start_srv_client = this->create_client<std_srvs::srv::SetBool>("/robot/startup/start_signal");
         obstacles_pub_ = this->create_publisher<btcpp_ros2_interfaces::msg::Obstacles>("ball_obstacles", 10);
         
-        // file for bot1
-        this->declare_parameter<std::string>("Bot1_YellowA_config", "bt_plan_a_Yellow.xml");
-        this->declare_parameter<std::string>("Bot1_YellowB_config", "bt_plan_b_Yellow.xml");
-        this->declare_parameter<std::string>("Bot1_YellowC_config", "bt_plan_c_Yellow.xml");
-        this->declare_parameter<std::string>("Bot1_YellowD_config", "");
-        this->declare_parameter<std::string>("Bot1_YellowE_config", "");
-        this->declare_parameter<std::string>("Bot1_YellowF_config", "");
-        this->declare_parameter<std::string>("Bot1_YellowS_config", "");
-        this->declare_parameter<std::string>("Bot1_BlueA_config", "bt_plan_a_Blue.xml");
-        this->declare_parameter<std::string>("Bot1_BlueB_config", "bt_plan_b_Blue.xml");
-        this->declare_parameter<std::string>("Bot1_BlueC_config", "bt_plan_c_Blue.xml");
-        this->declare_parameter<std::string>("Bot1_BlueD_config", "");
-        this->declare_parameter<std::string>("Bot1_BlueE_config", "");
-        this->declare_parameter<std::string>("Bot1_BlueF_config", "");
-        this->declare_parameter<std::string>("Bot1_BlueS_config", "");
-        // file for bot2
-        this->declare_parameter<std::string>("Bot2_YellowA_config", "bot2_yellow_a.xml");
-        this->declare_parameter<std::string>("Bot2_YellowB_config", "bot2_yellow_b.xml");
-        this->declare_parameter<std::string>("Bot2_YellowC_config", "bot2_yellow_c.xml");
-        this->declare_parameter<std::string>("Bot2_YellowD_config", "");
-        this->declare_parameter<std::string>("Bot2_YellowE_config", "");
-        this->declare_parameter<std::string>("Bot2_YellowF_config", "");
-        this->declare_parameter<std::string>("Bot2_YellowS_config", "");
-        this->declare_parameter<std::string>("Bot2_BlueA_config", "bot2_blue_a.xml");
-        this->declare_parameter<std::string>("Bot2_BlueB_config", "bot2_blue_b.xml");
-        this->declare_parameter<std::string>("Bot2_BlueC_config", "bot2_blue_c.xml");
-        this->declare_parameter<std::string>("Bot2_BlueD_config", "");
-        this->declare_parameter<std::string>("Bot2_BlueE_config", "");
-        this->declare_parameter<std::string>("Bot2_BlueF_config", "");
-        this->declare_parameter<std::string>("Bot2_BlueS_config", "");
-
         this->declare_parameter<std::string>("Robot_name", "Tongue");
-        this->declare_parameter<std::vector<double>>("material_points", std::vector<double>{});
+        this->declare_parameter<std::vector<double>>("map_points_1", std::vector<double>{});
+        this->declare_parameter<std::vector<double>>("number_of_plans", std::vector<double>{});
+        this->declare_parameter<std::vector<double>>("start_points_bot1_yellow", std::vector<double>{});
+        this->declare_parameter<std::vector<double>>("start_points_bot1_blue", std::vector<double>{});
+        this->declare_parameter<std::vector<double>>("start_points_bot2_yellow", std::vector<double>{});
+        this->declare_parameter<std::vector<double>>("start_points_bot2_blue", std::vector<double>{});
+        this->declare_parameter<std::string>("Bot1_name", "");
+        this->declare_parameter<std::string>("Bot2_name", "");
+        for (int i = 0; i < 26; i++) {
+            std::string param_name_1 = "Bot1_Yellow";
+            std::string param_name_2 = "Bot1_Blue";
+            std::string param_name_3 = "Bot2_Yellow";
+            std::string param_name_4 = "Bot2_Blue";
+            param_name_1 += char(65 + i);
+            param_name_2 += char(65 + i);
+            param_name_3 += char(65 + i);
+            param_name_4 += char(65 + i);
+            param_name_1 += "_config";
+            param_name_2 += "_config";
+            param_name_3 += "_config";
+            param_name_4 += "_config";
+            this->declare_parameter<std::string>(param_name_1, "nan");
+            this->declare_parameter<std::string>(param_name_2, "nan");
+            this->declare_parameter<std::string>(param_name_3, "nan");
+            this->declare_parameter<std::string>(param_name_4, "nan");
+        }
+        this->declare_parameter<std::string>("Bot1_YellowSpetial_config", "nan");
+        this->declare_parameter<std::string>("Bot1_BlueSpetial_config", "nan");
+        this->declare_parameter<std::string>("Bot2_YellowSpetial_config", "nan");
+        this->declare_parameter<std::string>("Bot2_BlueSpetial_config", "nan");
+
         this->get_parameter("Robot_name", Robot_name_);
-        this->get_parameter("material_points", material_points_);
-        this->get_parameter("Bot1_YellowA_config", Bot1_YellowA_file);
-        this->get_parameter("Bot1_YellowB_config", Bot1_YellowB_file);
-        this->get_parameter("Bot1_YellowC_config", Bot1_YellowC_file);
-        this->get_parameter("Bot1_YellowS_config", Bot1_YellowS_file);
-        this->get_parameter("Bot1_BlueA_config", Bot1_BlueA_file);
-        this->get_parameter("Bot1_BlueB_config", Bot1_BlueB_file);
-        this->get_parameter("Bot1_BlueC_config", Bot1_BlueC_file);
-        this->get_parameter("Bot1_BlueS_config", Bot1_BlueS_file);
-        this->get_parameter("Bot2_BlueA_config", Bot2_BlueA_file);
+        this->get_parameter("map_points_1", material_points_);
+        this->get_parameter("number_of_plans", number_of_plans_double_);
+        this->get_parameter("Bot1_name", Bot1_name_);
+        this->get_parameter("Bot2_name", Bot2_name_);
+        this->get_parameter("start_points_bot1_yellow", start_points_bot1_yellow_);
+        this->get_parameter("start_points_bot1_blue", start_points_bot1_blue_);
+        this->get_parameter("start_points_bot2_yellow", start_points_bot2_yellow_);
+        this->get_parameter("start_points_bot2_blue", start_points_bot2_blue_);
+        for (int i = 0; i < 4; i++) {
+            number_of_plans_[i] = int(number_of_plans_double_[i]);
+        }
+        name_of_bot1_yellow_plans = new std::string[number_of_plans_[0]];
+        name_of_bot1_blue_plans = new std::string[number_of_plans_[1]];
+        name_of_bot2_yellow_plans = new std::string[number_of_plans_[2]];
+        name_of_bot2_blue_plans = new std::string[number_of_plans_[3]];
+        for (int i = 0; i < number_of_plans_[0] - 1; i++) {
+            std::string param_name = "Bot1_Yellow";
+            param_name += char(65 + i);
+            param_name += "_config";
+            this->get_parameter(param_name, name_of_bot1_yellow_plans[i]);
+        }
+        this->get_parameter("Bot1_YellowSpetial_config", name_of_bot1_yellow_plans[number_of_plans_[0] - 1]);
+        for (int i = 0; i < number_of_plans_[1] - 1; i++) {
+            std::string param_name = "Bot1_Blue";
+            param_name += char(65 + i);
+            param_name += "_config";
+            this->get_parameter(param_name, name_of_bot1_blue_plans[i]);
+        }
+        this->get_parameter("Bot1_BlueSpetial_config", name_of_bot1_blue_plans[number_of_plans_[1] - 1]);
+        for (int i = 0; i < number_of_plans_[2] - 1; i++) {
+            std::string param_name = "Bot2_Yellow";
+            param_name += char(65 + i);
+            param_name += "_config";
+            this->get_parameter(param_name, name_of_bot2_yellow_plans[i]);
+        }
+        this->get_parameter("Bot2_YellowSpetial_config", name_of_bot2_yellow_plans[number_of_plans_[2] - 1]);
+        for (int i = 0; i < number_of_plans_[3] - 1; i++) {
+            std::string param_name = "Bot2_Blue";
+            param_name += char(65 + i);
+            param_name += "_config";
+            this->get_parameter(param_name, name_of_bot2_blue_plans[i]);
+        }
+        this->get_parameter("Bot2_BlueSpetial_config", name_of_bot2_blue_plans[number_of_plans_[3] - 1]);
 
         start_up_state = INIT;
         timer_ = this->create_wall_timer(
-            std::chrono::microseconds(100), 
+            std::chrono::microseconds(100),
             std::bind(&StartUp::StateMachine, this)
         );
     }
@@ -99,26 +149,26 @@ public:
             team_colcor_ = (plan_code_ - plan_code_ / 10 * 10);
             UpdateTeamAndPoint(plan_code_);
 
-            /* Press ready signal and get robot init position */
+            /* choose plan from pannel and get robot init position */
             if (plan_code_) {
                 start_up_state = READY;
                 RCLCPP_INFO(this->get_logger(), "[StartUp Program]: INIT -> READY");
             }
             break;
         case READY:
-            PublishReadySignal(pub);
-            if (ready_feedback == 1) {
+            PublishReadySignal(ready_pub);                                     // publish plan file name as start message
+            if (ready_feedback[0] == START && ready_feedback[1] == START && ready_feedback[2] == START && ready_feedback[3] == START) {
                 if (ready == false) {
                     RCLCPP_INFO(this->get_logger(), "[StartUp Program]: All of the programs are ready!");
                 }
                 ready = true;
             }
-            /* Press start signal */
-            if ( (ready_feedback == 1) && start) {
+            /* Plug out the plug */
+            if ((ready_feedback[0] == START && ready_feedback[1] == START && ready_feedback[2] == START && ready_feedback[3] == START) && start) {
                 start_up_state = START;
                 RCLCPP_INFO(this->get_logger(), "[StartUp Program]: READY -> START");
                 /* Publish start signal */
-                PublishStartSignal(start_pub);
+                PublishStartSignal();
                 /* Start the time */
                 starting_time = this->get_clock()->now().seconds();
             }
@@ -132,18 +182,29 @@ public:
         }
     }
 
+    // publish plan file name as ready message to every groups 
     void PublishReadySignal(rclcpp::Publisher<std_msgs::msg::String>::SharedPtr pub) {
-        // start_position.header.stamp = this->get_clock()->now();
-        // pub->publish(start_position);
-        pub->publish(start_plan);
+        // RCLCPP_INFO_STREAM(this->get_logger(), "publishing ready signal");
+        start_position.header.stamp = this->get_clock()->now();
+        // initial_pub->publish(start_position);                               // publish initial pose to everyone
+        pub->publish(start_plan);                                              // publish a string that is the xml file name
+        rate.sleep();
     }
 
-    void PublishStartSignal(rclcpp::Publisher<std_msgs::msg::String>::SharedPtr pub) {
-        // start_position.header.stamp = this->get_clock()->now();
-        // pub->publish(start_position);
-        pub->publish(start_plan);
+    // send the service request to bt_m (main function) to ask it to creat and start the behaviortree
+    void PublishStartSignal() {
+        auto request = std::make_shared<std_srvs::srv::SetBool::Request>();
+        request->data = true;
+    
+        start_srv_client->async_send_request(request, 
+            [this](rclcpp::Client<std_srvs::srv::SetBool>::SharedFuture future) {
+                auto response = future.get();
+                RCLCPP_INFO(this->get_logger(), "Response: success=%s, message=%s", response->success ? "true" : "false", response->message.c_str());
+            }
+        );
     }
 
+    // publish time to everyone
     void PublishTime(rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr pub) {
 
         // Get current time by second
@@ -165,8 +226,6 @@ public:
         obstacles_msg.header.stamp = this->get_clock()->now();
         obstacles_pub_->publish(obstacles_msg);
 
-
-
         static bool is_published = false;
         static bool time_check = false;
 
@@ -179,141 +238,189 @@ public:
             is_published = true;
         }
 
-        if (msg.data >= 100 && !time_check) {
+        if (msg.data >= 100 && !time_check) {                                  // check if it's timeout
             RCLCPP_INFO(this->get_logger(), "[StartUp Program]: Time is out!");
             time_check = true;
         }
     }
 
+    // decode the plan code and find to correspon plan file name
     void UpdateTeamAndPoint(const int code) {
         int start_pt_code = 0;
-        if (Robot_name_ == "Tongue") {
-            switch (code) {
-            case 10:
-                start_pt_code = 11;
-                groot_filename = Bot1_YellowA_file;
-                RCLCPP_INFO(this->get_logger(), "[Bot1]: Yellow team plan A");
-                break;
-            case 20:
-                start_pt_code = 10;
-                groot_filename = Bot1_YellowB_file;
-                RCLCPP_INFO(this->get_logger(), "[Bot1]: Yellow team plan B");
-                break;
-            case 30: 
-                start_pt_code = 10;
-                groot_filename = Bot1_YellowC_file;
-                RCLCPP_INFO(this->get_logger(), "[Bot1]: Yellow team plan C");
-                break;
-            case 11:
-                start_pt_code = 15;
-                groot_filename = Bot1_BlueA_file;
-                RCLCPP_INFO(this->get_logger(), "[Bot1]: Blue team plan A");
-                break;
-            case 21:
-                start_pt_code = 19;
-                groot_filename = Bot1_BlueB_file;
-                RCLCPP_INFO(this->get_logger(), "[Bot1]: Blue team plan B");
-                break;
-            case 31: 
-                start_pt_code = 19;
-                groot_filename = Bot1_BlueC_file;
-                RCLCPP_INFO(this->get_logger(), "[Bot1]: Blue team plan C");
-                break;
-            default: 
-                start_pt_code = 10;
-                groot_filename = Bot1_YellowB_file;
-                RCLCPP_INFO(this->get_logger(), "[Bot1]: Yellow team plan B");
-                break;
+        bool isTreenameSet = false;
+        if (Robot_name_ == Bot1_name_) {                                       // for bot 1
+            for (int i = 0; i < number_of_plans_[0] - 1; i ++) {               // for yellow team
+                if (code == (i + 1) * 10) {
+                    start_pt_code = int(start_points_bot1_yellow_[i]);
+                    groot_filename = name_of_bot1_yellow_plans[i];
+                    RCLCPP_INFO_STREAM(this->get_logger(), "[Bot1]: Yellow team plan " << (char)(i + 65));
+                    isTreenameSet = true;
+                    break;
+                }
             }
-        }
-        else if (Robot_name_ == "Invisible") {
-            switch (code) {
-            case 10:
-                start_pt_code = 13;
-                groot_filename = Bot2_YellowA_file;
-                RCLCPP_INFO(this->get_logger(), "[Bot2]: Yellow team plan A");
-                break;
-            case 20:
-                start_pt_code = 10;
-                groot_filename = Bot2_YellowB_file;
-                RCLCPP_INFO(this->get_logger(), "[Bot2]: Yellow team plan B");
-                break;
-            case 30: 
-                start_pt_code = 10;
-                groot_filename = Bot2_YellowC_file;
-                RCLCPP_INFO(this->get_logger(), "[Bot2]: Yellow team plan C");
-                break;
-            case 11:
-                start_pt_code = 17;
-                groot_filename = Bot2_BlueA_file;
-                RCLCPP_INFO(this->get_logger(), "[Bot2]: Blue team plan A");
-                break;
-            case 21:
-                start_pt_code = 20;
-                groot_filename = Bot2_BlueB_file;
-                RCLCPP_INFO(this->get_logger(), "[Bot2]: Blue team plan B");
-                break;
-            case 31: 
-                start_pt_code = 20;
-                groot_filename = Bot2_BlueC_file;
-                RCLCPP_INFO(this->get_logger(), "[Bot2]: Blue team plan C");
-                break;
-            default:
-                start_pt_code = 17;
-                groot_filename = Bot2_BlueA_file;
-                RCLCPP_INFO(this->get_logger(), "[Bot2]: Blue team plan A");
-                break;
+            if (code == 100 * 10) {                                            // for spetial plan of yellow team
+                start_pt_code = int(start_points_bot1_yellow_[number_of_plans_[0] - 1]);
+                groot_filename = name_of_bot1_yellow_plans[number_of_plans_[0] - 1];
+                RCLCPP_INFO_STREAM(this->get_logger(), "[Bot1]: Yellow team spetial plan");
+                isTreenameSet = true;
             }
+            for (int i = 0; i < number_of_plans_[1] - 1; i ++) {               // for blue team
+                if (isTreenameSet)
+                    break;
+                if (code == (i + 1) * 10 + 1) {
+                    start_pt_code = int(start_points_bot1_blue_[i]) + 4;
+                    groot_filename = name_of_bot1_blue_plans[i];
+                    RCLCPP_INFO_STREAM(this->get_logger(), "[Bot1]: Blue team plan " << (char)(i + 65));
+                    isTreenameSet = true;
+                    break;
+                }
+            }
+            if (code == 100 * 10 + 1) {                                        // for spetial plan of blue team
+                start_pt_code = int(start_points_bot1_blue_[number_of_plans_[0] - 1]) + 4;
+                groot_filename = name_of_bot1_blue_plans[number_of_plans_[1] - 1];
+                RCLCPP_INFO_STREAM(this->get_logger(), "[Bot1]: Blue team spetial plan");
+                isTreenameSet = true;
+            }
+            if (!isTreenameSet)                                                // if can't find
+                RCLCPP_ERROR_STREAM(this->get_logger(), "no plan match");
         }
-        start_position.point.x = material_points_[start_pt_code * 4];
-        start_position.point.y = material_points_[start_pt_code * 4 + 1];
-        start_position.point.z = material_points_[start_pt_code * 4 + 2];
+        else if (Robot_name_ == Bot2_name_) {                                  // for bot 2
+            isTreenameSet = false;
+            for (int i = 0; i < number_of_plans_[2] - 1; i++) {                // for yellow team
+                if (code == (i + 1) * 10) {
+                    start_pt_code = int(start_points_bot2_yellow_[i]);
+                    groot_filename = name_of_bot2_yellow_plans[i];
+                    RCLCPP_INFO_STREAM(this->get_logger(), "[Bot2]: Yellow team plan " << (char)(i + 65));
+                    isTreenameSet = true;
+                    break;
+                }
+            }
+            if (code == 100 * 10) {                                            // for spetial plan of yellow team
+                start_pt_code = int(start_points_bot2_yellow_[number_of_plans_[0] - 1]);
+                groot_filename = name_of_bot2_yellow_plans[number_of_plans_[2] - 1];
+                RCLCPP_INFO_STREAM(this->get_logger(), "[Bot2]: Yellow team spetial plan");
+                isTreenameSet = true;
+            }
+            for (int i = 0; i < number_of_plans_[3] - 1; i ++) {               // for blue team
+                if (isTreenameSet)
+                    break;
+                if (code == (i + 1) * 10 + 1) {
+                    start_pt_code = int(start_points_bot2_blue_[i] + 4);
+                    groot_filename = name_of_bot2_blue_plans[i];
+                    RCLCPP_INFO_STREAM(this->get_logger(), "[Bot2]: Blue team plan " << (char)(i + 65));
+                    isTreenameSet = true;
+                    break;
+                }
+            }
+            if (code == 100 * 10 + 1) {                                        // for spetial plan of blue team
+                start_pt_code = int(start_points_bot2_blue_[number_of_plans_[0] - 1] + 4);
+                groot_filename = name_of_bot2_blue_plans[number_of_plans_[3] - 1];
+                RCLCPP_INFO_STREAM(this->get_logger(), "[Bot2]: Blue team spetial plan");
+                isTreenameSet = true;
+            }
+            if (!isTreenameSet)
+                RCLCPP_ERROR_STREAM(this->get_logger(), "no plan match");
+        }
+
+        // setting message of initial pose (no useage for now)
+        start_position.pose.pose.position.x = material_points_[start_pt_code * 5];
+        start_position.pose.pose.position.y = material_points_[start_pt_code * 5 + 1];
+        tf2::Quaternion q; // declare Quaternion
+        q.setRPY(0, 0, material_points_[start_pt_code * 5 + 2] * PI / 2); // change degree-z into Quaternion
+        start_position.pose.pose.orientation.x = q.x();
+        start_position.pose.pose.orientation.y = q.y();
+        start_position.pose.pose.orientation.z = q.z();
+        start_position.pose.pose.orientation.w = q.w();
         start_plan.data = groot_filename + std::to_string(team_colcor_);
     }
 
-    void StartCallback(const std_msgs::msg::Int32::SharedPtr msg) {
-        static int prev_msg = 0;
-
-        if (msg->data == 1) {
-            if (prev_msg == 0) {
-                ready_feedback = 1;
-                start = true;
-                RCLCPP_INFO_STREAM(this->get_logger(), "start callback: " << ready_feedback << start);
+    //receive ready message from every groups
+    void ReadyFeedback(const std::shared_ptr<btcpp_ros2_interfaces::srv::StartUpSrv::Request> request,
+        std::shared_ptr<btcpp_ros2_interfaces::srv::StartUpSrv::Response> response) {
+        RCLCPP_INFO(this->get_logger(), "Received state %d from %d", request->state, request->group);
+        response->group = request->group;
+        response->success = false;
+        if (request->group == 0) {                                             // message from bt_m (main program)
+            if (request->state == 3 && (prev_msg[0] == READY || prev_msg[0] == INIT)) {
+                response->success = true;
+                ready_feedback[0] = START;
             }
+            prev_msg[0] = StartUpState(request->state);                        // turn the message type into enum and store
         }
-        prev_msg = msg->data;
+        else if (request->group == 1) {                                        // message from vision
+            if (request->state == 3 && (prev_msg[1] == READY || prev_msg[1] == INIT)) {
+                response->success = true;
+                ready_feedback[1] = START;
+            }
+            prev_msg[1] = StartUpState(request->state);                        // turn the message type into enum and store
+        }
+        else if (request->group == 2) {                                        // message from navigation
+            if (request->state == 3 && (prev_msg[2] == READY || prev_msg[2] == INIT)) {
+                response->success = true;
+                ready_feedback[2] = START;
+            }
+            prev_msg[2] = StartUpState(request->state);                        // turn the message type into enum and store
+        }
+        else if (request->group == 3) {                                        // message from localization
+            if (request->state == 3 && (prev_msg[3] == READY || prev_msg[3] == INIT)) {
+                response->success = true;
+                ready_feedback[3] = START;
+            }
+            prev_msg[3] = StartUpState(request->state);                        // turn the message type into enum and store
+        }
+        RCLCPP_INFO(this->get_logger(), "Response %d to %d", int(response->success), response->group);
+    }
+    void PlanCallback(const std_msgs::msg::Int32::SharedPtr msg) {             // get plan code from pannel
+        plan_code_ = msg->data;
+    }
+
+    void StartCallback(const std_msgs::msg::Bool::SharedPtr msg) {             // will be triggered by the plug
+        if (msg->data == true && prev_start_msg == false) {
+            start = true;
+        }
+        prev_start_msg = msg->data;
     }
 
 private:
     rclcpp::TimerBase::SharedPtr timer_;
-    rclcpp::Publisher<std_msgs::msg::String>::SharedPtr pub;
-    rclcpp::Publisher<std_msgs::msg::String>::SharedPtr start_pub;
+    // rclcpp::Publisher<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr initial_pub;
+    rclcpp::Publisher<std_msgs::msg::String>::SharedPtr ready_pub;             // publish plan message as ready signal to every groups
     rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr time_pub;
-    rclcpp::Subscription<std_msgs::msg::Int32>::SharedPtr start_sub;
+    rclcpp::Subscription<std_msgs::msg::Int32>::SharedPtr plan_sub;            // it might can be removed, startup can read the plan code value in a json file directly
+    rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr start_sub;            // plug message
+    rclcpp::Service<btcpp_ros2_interfaces::srv::StartUpSrv>::SharedPtr ready_srv_server; // receive to check if every group start successfully
+    rclcpp::Client<std_srvs::srv::SetBool>::SharedPtr start_srv_client;        // it might can be removed, main can listen to start topic by plug directly
 
     rclcpp::Publisher<btcpp_ros2_interfaces::msg::Obstacles>::SharedPtr obstacles_pub_;
 
     // Parameters
-    std::string Bot1_YellowA_file, Bot1_YellowB_file, Bot1_YellowC_file, Bot1_YellowD_file, Bot1_YellowE_file, Bot1_YellowF_file, Bot1_YellowS_file;
-    std::string Bot1_BlueA_file, Bot1_BlueB_file, Bot1_BlueC_file, Bot1_BlueD_file, Bot1_BlueE_file, Bot1_BlueF_file, Bot1_BlueS_file;
-    std::string Bot2_YellowA_file, Bot2_YellowB_file, Bot2_YellowC_file, Bot2_YellowD_file, Bot2_YellowE_file, Bot2_YellowF_file, Bot2_YellowS_file;
-    std::string Bot2_BlueA_file, Bot2_BlueB_file, Bot2_BlueC_file, Bot2_BlueD_file, Bot2_BlueE_file, Bot2_BlueF_file, Bot2_BlueS_file;
-    std::string Robot_name_;
+    std::string* name_of_bot1_yellow_plans = NULL;
+    std::string* name_of_bot1_blue_plans = NULL;
+    std::string* name_of_bot2_yellow_plans = NULL;
+    std::string* name_of_bot2_blue_plans = NULL;
+    std::string Robot_name_, Bot1_name_, Bot2_name_;
     std::string groot_filename;
 
     btcpp_ros2_interfaces::msg::CircleObstacle c;
+    rclcpp::Rate rate;
 
     int team_colcor_;
-    int ready_feedback = 0;
+    int number_of_plans_[4];                                                   // plan numbers of different color and different bot
     int plan_code_;
     bool ready = false;
-    bool pub_ready = false;
-    bool start = false;
+    StartUpState prev_msg[4] = {INIT, INIT, INIT, INIT};                       // ready message from other programs
+    StartUpState ready_feedback[4] = {INIT, START, START, START};   // it should be INIT        // ready message from other programs
+    bool prev_start_msg = false;                                               // plug message
+    bool start = false;  // it should be false                                  // plug message
     double starting_time = 0;
-    StartUpState start_up_state;
-    std::vector<double> material_points_;
-    geometry_msgs::msg::PointStamped start_position;
+    StartUpState start_up_state;                                               // state of startup program
+    std::vector<double> material_points_;                                      // prepared for choosing start point
+    std::vector<double> number_of_plans_double_;
+    std::vector<double> start_points_bot1_yellow_, start_points_bot1_blue_, start_points_bot2_yellow_, start_points_bot2_blue_;
+    // ROS message
+    geometry_msgs::msg::PoseWithCovarianceStamped start_position;
     std_msgs::msg::String start_plan;
+    std_msgs::msg::Bool start_signal;
 };
 
 int main(int argc, char **argv) {

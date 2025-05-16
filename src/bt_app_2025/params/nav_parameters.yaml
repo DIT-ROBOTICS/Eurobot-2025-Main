@@ -1,8 +1,9 @@
 bt_app_2025:
   ros__parameters:
-    nav_dist_error: 0.03
-    dock_dist_error: 0.03
-    rotate_dist_error: 0.03
+    nav_dist_error: 0.005
+    dock_dist_error: 0.005
+    rotate_dist_error: 0.005
     nav_ang_error: 0.4
     dock_ang_error: 0.4
     rotate_ang_error: 0.4
+    safety_dist: 0.5

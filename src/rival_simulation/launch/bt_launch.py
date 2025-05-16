@@ -21,7 +21,7 @@ def generate_launch_description():
         'config_path.yaml'
     )
     map_points = os.path.join(
-        get_package_share_directory('bt_app_2025'),
+        get_package_share_directory('rival_simulation'),
         'params',
         'map_points.yaml'
     )
@@ -33,8 +33,8 @@ def generate_launch_description():
             parameters = [
                 config_path, 
                 map_points, 
-                {"frame_id": "base_link"}, 
-                {"tree_name": "MainTree"}
+                {"frame_id": "base_footprint"}, 
+                {"tree_name": "EasyMainTree"}
             ]
         )
     ])

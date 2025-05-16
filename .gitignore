@@ -5,6 +5,7 @@
 **/build/
 **/install/
 **/log/
+**/bag/
 
 # Ignore python cache files
 **/__pycache__/

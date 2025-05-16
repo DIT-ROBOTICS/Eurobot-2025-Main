@@ -62,6 +62,7 @@ public:
 private:
     double calculateDistance(const geometry_msgs::msg::Pose &pose1, const geometry_msgs::msg::Pose &pose2);
     void broadcastTransform(const geometry_msgs::msg::Pose &pose);
+    geometry_msgs::msg::PoseStamped ExportPose(const int index);
 
     std::shared_ptr<rclcpp::Node> node_;
     BT::Blackboard::Ptr blackboard_;
@@ -77,6 +78,7 @@ private:
     geometry_msgs::msg::PoseStamped start_pose_;
     nav_msgs::msg::Odometry current_pose_;
     geometry_msgs::msg::PoseStamped rival_predict_goal_;
+    std::vector<double> material_points_;
 };
 
 class initPoints : public BT::SyncActionNode {

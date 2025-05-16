@@ -45,29 +45,39 @@ def generate_launch_description():
     nav_parameters = LaunchConfiguration('params2')
     map_points = LaunchConfiguration('params3')
 
-    bt_m_node = Node(
-        parameters=[
-            config_path,
-            finisher,
-            nav_parameters,
-            map_points,
-            {"frame_id": "base_footprint"},
-            {"tree_name": "MissionPointOne"}, # "MissionPointOne"
-        ],
-        package = 'bt_app_2025',
-        executable = 'bt_m',
-        name = 'bt_m'
+    bt_m_node = TimerAction(
+        period=2.0,
+        actions=[
+            Node(
+                parameters=[
+                    config_path,
+                    finisher,
+                    nav_parameters,
+                    map_points,
+                    {"frame_id": "base_footprint"},
+                    {"tree_name": "MainTree"}, # "MissionPointOne"
+                ],
+                package = 'bt_app_2025',
+                executable = 'bt_m',
+                name = 'bt_m'
+            )
+        ]
     )
-    startup_node = Node(
-        parameters=[
-            config_path,
-            map_points,
-            {"Robot_name": "Tongue"},  # Invisible or Tongue
-            {"plan_code": 11} # 10e1: plan (start from 1), 10e0: color(0 for yellow, 1 for blue)
-        ],
-        package = 'startup',
-        executable = 'startup',
-        name = 'startup'
+    startup_node = TimerAction(
+        period=2.0,
+        actions=[
+            Node(
+                parameters=[
+                    config_path,
+                    map_points,
+                    {"Robot_name": "Tongue"},  # Invisible or Tongue
+                    {"plan_code": 40} # 10e1: plan (start from 1), 10e0: color(0 for yellow, 1 for blue)
+                ],
+                package = 'startup',
+                executable = 'startup',
+                name = 'startup'
+            )
+        ]
     )
     firmware_node = Node(
         package='micro_ros_agent',
@@ -77,12 +87,12 @@ def generate_launch_description():
         arguments=['serial', '-b', '115200', '-D', '/dev/mission']
     )
     return LaunchDescription([
+        bt_m_node,
+        startup_node,
         config_path_arg,
         finisher_arg,
         nav_parameters_arg,
         map_points_arg,
-        bt_m_node,
-        startup_node,
         firmware_node
         # TimerAction(
         #     period = 1.0,
