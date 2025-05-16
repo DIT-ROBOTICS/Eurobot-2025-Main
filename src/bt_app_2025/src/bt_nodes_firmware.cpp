@@ -255,6 +255,7 @@ PortsList MissionFailure::providedPorts() {
     return { 
         BT::InputPort<std::deque<int>>("step_results"),
         BT::InputPort<bool>("robot_type"),
+        BT::InputPort<int>("base_index"),
         BT::OutputPort<int>("success_levels"), 
         BT::OutputPort<int>("failed_levels")
     };
@@ -262,6 +263,7 @@ PortsList MissionFailure::providedPorts() {
 
 BT::NodeStatus MissionFailure::onStart()
 {
+    getInput<int>("base_index", base_index_);
     getInput<std::deque<int>>("step_results", step_results_);
     getInput<bool>("robot_type", robot_type_);
     blackboard_->get<int>("mission_progress", mission_progress_);
@@ -354,7 +356,11 @@ BT::NodeStatus MissionFailure::onRunning()
         default:
             break;
     }
-
+    if (base_index_ > 10) {
+        blackboard_->get<std_msgs::msg::Int32MultiArray>("mission_points_status", mission_points_status_);
+        mission_points_status_.data[base_index_ - 11]++;
+        blackboard_->set<std_msgs::msg::Int32MultiArray>("mission_points_status", mission_points_status_);
+    }
     blackboard_->set<int>("front_materials", front_materials_);
     blackboard_->set<int>("back_materials", back_materials_);
 

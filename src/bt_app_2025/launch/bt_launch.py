@@ -55,7 +55,7 @@ def generate_launch_description():
                     nav_parameters,
                     map_points,
                     {"frame_id": "base_footprint"},
-                    {"tree_name": "MainTree"}, # "MissionPointOne"
+                    {"tree_name": "FuncTest"}, # "MissionPointOne"
                 ],
                 package = 'bt_app_2025',
                 executable = 'bt_m',

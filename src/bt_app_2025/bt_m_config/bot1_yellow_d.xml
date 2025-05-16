@@ -6,7 +6,7 @@
         <BannerChecker remap_banner_place="{remap_banner_place}" banner_place="{BANNER_PLACE}" />
         <Parallel failure_count="1" success_count="2">
           <ForceSuccess>
-            <Timeout msec="6000">
+            <Timeout msec="100">
               <FirmwareMission mission_status="{x}" mission_type="30" _description="lift the front grabber" />
             </Timeout>
           </ForceSuccess>
@@ -141,12 +141,17 @@
     <Sequence>
       <ForceSuccess>
         <Timeout msec="6000">
-          <FirmwareMission mission_status="{x}" mission_type="32" />
+          <FirmwareMission mission_status="{x}" mission_type="22" />
         </Timeout>
       </ForceSuccess>
       <ForceSuccess>
         <Timeout msec="6000">
           <FirmwareMission mission_status="{x}" mission_type="30" />
+        </Timeout>
+      </ForceSuccess>
+      <ForceSuccess>
+        <Timeout msec="6000">
+          <FirmwareMission mission_status="{x}" mission_type="23" />
         </Timeout>
       </ForceSuccess>
       <Sleep msec="50000" />
@@ -410,7 +415,7 @@
           <RetryUntilSuccessful num_attempts="10">
             <Fallback>
               <MissionChecker level="{level}" remap_base="{base}" mission_type="back" base_index="13">
-                <Docking final_pose="{PrevGoal}" isPureDocking="0" dock_type="dock_y_slow_precise" shift="0" offset="-0.1" base="{base}" />
+                <Docking final_pose="{PrevGoal}" isPureDocking="0" dock_type="dock_y_slow_precise" shift="0" offset="0.1" base="{base}" />
               </MissionChecker>
               <ForceFailure>
                 <Sleep msec="500" />

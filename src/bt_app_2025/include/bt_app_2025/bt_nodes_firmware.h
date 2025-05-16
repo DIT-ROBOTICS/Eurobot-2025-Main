@@ -146,6 +146,7 @@ private:
   // step_results_-> 1: front_collect 2: back_collect 3: construct_1 4: construct_2 5: construct_3
   std::deque<int> step_results_;
   // obot_type_-> 0: SpinArm 1: NotSpinArm
+  std_msgs::msg::Int32MultiArray mission_points_status_;
   bool robot_type_;
   bool matreials_accord_;
   int success_levels_;
@@ -153,6 +154,7 @@ private:
   int mission_progress_;
   int front_materials_;
   int back_materials_;
+  int base_index_;
 
   std::deque<int> stage_info_;
 

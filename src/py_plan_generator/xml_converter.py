@@ -78,7 +78,10 @@ def read_input(root):
                     i += 1
                     docking = node[0]
                     docking.set('dock_type', dock_type_list[int(points_list[i - 1])])
-                    docking.set('offset', offset_list[int(points_list[i - 1]) - 11])
+                    if (i != 7 or points_list[6] != points_list[7]):
+                        docking.set('offset', offset_list[int(points_list[i - 1]) - 11])
+                    else:
+                        docking.set('offset', str(-float(offset_list[int(points_list[i - 1]) - 11])))
                 if (node.tag == "SubTree" and (node.get('ID') == "PlaceOneLevel" or node.get('ID') == "PlaceTwoLevels" or node.get('ID') == "ThreeLevelsBot1new")):
                     node.set('index', points_list[i - 1])
                 if (node.tag == "SubTree" and node.get('ID') == "BannerMission"):
@@ -87,7 +90,7 @@ def read_input(root):
     tree.write(output_file_name, encoding="utf-8", xml_declaration=True)
 
 def create_tree():
-    input_tree = ET.parse('bot1_blue_a_template.xml')
+    input_tree = ET.parse('bot1_yellow_d.xml')
     root_in = input_tree.getroot()
     root_out = ET.Element("root", {"BTCPP_format": "4"})
     root_out.clear()

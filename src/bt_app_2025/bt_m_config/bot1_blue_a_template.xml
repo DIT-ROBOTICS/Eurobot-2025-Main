@@ -110,6 +110,16 @@
     </Sequence>
   </BehaviorTree>
 
+  <BehaviorTree ID="FirmwareSubTree">
+    <ForceSuccess>
+      <Timeout msec="{firmware_timeout}">
+        <FirmwareMission mission_status="{x}"
+                         mission_type="{mission_type}"
+                         _description="{_description}"/>
+      </Timeout>
+    </ForceSuccess>
+  </BehaviorTree>
+
   <BehaviorTree ID="FirmwareTest">
     <Switch5 case_1="1"
              case_2="2"
@@ -165,7 +175,7 @@
         </MaterialChecker>
         <SubTree ID="TwoLevelsBot1new"
                  back="0.2, 0.1, 0.05"
-                 forward="0.15, 0.105, 0.065"
+                 forward="0.15, 0.105, 0.075"
                  shift="0.11"
                  index="7"
                  _autoremap="true"/>
@@ -278,13 +288,13 @@
       <ForceSuccess>
         <Timeout msec="6000">
           <FirmwareMission mission_status="{x}"
-                           mission_type="70"/>
+                           mission_type="32"/>
         </Timeout>
       </ForceSuccess>
       <ForceSuccess>
         <Timeout msec="6000">
           <FirmwareMission mission_status="{x}"
-                           mission_type="71"/>
+                           mission_type="30"/>
         </Timeout>
       </ForceSuccess>
       <Sleep msec="50000"/>
@@ -464,7 +474,7 @@
       </Parallel>
       <SubTree ID="TwoLevelsBot1new"
                back="0.2, 0.1, 0.05"
-               forward="0.15, 0.105, 0.065"
+               forward="0.15, 0.105, 0.075"
                shift="0.10"
                index="{index}"
                _skipIf="last_mission_failed"
@@ -570,7 +580,7 @@
       </Parallel>
       <SubTree ID="TwoLevelsBot1new"
                back="0.2, 0.1, 0.05"
-               forward="0.15, 0.105, 0.065"
+               forward="0.15, 0.105, 0.075"
                shift="0.11"
                index="{index}"
                _skipIf="last_mission_failed"
@@ -725,7 +735,7 @@
       </Parallel>
       <SubTree ID="TwoLevelsBot1new"
                back="0.2, 0.1, 0.05"
-               forward="0.15, 0.105, 0.065"
+               forward="0.15, 0.105, 0.075"
                shift="0.11"
                index="{index}"
                _skipIf="last_mission_failed"
@@ -896,7 +906,7 @@
                          isPureDocking="0"
                          dock_type="dock_y_precise_linearBoost"
                          shift="0"
-                         offset="-0.1"
+                         offset="0"
                          base="{base}"/>
               </MissionChecker>
               <ForceFailure>
@@ -942,26 +952,47 @@
         </Timeout>
       </ForceSuccess>
       <SubTree ID="PointTestSubTree"
-               index="0"
+               index="5"
                _autoremap="true"/>
       <SubTree ID="PointTestSubTree"
-               index="1"
+               index="5"
                _autoremap="true"/>
       <SubTree ID="PointTestSubTree"
-               index="2"
+               index="5"
                _autoremap="true"/>
       <SubTree ID="PointTestSubTree"
-               index="3"
+               index="5"
                _autoremap="true"/>
       <SubTree ID="PointTestSubTree"
-               index="4"
+               index="5"
+               _autoremap="true"/>
+      <SubTree ID="PointTestSubTree"
+               index="5"
+               _autoremap="true"/>
+      <SubTree ID="PointTestSubTree"
+               index="5"
+               _autoremap="true"/>
+      <SubTree ID="PointTestSubTree"
+               index="5"
+               _autoremap="true"/>
+      <SubTree ID="PointTestSubTree"
+               index="5"
+               _autoremap="true"/>
+      <SubTree ID="PointTestSubTree"
+               index="5"
+               _autoremap="true"/>
+      <SubTree ID="PointTestSubTree"
+               index="5"
+               _autoremap="true"/>
+      <SubTree ID="PointTestSubTree"
+               index="5"
                _autoremap="true"/>
       <Docking final_pose="{PrevGoal}"
                isPureDocking="0"
                dock_type="dock_x_precise_linearBoost"
                shift="0"
                offset="0"
-               base="2.75, 0.9, 2"
+               base="0.25, 0.9, 0"
                _description="step back to release"/>
     </Sequence>
   </BehaviorTree>
@@ -983,19 +1014,19 @@
                        blackboard_key="{dontLift}"/>
       <Sequence>
         <SubTree ID="PointTestSubTree1"
-                 index="0"
+                 index="6"
                  _autoremap="true"/>
         <SubTree ID="PointTestSubTree1"
-                 index="1"
+                 index="5"
                  _autoremap="true"/>
         <SubTree ID="PointTestSubTree1"
-                 index="2"
+                 index="7"
                  _autoremap="true"/>
         <SubTree ID="PointTestSubTree1"
-                 index="3"
+                 index="8"
                  _autoremap="true"/>
         <SubTree ID="PointTestSubTree1"
-                 index="4"
+                 index="9"
                  _autoremap="true"/>
       </Sequence>
       <Docking final_pose="{PrevGoal}"
@@ -1104,6 +1135,13 @@
                              _description="smd strenght"/>
           </Timeout>
         </ForceSuccess>
+        <ForceSuccess>
+          <MissionFailure failed_levels="{a}"
+                          success_levels="{b}"
+                          base_index="{index}"
+                          robot_type="1"
+                          step_results="3"/>
+        </ForceSuccess>
       </Sequence>
     </Fallback>
   </BehaviorTree>
@@ -1111,23 +1149,27 @@
   <BehaviorTree ID="PlaceTwoLevels">
     <Fallback>
       <Sequence>
-        <Parallel failure_count="1"
-                  success_count="2">
-          <ForceSuccess>
-            <Timeout msec="6000">
-              <FirmwareMission mission_status="{x}"
-                               mission_type="35"
-                               _description="shrink little arm"/>
-            </Timeout>
-          </ForceSuccess>
-          <ForceSuccess>
-            <Timeout msec="6000">
-              <FirmwareMission mission_status="{x}"
-                               mission_type="30"
-                               _description="arm down"/>
-            </Timeout>
-          </ForceSuccess>
-        </Parallel>
+        <ForceSuccess>
+          <Timeout msec="6000">
+            <FirmwareMission mission_status="{x}"
+                              mission_type="35"
+                              _description="shrink little arm"/>
+          </Timeout>
+        </ForceSuccess>
+        <ForceSuccess>
+          <Timeout msec="6000">
+            <FirmwareMission mission_status="{x}"
+                              mission_type="30"
+                              _description="arm down"/>
+          </Timeout>
+        </ForceSuccess>
+        <ForceSuccess>
+          <Timeout msec="6000">
+            <FirmwareMission mission_status="{x}"
+                             mission_type="10"
+                             _description="front releace materials"/>
+          </Timeout>
+        </ForceSuccess>
         <MissionSuccess levels="2"
                         base_index="{index}"/>
       </Sequence>
@@ -1155,6 +1197,13 @@
                              mission_type="20"
                              _description="smd strenght"/>
           </Timeout>
+        </ForceSuccess>
+        <ForceSuccess>
+          <MissionFailure failed_levels="{a}"
+                          success_levels="{b}"
+                          base_index="{index}"
+                          robot_type="1"
+                          step_results="4"/>
         </ForceSuccess>
       </Sequence>
     </Fallback>
@@ -1199,12 +1248,12 @@
                            _description="take the raw material"/>
         </Timeout>
       </ForceSuccess>
-      <Rotation final_pose="{PrevGoal}"
+      <!-- <Rotation final_pose="{PrevGoal}"
                 degree="3"
                 base="{PrevGoal}"/>
       <Rotation final_pose="{PrevGoal}"
                 degree="-3"
-                base="{PrevGoal}"/>
+                base="{PrevGoal}"/> -->
       <ForceSuccess>
         <Timeout msec="6000">
           <FirmwareMission mission_status="{x}"
@@ -1282,13 +1331,17 @@
           </Timeout>
         </ForceSuccess>
       </Sequence>
-      <SubTree ID="TwoLevelsBot1new"
-               back="0.2, 0.1, 0.05"
-               forward="0.15, 0.105, 0.065"
-               index="{index}"
-               shift="0.105"
-               _successIf="dontDoMission_b"
-               _autoremap="true"/>
+      <Sequence _successIf="dontDoMission_b">
+        <SubTree ID="TwoLevelsBot1new"
+                 back="0.2, 0.1, 0.06"
+                 forward="0.15, 0.105, 0.075"
+                 index="{index}"
+                 shift="0.105"
+                 _autoremap="true"/>
+        <SubTree ID="PlaceTwoLevels"
+                 index="{index}"
+                 _autoremap="true"/>
+      </Sequence>
     </Sequence>
   </BehaviorTree>
 
@@ -1473,13 +1526,14 @@
                              _description="smd strenght"/>
           </Timeout>
         </ForceSuccess>
+        <ForceSuccess>
+          <MissionFailure failed_levels="{a}"
+                          success_levels="{b}"
+                          base_index="{index}"
+                          robot_type="1"
+                          step_results="5"/>
+        </ForceSuccess>
       </Sequence>
-      <ForceSuccess>
-        <MissionFailure failed_levels="{a}"
-                        success_levels="{b}"
-                        robot_type="1"
-                        step_results="5"/>
-      </ForceSuccess>
     </Fallback>
   </BehaviorTree>
 
@@ -1523,17 +1577,26 @@
                              _description="arm down"/>
           </Timeout>
         </ForceSuccess>
-        <SubTree ID="DockingSubTree"
-                 base="{PrevGoal}"
-                 dock_type="{DOCK_DIR}"
-                 final_pose="{PrevGoal}"
-                 isPureDocking="1"
-                 offset="{FORWARD_S}"
-                 retry="100"
-                 shift="0"
-                 sleep="100"
-                 timeout="2700"
-                 _autoremap="true"/>
+        <ForceSuccess>
+          <Timeout msec="6000">
+            <FirmwareMission mission_status="{x}"
+                             mission_type="12"
+                             _description="arm down"/>
+          </Timeout>
+        </ForceSuccess>
+        <ForceSuccess>
+          <SubTree ID="DockingSubTree"
+                   base="{PrevGoal}"
+                   dock_type="{DOCK_DIR}"
+                   final_pose="{PrevGoal}"
+                   isPureDocking="1"
+                   offset="{FORWARD_M}"
+                   retry="100"
+                   shift="0"
+                   sleep="100"
+                   timeout="2700"
+                   _autoremap="true"/>
+        </ForceSuccess>
         <ForceSuccess>
           <Timeout msec="6000">
             <FirmwareMission mission_status="{x}"
@@ -1605,17 +1668,19 @@
                              _description="arm down"/>
           </Timeout>
         </ForceSuccess>
-        <SubTree ID="DockingSubTree"
-                 base="{PrevGoal}"
-                 dock_type="{DOCK_DIR}"
-                 final_pose="{PrevGoal}"
-                 isPureDocking="1"
-                 offset="{FORWARD_M}"
-                 retry="100"
-                 shift="0"
-                 sleep="100"
-                 timeout="2500"
-                 _autoremap="true"/>
+        <ForceSuccess>
+          <SubTree ID="DockingSubTree"
+                  base="{PrevGoal}"
+                  dock_type="{DOCK_DIR}"
+                  final_pose="{PrevGoal}"
+                  isPureDocking="1"
+                  offset="{FORWARD_M}"
+                  retry="100"
+                  shift="0"
+                  sleep="100"
+                  timeout="2500"
+                  _autoremap="true"/>
+        </ForceSuccess>
         <ForceSuccess>
           <Timeout msec="6000">
             <FirmwareMission mission_status="{x}"

@@ -61,6 +61,7 @@
         </Decorator>
         <Action ID="MissionFailure">
             <output_port name="failed_levels" type="int"/>
+            <input_port name="base_index" type="int"/>
             <output_port name="success_levels" type="int"/>
             <input_port name="robot_type" type="bool"/>
             <input_port name="step_results" type="std::deque&lt;int, std::allocator&lt;int&gt; &gt;"/>
