@@ -215,7 +215,7 @@ public:
         do {
             rate.sleep();
             status = tree.rootNode()->executeTick();
-        } while (rclcpp::ok() && status == BT::NodeStatus::RUNNING);
+        } while (rclcpp::ok() && status == BT::NodeStatus::RUNNING && game_time <= 100);
     }
 
 private:
