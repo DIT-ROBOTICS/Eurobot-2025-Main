@@ -1492,7 +1492,7 @@
                  dock_type="{DOCK_DIR}"
                  final_pose="{PrevGoal}"
                  isPureDocking="1"
-                 offset="{BACK_S}"
+                 offset="{BACK_M}"
                  retry="100"
                  shift="0"
                  sleep="100"
@@ -1618,24 +1618,27 @@
                              _description="place board"/>
           </Timeout>
         </ForceSuccess>
-        <SubTree ID="DockingSubTree"
-                 base="{PrevGoal}"
-                 dock_type="{DOCK_DIR}"
-                 final_pose="{PrevGoal}"
-                 isPureDocking="0"
-                 offset="0"
-                 retry="100"
-                 shift="{SHIFT}"
-                 sleep="100"
-                 timeout="2700"
-                 _autoremap="true"/>
-        <ForceSuccess>
-          <Timeout msec="6000">
-            <FirmwareMission mission_status="{x}"
-                             mission_type="31"
-                             _description="arm to one level height"/>
-          </Timeout>
-        </ForceSuccess>
+        <Parallel failure_count="1"
+                  success_count="2">
+          <SubTree ID="DockingSubTree"
+                  base="{PrevGoal}"
+                  dock_type="{DOCK_DIR}"
+                  final_pose="{PrevGoal}"
+                  isPureDocking="0"
+                  offset="0"
+                  retry="100"
+                  shift="{SHIFT}"
+                  sleep="100"
+                  timeout="2700"
+                  _autoremap="true"/>
+          <ForceSuccess>
+            <Timeout msec="6000">
+              <FirmwareMission mission_status="{x}"
+                              mission_type="31"
+                              _description="arm to one level height"/>
+            </Timeout>
+          </ForceSuccess>
+        </Parallel>
         <ForceSuccess>
           <Timeout msec="6000">
             <FirmwareMission mission_status="{x}"
