@@ -454,8 +454,8 @@ int MaterialChecker::findBestTarget() {
     safestPointIndex_ = candidate_.front();
     minDistIndex_ = candidate_.front();
     do {                                         // delete materials point that is too close to rival
-        targetMaterialPose_.position.x = material_points_[candidate_.front() * 6];
-        targetMaterialPose_.position.y = material_points_[candidate_.front() * 6 + 1];
+        targetMaterialPose_.position.x = material_points_[candidate_.front() * 7];
+        targetMaterialPose_.position.y = material_points_[candidate_.front() * 7 + 1];
         deltaDist_ = calculateDistance(targetMaterialPose_, rival_pose_.pose) - calculateDistance(targetMaterialPose_, robot_pose_.pose);
         dist_ = calculateDistance(targetMaterialPose_, robot_pose_.pose);
         if (safestDeltaDist_ < deltaDist_) {     // iterate to find the safest material point
@@ -500,8 +500,8 @@ NodeStatus MaterialChecker::tick() {
     // If the target is not ok
     // use vision message to find the best new target `i` (new base)
     LocReceiver::UpdateRivalPose(rival_pose_, tf_buffer_, frame_id_);
-    base_.pose.position.x = material_points_[baseIndex_ * 6];
-    base_.pose.position.y = material_points_[baseIndex_ * 6 + 1];
+    base_.pose.position.x = material_points_[baseIndex_ * 7];
+    base_.pose.position.y = material_points_[baseIndex_ * 7 + 1];
     if (materials_info_.data[baseIndex_] == 0 || baseIndex_ == -1 || calculateDistance(base_.pose, rival_pose_.pose) < safety_dist_) {
         baseIndex_ = findBestTarget();
         /**********************************************************/
@@ -516,13 +516,13 @@ NodeStatus MaterialChecker::tick() {
         blackboard_->get<int>("current_index", baseIndex_); 
     } else {
         blackboard_->set<bool>("enable_vision_check", false);
-        RCLCPP_INFO_STREAM(node_->get_logger(), "index: " << baseIndex_ << " offset: " << material_points_[baseIndex_ * 6 + 3] << " missionType_: " << missionType_);
+        RCLCPP_INFO_STREAM(node_->get_logger(), "index: " << baseIndex_ << " offset: " << material_points_[baseIndex_ * 7 + 3] << " missionType_: " << missionType_);
     }
-    base_.pose.position.x = material_points_[baseIndex_ * 6];
-    base_.pose.position.y = material_points_[baseIndex_ * 6 + 1];
-    base_.pose.position.z = material_points_[baseIndex_ * 6 + 2];
-    offset_ = material_points_[baseIndex_ * 6 + 3];
-    dockType_ = (int(material_points_[baseIndex_ * 6 + 2]) % 2) ? ("dock_y_" + dockType_) : ("dock_x_" + dockType_);
+    base_.pose.position.x = material_points_[baseIndex_ * 7];
+    base_.pose.position.y = material_points_[baseIndex_ * 7 + 1];
+    base_.pose.position.z = material_points_[baseIndex_ * 7 + 2];
+    offset_ = material_points_[baseIndex_ * 7 + 3];
+    dockType_ = (int(material_points_[baseIndex_ * 7 + 2]) % 2) ? ("dock_y_" + dockType_) : ("dock_x_" + dockType_);
     shift_ = 0;
 
     // derive the position.z & offset & shift according to mission_type & map_points[i]
@@ -530,8 +530,8 @@ NodeStatus MaterialChecker::tick() {
     int offset_positivity_ = (int)(offset_ / abs(offset_));
     if (missionType_ == "front") {
         if (bot_ == "1")
-            offset_ -= offset_ / abs(offset_) * material_points_[baseIndex_ * 6 + 5];
-        shift_ = material_points_[baseIndex_ * 6 + 4];
+            offset_ -= offset_ / abs(offset_) * material_points_[baseIndex_ * 7 + 5];
+        shift_ = material_points_[baseIndex_ * 7 + 4];
     } else if (missionType_ == "back") {
         base_.pose.position.z = ((int)base_.pose.position.z / 2) ? base_.pose.position.z - 2 : base_.pose.position.z + 2;
     } else {
@@ -579,11 +579,11 @@ NodeStatus MissionChecker::tick() {
     blackboard_->get<int>("back_materials", back_materials_);
     
     // get base & offset from map_points[i]
-    base_.pose.position.x = material_points_[baseIndex_ * 6];
-    base_.pose.position.y = material_points_[baseIndex_ * 6 + 1];
-    base_.pose.position.z = material_points_[baseIndex_ * 6 + 2];
-    offset = material_points_[baseIndex_ * 6 + 3];
-    shift_ = material_points_[baseIndex_ * 6 + 4];
+    base_.pose.position.x = material_points_[baseIndex_ * 7];
+    base_.pose.position.y = material_points_[baseIndex_ * 7 + 1];
+    base_.pose.position.z = material_points_[baseIndex_ * 7 + 2];
+    offset = material_points_[baseIndex_ * 7 + 3];
+    shift_ = material_points_[baseIndex_ * 7 + 4];
 
     LocReceiver::UpdateRivalPose(rival_pose_, tf_buffer_, frame_id_);
     dist = calculateDistance(base_.pose, rival_pose_.pose);

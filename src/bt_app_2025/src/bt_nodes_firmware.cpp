@@ -131,8 +131,9 @@ BT::NodeStatus MissionStart::tick() {
     map_points = "map_points_" + map_points;
     node_->get_parameter(map_points, material_points_);
 
-    int offset_dir_ = (int)(1 - 2 * ((int)(material_points_[index_ * 6 + 2]) % 2));
-    int offset_positivity_ = (int)(material_points_[index_ * 6 + 3] / abs(material_points_[index_ * 6 + 3]));
+    int offset_dir_ = (int)(1 - 2 * ((int)(material_points_[index_ * 7 + 2]) % 2));
+    int offset_positivity_ = (int)(material_points_[index_ * 7 + 3] / abs(material_points_[index_ * 7 + 3]));
+    forward_.value()[0] = material_points_[index_ * 7 + 6];
     RCLCPP_INFO_STREAM(node_->get_logger(), offset_positivity_);
     shift_ *= offset_dir_ * offset_positivity_;
 
@@ -507,8 +508,8 @@ BT::NodeStatus BannerChecker::tick() {
     }
     
     RCLCPP_INFO_STREAM(node_->get_logger(), "final decision: " << banner_place_);
-    // pt_pose_.position.x = material_points_[(index + 12) * 6];
-    // pt_pose_.position.y = material_points_[(index + 12) * 6 + 1];
+    // pt_pose_.position.x = material_points_[(index + 12) * 7];
+    // pt_pose_.position.y = material_points_[(index + 12) * 7 + 1];
     // if (calculateDistance(ptPose_, rival_pose_.pose) < safety_dist_) {
     // }
     
