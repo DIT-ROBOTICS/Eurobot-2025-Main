@@ -103,6 +103,7 @@ void CamReceiver::materials_info_callback(const std_msgs::msg::Int32MultiArray::
     if (msg != NULL) {
         blackboard_->set<std_msgs::msg::Int32MultiArray>("materials_info", materials_info_);
     }
+    // // print out the vision data for debug
     // int material_array = 0;
     // for (int i = 0; i < 10; i++)
     //     material_array += materials_info_.data[i] * pow(10, (9 - i));
@@ -110,14 +111,20 @@ void CamReceiver::materials_info_callback(const std_msgs::msg::Int32MultiArray::
 }
 
 void CamReceiver::mission_info_callback(const std_msgs::msg::Int32::SharedPtr msg) {
-    mission_info_ = *msg;
-    blackboard_->set<std_msgs::msg::Int32>("mission_info", mission_info_);
+    mission_info_ = msg->data;
+    // blackboard_->set<std_msgs::msg::Int32>("mission_info", mission_info_);
+}
+
+void CamReceiver::score_callback(const std_msgs::msg::Int32::SharedPtr msg) {
+    score_vision_ = msg->data;
+    blackboard_->get<int>("score_from_main", score_main_);
 }
 
 BT::NodeStatus CamReceiver::tick() {
     RCLCPP_INFO(node_->get_logger(), "Node start");
     sub_materials_info_ = node_->create_subscription<std_msgs::msg::Int32MultiArray>("/detected/global_center_poses/has_material", 10, std::bind(&CamReceiver::materials_info_callback, this, std::placeholders::_1));
     sub_mission_info_ = node_->create_subscription<std_msgs::msg::Int32>("/robot/objects/mission_info", 10, std::bind(&CamReceiver::mission_info_callback, this, std::placeholders::_1));
+    sub_score_ = node_->create_subscription<std_msgs::msg::Int32>("/vision/score", 10, std::bind(&CamReceiver::score_callback, this, std::placeholders::_1));
     
     return BT::NodeStatus::SUCCESS;
 }

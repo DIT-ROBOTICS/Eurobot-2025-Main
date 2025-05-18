@@ -3,24 +3,9 @@
 using namespace BT;
 using namespace std;
 
-template <> inline geometry_msgs::msg::PoseStamped BT::convertFromString(StringView str) {
-
-    auto parts = splitString(str, ',');
-    if (parts.size() != 3) {
-        throw RuntimeError("invalid input)");
-    }
-    else {
-        geometry_msgs::msg::PoseStamped output;
-        output.pose.position.x = convertFromString<double>(parts[0]);
-        output.pose.position.y = convertFromString<double>(parts[1]);
-        output.pose.position.z = convertFromString<double>(parts[2]);
-        return output;
-    }
-}
-
 template <> inline int BT::convertFromString(StringView str) {
     auto value = convertFromString<double>(str);
-    return (int) value;
+    return (int)value;
 }
 
 template <> inline std::deque<int> BT::convertFromString(StringView str) {
@@ -48,6 +33,7 @@ BT::NodeStatus MySetBlackboard::tick() {
     bool blackboard_value_;
     getInput<std::string>("blackboard_key", blackboard_key_);
     getInput<bool>("blackboard_value", blackboard_value_);
+    RCLCPP_INFO_STREAM(node_->get_logger(), blackboard_key_ << ": " << blackboard_value_);
 
     blackboard_->set<bool>(blackboard_key_, blackboard_value_);
     setOutput<bool>("new_value", blackboard_value_);
@@ -426,35 +412,82 @@ BT::PortsList TimerChecker::providedPorts() {
     };
 }
 
-/****************************/
-/* TimerChecker - Decorator */
-/****************************/
+/****************/
+/* TimerChecker */
+/****************/
 BT::NodeStatus TimerChecker::tick() {
 
     int timer = getInput<int>("timer_sec").value();
 
     blackboard_->get("current_time", current_time_);
 
-    if (first_log_) {
-        RCLCPP_INFO_STREAM(rclcpp::get_logger("rclcpp"), "[TimerChecker]: Current time: " << current_time_ << ", Check Timeout: " << timer);
-        first_log_ = false;
-    }
-
-    const BT::NodeStatus status = child_node_->executeTick();
-
-    if (isStatusCompleted(status)) {
-        resetChild();
-    }
-
-    if (current_time_ < timer) {
-        return status;
-    }
-    else {
-        RCLCPP_ERROR_STREAM(rclcpp::get_logger("rclcpp"), "[TimerChecker]: Timeout" << timer);
+    if (current_time_ < timer)
         return BT::NodeStatus::FAILURE;
-    }
+    else
+        return BT::NodeStatus::SUCCESS;
 }
 
+PortsList LoopInt32::providedPorts()
+{
+    return {
+        // BT::InputPort<std::string>("queue"),
+        BT::InputPort<std::deque<int>>("queue"),
+        BT::InputPort<BT::NodeStatus>("if_empty"),
+        BT::OutputPort<int>("value")
+    };
+}
+
+NodeStatus LoopInt32::tick()
+{
+    // std::string str;
+    // getInput<std::string>("queue", str);
+    // auto parts = splitString(str, ',');
+    getInput<std::deque<int>>("queue", deque);
+
+    // for (int i = 0; i < (int)parts.size(); i++) {
+    //     deque.push_back(std::stoi(parts[i].data()));
+    // }
+
+    BT::NodeStatus child_status;
+    // Generate the path points
+    while (!deque.empty()) {
+        child_status = child_node_->executeTick();
+        switch (child_status)
+        {
+            case BT::NodeStatus::SUCCESS:
+                RCLCPP_INFO_STREAM(node_->get_logger(), "Success");
+                setOutput("value", deque.front());
+                deque.pop_front();
+                break;
+            case BT::NodeStatus::FAILURE:
+                RCLCPP_INFO_STREAM(node_->get_logger(), "Fail");
+                return BT::NodeStatus::FAILURE;
+            case BT::NodeStatus::RUNNING:
+                RCLCPP_INFO_STREAM(node_->get_logger(), "Running");
+                return BT::NodeStatus::RUNNING;
+            default:
+                break;
+        }
+    }
+    return BT::NodeStatus::SUCCESS;
+}
+
+PortsList Double2Int::providedPorts()
+{
+    return {
+        // BT::InputPort<std::string>("queue"),
+        BT::InputPort<double>("double"),
+        BT::OutputPort<int>("int")
+    };
+}
+
+NodeStatus Double2Int::tick()
+{
+    getInput<double>("double", double_);
+    RCLCPP_INFO_STREAM(node_->get_logger(), double_ << ", " << int(double_));
+    setOutput("int", int(double_));
+    return BT::NodeStatus::SUCCESS;
+}
 // /****************************************************/
 // /* Simple Node for finding the rival start position */
 // /****************************************************/

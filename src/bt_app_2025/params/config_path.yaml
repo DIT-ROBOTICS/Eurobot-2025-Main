@@ -1,16 +1,39 @@
 /**:
   ros__parameters:
-    Bot1_YellowA_config: "bt_plan_a_Yellow.xml"
-    Bot1_YellowB_config: "bt_plan_b_Yellow.xml"
-    Bot1_YellowC_config: "bt_plan_c_Yellow.xml"
+    number_of_plans: [7.0, 7.0, 4.0, 4.0]
+    start_points_bot1_yellow: [11.0, 10.0, 10.0, 13.0, 11.0, 11.0]
+    Bot1_YellowA_config: "bot1_yellow_a.xml"
+    Bot1_YellowB_config: "bot1_yellow_b.xml"
+    Bot1_YellowC_config: "bot1_yellow_c.xml"
+    Bot1_YellowD_config: "bot1_yellow_d.xml"
+    Bot1_YellowE_config: "bot1_yellow_e.xml"
+    Bot1_YellowF_config: "bot1_yellow_f.xml"
+    Bot1_YellowSpetial_config: "bot1_yellow_a_template.xml"
+    start_points_bot1_blue: [15.0, 9.0, 9.0, 17.0, 15.0, 15.0]
     Bot1_BlueA_config: "bot1_blue_a.xml"
     Bot1_BlueB_config: "bot1_blue_b.xml"
     Bot1_BlueC_config: "bot1_blue_c.xml"
+    Bot1_BlueD_config: "bot1_blue_d.xml"
+    Bot1_BlueE_config: "bot1_blue_e.xml"
+    Bot1_BlueF_config: "bot1_blue_f.xml"
+    Bot1_BlueSpetial_config: "bot1_blue_a_template.xml"
+    start_points_bot2_yellow: [13.0, 13.0, 13.0, 11.0]
     Bot2_YellowA_config: "bot2_yellow_a.xml"
     Bot2_YellowB_config: "bot2_yellow_b.xml"
     Bot2_YellowC_config: "bot2_yellow_c.xml"
+    Bot2_YellowD_config: ""
+    Bot2_YellowE_config: ""
+    Bot2_YellowF_config: ""
+    Bot2_YellowSpetial_config: "bot1_blue_a_template.xml"
+    start_points_bot2_blue: [17.0, 17.0, 17.0, 15.0]
     Bot2_BlueA_config: "bot2_blue_a.xml"
     Bot2_BlueB_config: "bot2_blue_b.xml"
     Bot2_BlueC_config: "bot2_blue_c.xml"
+    Bot2_BlueD_config: ""
+    Bot2_BlueE_config: ""
+    Bot2_BlueF_config: ""
+    Bot2_BlueSpetial_config: "bot1_blue_a_template.xml"
     tree_node_model_config_file: "/Eurobot-2025-Main/src/bt_app_2025/bt_m_config/bt_m_tree_node_model.xml"
     groot_xml_config_directory: "/Eurobot-2025-Main/src/bt_app_2025/bt_m_config/"
+    Bot1_name: "Tongue"
+    Bot2_name: "Invisible"

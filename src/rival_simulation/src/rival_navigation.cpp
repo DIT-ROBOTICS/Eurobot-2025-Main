@@ -6,7 +6,14 @@ using namespace std;
 template <> inline geometry_msgs::msg::PoseStamped BT::convertFromString(StringView str) {
 
     auto parts = splitString(str, ',');
-    if (parts.size() != 3) {
+    if (parts.size() == 1) {
+        geometry_msgs::msg::PoseStamped output;
+        output.pose.position.x = 10;
+        output.pose.position.y = 10;
+        output.pose.position.z = -1;
+        return output;
+    }
+    else if (parts.size() != 3) {
         throw RuntimeError("invalid input)");
     }
     else {
@@ -55,13 +62,25 @@ BT::PortsList Navigation::providedPorts() {
     return {
         BT::InputPort<geometry_msgs::msg::PoseStamped>("start_pose"), 
         BT::InputPort<geometry_msgs::msg::PoseStamped>("goal"),
+        BT::InputPort<double>("goal_index"),
         BT::OutputPort<geometry_msgs::msg::PoseStamped>("final_pose")
     };
 }
 
+inline geometry_msgs::msg::PoseStamped Navigation::ExportPose(const int index) {
+    node_->get_parameter("material_points", material_points_);
+    geometry_msgs::msg::PoseStamped pose_;
+    pose_.pose.position.x = material_points_[3 * index];
+    pose_.pose.position.y = material_points_[3 * index + 1];
+    pose_.pose.position.z = material_points_[3 * index + 2] * PI / 2;
+    return pose_;
+}
+
 // Start function for the SimpleNavigation node
 BT::NodeStatus Navigation::onStart() {
-    getInput<geometry_msgs::msg::PoseStamped>("goal", goal_);
+    auto g = getInput<geometry_msgs::msg::PoseStamped>("goal");
+    auto g_i = getInput<double>("goal_index");
+    goal_ = (g.value().pose.position.z != -1) ? g.value() : ExportPose(int(g_i.value()));
     getInput<geometry_msgs::msg::PoseStamped>("start_pose", start_pose_);
     broadcaster_ = std::make_shared<tf2_ros::TransformBroadcaster>(node_);
     predict_goal_pub_ = node_->create_publisher<geometry_msgs::msg::PoseStamped>("rival/predict_goal", 20);
@@ -125,55 +144,55 @@ void Navigation::onHalted() {
     return;
 }
 
-BT::PortsList initPoints::providedPorts() {
-    return {
-        BT::OutputPort<BT::SharedQueue<geometry_msgs::msg::PoseStamped>>("material_points")
-    };
-}
+// BT::PortsList initPoints::providedPorts() {
+//     return {
+//         BT::OutputPort<BT::SharedQueue<geometry_msgs::msg::PoseStamped>>("material_points")
+//     };
+// }
 
-BT::NodeStatus initPoints::tick() {
-    auto material_shared_queue = std::make_shared<std::deque<geometry_msgs::msg::PoseStamped>>();
-    std::vector<std::string> points_name_ = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"};
-    node_->declare_parameter<std::vector<double>>(points_name_[0], {2.1, 1.7, 0.0, 0.0, 0.0, 0.707, 0.707});
-    node_->declare_parameter<std::vector<double>>(points_name_[1], {2.7, 1.3, 0.0, 0.0, 0.0, 0.0, 1.0});
-    node_->declare_parameter<std::vector<double>>(points_name_[2], {2.7, 0.4, 0.0, 0.0, 0.0, 0.0, 1.0});
-    node_->declare_parameter<std::vector<double>>(points_name_[3], {1.9, 0.8, 0.0, 0.0, 0.0, 0.707, 0.707});
-    node_->declare_parameter<std::vector<double>>(points_name_[4], {2.2, 0.4, 0.0, 0.0, 0.0, -0.707, 0.707});
-    node_->declare_parameter<std::vector<double>>(points_name_[5], {1.1, 0.8, 0.0, 0.0, 0.0, 0.707, 0.707});
-    node_->declare_parameter<std::vector<double>>(points_name_[6], {0.8, 0.4, 0.0, 0.0, 0.0, -0.707, 0.707});
-    node_->declare_parameter<std::vector<double>>(points_name_[7], {0.3, 1.3, 0.0, 0.0, 0.0, 1.0, 0.0});
-    node_->declare_parameter<std::vector<double>>(points_name_[8], {0.3, 0.4, 0.0, 0.0, 0.0, 1.0, 0.0});
-    node_->declare_parameter<std::vector<double>>(points_name_[9], {0.8, 1.7, 0.0, 0.0, 0.0, 0.707, 0.707});
-    for (const auto &point_name_ : points_name_) {
-        std::vector<double> param;
-        node_->get_parameter(point_name_, param);
-        geometry_msgs::msg::PoseStamped path_point;
-        path_point.pose.position.x = param[0];
-        path_point.pose.position.y = param[1];
-        path_point.pose.position.z = param[2];
-        path_point.pose.orientation.x = param[3];
-        path_point.pose.orientation.y = param[4];
-        path_point.pose.orientation.z = param[5];
-        path_point.pose.orientation.w = param[6];
-        // Store in shared_queue
-        material_shared_queue->push_back(path_point);
-    }
-    setOutput("material_points", material_shared_queue);
+// BT::NodeStatus initPoints::tick() {
+//     auto material_shared_queue = std::make_shared<std::deque<geometry_msgs::msg::PoseStamped>>();
+//     std::vector<std::string> points_name_ = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"};
+//     node_->declare_parameter<std::vector<double>>(points_name_[0], {2.1, 1.7, 0.0, 0.0, 0.0, 0.707, 0.707});
+//     node_->declare_parameter<std::vector<double>>(points_name_[1], {2.7, 1.3, 0.0, 0.0, 0.0, 0.0, 1.0});
+//     node_->declare_parameter<std::vector<double>>(points_name_[2], {2.7, 0.4, 0.0, 0.0, 0.0, 0.0, 1.0});
+//     node_->declare_parameter<std::vector<double>>(points_name_[3], {1.9, 0.8, 0.0, 0.0, 0.0, 0.707, 0.707});
+//     node_->declare_parameter<std::vector<double>>(points_name_[4], {2.2, 0.4, 0.0, 0.0, 0.0, -0.707, 0.707});
+//     node_->declare_parameter<std::vector<double>>(points_name_[5], {1.1, 0.8, 0.0, 0.0, 0.0, 0.707, 0.707});
+//     node_->declare_parameter<std::vector<double>>(points_name_[6], {0.8, 0.4, 0.0, 0.0, 0.0, -0.707, 0.707});
+//     node_->declare_parameter<std::vector<double>>(points_name_[7], {0.3, 1.3, 0.0, 0.0, 0.0, 1.0, 0.0});
+//     node_->declare_parameter<std::vector<double>>(points_name_[8], {0.3, 0.4, 0.0, 0.0, 0.0, 1.0, 0.0});
+//     node_->declare_parameter<std::vector<double>>(points_name_[9], {0.8, 1.7, 0.0, 0.0, 0.0, 0.707, 0.707});
+//     for (const auto &point_name_ : points_name_) {
+//         std::vector<double> param;
+//         node_->get_parameter(point_name_, param);
+//         geometry_msgs::msg::PoseStamped path_point;
+//         path_point.pose.position.x = param[0];
+//         path_point.pose.position.y = param[1];
+//         path_point.pose.position.z = param[2];
+//         path_point.pose.orientation.x = param[3];
+//         path_point.pose.orientation.y = param[4];
+//         path_point.pose.orientation.z = param[5];
+//         path_point.pose.orientation.w = param[6];
+//         // Store in shared_queue
+//         material_shared_queue->push_back(path_point);
+//     }
+//     setOutput("material_points", material_shared_queue);
 
-    RCLCPP_INFO(node_->get_logger(), "Init points");
+//     RCLCPP_INFO(node_->get_logger(), "Init points");
 
-    return BT::NodeStatus::SUCCESS;
-}
+//     return BT::NodeStatus::SUCCESS;
+// }
 
 BT::PortsList StateUpdater::providedPorts() {
     return {
-        BT::InputPort<int>("changed_point_code")
+        BT::InputPort<double>("changed_point_code")
     };
 }
 
 BT::NodeStatus StateUpdater::onStart() {
     RCLCPP_INFO(node_->get_logger(), "Start update state");
-    int pt_num_ = getInput<int>("changed_point_code").value();
+    int pt_num_ = int(getInput<double>("changed_point_code").value());
     blackboard_->get<std::vector<int>>("material_status", material_status_);
     material_status_[pt_num_] = 0;
     blackboard_->set<std::vector<int>>("material_status", material_status_);

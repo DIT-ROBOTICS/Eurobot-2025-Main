@@ -48,18 +48,24 @@ namespace BT {
     template <> inline geometry_msgs::msg::PoseStamped convertFromString(StringView str);
     template <> inline int convertFromString(StringView str);
     template <> inline std::deque<int> convertFromString(StringView str);
+    // template <> inline std::deque<double> convertFromString(StringView str);
 }
 
 /********************/
 /* Navigation state */
 /********************/
-class Navigation : public BT::RosActionNode<nav2_msgs::action::NavigateToPose> {
+class Navigation : public BT::RosActionNode<opennav_docking_msgs::action::DockRobot> {
 
 public:
     Navigation(const std::string& name, const NodeConfig& conf, const RosNodeParams& params)
-        : RosActionNode<nav2_msgs::action::NavigateToPose>(name, conf, params)
+        : RosActionNode<opennav_docking_msgs::action::DockRobot>(name, conf, params), tf_buffer_(params.nh.lock()->get_clock()), listener_(tf_buffer_)
     {
         node_ = params.nh.lock();
+        node_->get_parameter("frame_id", frame_id_);
+        tf_buffer_.setUsingDedicatedThread(true);
+        nav_finished_ = false;
+        nav_error_ = false;
+        nav_recov_times_ = 0;
     }
     /* Node remapping function */
     static PortsList providedPorts();
@@ -70,12 +76,18 @@ public:
 private:
     NodeStatus goalErrorDetect();
     std::shared_ptr<rclcpp::Node> node_;
-    bool nav_finished_ = false;
-    bool nav_error_ = false;
-    int nav_recov_times_ = 0;
+    bool nav_finished_;
+    bool nav_error_;
+    int nav_recov_times_;
     int nav_type_;
+    double offset_ = 0;
+    double shift_ = 0;
+    std::string dock_type_;
     geometry_msgs::msg::PoseStamped goal_;
-    geometry_msgs::msg::PoseStamped current_pose_;
+    geometry_msgs::msg::PoseStamped robot_pose_;
+    tf2_ros::Buffer tf_buffer_;
+    tf2_ros::TransformListener listener_;
+    std::string frame_id_;
 };
 
 /*****************/
@@ -84,8 +96,8 @@ private:
 class Docking : public BT::RosActionNode<opennav_docking_msgs::action::DockRobot> {
 
 public:
-    Docking(const std::string& name, const NodeConfig& conf, const RosNodeParams& params)
-        : RosActionNode<opennav_docking_msgs::action::DockRobot>(name, conf, params), tf_buffer_(params.nh.lock()->get_clock()), listener_(tf_buffer_)
+    Docking(const std::string& name, const NodeConfig& conf, const RosNodeParams& params, BT::Blackboard::Ptr blackboard)
+        : RosActionNode<opennav_docking_msgs::action::DockRobot>(name, conf, params), blackboard_(blackboard), tf_buffer_(params.nh.lock()->get_clock()), listener_(tf_buffer_)
     {
         node_ = params.nh.lock();
         node_->get_parameter("frame_id", frame_id_);
@@ -102,6 +114,8 @@ public:
     virtual NodeStatus onFailure(ActionNodeErrorCode error) override;
     NodeStatus onFeedback(const std::shared_ptr<const Feedback> feedback);
 private:
+    NodeStatus goalErrorDetect();
+    BT::Blackboard::Ptr blackboard_;
     std::shared_ptr<rclcpp::Node> node_;
     bool nav_finished_;
     bool nav_error_;
@@ -154,7 +168,7 @@ class StopRobot : public BT::SyncActionNode
 {
 public:
     StopRobot(const std::string& name, const BT::NodeConfig& config, const RosNodeParams& params)
-    : BT::SyncActionNode(name, config), node_(params.nh.lock())
+    : BT::SyncActionNode(name, config), node_(params.nh.lock()), rate_(30)
     {
         publisher_ = node_->create_publisher<std_msgs::msg::Bool>("/stopRobot", rclcpp::QoS(10).reliable().transient_local());
     }
@@ -163,14 +177,15 @@ public:
 private:
     std::shared_ptr<rclcpp::Node> node_;
     BT::Blackboard::Ptr blackboard_;
+    rclcpp::Rate rate_;
     rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr publisher_;
     std_msgs::msg::Bool stop_msg;
 };
 
-class VisionCheck : public BT::DecoratorNode
+class MaterialChecker : public BT::DecoratorNode
 {
 public:
-    VisionCheck(const std::string &name, const BT::NodeConfig &config, const RosNodeParams& params, BT::Blackboard::Ptr blackboard)
+    MaterialChecker(const std::string &name, const BT::NodeConfig &config, const RosNodeParams& params, BT::Blackboard::Ptr blackboard)
         : BT::DecoratorNode(name, config), node_(params.nh.lock()), blackboard_(blackboard), tf_buffer_(params.nh.lock()->get_clock()), listener_(tf_buffer_)
     {
         node_->get_parameter("frame_id", frame_id_);
@@ -196,12 +211,13 @@ private:
     // for vision
     std::deque<int> candidate_;
     bool last_mission_failed_;
+    double safety_dist_;
 };
 
-class MissionNearRival : public BT::DecoratorNode
+class MissionChecker : public BT::DecoratorNode
 {
 public:
-    MissionNearRival(const std::string &name, const BT::NodeConfig &config, const RosNodeParams& params, BT::Blackboard::Ptr blackboard)
+    MissionChecker(const std::string &name, const BT::NodeConfig &config, const RosNodeParams& params, BT::Blackboard::Ptr blackboard)
         : BT::DecoratorNode(name, config), node_(params.nh.lock()), blackboard_(blackboard), tf_buffer_(params.nh.lock()->get_clock()), listener_(tf_buffer_)
     {
         node_->get_parameter("frame_id", frame_id_);
@@ -220,7 +236,10 @@ private:
     geometry_msgs::msg::PoseStamped rival_pose_;
     // for input
     std_msgs::msg::Int32MultiArray materials_info_;
-    std::vector<int> mission_points_status_;
+    std_msgs::msg::Int32MultiArray mission_points_status_;
     geometry_msgs::msg::PoseStamped base_;
     std::vector<double> material_points_;
+    double safety_dist_;
+    int front_materials_;
+    int back_materials_;
 };

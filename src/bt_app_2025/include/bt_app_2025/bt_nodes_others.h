@@ -4,6 +4,7 @@
 #include <filesystem>
 #include <fstream>
 #include <deque>
+#include <string>
 #include <bitset>
 #include <math.h>
 
@@ -21,6 +22,7 @@
 
 // Use ros message
 #include "std_srvs/srv/set_bool.hpp"
+#include "std_msgs/msg/int32.hpp"
 #include "std_msgs/msg/float32.hpp"
 #include "std_msgs/msg/string.hpp"
 #include "geometry_msgs/msg/twist_stamped.hpp"
@@ -38,7 +40,6 @@
 using namespace BT;
 
 namespace BT {
-    template <> inline geometry_msgs::msg::PoseStamped convertFromString(StringView str);
     template <> inline int convertFromString(StringView str);
     template <> inline std::deque<int> convertFromString(StringView str);
 }
@@ -142,31 +143,51 @@ private:
     tf2_ros::TransformListener listener_;
 };
 
-/****************************/
-/* TimerChecker - Decorator */
-/****************************/
-// No usage now
-class TimerChecker : public BT::DecoratorNode {
+/****************/
+/* TimerChecker */
+/****************/
+class TimerChecker : public BT::ConditionNode {
 
 public:
     TimerChecker(const std::string& name, const NodeConfig& config, BT::Blackboard::Ptr blackboard)
-        : BT::DecoratorNode(name, config), blackboard_(blackboard) {}
-
+        : BT::ConditionNode(name, config), blackboard_(blackboard) {}
     /* Node remapping function */
     static BT::PortsList providedPorts();
-
     /* Start and running function */
     BT::NodeStatus tick() override;
 
 private:
     BT::Blackboard::Ptr blackboard_;
-
-    double timeout_ = 0.0;
-    double start_time_ = 0.0;
     double current_time_;
-    bool first_log_;
 };
 
+class LoopInt32 : public BT::DecoratorNode
+{
+public:
+    LoopInt32(const std::string &name, const BT::NodeConfig &config, const RosNodeParams& params)
+        : BT::DecoratorNode(name, config), node_(params.nh.lock())
+    {}
+    static BT::PortsList providedPorts();
+    BT::NodeStatus tick() override;
+private:
+    std::shared_ptr<rclcpp::Node> node_;
+    std::deque<int> deque;
+    int index_;
+};
+
+class Double2Int : public BT::SyncActionNode
+{
+public:
+    Double2Int(const std::string &name, const BT::NodeConfig &config, const RosNodeParams& params)
+        : BT::SyncActionNode(name, config), node_(params.nh.lock())
+    {}
+    static BT::PortsList providedPorts();
+    BT::NodeStatus tick() override;
+private:
+    std::shared_ptr<rclcpp::Node> node_;
+    int int_;
+    double double_;
+};
 
 // /****************************************************/
 // /* Simple Node for finding the rival start position */

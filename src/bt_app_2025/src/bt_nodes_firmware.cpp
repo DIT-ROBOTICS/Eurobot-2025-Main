@@ -23,6 +23,18 @@ template <> inline int BT::convertFromString(StringView str) {
     return (int) value;
 }
 
+template <> inline std::deque<double> BT::convertFromString(StringView str) {
+
+    auto parts = splitString(str, ',');
+    std::deque<double> output;
+
+    for (int i = 0; i < (int)parts.size(); i++) {
+        output.push_back(convertFromString<double>(parts[i]));
+    }
+
+    return output;
+}
+
 template <> inline std::deque<int> BT::convertFromString(StringView str) {
 
     auto parts = splitString(str, ',');
@@ -33,6 +45,14 @@ template <> inline std::deque<int> BT::convertFromString(StringView str) {
     }
 
     return output;
+}
+
+double inline calculateDistance(const geometry_msgs::msg::Pose &pose1, const geometry_msgs::msg::Pose &pose2) {
+    tf2::Vector3 position1(pose1.position.x, pose1.position.y, 0);
+    tf2::Vector3 position2(pose2.position.x, pose2.position.y, 0);
+    double dist = position1.distance(position2);
+    // RCLCPP_INFO_STREAM(rclcpp::get_logger("rclcpp"), "distance: " << dist);
+    return dist;
 }
 
 /********************************/
@@ -77,32 +97,144 @@ bool SIMAactivate::wakeUpSIMA() {
     return true;
 }
 
+/*****************/
+/* Mission Start */
+/*****************/
+PortsList MissionStart::providedPorts() {
+    return { 
+        BT::InputPort<std::deque<double>>("BACK_IN"),
+        BT::InputPort<std::deque<double>>("FORWARD_IN"),
+        BT::InputPort<double>("SHIFT_IN"),
+        BT::InputPort<int>("INDEX_IN"),
+        BT::OutputPort<double>("BACK_L"),
+        BT::OutputPort<double>("BACK_M"),
+        BT::OutputPort<double>("BACK_S"),
+        BT::OutputPort<double>("FORWARD_L"),
+        BT::OutputPort<double>("FORWARD_M"),
+        BT::OutputPort<double>("FORWARD_S"),
+        BT::OutputPort<double>("SHIFT"),
+        BT::OutputPort<std::string>("DOCK_DIR"),
+    };
+}
+
+BT::NodeStatus MissionStart::tick() {
+    auto back_ = getInput<std::deque<double>>("BACK_IN");
+    auto forward_ = getInput<std::deque<double>>("FORWARD_IN");
+    double shift_ = getInput<double>("SHIFT_IN").value();
+    int index_ = getInput<int>("INDEX_IN").value();
+
+    std::string map_points;
+    blackboard_->get<std::string>("bot", map_points); 
+    std_msgs::msg::Int32MultiArray materials_info_;
+    blackboard_->get<std_msgs::msg::Int32MultiArray>("materials_info", materials_info_);
+    RCLCPP_INFO_STREAM(node_->get_logger(), materials_info_.data[0] << materials_info_.data[1] << materials_info_.data[2] << materials_info_.data[3] << materials_info_.data[4] << materials_info_.data[5] << materials_info_.data[6] << materials_info_.data[7] << materials_info_.data[8] << materials_info_.data[9]);
+    map_points = "map_points_" + map_points;
+    node_->get_parameter(map_points, material_points_);
+
+    int offset_dir_ = (int)(1 - 2 * ((int)(material_points_[index_ * 6 + 2]) % 2));
+    int offset_positivity_ = (int)(material_points_[index_ * 6 + 3] / abs(material_points_[index_ * 6 + 3]));
+    RCLCPP_INFO_STREAM(node_->get_logger(), offset_positivity_);
+    shift_ *= offset_dir_ * offset_positivity_;
+
+    if (offset_dir_ == 1)
+        setOutput("DOCK_DIR", "dock_x_slow_precise");
+    else if (offset_dir_ == -1)
+        setOutput("DOCK_DIR", "dock_y_slow_precise");
+    
+    if (offset_positivity_ > 0) {
+        back_.value()[0] *= -1;
+        back_.value()[1] *= -1;
+        back_.value()[2] *= -1;
+    }
+    else {
+        forward_.value()[0] *= -1;
+        forward_.value()[1] *= -1;
+        forward_.value()[2] *= -1;
+    }
+    RCLCPP_INFO_STREAM(node_->get_logger(), back_.value()[0] << ", " << back_.value()[1] << ", " << back_.value()[2]);
+    RCLCPP_INFO_STREAM(node_->get_logger(), forward_.value()[0] << ", " << forward_.value()[1] << ", " << forward_.value()[2]);
+
+    setOutput("BACK_L", back_.value()[0]);
+    setOutput("BACK_M", back_.value()[1]);
+    setOutput("BACK_S", back_.value()[2]);
+    setOutput("FORWARD_L", forward_.value()[0]);
+    setOutput("FORWARD_M", forward_.value()[1]);
+    setOutput("FORWARD_S", forward_.value()[2]);
+    setOutput("SHIFT", shift_);
+
+    return BT::NodeStatus::SUCCESS;
+}
+
 /******************/
 /* MissionSuccess */
 /******************/
 PortsList MissionSuccess::providedPorts() {
     return { 
-        BT::InputPort<int>("base_index")
+        BT::InputPort<int>("base_index"),
+        BT::InputPort<int>("levels")
     };
 }
 
 BT::NodeStatus MissionSuccess::tick() {
-    int baseIndex_ = getInput<double>("base_index").value();
+    int baseIndex_ = getInput<int>("base_index").value();
+    int levels_ = getInput<int>("levels").value();
     bool lastMissionFailed_;
+    int score_;
 
-    // update mission_points_status_
-    blackboard_->get<std::vector<int>>("mission_points_status", mission_points_status_);
-    mission_points_status_[baseIndex_ - 11]++;
-    blackboard_->set<std::vector<int>>("mission_points_status", mission_points_status_);
-
-    blackboard_->get<bool>("last_mission_failed", lastMissionFailed_);
     lastMissionFailed_ = false;
     blackboard_->set<bool>("last_mission_failed", lastMissionFailed_);
+    blackboard_->get<int>("front_materials", front_materials_);
+    blackboard_->get<int>("back_materials", back_materials_);
+    if (baseIndex_ > 10) {   // finish placement mission
+        // update mission_points_status_
+        blackboard_->get<std_msgs::msg::Int32MultiArray>("mission_points_status", mission_points_status_);
+        mission_points_status_.data[baseIndex_ - 11]++;
+        blackboard_->set<std_msgs::msg::Int32MultiArray>("mission_points_status", mission_points_status_);
+        // update score
+        blackboard_->get<int>("score_from_main", score_);
+        score_ += (pow(2, levels_) - 1) * 4;
+        blackboard_->set<int>("score_from_main", score_);
+        switch (levels_) {
+            case 1:
+                back_materials_ -= 1;
+                break;
+            case 2:
+                front_materials_ -= 2;
+                break;
+            case 3:
+                front_materials_ -= 2;
+                back_materials_ -= 1;
+                break;
+            default:
+                break;
+        }
+        RCLCPP_INFO_STREAM(node_->get_logger(), "place materials at point " << baseIndex_ << " successfully, data: " << mission_points_status_.data[baseIndex_ - 11]);
+        // To Do: can merge the messages of mission_points_status & score_from_main in 1 parameter
 
-    vision_pub_ = node_->create_publisher<std_msgs::msg::Bool>("/on_robot_camera/finish_mission", 20);
-    is_mission_finished.data = true;
-    std::thread{std::bind(&MissionSuccess::timer_publisher, this)}.detach();
-    
+        // send the message to vision
+        mission_finished.data = baseIndex_;
+        std::thread{std::bind(&MissionSuccess::timer_publisher, this)}.detach();
+    } else if (baseIndex_ >= 0) {  // finish taking material
+        blackboard_->get<std_msgs::msg::Int32MultiArray>("materials_info", materials_info_);
+        materials_info_.data[baseIndex_] = 0;
+        blackboard_->set<std_msgs::msg::Int32MultiArray>("materials_info", materials_info_);
+        switch (levels_) {
+            case 1:
+                back_materials_ += 2;
+                break;
+            case 2:
+                front_materials_ += 2;
+                break;
+            default:
+                break;
+        }
+        RCLCPP_INFO_STREAM(node_->get_logger(), "take materials at point " << baseIndex_ << " successfully");
+    } else { // finish banner mission
+        mission_finished.data = baseIndex_;
+        std::thread{std::bind(&MissionSuccess::timer_publisher, this)}.detach();
+    }
+    blackboard_->set<int>("front_materials", front_materials_);
+    blackboard_->set<int>("back_materials", back_materials_);
     return BT::NodeStatus::SUCCESS;
 }
 
@@ -110,16 +242,16 @@ void MissionSuccess::timer_publisher() {
     rclcpp::Rate rate(100);
 
     while (rclcpp::ok() && publish_count < publish_times) { 
-        vision_pub_->publish(is_mission_finished);
+        vision_pub_->publish(mission_finished);
         publish_count++;
         rate.sleep();
     }
 }
 
 /*******************/
-/* MissionFinisher */
+/* MissionFailure */
 /*******************/
-PortsList MissionFinisher::providedPorts() {
+PortsList MissionFailure::providedPorts() {
     return { 
         BT::InputPort<std::deque<int>>("step_results"),
         BT::InputPort<bool>("robot_type"),
@@ -128,7 +260,7 @@ PortsList MissionFinisher::providedPorts() {
     };
 }
 
-BT::NodeStatus MissionFinisher::onStart()
+BT::NodeStatus MissionFailure::onStart()
 {
     getInput<std::deque<int>>("step_results", step_results_);
     getInput<bool>("robot_type", robot_type_);
@@ -143,22 +275,20 @@ BT::NodeStatus MissionFinisher::onStart()
     return BT::NodeStatus::RUNNING;
 }
 
-BT::NodeStatus MissionFinisher::onRunning()
+BT::NodeStatus MissionFailure::onRunning()
 {
     auto front_collect_ = node_->get_parameter("front_collect").as_integer_array();
     auto back_collect_ = node_->get_parameter("back_collect").as_integer_array();
     auto construct_1_ = node_->get_parameter("construct_1").as_integer_array();
-    auto not_spin_construct_2_ = node_->get_parameter("not_spin_construct_2").as_integer_array();
-    auto spin_construct_2_ = node_->get_parameter("spin_construct_2").as_integer_array();
-    auto not_spin_construct_3_ = node_->get_parameter("not_spin_construct_3").as_integer_array();
-    auto spin_construct_3_ = node_->get_parameter("spin_construct_3").as_integer_array();
+    auto construct_2_ = node_->get_parameter("construct_2").as_integer_array();
+    auto construct_3_ = node_->get_parameter("construct_3").as_integer_array();
     
     switch(step_results_.back()){
 
         // front_collect
         case 1:
-            front_materials_ += front_collect_[1];
-            back_materials_ += front_collect_[2];
+            // front_materials_ += front_collect_[1];
+            // back_materials_ += front_collect_[2];
             success_levels_ = 0;
             failed_levels_ = 0;
 
@@ -168,8 +298,8 @@ BT::NodeStatus MissionFinisher::onRunning()
             break;
         // back_collect
         case 2:
-            front_materials_ += back_collect_[1];
-            back_materials_ += back_collect_[2];
+            // front_materials_ += back_collect_[1];
+            // back_materials_ += back_collect_[2];
             success_levels_ = 0;
             failed_levels_ = 0;
 
@@ -179,8 +309,8 @@ BT::NodeStatus MissionFinisher::onRunning()
             break;
         // construct_1
         case 3:
-            front_materials_ = construct_1_[1];
-            back_materials_ = construct_1_[2];
+            // front_materials_ = construct_1_[1];
+            // back_materials_ = construct_1_[2];
             success_levels_ = construct_1_[3];
             failed_levels_ = 1 - success_levels_;
 
@@ -190,20 +320,10 @@ BT::NodeStatus MissionFinisher::onRunning()
             break;
         // construct_2
         case 4:
-            if(robot_type_)
-            {
-                front_materials_ = not_spin_construct_2_[mission_progress_ * 4 + 1];
-                back_materials_ = not_spin_construct_2_[mission_progress_ * 4 + 2];
-                success_levels_ = not_spin_construct_2_[mission_progress_ * 4 + 3];
-                failed_levels_ = 2 - success_levels_;
-            }
-            else
-            {
-                front_materials_ = spin_construct_2_[mission_progress_ * 4 + 1];
-                back_materials_ = spin_construct_2_[mission_progress_ * 4 + 2];
-                success_levels_ = spin_construct_2_[mission_progress_ * 4 + 3];
-                failed_levels_ = 2 - success_levels_;
-            }
+            // front_materials_ = construct_2_[mission_progress_ * 4 + 1];
+            // back_materials_ = construct_2_[mission_progress_ * 4 + 2];
+            success_levels_ = construct_2_[mission_progress_ * 4 + 3];
+            failed_levels_ = 2 - success_levels_;
 
             if (front_materials_ == 0 && back_materials_ == 0)
                 matreials_accord_ = 1;
@@ -211,40 +331,21 @@ BT::NodeStatus MissionFinisher::onRunning()
             break;
         // construct_3
         case 5:
-            if(robot_type_)
+            // front_materials_ = construct_3_[mission_progress_ * 4 + 1];
+            // back_materials_ = construct_3_[mission_progress_ * 4 + 2];
+            
+            if (construct_3_[mission_progress_ * 4 + 3] != 4)
             {
-                front_materials_ = not_spin_construct_3_[mission_progress_ * 4 + 1];
-                back_materials_ = not_spin_construct_3_[mission_progress_ * 4 + 2];
-                
-                if (not_spin_construct_3_[mission_progress_ * 4 + 3] != 4)
-                {
-                    success_levels_ = not_spin_construct_3_[mission_progress_ * 4 + 3];
-                    failed_levels_ = 3 - success_levels_;
-                }
-                // 疊三層時，過程中兩層的成功與否受到建造區影響
-                else
-                {
-                    success_levels_ = 1;
-                    failed_levels_ = 2;
-                }
+                success_levels_ = construct_3_[mission_progress_ * 4 + 3];
+                failed_levels_ = 3 - success_levels_;
             }
+            // 疊三層時，過程中兩層的成功與否受到建造區影響
             else
             {
-                front_materials_ = spin_construct_3_[mission_progress_ * 4 + 1];
-                back_materials_ = spin_construct_3_[mission_progress_ * 4 + 2];
-                
-                if (spin_construct_3_[mission_progress_ * 4 + 3] != 4)
-                {
-                    success_levels_ = spin_construct_3_[mission_progress_ * 4 + 3];
-                    failed_levels_ = 3 - success_levels_;
-                }
-                // 疊三層時，過程中兩層的成功與否受到建造區影響
-                else
-                {
-                    success_levels_ = 1;
-                    failed_levels_ = 2;
-                }
+                success_levels_ = 1;
+                failed_levels_ = 2;
             }
+        
 
             if (front_materials_ == 0 && back_materials_ == 0)
                 matreials_accord_ = 1;
@@ -270,7 +371,7 @@ BT::NodeStatus MissionFinisher::onRunning()
         return BT::NodeStatus::FAILURE;
 }
 
-void MissionFinisher::onHalted()
+void MissionFailure::onHalted()
 {
     // Reset the output port
     setOutput("success_levels", 0); 
@@ -291,24 +392,24 @@ PortsList FirmwareMission::providedPorts() {
 }
 
 BT::NodeStatus FirmwareMission::stopStep() {
-    if (mission_status_ == 1 && mission_received_) {
-        RCLCPP_INFO(node_->get_logger(), "Mission success");
+    if (mission_status_ == 1 && mission_stamp_ == mission_type_) {
+        // RCLCPP_INFO(node_->get_logger(), "Mission success");
         blackboard_->set<int>("mission_progress", ++mission_progress_);
         setOutput<int>("mission_status", mission_status_);
-        mission_received_ = false;
+        // mission_received_ = false;
         mission_status_ = 0;
         subscription_.reset();
         return BT::NodeStatus::SUCCESS;
-    } else if (mission_status_ == 0 || (!mission_received_ && mission_status_ == 1)) {
+    } else if (mission_status_ == 0 || (mission_status_ == 1 && mission_stamp_ != mission_type_)) {
         return BT::NodeStatus::RUNNING;
     } else if (mission_status_ == -1) {
-        RCLCPP_INFO(node_->get_logger(), "Mission failed");
+        // RCLCPP_INFO(node_->get_logger(), "Mission failed");
         setOutput<int>("mission_status", mission_status_);
-        mission_received_ = false;
+        // mission_received_ = false;
         subscription_.reset();
         return BT::NodeStatus::FAILURE;
     } else {
-        RCLCPP_INFO(node_->get_logger(), "Unknown status code, Stop mission");
+        // RCLCPP_INFO(node_->get_logger(), "Unknown status code, Stop mission");
         setOutput<int>("mission_status", -1);
         subscription_.reset();
         return BT::NodeStatus::FAILURE;
@@ -317,15 +418,17 @@ BT::NodeStatus FirmwareMission::stopStep() {
 void FirmwareMission::mission_callback(const std_msgs::msg::Int32::SharedPtr sub_msg) {
     if (mission_type_)
     {
-        if (sub_msg->data == 0)
-            mission_received_ = true;
-        mission_status_ = sub_msg->data;
-        RCLCPP_INFO(node_->get_logger(), "mission_received_: %d, mission type: '%d', heard: '%d'", mission_received_, mission_type_, mission_status_);
+        // if (sub_msg->data == 0)
+            // mission_received_ = true;
+        int temp_ = sub_msg->data;
+        mission_stamp_ = temp_ / 10;
+        mission_status_ = temp_ % 10;
+        // RCLCPP_INFO(node_->get_logger(), "mission type: %d, return: %d, status: %d", mission_type_, mission_stamp_, mission_status_);
     }
 }
 
 BT::NodeStatus FirmwareMission::onStart() {
-    RCLCPP_INFO(node_->get_logger(), "Node start");
+    // RCLCPP_INFO(node_->get_logger(), "Node start");
     getInput<int>("mission_type", mission_type_);
     blackboard_->get<int>("mission_progress", mission_progress_);
 
@@ -335,8 +438,8 @@ BT::NodeStatus FirmwareMission::onStart() {
 BT::NodeStatus FirmwareMission::onRunning() {
     pub_msg.data = mission_type_;
     publisher_->publish(pub_msg);
-    RCLCPP_INFO(node_->get_logger(), "mission_progress: %d", mission_progress_);
-    RCLCPP_INFO(node_->get_logger(), "mission_type: %d", mission_type_);
+    // RCLCPP_INFO(node_->get_logger(), "mission_progress: %d", mission_progress_);
+    // RCLCPP_INFO(node_->get_logger(), "mission_type: %d", mission_type_);
     rate_.sleep();
     return stopStep();
     // **failure test**
@@ -346,9 +449,63 @@ BT::NodeStatus FirmwareMission::onRunning() {
 }
 
 void FirmwareMission::onHalted() {
-    RCLCPP_INFO(node_->get_logger(), "Testing Node halted");
+    // RCLCPP_INFO(node_->get_logger(), "Testing Node halted");
     setOutput<int>("mission_status", -1);
     return;
+}
+
+BT::PortsList BannerChecker::providedPorts() {
+    return {
+        BT::InputPort<int>("banner_place"),
+        BT::OutputPort<std::string>("remap_banner_place")
+    };
+}
+
+void BannerChecker::onStart() {
+    getInput<int>("banner_place", banner_place_);
+    blackboard_->get<std::string>("team", team_);
+    blackboard_->get<std_msgs::msg::Int32MultiArray>("mission_points_status", mission_points_status_);
+    // get correspond map points according to bot name
+    std::string map_points;
+    blackboard_->get<std::string>("bot", map_points); 
+    map_points = "map_points_" + map_points;
+    node_->get_parameter(map_points, material_points_);
+    // node_->get_parameter("safety_dist", safety_dist_);
+    // LocReceiver::UpdateRobotPose(robot_pose_, tf_buffer_, frame_id_);
+    // LocReceiver::UpdateRivalPose(rival_pose_, tf_buffer_, frame_id_);
+}
+
+int BannerChecker::DecodeBannerIndex(const int index) {
+    if (team_ == "y")
+        return index + 12;
+    else if (team_ == "b")
+        return index + 16;
+    else
+        throw("error team color");
+}
+
+BT::NodeStatus BannerChecker::tick() {
+    geometry_msgs::msg::Pose ptPose_;
+    int mapPoint_;
+    int i = 0;
+
+    onStart();
+    mapPoint_ = DecodeBannerIndex(banner_place_);
+    while (mission_points_status_.data[mapPoint_ - 11] && i < 3) {
+        RCLCPP_INFO_STREAM(node_->get_logger(), "considering banner_place_: " << banner_place_ << ", status: " << mission_points_status_.data[mapPoint_ - 11]);
+        banner_place_ = (banner_place_ + 1) % 3;
+        mapPoint_ = DecodeBannerIndex(banner_place_);
+        i++;
+    }
+    
+    RCLCPP_INFO_STREAM(node_->get_logger(), "final decision: " << banner_place_);
+    // pt_pose_.position.x = material_points_[(index + 12) * 6];
+    // pt_pose_.position.y = material_points_[(index + 12) * 6 + 1];
+    // if (calculateDistance(ptPose_, rival_pose_.pose) < safety_dist_) {
+    // }
+    
+    setOutput("remap_banner_place", to_string(banner_place_));
+    return BT::NodeStatus::SUCCESS;
 }
 
 /***************************/

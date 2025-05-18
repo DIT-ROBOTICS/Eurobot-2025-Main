@@ -65,14 +65,24 @@ geometry_msgs::msg::PoseStamped inline ConvertPoseFormat(geometry_msgs::msg::Pos
 BT::PortsList Navigation::providedPorts() {
     return {
         BT::InputPort<geometry_msgs::msg::PoseStamped>("goal"),
-        BT::InputPort<int>("type"),
+        BT::InputPort<geometry_msgs::msg::PoseStamped>("base"),
+        BT::InputPort<double>("offset"),
+        BT::InputPort<double>("shift"),
+        BT::InputPort<std::string>("dock_type"),
         BT::OutputPort<geometry_msgs::msg::PoseStamped>("final_pose")
     };
 }
 
 bool Navigation::setGoal(RosActionNode::Goal& goal) {
-    auto m = getInput<geometry_msgs::msg::PoseStamped>("goal");
-    nav_type_ = getInput<int>("type").value();
+    auto m_0 = getInput<geometry_msgs::msg::PoseStamped>("goal");
+    auto m_1 = getInput<geometry_msgs::msg::PoseStamped>("base");
+    auto m = (m_0) ? m_0 : m_1;
+    auto o = getInput<double>("offset");
+    auto s = getInput<double>("shift");
+    if (o) offset_ = o.value();
+    if (s) shift_ = s.value();
+    getInput<std::string>("dock_type", dock_type_);
+
     rclcpp::Time now = this->now();
     goal_.header.stamp = now;
     goal_.header.frame_id = "map";
@@ -84,15 +94,34 @@ bool Navigation::setGoal(RosActionNode::Goal& goal) {
     goal_.pose.orientation.y = q.y();
     goal_.pose.orientation.z = q.z();
     goal_.pose.orientation.w = q.w();
-    goal.pose = goal_;
+    goal_.pose.position.z = 0;
 
-    RCLCPP_INFO(logger(), "Start Nav to (%f, %f)", goal.pose.pose.position.x, goal.pose.pose.position.y);
+    if (!m_0) {
+        if (dock_type_ == "mission_dock_x" || dock_type_.substr(0, 6) == "dock_x") {
+            goal_.pose.position.x += offset_; // set staging point
+            goal_.pose.position.y += shift_;
+        } else if (dock_type_ == "mission_dock_y" || dock_type_.substr(0, 6) == "dock_y") {
+            goal_.pose.position.x += shift_;
+            goal_.pose.position.y += offset_; // set staging point
+        } else {
+            RCLCPP_ERROR(logger(), "Invalid offset value");
+            return false;
+        }
+        goal_.pose.position.z = offset_;
+    }
+    goal.use_dock_id = false; // set use dock id
+    goal.dock_pose = goal_; // send goal pose
+    goal.dock_type = dock_type_;    // determine the docking direction (x or y)
+    goal.max_staging_time = 1000.0; // set max staging time
+    goal.navigate_to_staging_pose = 1;  // if it's pure docking, then don't need to navigate to staging pose
+
+    RCLCPP_INFO(logger(), "Start Nav to (%f, %f)", goal.dock_pose.pose.position.x, goal.dock_pose.pose.position.y);
     return true;
 }
 
 NodeStatus Navigation::onFeedback(const std::shared_ptr<const Feedback> feedback) {
-    current_pose_ = feedback->current_pose;
-    nav_recov_times_ = feedback->number_of_recoveries;
+    // nav_recov_times_ = feedback->number_of_recoveries;
+    nav_recov_times_ = feedback->num_retries;
     if (nav_recov_times_ > 2) {
         // check the correctness of the final pose
         return goalErrorDetect();
@@ -106,14 +135,15 @@ NodeStatus Navigation::goalErrorDetect() {
     double nav_ang_error_ = node_->get_parameter("nav_ang_error").as_double();
 
     // check the correctness of the final pose
-    if (calculateDistance(current_pose_.pose, goal_.pose) < nav_dist_error_ && calculateAngleDifference(current_pose_.pose, goal_.pose) < nav_ang_error_) {
-        RCLCPP_INFO_STREAM(logger(), "success! final_pose: " << current_pose_.pose.position.x << ", " << current_pose_.pose.position.y << ", " << ConvertPoseFormat(current_pose_).pose.position.z);
+    LocReceiver::UpdateRobotPose(robot_pose_, tf_buffer_, frame_id_);
+    if (calculateDistance(robot_pose_.pose, goal_.pose) < nav_dist_error_ && calculateAngleDifference(robot_pose_.pose, goal_.pose) < nav_ang_error_) {
+        RCLCPP_INFO_STREAM(logger(), "success! final_pose: " << robot_pose_.pose.position.x << ", " << robot_pose_.pose.position.y << ", " << ConvertPoseFormat(robot_pose_).pose.position.z);
         RCLCPP_INFO_STREAM(logger(), "-----------------");
-        setOutput<geometry_msgs::msg::PoseStamped>("final_pose", ConvertPoseFormat(current_pose_));
+        setOutput<geometry_msgs::msg::PoseStamped>("final_pose", ConvertPoseFormat(robot_pose_));
         return NodeStatus::SUCCESS;
     } else {
         nav_error_ = true;
-        RCLCPP_INFO_STREAM(logger(), "fail! final_pose: " << current_pose_.pose.position.x << ", " << current_pose_.pose.position.y << ", " << ConvertPoseFormat(current_pose_).pose.position.z);
+        RCLCPP_INFO_STREAM(logger(), "fail! final_pose: " << robot_pose_.pose.position.x << ", " << robot_pose_.pose.position.y << ", " << ConvertPoseFormat(robot_pose_).pose.position.z);
         RCLCPP_INFO_STREAM(logger(), "z" << ConvertPoseFormat(goal_).pose.position.z);
         RCLCPP_INFO_STREAM(logger(), "-----------------");
         setOutput<geometry_msgs::msg::PoseStamped>("final_pose", ConvertPoseFormat(goal_));
@@ -144,7 +174,7 @@ NodeStatus Navigation::onResultReceived(const WrappedResult& wr) {
 NodeStatus Navigation::onFailure(ActionNodeErrorCode error) {
     nav_error_ = true;
     nav_finished_ = true;
-    RCLCPP_INFO_STREAM(logger(), "RETURN FAILURE! final_pose: " << current_pose_.pose.position.x << ", " << current_pose_.pose.position.y << ", " << current_pose_.pose.position.z);
+    RCLCPP_INFO_STREAM(logger(), "RETURN FAILURE! final_pose: " << robot_pose_.pose.position.x << ", " << robot_pose_.pose.position.y << ", " << robot_pose_.pose.position.z);
     RCLCPP_INFO_STREAM(logger(), "z" << ConvertPoseFormat(goal_).pose.position.z);
     RCLCPP_INFO_STREAM(logger(), "-----------------");
     setOutput<geometry_msgs::msg::PoseStamped>("final_pose", ConvertPoseFormat(goal_));
@@ -168,6 +198,7 @@ bool Docking::setGoal(RosActionNode::Goal& goal) {
     getInput<double>("shift", shift_);
     getInput<bool>("isPureDocking", isPureDocking_);
     getInput<std::string>("dock_type", dock_type_);
+    blackboard_->set<bool>("Timeout", false);
 
     rclcpp::Time now = this->now(); // get current time
     goal_.header.stamp = now; // set header time
@@ -212,33 +243,68 @@ NodeStatus Docking::onFeedback(const std::shared_ptr<const Feedback> feedback) {
     return NodeStatus::RUNNING;
 }
 
+NodeStatus Docking::goalErrorDetect() {
+    double nav_dist_error_ = node_->get_parameter("nav_dist_error").as_double();
+    double nav_ang_error_ = node_->get_parameter("nav_ang_error").as_double();
+    blackboard_->set<bool>("enable_vision_check", true);
+
+    // check the correctness of the final pose
+    LocReceiver::UpdateRobotPose(robot_pose_, tf_buffer_, frame_id_);
+    if (calculateDistance(robot_pose_.pose, goal_.pose) < nav_dist_error_ && calculateAngleDifference(robot_pose_.pose, goal_.pose) < nav_ang_error_) {
+        RCLCPP_INFO_STREAM(logger(), "success! final_pose: " << robot_pose_.pose.position.x << ", " << robot_pose_.pose.position.y << ", " << ConvertPoseFormat(robot_pose_).pose.position.z);
+        RCLCPP_INFO_STREAM(logger(), "-----------------");
+        setOutput<geometry_msgs::msg::PoseStamped>("final_pose", ConvertPoseFormat(robot_pose_));
+        return NodeStatus::SUCCESS;
+    } else {
+        nav_error_ = true;
+        RCLCPP_INFO_STREAM(logger(), "fail! final_pose: " << robot_pose_.pose.position.x << ", " << robot_pose_.pose.position.y << ", " << ConvertPoseFormat(robot_pose_).pose.position.z);
+        RCLCPP_INFO_STREAM(logger(), "z" << ConvertPoseFormat(goal_).pose.position.z);
+        RCLCPP_INFO_STREAM(logger(), "-----------------");
+        setOutput<geometry_msgs::msg::PoseStamped>("final_pose", ConvertPoseFormat(goal_));
+        return NodeStatus::SUCCESS;
+    }
+}
+
 NodeStatus Docking::onResultReceived(const WrappedResult& wr) {
+    RCLCPP_INFO_STREAM(node_->get_logger(), "get dock result");
     nav_finished_ = true;
     switch (wr.result->success) {
         case true:
             break;
         case false:
             nav_error_ = true;
-            RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Goal was aborted");
+            nav_finished_ = true;
+            if (wr.result->error_code == 905)
+                blackboard_->set<bool>("Timeout", true);
+            blackboard_->set<bool>("enable_vision_check", true);
+            LocReceiver::UpdateRobotPose(robot_pose_, tf_buffer_, frame_id_);
+            setOutput<geometry_msgs::msg::PoseStamped>("final_pose", ConvertPoseFormat(robot_pose_));
+            RCLCPP_INFO_STREAM(logger(), "error code: " << wr.result->error_code << " RETURN FAILURE! final_pose: " << robot_pose_.pose.position.x << ", " << robot_pose_.pose.position.y << ", " << robot_pose_.pose.position.z);
+            RCLCPP_INFO_STREAM(logger(), "-----------------");
             return NodeStatus::FAILURE;
         default:
             nav_error_ = true;
-            RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Unknown result code");
+            nav_finished_ = true;
+            if (wr.result->error_code == 905)
+                blackboard_->set<bool>("Timeout", true);
+            blackboard_->set<bool>("enable_vision_check", true);
+            LocReceiver::UpdateRobotPose(robot_pose_, tf_buffer_, frame_id_);
+            setOutput<geometry_msgs::msg::PoseStamped>("final_pose", ConvertPoseFormat(robot_pose_));
+            RCLCPP_INFO_STREAM(logger(), "error code: " << wr.result->error_code << " RETURN FAILURE! final_pose: " << robot_pose_.pose.position.x << ", " << robot_pose_.pose.position.y << ", " << robot_pose_.pose.position.z);
+            RCLCPP_INFO_STREAM(logger(), "-----------------");
             return NodeStatus::FAILURE;
     }
-    LocReceiver::UpdateRobotPose(robot_pose_, tf_buffer_, frame_id_);
-    RCLCPP_INFO_STREAM(logger(), "success! final_pose: " << robot_pose_.pose.position.x << ", " << robot_pose_.pose.position.y << ", " << ConvertPoseFormat(robot_pose_).pose.position.z);
-    RCLCPP_INFO_STREAM(logger(), "-----------------");
-    setOutput<geometry_msgs::msg::PoseStamped>("final_pose", ConvertPoseFormat(robot_pose_));
-    return NodeStatus::SUCCESS;
+    return goalErrorDetect();
 }
 
 NodeStatus Docking::onFailure(ActionNodeErrorCode error) {
     nav_error_ = true;
     nav_finished_ = true;
+
+    blackboard_->set<bool>("enable_vision_check", true);
     LocReceiver::UpdateRobotPose(robot_pose_, tf_buffer_, frame_id_);
     setOutput<geometry_msgs::msg::PoseStamped>("final_pose", ConvertPoseFormat(robot_pose_));
-    RCLCPP_INFO_STREAM(logger(), "RETURN FAILURE! final_pose: " << robot_pose_.pose.position.x << ", " << robot_pose_.pose.position.y << ", " << robot_pose_.pose.position.z);
+    RCLCPP_INFO_STREAM(logger(), "error code: " << error << "RETURN FAILURE! final_pose: " << robot_pose_.pose.position.x << ", " << robot_pose_.pose.position.y << ", " << robot_pose_.pose.position.z);
     RCLCPP_INFO_STREAM(logger(), "-----------------");
     return NodeStatus::FAILURE;
 }
@@ -333,15 +399,19 @@ PortsList StopRobot::providedPorts() {
 
 BT::NodeStatus StopRobot::tick() {
     stop_msg.data = true;
-    for (int i = 0; i < 10; i++)
+    for (int i = 0; i < 10; i++) {
         publisher_->publish(stop_msg);
+        rate_.sleep();
+    }
     stop_msg.data = false;
-    for (int i = 0; i < 10; i++)
+    for (int i = 0; i < 10; i++) {
         publisher_->publish(stop_msg);
+        rate_.sleep();
+    }
     return BT::NodeStatus::SUCCESS;
 }
 
-PortsList VisionCheck::providedPorts() {
+PortsList MaterialChecker::providedPorts() {
     return {
         BT::InputPort<int>("base_index"),           // if base index is -1, then plan new goal directly
         BT::InputPort<std::string>("dock_type"),
@@ -351,11 +421,12 @@ PortsList VisionCheck::providedPorts() {
         BT::OutputPort<geometry_msgs::msg::PoseStamped>("remap_base"),
         BT::OutputPort<std::string>("remap_dock_type"),
         BT::OutputPort<double>("remap_offset"),
-        BT::OutputPort<double>("remap_shift")
+        BT::OutputPort<double>("remap_shift"),
+        BT::OutputPort<int>("remap_index"), 
     };
 }
 
-int VisionCheck::findBestTarget() {
+int MaterialChecker::findBestTarget() {
     double robotVelocity_, rivalVelocity;
     geometry_msgs::msg::PoseStamped rivalGoal;
     geometry_msgs::msg::Pose targetMaterialPose_;
@@ -367,9 +438,10 @@ int VisionCheck::findBestTarget() {
 
     LocReceiver::UpdateRobotPose(robot_pose_, tf_buffer_, frame_id_);
     LocReceiver::UpdateRivalPose(rival_pose_, tf_buffer_, frame_id_);
-    for (int i = 1; i < 9; i++)                  // delete empty materials point
+    for (int i = 1; i < 9; i++) {                 // delete empty materials point
         if (materials_info_.data[i])
             candidate_.push_back(i);
+    }
     if (team_ == "b" && materials_info_.data[0])       // if it's blue team, then detect if the first point is empty
         candidate_.push_back(0);
     else if (team_ == "y" && materials_info_.data[9]) // if it's yellow team, then detect if the last point is empty
@@ -382,8 +454,8 @@ int VisionCheck::findBestTarget() {
     safestPointIndex_ = candidate_.front();
     minDistIndex_ = candidate_.front();
     do {                                         // delete materials point that is too close to rival
-        targetMaterialPose_.position.x = material_points_[candidate_.front() * 5];
-        targetMaterialPose_.position.y = material_points_[candidate_.front() * 5 + 1];
+        targetMaterialPose_.position.x = material_points_[candidate_.front() * 6];
+        targetMaterialPose_.position.y = material_points_[candidate_.front() * 6 + 1];
         deltaDist_ = calculateDistance(targetMaterialPose_, rival_pose_.pose) - calculateDistance(targetMaterialPose_, robot_pose_.pose);
         dist_ = calculateDistance(targetMaterialPose_, robot_pose_.pose);
         if (safestDeltaDist_ < deltaDist_) {     // iterate to find the safest material point
@@ -395,11 +467,9 @@ int VisionCheck::findBestTarget() {
                 minDistIndex_ = candidate_.front();
                 minDist_ = dist_;
             }
-            // candidate_.push_back(candidate_.front());
         }
         candidate_.pop_front();
     } while (!candidate_.empty());
-    // int min_index = candidate_.front();
     if (last_mission_failed_) {
         blackboard_->set<bool>("last_mission_failed", false);  
         return safestPointIndex_;
@@ -408,7 +478,7 @@ int VisionCheck::findBestTarget() {
         return minDistIndex_;
 }
 
-NodeStatus VisionCheck::tick() {
+NodeStatus MaterialChecker::tick() {
     // get input
     int baseIndex_ = getInput<double>("base_index").value();
     std::string dockType_ = getInput<std::string>("dock_type").value();
@@ -417,15 +487,22 @@ NodeStatus VisionCheck::tick() {
     double shift_ = getInput<double>("shift").value();
 
     // get parameters
-    node_->get_parameter("material_points", material_points_);
-    node_->get_parameter("mission_points", mission_points_);
+    std::string mapPointsFile_, bot_;
+    blackboard_->get<std::string>("bot", bot_); 
+    mapPointsFile_ = "map_points_" + bot_;
+    node_->get_parameter(mapPointsFile_, material_points_);
+    node_->get_parameter("safety_dist", safety_dist_);
 
     blackboard_->get<std_msgs::msg::Int32MultiArray>("materials_info", materials_info_);  // use vision message to check the target
     blackboard_->get<bool>("last_mission_failed", last_mission_failed_);                  // see if last mission failed
-    
+    bool enable_vision_check_;
+    blackboard_->get<bool>("enable_vision_check", enable_vision_check_);
     // If the target is not ok
     // use vision message to find the best new target `i` (new base)
-    if (materials_info_.data[baseIndex_] == 0 || baseIndex_ == -1) {
+    LocReceiver::UpdateRivalPose(rival_pose_, tf_buffer_, frame_id_);
+    base_.pose.position.x = material_points_[baseIndex_ * 6];
+    base_.pose.position.y = material_points_[baseIndex_ * 6 + 1];
+    if (materials_info_.data[baseIndex_] == 0 || baseIndex_ == -1 || calculateDistance(base_.pose, rival_pose_.pose) < safety_dist_) {
         baseIndex_ = findBestTarget();
         /**********************************************************/
         /* Notice!! this part need to be consider again carefully */
@@ -434,52 +511,56 @@ NodeStatus VisionCheck::tick() {
         if (baseIndex_ == -1) { 
             return NodeStatus::FAILURE;
         }
-        dockType_ = (int(material_points_[baseIndex_ * 5 + 2]) % 2) ? "mission_dock_y" : "mission_dock_x";
     }
-    // get base & offset from map_points[i]
-    base_.pose.position.x = material_points_[baseIndex_ * 5];
-    base_.pose.position.y = material_points_[baseIndex_ * 5 + 1];
-    base_.pose.position.z = material_points_[baseIndex_ * 5 + 2];
-    offset_ = material_points_[baseIndex_ * 5 + 3];
-    shift_ = material_points_[baseIndex_ * 5 + 4];
+    if (!enable_vision_check_) {
+        blackboard_->get<int>("current_index", baseIndex_); 
+    } else {
+        blackboard_->set<bool>("enable_vision_check", false);
+        RCLCPP_INFO_STREAM(node_->get_logger(), "index: " << baseIndex_ << " offset: " << material_points_[baseIndex_ * 6 + 3] << " missionType_: " << missionType_);
+    }
+    base_.pose.position.x = material_points_[baseIndex_ * 6];
+    base_.pose.position.y = material_points_[baseIndex_ * 6 + 1];
+    base_.pose.position.z = material_points_[baseIndex_ * 6 + 2];
+    offset_ = material_points_[baseIndex_ * 6 + 3];
+    dockType_ = (int(material_points_[baseIndex_ * 6 + 2]) % 2) ? ("dock_y_" + dockType_) : ("dock_x_" + dockType_);
+    shift_ = 0;
 
     // derive the position.z & offset & shift according to mission_type & map_points[i]
+    int offset_dir_ = (int)(1 - 2 * int(base_.pose.position.z) % 2);
+    int offset_positivity_ = (int)(offset_ / abs(offset_));
     if (missionType_ == "front") {
-        int dockTypeCode_;
-        if (dockType_ == "mission_dock_y") // dock type code: 1 for y, -1 for x
-            dockTypeCode_ = 1;
-        else
-            dockTypeCode_ = -1;
-        shift_ *= offset_ / abs(offset_) * dockTypeCode_; // use dock type to determine the shift direction
-        offset_ -= offset_ / abs(offset_) * 0.04;
+        if (bot_ == "1")
+            offset_ -= offset_ / abs(offset_) * material_points_[baseIndex_ * 6 + 5];
+        shift_ = material_points_[baseIndex_ * 6 + 4];
     } else if (missionType_ == "back") {
         base_.pose.position.z = ((int)base_.pose.position.z / 2) ? base_.pose.position.z - 2 : base_.pose.position.z + 2;
-        // offset_ *= -1;
-        shift_ = 0;
     } else {
         throw "error mission direction for choosing nav goal!";
     }
 
     // set output port
+    blackboard_->set<int>("current_index", baseIndex_); 
     setOutput<geometry_msgs::msg::PoseStamped>("remap_base", base_);
     setOutput<std::string>("remap_dock_type", dockType_);
     setOutput<double>("remap_offset", offset_);
     setOutput<double>("remap_shift", shift_);
+    setOutput<int>("remap_index", baseIndex_);
 
     // Run the child node
     BT::NodeStatus child_status = child_node_->executeTick();
     return child_status;
 }
 
-PortsList MissionNearRival::providedPorts() {
+PortsList MissionChecker::providedPorts() {
     return {
         BT::InputPort<int>("base_index"),
         BT::InputPort<std::string>("mission_type"), // front grabber or back grabber
         BT::OutputPort<geometry_msgs::msg::PoseStamped>("remap_base"),
+        BT::OutputPort<std::string>("level")
     };
 }
 
-NodeStatus MissionNearRival::tick() {
+NodeStatus MissionChecker::tick() {
     // get input
     int baseIndex_ = getInput<double>("base_index").value();
     std::string missionType_ = getInput<std::string>("mission_type").value();
@@ -488,34 +569,55 @@ NodeStatus MissionNearRival::tick() {
     double shift_ = 0;
 
     // get parameters
-    node_->get_parameter("material_points", material_points_);
-    blackboard_->get<std::vector<int>>("mission_points_status", mission_points_status_);
+    std::string map_points;
+    blackboard_->get<std::string>("bot", map_points); 
+    map_points = "map_points_" + map_points;
+    node_->get_parameter(map_points, material_points_);
+    node_->get_parameter("safety_dist", safety_dist_);
+    blackboard_->get<std_msgs::msg::Int32MultiArray>("mission_points_status", mission_points_status_);
+    blackboard_->get<int>("front_materials", front_materials_);
+    blackboard_->get<int>("back_materials", back_materials_);
     
     // get base & offset from map_points[i]
-    base_.pose.position.x = material_points_[baseIndex_ * 5];
-    base_.pose.position.y = material_points_[baseIndex_ * 5 + 1];
-    base_.pose.position.z = material_points_[baseIndex_ * 5 + 2];
-    offset = material_points_[baseIndex_ * 5 + 3];
-    shift_ = material_points_[baseIndex_ * 5 + 4];
+    base_.pose.position.x = material_points_[baseIndex_ * 6];
+    base_.pose.position.y = material_points_[baseIndex_ * 6 + 1];
+    base_.pose.position.z = material_points_[baseIndex_ * 6 + 2];
+    offset = material_points_[baseIndex_ * 6 + 3];
+    shift_ = material_points_[baseIndex_ * 6 + 4];
 
     LocReceiver::UpdateRivalPose(rival_pose_, tf_buffer_, frame_id_);
     dist = calculateDistance(base_.pose, rival_pose_.pose);
 
-    if (missionType_ == "back") {
+    if (missionType_ == "back" && back_materials_ != 0) {
         base_.pose.position.z = ((int)base_.pose.position.z / 2) ? base_.pose.position.z - 2 : base_.pose.position.z + 2;
     }
     if (base_.pose.position.z == 1.0 || base_.pose.position.z == 3.0) {
-        if (mission_points_status_[baseIndex_ - 11] != 0)   // check if this mission is already placed
-            base_.pose.position.y -= offset * 1.3;    // if yes, the placement point need to e changed
-        if (dist < 0.5 && abs(base_.pose.position.y - rival_pose_.pose.position.y) < 0.4) {
-            base_.pose.position.x += (base_.pose.position.x - rival_pose_.pose.position.x)/abs(base_.pose.position.x - rival_pose_.pose.position.x)*(0.5 - abs(base_.pose.position.x - rival_pose_.pose.position.x));
+        if (mission_points_status_.data[baseIndex_ - 11] != 0) {   // check if this mission is already placed
+            base_.pose.position.y -= offset * 1.05 * mission_points_status_.data[baseIndex_ - 11];    // if yes, the placement point need to be changed
+            // RCLCPP_INFO_STREAM(node_->get_logger(), "step back 5 cm, and then place the materials");
+        }
+        if (dist < safety_dist_ && abs(base_.pose.position.y - rival_pose_.pose.position.y) < safety_dist_) {
+            base_.pose.position.x += (base_.pose.position.x - rival_pose_.pose.position.x)/abs(base_.pose.position.x - rival_pose_.pose.position.x) * (abs(base_.pose.position.x - rival_pose_.pose.position.x) - safety_dist_);
+            // RCLCPP_INFO_STREAM(node_->get_logger(), "rival near the bot when placing the materials");
         }
     } else {
-        if (mission_points_status_[baseIndex_ - 11] != 0)  // check if this mission is already placed
-            base_.pose.position.x -= offset * 1.3;   // if yes, the placement point need to e changed
-        if (dist < 0.5 && abs(base_.pose.position.x - rival_pose_.pose.position.x) < 0.4) {
-            base_.pose.position.y += (base_.pose.position.y - rival_pose_.pose.position.y)/abs(base_.pose.position.y - rival_pose_.pose.position.y)*(0.5 - abs(base_.pose.position.y - rival_pose_.pose.position.y));
+        if (mission_points_status_.data[baseIndex_ - 11] != 0) {  // check if this mission is already placed
+            base_.pose.position.x -= offset * 1.05 * mission_points_status_.data[baseIndex_ - 11];   // if yes, the placement point need to e changed
+            // RCLCPP_INFO_STREAM(node_->get_logger(), "step back 5 cm, and then place the materials");
         }
+        if (dist < safety_dist_ && abs(base_.pose.position.x - rival_pose_.pose.position.x) < safety_dist_) {
+            base_.pose.position.y += (base_.pose.position.y - rival_pose_.pose.position.y)/abs(base_.pose.position.y - rival_pose_.pose.position.y) * (abs(base_.pose.position.y - rival_pose_.pose.position.y) - safety_dist_);
+            // RCLCPP_INFO_STREAM(node_->get_logger(), "rival near the bot when placing the materials");
+        }
+    }
+    if (back_materials_ != 0 && front_materials_ == 2) {
+        setOutput<std::string>("level", "3");
+    } else if (back_materials_ == 0 && front_materials_ == 2) {
+        setOutput<std::string>("level", "2");
+    } else if (back_materials_ != 0 && front_materials_ != 2) {
+        setOutput<std::string>("level", "1");
+    } else {
+        setOutput<std::string>("level", "1");
     }
 
     // set output port
