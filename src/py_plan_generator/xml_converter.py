@@ -14,7 +14,7 @@ blue_home = '2.55'
 banner = []
 yellow_banner = ['2.7', '1.25', '0.75']
 blue_banner = ['0.3', '1.75', '2.25']
-dock_type_list = ['dock_y_slow_precise', 'dock_x_slow_precise', 'dock_x_slow_precise', 'dock_y_slow_precise', 'dock_y_slow_precise', 'dock_y_slow_precise', 'dock_y_slow_precise', 'dock_x_slow_precise', 'dock_x_slow_precise', 'dock_y_slow_precise', 'dock_y_slow_precise', 'dock_x_slow_precise', 'dock_y_slow_precise', 'dock_y_slow_precise', 'dock_y_slow_precise', 'dock_x_slow_precise', 'dock_y_slow_precise', 'dock_y_slow_precise', 'dock_y_slow_precise', 'dock_y_slow_precise']
+dock_type_list = ['dock_y_linearBoost_precise', 'dock_x_linearBoost_precise', 'dock_x_linearBoost_unerring', 'dock_y_linearBoost_precise', 'dock_y_linearBoost_precise', 'dock_y_linearBoost_precise', 'dock_y_linearBoost_precise', 'dock_x_linearBoost_unerring', 'dock_x_linearBoost_precise', 'dock_y_linearBoost_precise', 'dock_y_linearBoost_precise', 'dock_x_linearBoost_precise', 'dock_y_linearBoost_precise', 'dock_y_linearBoost_precise', 'dock_y_linearBoost_precise', 'dock_x_linearBoost_precise', 'dock_y_linearBoost_precise', 'dock_y_linearBoost_precise', 'dock_y_linearBoost_precise', 'dock_y_linearBoost_precise']
 offset_list = ['0.1', '-0.1', '-0.1', '-0.1', '-0.1', '-0.1', '-0.1', '-0.1']
 
 def read_input(root):
@@ -58,12 +58,6 @@ def read_input(root):
                         l += 1
         elif (elt.tag == "BehaviorTree" and elt.get('ID') == "MainTree"):
             for node in elt.iter():
-                if (node.tag == "SubTree" and (node.get('ID') == "MissionPoint1" or node.get('ID') == "MissionPoint2" or node.get('ID') == "MissionPoint3new")):
-                    c += 1
-                    print(c, node.get('ID'))
-                    node.set('NOT_NOW', "true")
-                if (node.tag == "SubTree" and node.get('ID') == banner_time):
-                    node.set('NOT_NOW', "false")
                 if (node.tag == "Docking"):
                     node.set('base', home + ', 1.6, 0')
         elif (elt.tag == "BehaviorTree" and (elt.get('ID') == "MissionPoint1" or elt.get('ID') == "MissionPoint2" or elt.get('ID') == "MissionPoint3new")):
@@ -78,19 +72,26 @@ def read_input(root):
                     i += 1
                     docking = node[0]
                     docking.set('dock_type', dock_type_list[int(points_list[i - 1])])
-                    if (i != 7 or points_list[6] != points_list[7]):
-                        docking.set('offset', offset_list[int(points_list[i - 1]) - 11])
-                    else:
+                    if (i == 8 and points_list[6] == points_list[7]):
+                        docking.set('base', '{PrevGoal}')
+                        docking.set('isPureDocking', '1')
                         docking.set('offset', str(-float(offset_list[int(points_list[i - 1]) - 11])))
+                    else:
+                        docking.set('offset', offset_list[int(points_list[i - 1]) - 11])
                 if (node.tag == "SubTree" and (node.get('ID') == "PlaceOneLevel" or node.get('ID') == "PlaceTwoLevels" or node.get('ID') == "ThreeLevelsBot1new")):
                     node.set('index', points_list[i - 1])
                 if (node.tag == "SubTree" and node.get('ID') == "BannerMission"):
+                    if (banner_time == str(j)):
+                        node.set('NOT_NOW', '0')
+                    else:
+                        node.set('NOT_NOW', '1')
                     node.set('BANNER_PLACE', banner_pt)
+                    j += 1
     tree = ET.ElementTree(root)
     tree.write(output_file_name, encoding="utf-8", xml_declaration=True)
 
 def create_tree():
-    input_tree = ET.parse('bot1_yellow_d.xml')
+    input_tree = ET.parse('bot1_blue_a_template.xml')
     root_in = input_tree.getroot()
     root_out = ET.Element("root", {"BTCPP_format": "4"})
     root_out.clear()

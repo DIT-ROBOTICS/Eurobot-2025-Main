@@ -10,7 +10,7 @@ bot1_yellow_a.xml
 14
 13
 1
-MissionPoint1
+1
 yellow
 bot1_yellow_b.xml
 8
@@ -22,7 +22,7 @@ bot1_yellow_b.xml
 14
 13
 1
-MissionPoint1
+1
 yellow
 bot1_yellow_c.xml
 9
@@ -34,7 +34,7 @@ bot1_yellow_c.xml
 14
 13
 1
-MissionPoint1
+1
 yellow
 bot1_yellow_d.xml
 6
@@ -46,7 +46,7 @@ bot1_yellow_d.xml
 13
 13
 1
-MissionPoint1
+0
 yellow
 bot1_yellow_e.xml
 1
@@ -58,7 +58,7 @@ bot1_yellow_e.xml
 13
 13
 1
-MissionPoint1
+1
 yellow
 bot1_yellow_f.xml
 1
@@ -70,7 +70,7 @@ bot1_yellow_f.xml
 11
 12
 1
-MissionPoint1
+1
 yellow
 bot1_yellow_a_template.xml
 1
@@ -82,7 +82,7 @@ bot1_yellow_a_template.xml
 12
 13
 1
-MissionPoint1
+1
 blue
 bot1_blue_a.xml
 1
@@ -94,7 +94,7 @@ bot1_blue_a.xml
 14
 13
 1
-MissionPoint1
+1
 blue
 bot1_blue_b.xml
 8
@@ -106,7 +106,7 @@ bot1_blue_b.xml
 14
 13
 1
-MissionPoint1
+1
 blue
 bot1_blue_c.xml
 9
@@ -118,7 +118,7 @@ bot1_blue_c.xml
 14
 13
 1
-MissionPoint1
+1
 blue
 bot1_blue_d.xml
 6
@@ -130,7 +130,7 @@ bot1_blue_d.xml
 13
 13
 1
-MissionPoint1
+0
 blue
 bot1_blue_e.xml
 1
@@ -142,7 +142,7 @@ bot1_blue_e.xml
 13
 13
 1
-MissionPoint1
+1
 blue
 bot1_blue_f.xml
 1
@@ -154,7 +154,7 @@ bot1_blue_f.xml
 11
 12
 1
-MissionPoint1
+1
 blue
 bot1_blue_a_template.xml
 1
@@ -166,4 +166,4 @@ bot1_blue_a_template.xml
 12
 13
 1
-MissionPoint1
+1
