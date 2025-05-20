@@ -3,6 +3,7 @@
 #include "std_srvs/srv/set_bool.hpp"
 #include "std_msgs/msg/bool.hpp"
 #include "std_msgs/msg/int32.hpp"
+#include "std_msgs/msg/int16.hpp"
 #include "std_msgs/msg/float32.hpp"
 #include "std_msgs/msg/string.hpp"
 #include "geometry_msgs/msg/point_stamped.hpp"
@@ -50,6 +51,7 @@ public:
             "/robot/startup/ready_signal", std::bind(&StartUp::ReadyFeedback, this, std::placeholders::_1, std::placeholders::_2));
         start_srv_client = this->create_client<std_srvs::srv::SetBool>("/robot/startup/start_signal");
         obstacles_pub_ = this->create_publisher<btcpp_ros2_interfaces::msg::Obstacles>("ball_obstacles", 10);
+        sima_start_pub_ = this->create_publisher<std_msgs::msg::Int16>("/sima/start", 10);
         
         this->declare_parameter<std::string>("Robot_name", "Tongue");
         this->declare_parameter<std::vector<double>>("map_points_1", std::vector<double>{});
@@ -129,6 +131,7 @@ public:
         this->get_parameter("Bot2_BlueSpetial_config", name_of_bot2_blue_plans[number_of_plans_[3] - 1]);
 
         start_up_state = INIT;
+        sima_timer_ = nullptr;  // Initialize timer pointer to null
         timer_ = this->create_wall_timer(
             std::chrono::microseconds(100),
             std::bind(&StartUp::StateMachine, this)
@@ -226,16 +229,23 @@ public:
         obstacles_msg.header.stamp = this->get_clock()->now();
         obstacles_pub_->publish(obstacles_msg);
 
-        static bool is_published = false;
+        static bool sima_start_enabled = false;
         static bool time_check = false;
 
-        if (msg.data >= 85 && !is_published) {
-            // RCLCPP_INFO(this->get_logger(), "[StartUp Program]: Send the ladybug!");
-
-            // Use system call the ladybug script
-            // system("/home/main_ws/scripts/ladybug.sh");
-
-            is_published = true;
+        // After 85 seconds, start sending SIMA start signals continuously at 10Hz
+        if (msg.data >= 85) {
+            if (!sima_start_enabled) {
+                RCLCPP_INFO(this->get_logger(), "[StartUp Program]: Starting continuous SIMA start signal!");
+                sima_start_enabled = true;
+                
+                // Create timer for continuous publishing if not already created
+                if (!sima_timer_) {
+                    sima_timer_ = this->create_wall_timer(
+                        std::chrono::milliseconds(100), // 10Hz (100ms)
+                        std::bind(&StartUp::PublishSIMAStartSignal, this)
+                    );
+                }
+            }
         }
 
         if (msg.data >= 100 && !time_check) {                                  // check if it's timeout
@@ -381,8 +391,16 @@ public:
         prev_start_msg = msg->data;
     }
 
+    // Continuously publish SIMA start signal at 10Hz
+    void PublishSIMAStartSignal() {
+        std_msgs::msg::Int16 sima_msg;
+        sima_msg.data = (team_colcor_ == 0) ? 2 : 1; // Yellow = 2, Blue = 1
+        sima_start_pub_->publish(sima_msg);
+    }
+
 private:
     rclcpp::TimerBase::SharedPtr timer_;
+    rclcpp::TimerBase::SharedPtr sima_timer_;    // Timer for continuous SIMA publishing
     // rclcpp::Publisher<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr initial_pub;
     rclcpp::Publisher<std_msgs::msg::String>::SharedPtr ready_pub;             // publish plan message as ready signal to every groups
     rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr time_pub;
@@ -392,6 +410,7 @@ private:
     rclcpp::Client<std_srvs::srv::SetBool>::SharedPtr start_srv_client;        // it might can be removed, main can listen to start topic by plug directly
 
     rclcpp::Publisher<btcpp_ros2_interfaces::msg::Obstacles>::SharedPtr obstacles_pub_;
+    rclcpp::Publisher<std_msgs::msg::Int16>::SharedPtr sima_start_pub_;
 
     // Parameters
     std::string* name_of_bot1_yellow_plans = NULL;
@@ -411,7 +430,7 @@ private:
     StartUpState prev_msg[4] = {INIT, INIT, INIT, INIT};                       // ready message from other programs
     StartUpState ready_feedback[4] = {INIT, START, START, START};   // it should be INIT        // ready message from other programs
     bool prev_start_msg = false;                                               // plug message
-    bool start = false;  // it should be false                                  // plug message
+    bool start = true;  // it should be false                                  // plug message
     double starting_time = 0;
     StartUpState start_up_state;                                               // state of startup program
     std::vector<double> material_points_;                                      // prepared for choosing start point
