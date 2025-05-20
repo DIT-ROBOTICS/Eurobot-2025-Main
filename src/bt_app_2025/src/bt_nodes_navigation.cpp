@@ -278,7 +278,7 @@ NodeStatus Docking::onResultReceived(const WrappedResult& wr) {
                 blackboard_->set<bool>("Timeout", true);
             blackboard_->set<bool>("enable_vision_check", true);
             LocReceiver::UpdateRobotPose(robot_pose_, tf_buffer_, frame_id_);
-            setOutput<geometry_msgs::msg::PoseStamped>("final_pose", ConvertPoseFormat(robot_pose_));
+            // setOutput<geometry_msgs::msg::PoseStamped>("final_pose", ConvertPoseFormat(robot_pose_));
             RCLCPP_INFO_STREAM(logger(), "error code: " << wr.result->error_code << " RETURN FAILURE! final_pose: " << robot_pose_.pose.position.x << ", " << robot_pose_.pose.position.y << ", " << robot_pose_.pose.position.z);
             RCLCPP_INFO_STREAM(logger(), "-----------------");
             return NodeStatus::FAILURE;
@@ -289,7 +289,7 @@ NodeStatus Docking::onResultReceived(const WrappedResult& wr) {
                 blackboard_->set<bool>("Timeout", true);
             blackboard_->set<bool>("enable_vision_check", true);
             LocReceiver::UpdateRobotPose(robot_pose_, tf_buffer_, frame_id_);
-            setOutput<geometry_msgs::msg::PoseStamped>("final_pose", ConvertPoseFormat(robot_pose_));
+            // setOutput<geometry_msgs::msg::PoseStamped>("final_pose", ConvertPoseFormat(robot_pose_));
             RCLCPP_INFO_STREAM(logger(), "error code: " << wr.result->error_code << " RETURN FAILURE! final_pose: " << robot_pose_.pose.position.x << ", " << robot_pose_.pose.position.y << ", " << robot_pose_.pose.position.z);
             RCLCPP_INFO_STREAM(logger(), "-----------------");
             return NodeStatus::FAILURE;

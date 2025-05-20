@@ -436,11 +436,10 @@ void FirmwareMission::mission_callback(const std_msgs::msg::Int32::SharedPtr sub
 
 BT::NodeStatus FirmwareMission::onStart() {
     // RCLCPP_INFO(node_->get_logger(), "Node start");
-    RCLCPP_INFO(node_->get_logger(), "mission_type: %d", mission_type_);
-    RCLCPP_INFO(node_->get_logger(), "-----------------");
     getInput<int>("mission_type", mission_type_);
     blackboard_->get<int>("mission_progress", mission_progress_);
-
+    // RCLCPP_INFO(node_->get_logger(), "mission_type: %d", mission_type_);
+    // RCLCPP_INFO(node_->get_logger(), "-----------------");
     return BT::NodeStatus::RUNNING;
 }
 

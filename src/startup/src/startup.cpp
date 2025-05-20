@@ -347,21 +347,21 @@ public:
             }
             prev_msg[0] = StartUpState(request->state);                        // turn the message type into enum and store
         }
-        else if (request->group == 1) {                                        // message from vision
+        else if (request->group == 2) {                                        // message from vision
             if (request->state == 3 && (prev_msg[1] == READY || prev_msg[1] == INIT)) {
                 response->success = true;
                 ready_feedback[1] = START;
             }
             prev_msg[1] = StartUpState(request->state);                        // turn the message type into enum and store
         }
-        else if (request->group == 2) {                                        // message from navigation
+        else if (request->group == 3) {                                        // message from navigation
             if (request->state == 3 && (prev_msg[2] == READY || prev_msg[2] == INIT)) {
                 response->success = true;
                 ready_feedback[2] = START;
             }
             prev_msg[2] = StartUpState(request->state);                        // turn the message type into enum and store
         }
-        else if (request->group == 3) {                                        // message from localization
+        else if (request->group == 4) {                                        // message from localization
             if (request->state == 3 && (prev_msg[3] == READY || prev_msg[3] == INIT)) {
                 response->success = true;
                 ready_feedback[3] = START;
@@ -409,7 +409,7 @@ private:
     int plan_code_;
     bool ready = false;
     StartUpState prev_msg[4] = {INIT, INIT, INIT, INIT};                       // ready message from other programs
-    StartUpState ready_feedback[4] = {INIT, START, START, START};   // it should be INIT        // ready message from other programs
+    StartUpState ready_feedback[4] = {INIT, START, INIT, START};   // it should be INIT        // ready message from other programs
     bool prev_start_msg = false;                                               // plug message
     bool start = true;  // it should be false                                  // plug message
     double starting_time = 0;
