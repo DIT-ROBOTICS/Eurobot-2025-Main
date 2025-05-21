@@ -211,8 +211,8 @@ bool Docking::setGoal(RosActionNode::Goal& goal) {
         goal_.pose.position.x += shift_;
         goal_.pose.position.y += offset_; // set staging point
     } else {
-        RCLCPP_ERROR(logger(), "Invalid offset value");
-        return false;
+        RCLCPP_WARN(logger(), "No offset value");
+        // return false;
     }
     goal_.pose.position.z = offset_; // set offset distance
     tf2::Quaternion q; // declare Quaternion
