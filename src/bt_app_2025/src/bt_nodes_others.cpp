@@ -20,6 +20,47 @@ template <> inline std::deque<int> BT::convertFromString(StringView str) {
     return output;
 }
 
+BT::PortsList GetBlackboard::providedPorts() {
+    return {
+        BT::InputPort<std::string>("blackboard_key"),
+        BT::InputPort<std::string>("blackboard_type")
+    };
+}
+
+BT::NodeStatus GetBlackboard::tick() {
+    std::string blackboard_key_, blackboard_type_;
+
+    getInput<std::string>("blackboard_key", blackboard_key_);
+    getInput<std::string>("blackboard_type", blackboard_type_);
+    if (blackboard_type_ == "bool") {
+        bool blackboard_value_;
+        blackboard_->get<bool>(blackboard_key_, blackboard_value_);
+        RCLCPP_INFO_STREAM(node_->get_logger(), "Get BlackBoard " << blackboard_key_ << ": " << blackboard_value_);
+    }
+    else if (blackboard_type_ == "int") {
+        int blackboard_value_;
+        blackboard_->get<int>(blackboard_key_, blackboard_value_);
+        RCLCPP_INFO_STREAM(node_->get_logger(), "Get BlackBoard " << blackboard_key_ << ": " << blackboard_value_);
+    }
+    else if (blackboard_type_ == "float") {
+        float blackboard_value_;
+        blackboard_->get<float>(blackboard_key_, blackboard_value_);
+        RCLCPP_INFO_STREAM(node_->get_logger(), "Get BlackBoard " << blackboard_key_ << ": " << blackboard_value_);
+    }
+    else if (blackboard_type_ == "double") {  
+        double blackboard_value_;
+        blackboard_->get<double>(blackboard_key_, blackboard_value_);
+        RCLCPP_INFO_STREAM(node_->get_logger(), "Get BlackBoard " << blackboard_key_ << ": " << blackboard_value_);
+    }
+    else if (blackboard_type_ == "string") {
+        std::string blackboard_value_;
+        blackboard_->get<std::string>(blackboard_key_, blackboard_value_);
+        RCLCPP_INFO_STREAM(node_->get_logger(), "Get BlackBoard " << blackboard_key_ << ": " << blackboard_value_);
+    }
+
+    return BT::NodeStatus::SUCCESS;
+}
+
 BT::PortsList MySetBlackboard::providedPorts() {
     return {
         BT::InputPort<std::string>("blackboard_key"),

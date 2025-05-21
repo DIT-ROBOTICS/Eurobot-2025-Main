@@ -138,9 +138,9 @@ BT::NodeStatus MissionStart::tick() {
     shift_ *= offset_dir_ * offset_positivity_;
 
     if (offset_dir_ == 1)
-        setOutput("DOCK_DIR", "dock_x_slow_precise");
+        setOutput("DOCK_DIR", "dock_x_gentle_precise_linearBoost");
     else if (offset_dir_ == -1)
-        setOutput("DOCK_DIR", "dock_y_slow_precise");
+        setOutput("DOCK_DIR", "dock_y_gentle_precise_linearBoost");
     
     if (offset_positivity_ > 0) {
         back_.value()[0] *= -1;

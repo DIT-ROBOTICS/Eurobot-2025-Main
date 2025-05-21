@@ -137,6 +137,7 @@ public:
         /* others */
         factory.registerNodeType<BTStarter>("BTStarter", params, blackboard);
         factory.registerNodeType<MySetBlackboard>("MySetBlackboard", params, blackboard);
+        factory.registerNodeType<GetBlackboard>("GetBlackboard", params, blackboard);
         factory.registerNodeType<Comparator>("Comparator", params);            // decorator
         factory.registerNodeType<TimerChecker>("TimerChecker", blackboard);    // condition node
         factory.registerNodeType<LoopInt32>("LoopInt32", params);
