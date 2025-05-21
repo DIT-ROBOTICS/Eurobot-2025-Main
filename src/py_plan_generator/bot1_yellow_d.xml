@@ -139,74 +139,19 @@
 
   <BehaviorTree ID="FuncTest">
     <Sequence>
-      <!-- <RetryUntilSuccessful num_attempts="100">
-        <Timeout msec="1000">
-          <FirmwareMission mission_status="{x}" mission_type="1" _description=""/>
-        </Timeout>
-      </RetryUntilSuccessful> -->
+      
       <ForceSuccess>
         <Timeout msec="6000">
-          <FirmwareMission mission_status="{x}" mission_type="22" _description=""/>
+          <FirmwareMission mission_status="{x}" mission_type="22" _description="" />
         </Timeout>
       </ForceSuccess>
       <ForceSuccess>
         <Timeout msec="6000">
-          <FirmwareMission mission_status="{x}" mission_type="21" _description=""/>
+          <FirmwareMission mission_status="{x}" mission_type="21" _description="" />
         </Timeout>
       </ForceSuccess>
-      <Sleep msec="1000"/>
-      <!-- <ForceSuccess>
-        <Timeout msec="6000">
-          <FirmwareMission mission_status="{x}" mission_type="24" _description=""/>
-        </Timeout>
-      </ForceSuccess> -->
-      <Sleep msec="6000"/>
-      <!-- <ForceSuccess>
-        <Timeout msec="6000">
-          <FirmwareMission mission_status="{x}" mission_type="21" _description=""/>
-        </Timeout>
-      </ForceSuccess>
-      <Sleep msec="1000"/>
-      <ForceSuccess>
-        <Timeout msec="6000">
-          <FirmwareMission mission_status="{x}" mission_type="24" _description=""/>
-        </Timeout>
-      </ForceSuccess>
-      <Sleep msec="6000"/>
-      <ForceSuccess>
-        <Timeout msec="6000">
-          <FirmwareMission mission_status="{x}" mission_type="21" _description=""/>
-        </Timeout>
-      </ForceSuccess>
-      <Sleep msec="1000"/>
-      <ForceSuccess>
-        <Timeout msec="6000">
-          <FirmwareMission mission_status="{x}" mission_type="24" _description=""/>
-        </Timeout>
-      </ForceSuccess> -->
-      <!-- <Sleep msec="1000"/>
-      <ForceSuccess>
-        <Timeout msec="6000">
-          <FirmwareMission mission_status="{x}" mission_type="20" _description=""/>
-        </Timeout>
-      </ForceSuccess>
-      <Sleep msec="1000"/>
-      <ForceSuccess>
-        <Timeout msec="6000">
-          <FirmwareMission mission_status="{x}" mission_type="21" _description=""/>
-        </Timeout>
-      </ForceSuccess>
-      <Sleep msec="1000"/>
-      <ForceSuccess>
-        <Timeout msec="6000">
-          <FirmwareMission mission_status="{x}" mission_type="20" _description=""/>
-        </Timeout>
-      </ForceSuccess> -->
-      <!-- <ForceSuccess>
-        <Timeout msec="1000">
-          <FirmwareMission mission_status="{x}" mission_type="0" _description=""/>
-        </Timeout>
-      </ForceSuccess> -->
+      <Sleep msec="1000" />
+      <Sleep msec="6000" />
       <Sleep msec="50000" />
     </Sequence>
   </BehaviorTree>
@@ -251,7 +196,7 @@
         </ForceSuccess>
         <Docking final_pose="{PrevGoal}" isPureDocking="0" dock_type="dock_y_precise_linearBoost" shift="0" offset="0" base="0.45, 1.5, 0" />
       </Parallel>
-      <StopRobot/>
+      <StopRobot />
     </Sequence>
   </BehaviorTree>
 
@@ -352,7 +297,6 @@
             <Docking final_pose="{PrevGoal}" isPureDocking="0" dock_type="dock_y_linearBoost_precise" shift="0" offset="-0.1" base="{base}" />
           </MissionChecker>
         </ForceSuccess>
-        <GetBlackboard blackboard_key="level" blackboard_type="int"/>
         <Switch2 case_1="1" case_2="2" variable="{level}">
           <SubTree ID="PlaceOneLevel" index="14" hasCompleteMaterial="{hasCompleteMaterial}" _autoremap="true" />
           <Sequence>
@@ -390,7 +334,6 @@
             <Docking final_pose="{PrevGoal}" isPureDocking="0" dock_type="dock_y_linearBoost_precise" shift="0" offset="-0.1" base="{base}" />
           </MissionChecker>
         </ForceSuccess>
-        <GetBlackboard blackboard_key="level" blackboard_type="int"/>
         <Switch2 case_1="1" case_2="2" variable="{level}">
           <SubTree ID="PlaceOneLevel" index="13" hasCompleteMaterial="{hasCompleteMaterial}" _autoremap="true" />
           <SubTree ID="PlaceTwoLevels" back="0.2, 0.1, 0.05" forward="0.15, 0.095, 0.065" hasCompleteMaterial="{hasCompleteMaterial}" index="13" shift="0" _autoremap="true" />
@@ -433,7 +376,6 @@
             </Fallback>
           </RetryUntilSuccessful>
         </ForceSuccess>
-        <GetBlackboard blackboard_key="level" blackboard_type="int"/>
         <Switch2 case_1="1" case_2="2" variable="{level}">
           <SubTree ID="PlaceOneLevel" index="13" hasCompleteMaterial="{hasCompleteMaterial}" _autoremap="true" />
           <Sequence>
@@ -454,7 +396,6 @@
             </Fallback>
           </RetryUntilSuccessful>
         </ForceSuccess>
-        <GetBlackboard blackboard_key="level" blackboard_type="int"/>
         <Switch2 case_1="1" case_2="2" variable="{level}">
           <SubTree ID="PlaceOneLevel" index="13" hasCompleteMaterial="{hasCompleteMaterial}" _autoremap="true" />
           <Sequence>
@@ -469,11 +410,6 @@
 
   <BehaviorTree ID="NavTest">
     <Sequence>
-      <!-- <ForceSuccess>
-        <Timeout msec="6000">
-          <FirmwareMission mission_status="{x}" mission_type="1" _description="take the raw material" />
-        </Timeout>
-      </ForceSuccess> -->
       <SubTree ID="PointTestSubTree" index="6" _autoremap="true" />
       <SubTree ID="PointTestSubTree" index="5" _autoremap="true" />
       <SubTree ID="PointTestSubTree" index="7" _autoremap="true" />

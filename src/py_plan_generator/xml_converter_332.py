@@ -16,10 +16,11 @@ yellow_banner = ['2.7', '1.25', '0.75']
 blue_banner = ['0.3', '1.75', '2.25']
 dock_type_list = ['dock_y_linearBoost_precise', 'dock_x_linearBoost_precise', 'dock_x_linearBoost_unerring', 'dock_y_linearBoost_precise', 'dock_y_linearBoost_precise', 'dock_y_linearBoost_precise', 'dock_y_linearBoost_precise', 'dock_x_linearBoost_unerring', 'dock_x_linearBoost_precise', 'dock_y_linearBoost_precise', 'dock_y_linearBoost_precise', 'dock_x_linearBoost_precise', 'dock_y_linearBoost_precise', 'dock_y_linearBoost_precise', 'dock_y_linearBoost_precise', 'dock_x_linearBoost_precise', 'dock_y_linearBoost_precise', 'dock_y_linearBoost_precise', 'dock_y_linearBoost_precise', 'dock_y_linearBoost_precise']
 offset_list = ['0.1', '-0.1', '-0.1', '-0.1', '-0.1', '-0.1', '-0.1', '-0.1']
+shift_list = ['0.055', '-0.055', '-0.055', '0.055', '-0.055', '-0.055', '-0.06', '0.06', '0.055', '0.06', '0.055', '0.06', '0.06', '0', '-0.055', '-0.055', '-0.055', '-0.055', '0.055', '-0.055', '-0.055', '-0.055', '0']
 
 def read_input(root):
     i = 0
-    list_size = 4 + 4
+    list_size = 3 + 4
 
     color = input('input team color: ')
     output_file_name = input('input file name: ')
@@ -59,8 +60,8 @@ def read_input(root):
         elif (elt.tag == "BehaviorTree" and elt.get('ID') == "MainTree"):
             for node in elt.iter():
                 if (node.tag == "Docking"):
-                    node.set('base', home + ', 1.6, 0')
-        elif (elt.tag == "BehaviorTree" and (elt.get('ID') == "MissionPoint1" or elt.get('ID') == "MissionPoint2" or elt.get('ID') == "MissionPoint3new")):
+                    node.set('base', home + ', 1.5, 0')
+        elif (elt.tag == "BehaviorTree" and (elt.get('ID') == "MissionPoint1" or elt.get('ID') == "MissionPoint2" or elt.get('ID') == "MissionPoint3")):
             for node in elt.iter():
                 if (node.tag == "MaterialChecker" and node.get('base_index') != "-1"):
                     node.set('base_index', points_list[i])
@@ -72,14 +73,12 @@ def read_input(root):
                     i += 1
                     docking = node[0]
                     docking.set('dock_type', dock_type_list[int(points_list[i - 1])])
-                    if (i == 8 and points_list[6] == points_list[7]):
-                        docking.set('base', '{PrevGoal}')
-                        docking.set('isPureDocking', '1')
-                        docking.set('offset', str(-float(offset_list[int(points_list[i - 1]) - 11])))
-                    else:
-                        docking.set('offset', offset_list[int(points_list[i - 1]) - 11])
+                    docking.set('offset', offset_list[int(points_list[i - 1]) - 10])
                 if (node.tag == "SubTree" and (node.get('ID') == "PlaceOneLevel" or node.get('ID') == "PlaceTwoLevels" or node.get('ID') == "ThreeLevelsBot1new")):
                     node.set('index', points_list[i - 1])
+                    if (node.get('ID') == "ThreeLevelsBot1new" and elt.get('ID') == "MissionPoint1"):
+                        print(shift_list[int(points_list[i - 1])])
+                        node.set('shift', shift_list[int(points_list[i - 1])])
                 if (node.tag == "SubTree" and node.get('ID') == "BannerMission"):
                     if (banner_time == str(j)):
                         node.set('NOT_NOW', '0')
@@ -91,7 +90,7 @@ def read_input(root):
     tree.write(output_file_name, encoding="utf-8", xml_declaration=True)
 
 def create_tree():
-    input_tree = ET.parse('bot1_blue_a_template.xml')
+    input_tree = ET.parse('bot1_yellow_d.xml')
     root_in = input_tree.getroot()
     root_out = ET.Element("root", {"BTCPP_format": "4"})
     root_out.clear()
