@@ -65,22 +65,13 @@ geometry_msgs::msg::PoseStamped inline ConvertPoseFormat(geometry_msgs::msg::Pos
 BT::PortsList Navigation::providedPorts() {
     return {
         BT::InputPort<geometry_msgs::msg::PoseStamped>("goal"),
-        BT::InputPort<geometry_msgs::msg::PoseStamped>("base"),
-        BT::InputPort<double>("offset"),
-        BT::InputPort<double>("shift"),
         BT::InputPort<std::string>("dock_type"),
         BT::OutputPort<geometry_msgs::msg::PoseStamped>("final_pose")
     };
 }
 
 bool Navigation::setGoal(RosActionNode::Goal& goal) {
-    auto m_0 = getInput<geometry_msgs::msg::PoseStamped>("goal");
-    auto m_1 = getInput<geometry_msgs::msg::PoseStamped>("base");
-    auto m = (m_0) ? m_0 : m_1;
-    auto o = getInput<double>("offset");
-    auto s = getInput<double>("shift");
-    if (o) offset_ = o.value();
-    if (s) shift_ = s.value();
+    auto m = getInput<geometry_msgs::msg::PoseStamped>("goal");
     getInput<std::string>("dock_type", dock_type_);
 
     rclcpp::Time now = this->now();
@@ -96,19 +87,19 @@ bool Navigation::setGoal(RosActionNode::Goal& goal) {
     goal_.pose.orientation.w = q.w();
     goal_.pose.position.z = 0;
 
-    if (!m_0) {
-        if (dock_type_ == "mission_dock_x" || dock_type_.substr(0, 6) == "dock_x") {
-            goal_.pose.position.x += offset_; // set staging point
-            goal_.pose.position.y += shift_;
-        } else if (dock_type_ == "mission_dock_y" || dock_type_.substr(0, 6) == "dock_y") {
-            goal_.pose.position.x += shift_;
-            goal_.pose.position.y += offset_; // set staging point
-        } else {
-            RCLCPP_ERROR(logger(), "Invalid offset value");
-            return false;
-        }
-        goal_.pose.position.z = offset_;
-    }
+    // if (!m_0) {
+    //     if (dock_type_ == "mission_dock_x" || dock_type_.substr(0, 6) == "dock_x") {
+    //         goal_.pose.position.x += offset_; // set staging point
+    //         goal_.pose.position.y += shift_;
+    //     } else if (dock_type_ == "mission_dock_y" || dock_type_.substr(0, 6) == "dock_y") {
+    //         goal_.pose.position.x += shift_;
+    //         goal_.pose.position.y += offset_; // set staging point
+    //     } else {
+    //         RCLCPP_ERROR(logger(), "Invalid offset value");
+    //         return false;
+    //     }
+        goal_.pose.position.z = 0;
+    // }
     goal.use_dock_id = false; // set use dock id
     goal.dock_pose = goal_; // send goal pose
     goal.dock_type = dock_type_;    // determine the docking direction (x or y)
@@ -593,7 +584,7 @@ NodeStatus MissionChecker::tick() {
     }
     if (base_.pose.position.z == 1.0 || base_.pose.position.z == 3.0) {
         if (mission_points_status_.data[baseIndex_ - 11] != 0) {   // check if this mission is already placed
-            base_.pose.position.y -= offset * 1.05 * mission_points_status_.data[baseIndex_ - 11];    // if yes, the placement point need to be changed
+            base_.pose.position.y -= offset * 0.9 * mission_points_status_.data[baseIndex_ - 11];    // if yes, the placement point need to be changed
             // RCLCPP_INFO_STREAM(node_->get_logger(), "step back 5 cm, and then place the materials");
         }
         if (dist < safety_dist_ && abs(base_.pose.position.y - rival_pose_.pose.position.y) < safety_dist_) {
@@ -602,7 +593,7 @@ NodeStatus MissionChecker::tick() {
         }
     } else {
         if (mission_points_status_.data[baseIndex_ - 11] != 0) {  // check if this mission is already placed
-            base_.pose.position.x -= offset * 1.05 * mission_points_status_.data[baseIndex_ - 11];   // if yes, the placement point need to e changed
+            base_.pose.position.x -= offset * 0.9 * mission_points_status_.data[baseIndex_ - 11];   // if yes, the placement point need to e changed
             // RCLCPP_INFO_STREAM(node_->get_logger(), "step back 5 cm, and then place the materials");
         }
         if (dist < safety_dist_ && abs(base_.pose.position.x - rival_pose_.pose.position.x) < safety_dist_) {

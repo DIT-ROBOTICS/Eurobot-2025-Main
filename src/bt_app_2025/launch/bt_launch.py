@@ -71,7 +71,7 @@ def generate_launch_description():
                     config_path,
                     map_points,
                     {"Robot_name": "Tongue"},  # Invisible or Tongue
-                    {"plan_code": 40} # 10e1: plan (start from 1), 10e0: color(0 for yellow, 1 for blue)
+                    {"plan_code": 80} # 10e1: plan (start from 1), 10e0: color(0 for yellow, 1 for blue)
                 ],
                 package = 'startup',
                 executable = 'startup',
