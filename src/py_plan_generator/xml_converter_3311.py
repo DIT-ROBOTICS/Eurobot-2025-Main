@@ -52,7 +52,7 @@ def read_input(root):
         if (elt.tag == "BehaviorTree" and elt.get('ID') == "BannerMission"):
             for dock in elt.iter():
                 if (dock.tag == "Docking" and l < 11):
-                    dock.set('base', banner[l % 3] + ', 0.3, 3')
+                    dock.set('base', banner[l % 3] + ', 0.17, 3')
                     l += 1
                     if (l == 3 or l == 7):
                         l += 1
@@ -72,12 +72,6 @@ def read_input(root):
                     i += 1
                     docking = node[0]
                     docking.set('dock_type', dock_type_list[int(points_list[i - 1])])
-                    if (i == 8 and points_list[6] == points_list[7]):
-                        docking.set('base', '{PrevGoal}')
-                        docking.set('isPureDocking', '1')
-                        docking.set('offset', str(-float(offset_list[int(points_list[i - 1]) - 11])))
-                    else:
-                        docking.set('offset', offset_list[int(points_list[i - 1]) - 11])
                 if (node.tag == "SubTree" and (node.get('ID') == "PlaceOneLevel" or node.get('ID') == "PlaceTwoLevels" or node.get('ID') == "ThreeLevelsBot1new")):
                     node.set('index', points_list[i - 1])
                 if (node.tag == "SubTree" and node.get('ID') == "BannerMission"):
