@@ -19,8 +19,8 @@
 #include <tf2_ros/buffer.h>
 #include <tf2/exceptions.h>
 
-// #include <jsoncpp/json/json.h>
-// #include <fstream>
+#include <jsoncpp/json/json.h>
+#include <fstream>
 #include <iostream>
 #include <stdexcept>
 #include <stdio.h>
@@ -84,6 +84,7 @@ public:
         this->declare_parameter<std::string>("Bot1_BlueSpetial_config", "nan");
         this->declare_parameter<std::string>("Bot2_YellowSpetial_config", "nan");
         this->declare_parameter<std::string>("Bot2_BlueSpetial_config", "nan");
+        this->declare_parameter<std::string>("sima_config_path", "/home/ros/share/data/sima.json");
 
         this->get_parameter("Robot_name", Robot_name_);
         this->get_parameter("map_points_1", material_points_);
@@ -129,6 +130,8 @@ public:
             this->get_parameter(param_name, name_of_bot2_blue_plans[i]);
         }
         this->get_parameter("Bot2_BlueSpetial_config", name_of_bot2_blue_plans[number_of_plans_[3] - 1]);
+        this->get_parameter("sima_config_path", sima_config_path_);
+        sima_start_time_ = ReadSimaStartTime();
 
         start_up_state = INIT;
         sima_timer_ = nullptr;  // Initialize timer pointer to null
@@ -136,6 +139,29 @@ public:
             std::chrono::microseconds(100),
             std::bind(&StartUp::StateMachine, this)
         );
+    }
+
+    double ReadSimaStartTime() {
+        Json::Value root;
+        std::ifstream file(sima_config_path_);
+        if (!file.is_open()) {
+            RCLCPP_WARN(this->get_logger(), "Could not open SIMA config file at %s, using default value 85", sima_config_path_.c_str());
+            return 85;
+        }
+        
+        Json::CharReaderBuilder builder;
+        JSONCPP_STRING errs;
+        if (!parseFromStream(builder, file, &root, &errs)) {
+            RCLCPP_ERROR(this->get_logger(), "Failed to parse SIMA config file: %s", errs.c_str());
+            return 85;
+        }
+
+        if (root.isMember("sima_start_time")) {
+            return root["sima_start_time"].asInt();
+        } else {
+            RCLCPP_WARN(this->get_logger(), "sima_start_time not found in config file, using default value 85");
+            return 85;
+        }
     }
 
     void StateMachine() {
@@ -209,7 +235,6 @@ public:
 
     // publish time to everyone
     void PublishTime(rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr pub) {
-
         // Get current time by second
         double current_time = this->get_clock()->now().seconds();
 
@@ -232,10 +257,10 @@ public:
         static bool sima_start_enabled = false;
         static bool time_check = false;
 
-        // After 85 seconds, start sending SIMA start signals continuously at 10Hz
-        if (msg.data >= 85) {
+        // After sima_start_time_ seconds, start sending SIMA start signals continuously at 10Hz
+        if (msg.data >= sima_start_time_) {
             if (!sima_start_enabled) {
-                RCLCPP_INFO(this->get_logger(), "[StartUp Program]: Starting continuous SIMA start signal!");
+                RCLCPP_INFO(this->get_logger(), "[StartUp Program]: Starting continuous SIMA start signal at time %d!", sima_start_time_);
                 sima_start_enabled = true;
                 
                 // Create timer for continuous publishing if not already created
@@ -394,7 +419,7 @@ public:
     // Continuously publish SIMA start signal at 10Hz
     void PublishSIMAStartSignal() {
         std_msgs::msg::Int16 sima_msg;
-        sima_msg.data = (team_colcor_ == 0) ? 2 : 1; // Yellow = 2, Blue = 1
+        sima_msg.data = (team_colcor_ == 0) ? 1 : 2; // Yellow = 1, Blue = 2
         sima_start_pub_->publish(sima_msg);
     }
 
@@ -440,6 +465,8 @@ private:
     geometry_msgs::msg::PoseWithCovarianceStamped start_position;
     std_msgs::msg::String start_plan;
     std_msgs::msg::Bool start_signal;
+    std::string sima_config_path_;
+    int sima_start_time_;
 };
 
 int main(int argc, char **argv) {

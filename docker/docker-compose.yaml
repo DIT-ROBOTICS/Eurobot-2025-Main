@@ -13,7 +13,6 @@ services:
     tty: true
     privileged: true
     network_mode: "host"
-    # restart: unless-stopped
 
     working_dir: /home/ros
 
@@ -23,7 +22,6 @@ services:
       - LOCAL_USER_ID=${LOCAL_USER_ID}
       - LOCAL_GROUP_ID=${LOCAL_GROUP_ID}
       - DISPLAY=${DISPLAY}
-      # - XAUTHORITY=/root/.Xauthority
       - ROS_WS=/home/ros/Eurobot-2025-Main
       - GROOT_APPIMAGE=/home/ros/Eurobot-2025-Main/groot/groot.AppImage
       - ROS_DOMAIN_ID=${ROS_DOMAIN_ID}
@@ -32,13 +30,13 @@ services:
     volumes:
       # Mount app resources into container.
       - ../:/home/ros/Eurobot-2025-Main
+      - /home/share/data:/home/ros/share/data
 
       # Mount local timezone into container.
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
       # Mount X11 server
       - /tmp/.X11-unix:/tmp/.X11-unix
-      # - /d/.Xauthority:/root/.Xauthority
       
       # Direct Rendering Infrastructure
       - /dev:/dev
