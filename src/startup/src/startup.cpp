@@ -44,7 +44,7 @@ public:
         // initial_pub = this->create_publisher<geometry_msgs::msg::PoseWithCovarianceStamped>("/initialpose", 2);
         ready_pub = this->create_publisher<std_msgs::msg::String>("/robot/startup/plan", 2);
         time_pub = this->create_publisher<std_msgs::msg::Float32>("/robot/startup/time", 2);
-        plan_sub = this->create_subscription<std_msgs::msg::Int32>("/robot/startup/plan_code", 2, std::bind(&StartUp::PlanCallback, this, std::placeholders::_1));
+        web_sub = this->create_subscription<std_msgs::msg::Int32>("/robot/startup/web_plan", 2, std::bind(&StartUp::WebCallback, this, std::placeholders::_1));
         start_sub = this->create_subscription<std_msgs::msg::Bool>("/robot/startup/plug", 2, std::bind(&StartUp::StartCallback, this, std::placeholders::_1));
         ready_srv_server = this->create_service<btcpp_ros2_interfaces::srv::StartUpSrv>(
             "/robot/startup/ready_signal", std::bind(&StartUp::ReadyFeedback, this, std::placeholders::_1, std::placeholders::_2));
@@ -129,6 +129,7 @@ public:
         this->get_parameter("Bot2_BlueSpetial_config", name_of_bot2_blue_plans[number_of_plans_[3] - 1]);
 
         start_up_state = INIT;
+        plan_code_ = 0;
         timer_ = this->create_wall_timer(
             std::chrono::microseconds(100),
             std::bind(&StartUp::StateMachine, this)
@@ -145,12 +146,12 @@ public:
             this->declare_parameter<int>("plan_code", 0);  // ten: plan, one: color
             this->get_parameter("plan_code", plan_code_);
             /*****************************************************************/
-            RCLCPP_INFO_STREAM(rclcpp::get_logger("startup"), "plan_code: " << plan_code_);
-            team_colcor_ = (plan_code_ - plan_code_ / 10 * 10);
-            UpdateTeamAndPoint(plan_code_);
 
             /* choose plan from pannel and get robot init position */
             if (plan_code_) {
+                RCLCPP_INFO_STREAM(rclcpp::get_logger("startup"), "plan_code: " << plan_code_);
+                team_colcor_ = (plan_code_ - plan_code_ / 10 * 10);
+                UpdateTeamAndPoint(plan_code_);
                 start_up_state = READY;
                 RCLCPP_INFO(this->get_logger(), "[StartUp Program]: INIT -> READY");
             }
@@ -370,7 +371,7 @@ public:
         }
         RCLCPP_INFO(this->get_logger(), "Response %d to %d", int(response->success), response->group);
     }
-    void PlanCallback(const std_msgs::msg::Int32::SharedPtr msg) {             // get plan code from pannel
+    void WebCallback(const std_msgs::msg::Int32::SharedPtr msg) {             // get plan code from pannel
         plan_code_ = msg->data;
     }
 
@@ -386,7 +387,7 @@ private:
     // rclcpp::Publisher<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr initial_pub;
     rclcpp::Publisher<std_msgs::msg::String>::SharedPtr ready_pub;             // publish plan message as ready signal to every groups
     rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr time_pub;
-    rclcpp::Subscription<std_msgs::msg::Int32>::SharedPtr plan_sub;            // it might can be removed, startup can read the plan code value in a json file directly
+    rclcpp::Subscription<std_msgs::msg::Int32>::SharedPtr web_sub;            // it might can be removed, startup can read the plan code value in a json file directly
     rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr start_sub;            // plug message
     rclcpp::Service<btcpp_ros2_interfaces::srv::StartUpSrv>::SharedPtr ready_srv_server; // receive to check if every group start successfully
     rclcpp::Client<std_srvs::srv::SetBool>::SharedPtr start_srv_client;        // it might can be removed, main can listen to start topic by plug directly
