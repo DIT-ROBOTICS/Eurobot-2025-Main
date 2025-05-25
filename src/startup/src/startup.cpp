@@ -5,6 +5,7 @@
 #include "std_msgs/msg/int32.hpp"
 #include "std_msgs/msg/float32.hpp"
 #include "std_msgs/msg/string.hpp"
+#include "std_msgs/msg/int32_multi_array.hpp"
 #include "geometry_msgs/msg/point_stamped.hpp"
 #include "geometry_msgs/msg/pose_with_covariance_stamped.hpp"
 #include "btcpp_ros2_interfaces/srv/start_up_srv.hpp" 
@@ -44,7 +45,8 @@ public:
         // initial_pub = this->create_publisher<geometry_msgs::msg::PoseWithCovarianceStamped>("/initialpose", 2);
         ready_pub = this->create_publisher<std_msgs::msg::String>("/robot/startup/plan", 2);
         time_pub = this->create_publisher<std_msgs::msg::Float32>("/robot/startup/time", 2);
-        plan_sub = this->create_subscription<std_msgs::msg::Int32>("/robot/startup/plan_code", 2, std::bind(&StartUp::PlanCallback, this, std::placeholders::_1));
+        group_state_pub = this->create_publisher<std_msgs::msg::Int32MultiArray>("/robot/startup/groups_state", 2);
+        plan_sub = this->create_subscription<std_msgs::msg::Int32>("/robot/startup/web_plan", 2, std::bind(&StartUp::PlanCallback, this, std::placeholders::_1));
         start_sub = this->create_subscription<std_msgs::msg::Bool>("/robot/startup/plug", 2, std::bind(&StartUp::StartCallback, this, std::placeholders::_1));
         ready_srv_server = this->create_service<btcpp_ros2_interfaces::srv::StartUpSrv>(
             "/robot/startup/ready_signal", std::bind(&StartUp::ReadyFeedback, this, std::placeholders::_1, std::placeholders::_2));
@@ -129,6 +131,7 @@ public:
         this->get_parameter("Bot2_BlueSpetial_config", name_of_bot2_blue_plans[number_of_plans_[3] - 1]);
 
         start_up_state = INIT;
+        plan_code_ = 0;
         timer_ = this->create_wall_timer(
             std::chrono::microseconds(100),
             std::bind(&StartUp::StateMachine, this)
@@ -140,23 +143,24 @@ public:
 
         case INIT:
 
-            // ReadJsonFile(file_path);
-            /* temp: will be delete and get the `plan_code_` from web pannel */ 
-            this->declare_parameter<int>("plan_code", 0);  // ten: plan, one: color
-            this->get_parameter("plan_code", plan_code_);
-            /*****************************************************************/
-            RCLCPP_INFO_STREAM(rclcpp::get_logger("startup"), "plan_code: " << plan_code_);
-            team_colcor_ = (plan_code_ - plan_code_ / 10 * 10);
-            UpdateTeamAndPoint(plan_code_);
+            // // ReadJsonFile(file_path);
+            // /* temp: will be delete and get the `plan_code_` from web pannel */ 
+            // this->declare_parameter<int>("plan_code", 0);  // ten: plan, one: color
+            // this->get_parameter("plan_code", plan_code_);
 
             /* choose plan from pannel and get robot init position */
             if (plan_code_) {
+                /*****************************************************************/
+                RCLCPP_INFO_STREAM(rclcpp::get_logger("startup"), "plan_code: " << plan_code_);
+                team_colcor_ = (plan_code_ - plan_code_ / 10 * 10);
+                UpdateTeamAndPoint(plan_code_);
                 start_up_state = READY;
+                groups_state.data = {0, 0, 0, 0};
                 RCLCPP_INFO(this->get_logger(), "[StartUp Program]: INIT -> READY");
             }
             break;
         case READY:
-            PublishReadySignal(ready_pub);                                     // publish plan file name as start message
+            PublishReadySignal(ready_pub, group_state_pub);                                     // publish plan file name as start message
             if (ready_feedback[0] == START && ready_feedback[1] == START && ready_feedback[2] == START && ready_feedback[3] == START) {
                 if (ready == false) {
                     RCLCPP_INFO(this->get_logger(), "[StartUp Program]: All of the programs are ready!");
@@ -183,11 +187,14 @@ public:
     }
 
     // publish plan file name as ready message to every groups 
-    void PublishReadySignal(rclcpp::Publisher<std_msgs::msg::String>::SharedPtr pub) {
+    void PublishReadySignal(rclcpp::Publisher<std_msgs::msg::String>::SharedPtr plan_pub, rclcpp::Publisher<std_msgs::msg::Int32MultiArray>::SharedPtr groups_state_pub) {
         // RCLCPP_INFO_STREAM(this->get_logger(), "publishing ready signal");
         start_position.header.stamp = this->get_clock()->now();
+        for (int i = 0; i < 4; i++)
+            groups_state.data[i] = static_cast<int>(ready_feedback[i]);
         // initial_pub->publish(start_position);                               // publish initial pose to everyone
-        pub->publish(start_plan);                                              // publish a string that is the xml file name
+        plan_pub->publish(start_plan);                                         // publish a string that is the xml file name
+        groups_state_pub->publish(groups_state);
         rate.sleep();
     }
 
@@ -347,21 +354,21 @@ public:
             }
             prev_msg[0] = StartUpState(request->state);                        // turn the message type into enum and store
         }
-        else if (request->group == 1) {                                        // message from vision
+        else if (request->group == 2) {                                        // message from vision
             if (request->state == 3 && (prev_msg[1] == READY || prev_msg[1] == INIT)) {
                 response->success = true;
                 ready_feedback[1] = START;
             }
             prev_msg[1] = StartUpState(request->state);                        // turn the message type into enum and store
         }
-        else if (request->group == 2) {                                        // message from navigation
+        else if (request->group == 3) {                                        // message from navigation
             if (request->state == 3 && (prev_msg[2] == READY || prev_msg[2] == INIT)) {
                 response->success = true;
                 ready_feedback[2] = START;
             }
             prev_msg[2] = StartUpState(request->state);                        // turn the message type into enum and store
         }
-        else if (request->group == 3) {                                        // message from localization
+        else if (request->group == 4) {                                        // message from localization
             if (request->state == 3 && (prev_msg[3] == READY || prev_msg[3] == INIT)) {
                 response->success = true;
                 ready_feedback[3] = START;
@@ -370,7 +377,7 @@ public:
         }
         RCLCPP_INFO(this->get_logger(), "Response %d to %d", int(response->success), response->group);
     }
-    void PlanCallback(const std_msgs::msg::Int32::SharedPtr msg) {             // get plan code from pannel
+    void WebCallback(const std_msgs::msg::Int32::SharedPtr msg) {             // get plan code from pannel
         plan_code_ = msg->data;
     }
 
@@ -386,6 +393,7 @@ private:
     // rclcpp::Publisher<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr initial_pub;
     rclcpp::Publisher<std_msgs::msg::String>::SharedPtr ready_pub;             // publish plan message as ready signal to every groups
     rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr time_pub;
+    rclcpp::Publisher<std_msgs::msg::Int32MultiArray>::SharedPtr group_state_pub;
     rclcpp::Subscription<std_msgs::msg::Int32>::SharedPtr plan_sub;            // it might can be removed, startup can read the plan code value in a json file directly
     rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr start_sub;            // plug message
     rclcpp::Service<btcpp_ros2_interfaces::srv::StartUpSrv>::SharedPtr ready_srv_server; // receive to check if every group start successfully
@@ -409,9 +417,9 @@ private:
     int plan_code_;
     bool ready = false;
     StartUpState prev_msg[4] = {INIT, INIT, INIT, INIT};                       // ready message from other programs
-    StartUpState ready_feedback[4] = {INIT, START, START, START};   // it should be INIT        // ready message from other programs
+    StartUpState ready_feedback[4] = {INIT, START, INIT, START};   // it should be INIT        // ready message from other programs
     bool prev_start_msg = false;                                               // plug message
-    bool start = false;  // it should be false                                  // plug message
+    bool start = true;  // it should be false                                  // plug message
     double starting_time = 0;
     StartUpState start_up_state;                                               // state of startup program
     std::vector<double> material_points_;                                      // prepared for choosing start point
@@ -421,6 +429,7 @@ private:
     geometry_msgs::msg::PoseWithCovarianceStamped start_position;
     std_msgs::msg::String start_plan;
     std_msgs::msg::Bool start_signal;
+    std_msgs::msg::Int32MultiArray groups_state;
 };
 
 int main(int argc, char **argv) {

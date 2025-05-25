@@ -32,7 +32,44 @@
 
 using namespace BT;
 
-class MainClass : public rclcpp::Node {
+#include "rclcpp/rclcpp.hpp"
+#include "rclcpp/client.hpp" 
+#include "rclcpp/service.hpp"
+#include "btcpp_ros2_interfaces/srv/start_up_srv.hpp"
+
+class ReadySignal : virtual public rclcpp::Node {
+public:
+    ReadySignal() : Node("main_ready") {
+        ready_sub = this->create_subscription<std_msgs::msg::String>("/robot/startup/plan", 2, std::bind(&ReadySignal::readyCallback, this, std::placeholders::_1));
+        ready_srv_client = this->create_client<btcpp_ros2_interfaces::srv::StartUpSrv>("/robot/startup/ready_signal");
+        is_main_ready = false;
+    }
+
+protected:
+    virtual void readyCallback(const std_msgs::msg::String::SharedPtr msg) {
+        if (msg != NULL && !is_main_ready)
+            is_main_ready = true;
+    }
+    void sendReadySignal(int group_, int state_) {
+        RCLCPP_INFO_STREAM(this->get_logger(), "send ready signal");
+
+        auto request = std::make_shared<btcpp_ros2_interfaces::srv::StartUpSrv::Request>();
+        request->group = group_;
+        request->state = state_;
+
+        ready_srv_client->async_send_request(request, 
+            [this](rclcpp::Client<btcpp_ros2_interfaces::srv::StartUpSrv>::SharedFuture future) {
+                auto response = future.get();
+                RCLCPP_INFO(this->get_logger(), "response: success=%d, group=%d", int(response->success), response->group);
+            }
+        );
+    }
+    rclcpp::Subscription<std_msgs::msg::String>::SharedPtr ready_sub;
+    rclcpp::Client<btcpp_ros2_interfaces::srv::StartUpSrv>::SharedPtr ready_srv_client;
+    bool is_main_ready;
+};
+
+class MainClass : virtual public rclcpp::Node, public ReadySignal {
 public:
     MainClass() : Node("bt_app_2025"), rate(100) {}
     std::shared_ptr<rclcpp::Node> get_node() {
@@ -40,8 +77,8 @@ public:
         return shared_from_this();                                             // Get a shared pointer to this node
     }
     void timeCallback(const std_msgs::msg::Float32::SharedPtr msg);
-    void sendReadySignal();
-    void readyCallback(const std_msgs::msg::String::SharedPtr msg);
+    // void sendReadySignal(int group_, int state_);
+    void readyCallback(const std_msgs::msg::String::SharedPtr msg) override;
     void startCallback(const std::shared_ptr<std_srvs::srv::SetBool::Request> request,
         std::shared_ptr<std_srvs::srv::SetBool::Response> response);
 
@@ -81,8 +118,9 @@ public:
         blackboard->set<int>("current_index", 0);                              // record the result of decorator, pass as result if enable_vision_check is false
         // Subscriber
         time_sub = this->create_subscription<std_msgs::msg::Float32>("/robot/startup/time", 2, std::bind(&MainClass::timeCallback, this, std::placeholders::_1));
-        ready_sub = this->create_subscription<std_msgs::msg::String>("/robot/startup/plan", 2, std::bind(&MainClass::readyCallback, this, std::placeholders::_1));
-        ready_srv_client = this->create_client<btcpp_ros2_interfaces::srv::StartUpSrv>("/robot/startup/ready_signal");
+        // ready_sub = this->create_subscription<std_msgs::msg::String>("/robot/startup/plan", 2, std::bind(&MainClass::readyCallback, this, std::placeholders::_1));
+        // ready_srv_client = this->create_client<btcpp_ros2_interfaces::srv::StartUpSrv>("/robot/startup/ready_signal");
+        stop_pub = this->create_publisher<std_msgs::msg::Bool>("/stopRobot", rclcpp::QoS(10).reliable().transient_local());
         start_srv_server = this->create_service<std_srvs::srv::SetBool>(
             "/robot/startup/start_signal", std::bind(&MainClass::startCallback, this, std::placeholders::_1, std::placeholders::_2));
         // Read parameters
@@ -129,7 +167,6 @@ public:
         params.default_port_value = "firmware_mission"; // ros action name for IntegratedMissionNode (no use for now)
         factory.registerNodeType<FirmwareMission>("FirmwareMission", params, blackboard);
         factory.registerNodeType<IntegratedMissionNode>("IntegratedMissionNode", params, blackboard);
-        factory.registerNodeType<SIMAactivate>("SIMAactivate", params);
         factory.registerNodeType<MissionStart>("MissionStart", params, blackboard);
         factory.registerNodeType<MissionSuccess>("MissionSuccess", params, blackboard);
         factory.registerNodeType<MissionFailure>("MissionFailure", params, blackboard);
@@ -137,10 +174,9 @@ public:
         /* others */
         factory.registerNodeType<BTStarter>("BTStarter", params, blackboard);
         factory.registerNodeType<MySetBlackboard>("MySetBlackboard", params, blackboard);
-        factory.registerNodeType<Comparator>("Comparator", params);            // decorator
+        factory.registerNodeType<GetBlackboard>("GetBlackboard", params, blackboard);
+        factory.registerNodeType<GetLocation>("GetLocation", params, blackboard);
         factory.registerNodeType<TimerChecker>("TimerChecker", blackboard);    // condition node
-        factory.registerNodeType<LoopInt32>("LoopInt32", params);
-        factory.registerNodeType<Double2Int>("Double2Int", params);
     }
 
     void CreatTree() {
@@ -163,7 +199,7 @@ public:
         // create tree
         RCLCPP_INFO(node_->get_logger(), "--Create tree--");
         tree = factory.createTree(tree_name, blackboard);
-        sendReadySignal();
+        sendReadySignal(0, 3);
     }
 
     void RunTheTree() {
@@ -178,13 +214,16 @@ public:
         do {
             rate.sleep();
             status = tree.rootNode()->executeTick();
-        } while (rclcpp::ok() && status == BT::NodeStatus::RUNNING);
+        } while (rclcpp::ok() && status == BT::NodeStatus::RUNNING && game_time <= 101);
+        stop_robot.data = true;
+        stop_pub->publish(stop_robot);
     }
 
 private:
     rclcpp::Subscription<std_msgs::msg::Float32>::SharedPtr time_sub;
-    rclcpp::Subscription<std_msgs::msg::String>::SharedPtr ready_sub;
-    rclcpp::Client<btcpp_ros2_interfaces::srv::StartUpSrv>::SharedPtr ready_srv_client;
+    // rclcpp::Subscription<std_msgs::msg::String>::SharedPtr ready_sub;
+    // rclcpp::Client<btcpp_ros2_interfaces::srv::StartUpSrv>::SharedPtr ready_srv_client;
+    rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr stop_pub;
     rclcpp::Service<std_srvs::srv::SetBool>::SharedPtr start_srv_server;
     
     BT::Blackboard::Ptr blackboard;
@@ -197,6 +236,7 @@ private:
     BT::BehaviorTreeFactory factory;
     BT::RosNodeParams params;
     // ROS msg
+    std_msgs::msg::Bool stop_robot;
     std_msgs::msg::Int32 ready_feedback;
     std_msgs::msg::Int32MultiArray materials_info_, mission_points_status_;
     double game_time = 0.0;
@@ -215,22 +255,23 @@ private:
 
 void MainClass::timeCallback(const std_msgs::msg::Float32::SharedPtr msg) {
     game_time = msg->data;
+    blackboard->get<double>("current_time", game_time);
 }
 
-void MainClass::sendReadySignal() {
-    RCLCPP_INFO_STREAM(this->get_logger(), "send ready signal");
+// void MainClass::sendReadySignal(int group_, int state_) {
+//     RCLCPP_INFO_STREAM(this->get_logger(), "send ready signal");
 
-    auto request = std::make_shared<btcpp_ros2_interfaces::srv::StartUpSrv::Request>();
-    request->group = 0;
-    request->state = 3;
+//     auto request = std::make_shared<btcpp_ros2_interfaces::srv::StartUpSrv::Request>();
+//     request->group = group_;
+//     request->state = state_;
 
-    ready_srv_client->async_send_request(request, 
-        [this](rclcpp::Client<btcpp_ros2_interfaces::srv::StartUpSrv>::SharedFuture future) {
-            auto response = future.get();
-            RCLCPP_INFO(this->get_logger(), "Response: success=%d, group=%d", int(response->success), response->group);
-        }
-    );
-}
+//     ready_srv_client->async_send_request(request, 
+//         [this](rclcpp::Client<btcpp_ros2_interfaces::srv::StartUpSrv>::SharedFuture future) {
+//             auto response = future.get();
+//             RCLCPP_INFO(this->get_logger(), "Response: success=%d, group=%d", int(response->success), response->group);
+//         }
+//     );
+// }
 
 void MainClass::readyCallback(const std_msgs::msg::String::SharedPtr msg) {
     // RCLCPP_INFO_STREAM(this->get_logger(), "start ready callback");

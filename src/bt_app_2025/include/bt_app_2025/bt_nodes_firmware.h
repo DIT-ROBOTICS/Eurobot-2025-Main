@@ -48,30 +48,6 @@ namespace BT {
     template <> inline std::deque<double> convertFromString(StringView str);
 }
 
-/********************************/
-/* Simple Node to activate SIMA */
-/********************************/
-class SIMAactivate : public BT::SyncActionNode {
-public:
-  SIMAactivate(const std::string& name, const BT::NodeConfig& config, const RosNodeParams& params)
-    : BT::SyncActionNode(name, config), node_(params.nh.lock())
-  {}
-
-  /* Node remapping function */
-  static BT::PortsList providedPorts() {
-    return {}; 
-  }
-
-  /* Start and running function */
-  BT::NodeStatus tick() override;
-private:
-  bool wakeUpSIMA();
-  std::shared_ptr<rclcpp::Node> node_;
-  rclcpp::TimerBase::SharedPtr timer_;
-  float current_time_;
-  bool mission_finished_ = false;
-};
-
 class MissionStart : public BT::SyncActionNode
 {
 public:
@@ -97,9 +73,10 @@ public:
   MissionSuccess(const std::string& name, const BT::NodeConfig& config, const RosNodeParams& params, BT::Blackboard::Ptr blackboard)
     : BT::SyncActionNode(name, config), node_(params.nh.lock()), blackboard_(blackboard)
   {
-    publish_times = 100;
+    publish_times = 10;
     publish_count = 0;
     vision_pub_ = node_->create_publisher<std_msgs::msg::Int32>("/main/mission/success", rclcpp::QoS(100).reliable().transient_local());
+    ideal_score_pub_ = node_->create_publisher<std_msgs::msg::Int32>("/main/ideal_score", rclcpp::QoS(100).reliable().transient_local());
   }
   /* Node remapping function */
   static BT::PortsList providedPorts();
@@ -111,8 +88,10 @@ private:
   BT::Blackboard::Ptr blackboard_;
   rclcpp::Node::SharedPtr node_;
   rclcpp::Publisher<std_msgs::msg::Int32>::SharedPtr vision_pub_;
+  rclcpp::Publisher<std_msgs::msg::Int32>::SharedPtr ideal_score_pub_;
   std_msgs::msg::Bool is_mission_finished;
   std_msgs::msg::Int32 mission_finished;
+  std_msgs::msg::Int32 ideal_score;
   std_msgs::msg::Int32MultiArray mission_points_status_;
   std_msgs::msg::Int32MultiArray materials_info_;
   int publish_times;
@@ -146,6 +125,7 @@ private:
   // step_results_-> 1: front_collect 2: back_collect 3: construct_1 4: construct_2 5: construct_3
   std::deque<int> step_results_;
   // obot_type_-> 0: SpinArm 1: NotSpinArm
+  std_msgs::msg::Int32MultiArray mission_points_status_;
   bool robot_type_;
   bool matreials_accord_;
   int success_levels_;
@@ -153,6 +133,7 @@ private:
   int mission_progress_;
   int front_materials_;
   int back_materials_;
+  int base_index_;
 
   std::deque<int> stage_info_;
 
