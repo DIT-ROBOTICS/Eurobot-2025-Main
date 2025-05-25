@@ -98,6 +98,8 @@ private:
   int publish_count;
   int front_materials_;
   int back_materials_;
+  int base_index_;
+  int score_;
 };
 
 class MissionFailure : public BT::StatefulActionNode
