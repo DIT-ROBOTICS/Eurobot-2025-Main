@@ -82,6 +82,7 @@ public:
         // Subscriber
         time_sub = this->create_subscription<std_msgs::msg::Float32>("/robot/startup/time", 2, std::bind(&MainClass::timeCallback, this, std::placeholders::_1));
         ready_sub = this->create_subscription<std_msgs::msg::String>("/robot/startup/plan", 2, std::bind(&MainClass::readyCallback, this, std::placeholders::_1));
+        stop_pub = this->create_publisher<std_msgs::msg::Bool>("/stopRobot", rclcpp::QoS(10).reliable().transient_local());
         ready_srv_client = this->create_client<btcpp_ros2_interfaces::srv::StartUpSrv>("/robot/startup/ready_signal");
         start_srv_server = this->create_service<std_srvs::srv::SetBool>(
             "/robot/startup/start_signal", std::bind(&MainClass::startCallback, this, std::placeholders::_1, std::placeholders::_2));
@@ -129,7 +130,6 @@ public:
         params.default_port_value = "firmware_mission"; // ros action name for IntegratedMissionNode (no use for now)
         factory.registerNodeType<FirmwareMission>("FirmwareMission", params, blackboard);
         factory.registerNodeType<IntegratedMissionNode>("IntegratedMissionNode", params, blackboard);
-        factory.registerNodeType<SIMAactivate>("SIMAactivate", params);
         factory.registerNodeType<MissionStart>("MissionStart", params, blackboard);
         factory.registerNodeType<MissionSuccess>("MissionSuccess", params, blackboard);
         factory.registerNodeType<MissionFailure>("MissionFailure", params, blackboard);
@@ -138,10 +138,8 @@ public:
         factory.registerNodeType<BTStarter>("BTStarter", params, blackboard);
         factory.registerNodeType<MySetBlackboard>("MySetBlackboard", params, blackboard);
         factory.registerNodeType<GetBlackboard>("GetBlackboard", params, blackboard);
-        factory.registerNodeType<Comparator>("Comparator", params);            // decorator
+        factory.registerNodeType<GetLocation>("GetLocation", params, blackboard);
         factory.registerNodeType<TimerChecker>("TimerChecker", blackboard);    // condition node
-        factory.registerNodeType<LoopInt32>("LoopInt32", params);
-        factory.registerNodeType<Double2Int>("Double2Int", params);
     }
 
     void CreatTree() {
@@ -179,12 +177,15 @@ public:
         do {
             rate.sleep();
             status = tree.rootNode()->executeTick();
-        } while (rclcpp::ok() && status == BT::NodeStatus::RUNNING);
+        } while (rclcpp::ok() && status == BT::NodeStatus::RUNNING && game_time <= 101);
+        stop_robot.data = true;
+        stop_pub->publish(stop_robot);
     }
 
 private:
     rclcpp::Subscription<std_msgs::msg::Float32>::SharedPtr time_sub;
     rclcpp::Subscription<std_msgs::msg::String>::SharedPtr ready_sub;
+    rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr stop_pub;
     rclcpp::Client<btcpp_ros2_interfaces::srv::StartUpSrv>::SharedPtr ready_srv_client;
     rclcpp::Service<std_srvs::srv::SetBool>::SharedPtr start_srv_server;
     
@@ -198,6 +199,7 @@ private:
     BT::BehaviorTreeFactory factory;
     BT::RosNodeParams params;
     // ROS msg
+    std_msgs::msg::Bool stop_robot;
     std_msgs::msg::Int32 ready_feedback;
     std_msgs::msg::Int32MultiArray materials_info_, mission_points_status_;
     double game_time = 0.0;
@@ -216,6 +218,7 @@ private:
 
 void MainClass::timeCallback(const std_msgs::msg::Float32::SharedPtr msg) {
     game_time = msg->data;
+    blackboard->get<double>("current_time", game_time);
 }
 
 void MainClass::sendReadySignal() {
