@@ -12,14 +12,15 @@ points_list = []
 yellow_home = '0.45'
 blue_home = '2.55'
 banner = []
-yellow_banner = ['2.7', '1.25', '0.75']
-blue_banner = ['0.3', '1.75', '2.25']
-dock_type_list = ['dock_y_slow_precise', 'dock_x_slow_precise', 'dock_x_slow_precise', 'dock_y_slow_precise', 'dock_y_slow_precise', 'dock_y_slow_precise', 'dock_y_slow_precise', 'dock_x_slow_precise', 'dock_x_slow_precise', 'dock_y_slow_precise', 'dock_y_slow_precise', 'dock_x_slow_precise', 'dock_y_slow_precise', 'dock_y_slow_precise', 'dock_y_slow_precise', 'dock_x_slow_precise', 'dock_y_slow_precise', 'dock_y_slow_precise', 'dock_y_slow_precise', 'dock_y_slow_precise']
+yellow_banner = ['2.7', '1.175', '0.75']
+blue_banner = ['0.3', '1.825', '2.25']
+dock_type_list = ['dock_y_linearBoost_precise', 'dock_x_linearBoost_precise', 'dock_x_linearBoost_unerring', 'dock_y_linearBoost_precise', 'dock_y_linearBoost_precise', 'dock_y_linearBoost_precise', 'dock_y_linearBoost_precise', 'dock_x_linearBoost_unerring', 'dock_x_linearBoost_precise', 'dock_y_linearBoost_precise', 'dock_y_linearBoost_precise', 'dock_x_linearBoost_precise', 'dock_y_linearBoost_precise', 'dock_y_linearBoost_precise', 'dock_y_linearBoost_precise', 'dock_x_linearBoost_precise', 'dock_y_linearBoost_precise', 'dock_y_linearBoost_precise', 'dock_y_linearBoost_precise', 'dock_y_linearBoost_precise']
 offset_list = ['0.1', '-0.1', '-0.1', '-0.1', '-0.1', '-0.1', '-0.1', '-0.1']
+shift_list = ['0.055', '-0.055', '-0.055', '0.055', '-0.055', '-0.055', '-0.06', '0.06', '0.055', '0.06', '0.055', '0.06', '0.06', '0', '-0.055', '-0.055', '-0.055', '-0.055', '0.055', '-0.055', '-0.055', '-0.055', '0']
 
 def read_input(root):
     i = 0
-    list_size = 4 + 4
+    list_size = 5 + 3
 
     color = input('input team color: ')
     output_file_name = input('input file name: ')
@@ -51,22 +52,16 @@ def read_input(root):
     for elt in root.iter():
         if (elt.tag == "BehaviorTree" and elt.get('ID') == "BannerMission"):
             for dock in elt.iter():
-                if (dock.tag == "Docking" and l < 11):
-                    dock.set('base', banner[l % 3] + ', 0.3, 3')
+                if (dock.tag == "Navigation" and l < 11):
+                    dock.set('goal', banner[l % 3] + ', 0.17, 3')
                     l += 1
                     if (l == 3 or l == 7):
                         l += 1
         elif (elt.tag == "BehaviorTree" and elt.get('ID') == "MainTree"):
             for node in elt.iter():
-                if (node.tag == "SubTree" and (node.get('ID') == "MissionPoint1" or node.get('ID') == "MissionPoint2" or node.get('ID') == "MissionPoint3new")):
-                    c += 1
-                    print(c, node.get('ID'))
-                    node.set('NOT_NOW', "true")
-                if (node.tag == "SubTree" and node.get('ID') == banner_time):
-                    node.set('NOT_NOW', "false")
                 if (node.tag == "Docking"):
-                    node.set('base', home + ', 1.6, 0')
-        elif (elt.tag == "BehaviorTree" and (elt.get('ID') == "MissionPoint1" or elt.get('ID') == "MissionPoint2" or elt.get('ID') == "MissionPoint3new")):
+                    node.set('base', home + ', 1.5, 0')
+        elif (elt.tag == "BehaviorTree" and (elt.get('ID') == "MissionPoint1" or elt.get('ID') == "MissionPoint2" or elt.get('ID') == "MissionPoint3_3")):
             for node in elt.iter():
                 if (node.tag == "MaterialChecker" and node.get('base_index') != "-1"):
                     node.set('base_index', points_list[i])
@@ -78,16 +73,20 @@ def read_input(root):
                     i += 1
                     docking = node[0]
                     docking.set('dock_type', dock_type_list[int(points_list[i - 1])])
-                    docking.set('offset', offset_list[int(points_list[i - 1]) - 11])
                 if (node.tag == "SubTree" and (node.get('ID') == "PlaceOneLevel" or node.get('ID') == "PlaceTwoLevels" or node.get('ID') == "ThreeLevelsBot1new")):
                     node.set('index', points_list[i - 1])
                 if (node.tag == "SubTree" and node.get('ID') == "BannerMission"):
+                    if (banner_time == str(j)):
+                        node.set('NOT_NOW', '0')
+                    else:
+                        node.set('NOT_NOW', '1')
                     node.set('BANNER_PLACE', banner_pt)
+                    j += 1
     tree = ET.ElementTree(root)
     tree.write(output_file_name, encoding="utf-8", xml_declaration=True)
 
 def create_tree():
-    input_tree = ET.parse('bot1_blue_a_template.xml')
+    input_tree = ET.parse('bot1_yellow_f.xml')
     root_in = input_tree.getroot()
     root_out = ET.Element("root", {"BTCPP_format": "4"})
     root_out.clear()
