@@ -1,4 +1,5 @@
 #include "bt_app_2025/bt_nodes_firmware.h"
+#include "bt_app_2025/bt_nodes_receiver.h"
 
 using namespace BT;
 using namespace std;
@@ -53,48 +54,6 @@ double inline calculateDistance(const geometry_msgs::msg::Pose &pose1, const geo
     double dist = position1.distance(position2);
     // RCLCPP_INFO_STREAM(rclcpp::get_logger("rclcpp"), "distance: " << dist);
     return dist;
-}
-
-/********************************/
-/* Simple Node to activate SIMA */
-/********************************/
-BT::NodeStatus SIMAactivate::tick() {
-    timer_ = node_->create_wall_timer(1000ms, std::bind(&SIMAactivate::wakeUpSIMA, this));
-    return NodeStatus::SUCCESS;
-}
-bool SIMAactivate::wakeUpSIMA() {
-    if (current_time_ < 85)
-        return false;
-
-    rclcpp::Client<std_srvs::srv::SetBool>::SharedPtr client = node_->create_client<std_srvs::srv::SetBool>("/robot/objects/sima_activate");
-    // setup request service
-    auto request = std::make_shared<std_srvs::srv::SetBool::Request>();
-    request->data = true; // active SIMA
-
-    while (!client->wait_for_service(1s))
-        RCLCPP_INFO(node_->get_logger(), "service not available, waiting again...");
-    
-    // keep sending request until mission success
-    do {
-        // send request to the server
-        auto result = client->async_send_request(request);
-        // Wait for the result.
-        if (rclcpp::spin_until_future_complete(node_, result) == rclcpp::FutureReturnCode::SUCCESS) {
-            if (result.get()->success) {
-                RCLCPP_INFO_STREAM(node_->get_logger(), "SIMA active!"); 
-                mission_finished_ = result.get()->success;
-            }
-            else
-                RCLCPP_INFO_STREAM(node_->get_logger(), "SIMA error msg: " << result.get()->message);
-        } else {
-            RCLCPP_ERROR(node_->get_logger(), "Failed to call SIMA");
-        }
-    } while (!mission_finished_);
-
-    // close the timer function if mission success
-    if (mission_finished_)
-        timer_.reset();
-    return true;
 }
 
 /*****************/
@@ -479,7 +438,7 @@ void BannerChecker::onStart() {
     map_points = "map_points_" + map_points;
     node_->get_parameter(map_points, material_points_);
     // node_->get_parameter("safety_dist", safety_dist_);
-    // LocReceiver::UpdateRobotPose(robot_pose_, tf_buffer_, frame_id_);
+    LocReceiver::UpdateRobotPose(robot_pose_, tf_buffer_, frame_id_);
     // LocReceiver::UpdateRivalPose(rival_pose_, tf_buffer_, frame_id_);
 }
 
@@ -507,11 +466,13 @@ BT::NodeStatus BannerChecker::tick() {
     }
     
     RCLCPP_INFO_STREAM(node_->get_logger(), "final decision: " << banner_place_);
-    // pt_pose_.position.x = material_points_[(index + 12) * 7];
-    // pt_pose_.position.y = material_points_[(index + 12) * 7 + 1];
-    // if (calculateDistance(ptPose_, rival_pose_.pose) < safety_dist_) {
-    // }
-    
+    ptPose_.position.x = material_points_[mapPoint_ * 7];
+    ptPose_.position.y = material_points_[mapPoint_ * 7 + 1];
+    if (calculateDistance(ptPose_, robot_pose_.pose) < 0.05) {
+        RCLCPP_INFO_STREAM(node_->get_logger(), "already at the banner place");
+        setOutput("remap_banner_place", to_string(3));
+        return BT::NodeStatus::SUCCESS;
+    }
     setOutput("remap_banner_place", to_string(banner_place_));
     return BT::NodeStatus::SUCCESS;
 }

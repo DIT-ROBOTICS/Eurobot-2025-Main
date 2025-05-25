@@ -48,30 +48,6 @@ namespace BT {
     template <> inline std::deque<double> convertFromString(StringView str);
 }
 
-/********************************/
-/* Simple Node to activate SIMA */
-/********************************/
-class SIMAactivate : public BT::SyncActionNode {
-public:
-  SIMAactivate(const std::string& name, const BT::NodeConfig& config, const RosNodeParams& params)
-    : BT::SyncActionNode(name, config), node_(params.nh.lock())
-  {}
-
-  /* Node remapping function */
-  static BT::PortsList providedPorts() {
-    return {}; 
-  }
-
-  /* Start and running function */
-  BT::NodeStatus tick() override;
-private:
-  bool wakeUpSIMA();
-  std::shared_ptr<rclcpp::Node> node_;
-  rclcpp::TimerBase::SharedPtr timer_;
-  float current_time_;
-  bool mission_finished_ = false;
-};
-
 class MissionStart : public BT::SyncActionNode
 {
 public:
