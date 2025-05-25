@@ -377,7 +377,7 @@ public:
         }
         RCLCPP_INFO(this->get_logger(), "Response %d to %d", int(response->success), response->group);
     }
-    void WebCallback(const std_msgs::msg::Int32::SharedPtr msg) {             // get plan code from pannel
+    void PlanCallback(const std_msgs::msg::Int32::SharedPtr msg) {             // get plan code from pannel
         plan_code_ = msg->data;
     }
 
