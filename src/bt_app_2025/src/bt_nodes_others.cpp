@@ -1,5 +1,4 @@
 #include "bt_app_2025/bt_nodes_others.h"
-#include "bt_app_2025/bt_nodes_receiver.h"
 
 using namespace BT;
 using namespace std;
@@ -19,77 +18,6 @@ template <> inline std::deque<int> BT::convertFromString(StringView str) {
     }
 
     return output;
-}
-
-geometry_msgs::msg::PoseStamped inline ConvertPoseFormat(geometry_msgs::msg::PoseStamped pose_) {
-    tf2::Quaternion quaternion;
-    tf2::fromMsg(pose_.pose.orientation, quaternion);
-    pose_.pose.position.z = tf2::impl::getYaw(quaternion) * 2 / PI;
-    return pose_;
-}
-
-BT::PortsList GetLocation::providedPorts() {
-    return {
-        BT::InputPort<std::string>("locaization_target"),
-        BT::OutputPort<geometry_msgs::msg::PoseStamped>("pose")
-    };
-}
-
-BT::NodeStatus GetLocation::tick() {
-    std::string locaizationTarget_;
-
-    getInput<std::string>("locaization_target", locaizationTarget_);
-    if (locaizationTarget_ == "robot") {
-        LocReceiver::UpdateRobotPose(pose_, tf_buffer_, frame_id_);
-    } else if (locaizationTarget_ == "rival") {
-        LocReceiver::UpdateRivalPose(pose_, tf_buffer_, frame_id_);
-    } else {
-        return BT::NodeStatus::FAILURE;
-    }
-    setOutput<geometry_msgs::msg::PoseStamped>("pose", ConvertPoseFormat(pose_));
-
-    return BT::NodeStatus::SUCCESS;
-}
-
-BT::PortsList GetBlackboard::providedPorts() {
-    return {
-        BT::InputPort<std::string>("blackboard_key"),
-        BT::InputPort<std::string>("blackboard_type")
-    };
-}
-
-BT::NodeStatus GetBlackboard::tick() {
-    std::string blackboard_key_, blackboard_type_;
-
-    getInput<std::string>("blackboard_key", blackboard_key_);
-    getInput<std::string>("blackboard_type", blackboard_type_);
-    if (blackboard_type_ == "bool") {
-        bool blackboard_value_;
-        blackboard_->get<bool>(blackboard_key_, blackboard_value_);
-        RCLCPP_INFO_STREAM(node_->get_logger(), "Get BlackBoard " << blackboard_key_ << ": " << blackboard_value_);
-    }
-    else if (blackboard_type_ == "int") {
-        int blackboard_value_;
-        blackboard_->get<int>(blackboard_key_, blackboard_value_);
-        RCLCPP_INFO_STREAM(node_->get_logger(), "Get BlackBoard " << blackboard_key_ << ": " << blackboard_value_);
-    }
-    else if (blackboard_type_ == "float") {
-        float blackboard_value_;
-        blackboard_->get<float>(blackboard_key_, blackboard_value_);
-        RCLCPP_INFO_STREAM(node_->get_logger(), "Get BlackBoard " << blackboard_key_ << ": " << blackboard_value_);
-    }
-    else if (blackboard_type_ == "double") {  
-        double blackboard_value_;
-        blackboard_->get<double>(blackboard_key_, blackboard_value_);
-        RCLCPP_INFO_STREAM(node_->get_logger(), "Get BlackBoard " << blackboard_key_ << ": " << blackboard_value_);
-    }
-    else if (blackboard_type_ == "string") {
-        std::string blackboard_value_;
-        blackboard_->get<std::string>(blackboard_key_, blackboard_value_);
-        RCLCPP_INFO_STREAM(node_->get_logger(), "Get BlackBoard " << blackboard_key_ << ": " << blackboard_value_);
-    }
-
-    return BT::NodeStatus::SUCCESS;
 }
 
 BT::PortsList MySetBlackboard::providedPorts() {
@@ -143,27 +71,423 @@ void BTStarter::topic_callback(const std_msgs::msg::Float32::SharedPtr msg) {
     blackboard_->set<double>("current_time", current_time_);
 }
 
-/****************/
-/* TimerChecker */
-/****************/
-BT::PortsList TimerChecker::providedPorts() {
+/**************/
+/* BTFinisher */
+/**************/
+BT::PortsList BTFinisher::providedPorts() {
     return { 
-        BT::InputPort<double>("target_time_sec")
+        BT::InputPort<int>("game_status"),
+        BT::InputPort<int>("mission_type"),
+        BT::InputPort<int>("mission_sub_type"),
+        BT::OutputPort<int>("result") 
     };
 }
 
-BT::NodeStatus TimerChecker::tick() {
+BT::NodeStatus BTFinisher::tick() {
+    
+    int game_status = getInput<int>("game_status").value();
+    int mission_type = getInput<int>("mission_type").value();
+    int mission_sub_type = getInput<int>("mission_sub_type").value();
 
-    double targetTimeSec_ = getInput<double>("target_time_sec").value();
+    if (mission_type == 0) {
+        /* Plant mission */
+        game_status += 1 << mission_sub_type;
+    }
+    else if (mission_type == 1) {
+        /* Pot mission */
+        game_status += 1 << (mission_sub_type + 12);
+    }
+    else if (mission_type == 2) {
+        /* Planter mission */
+        game_status += 1 << (mission_sub_type + 16);
+    }
+    else if (mission_type == 3) {
+        if (mission_sub_type == 0) {
+            /* Solar mission */
+            game_status += 1 << 20;
+        }
+        else if (mission_sub_type == 1) {
+            /* Solar mission */
+            game_status += 1 << 21;
+        }
+    }
+    else if (mission_type == 4) {
+        /* Home */
+        game_status += 1 << 22;
+    }
 
-    blackboard_->get<double>("current_time", current_time_);
+    // Log game status
+    // RCLCPP_INFO(logger(), "[BTFinisher]: Game status: " << game_status);
+    cout << "[BTFinisher]: Game status: " << game_status << endl;
 
-    if (current_time_ < targetTimeSec_)
-        return BT::NodeStatus::SUCCESS;
-    else
-        return BT::NodeStatus::FAILURE;
+    int plant_number = 0; // Get by 2
+    int pot_number = 0; // Get by 3
+    int planter_number = 0; // Get by 5
+    int solar_number_1 = 0; // Get by 7
+    int solar_number_2 = 0; // Get by 8
+    int got_home = 0; // Get by 9
+
+    int tmp = game_status;
+
+    std::string binary = bitset<32>(tmp).to_string();
+
+    for (int i = 0; i < 32; i++) {
+        if (tmp & 1) {
+
+            // Append the binary representation
+            binary[31 - i] = '1';
+
+            if (i < 12) {
+                plant_number++;
+            }
+            else if (i < 16) {
+                pot_number++;
+            }
+            else if (i < 20) {
+                planter_number++;
+            }
+            else if (i == 20) {
+                solar_number_1++;
+            }
+            else if (i == 21) {
+                solar_number_2++;
+            }
+            else if (i == 22) {
+                got_home++;
+            }
+        }
+        else {
+            binary[31 - i] = '0';
+        }
+        tmp >>= 1;
+    }
+    double score = 0;
+
+    // Log current plant number, pot number, planter number
+    // RCLCPP_INFO(logger(), "[BTFinisher]: Plant number: " << plant_number << ", Pot number: " << pot_number << ", Planter number: " << planter_number);
+    cout << "[BTFinisher]: Plant number: " << plant_number << ", Pot number: " << pot_number << ", Planter number: " << planter_number << endl;
+
+    // Log the binary representation
+    // RCLCPP_INFO(logger(), "[BTFinisher]: Binary representation: " << binary);
+    cout << "[BTFinisher]: Binary representation: " << binary;
+
+    if (pot_number == 1 && plant_number >= 1) {
+        score += 12;
+        plant_number--;
+    }
+    else if (pot_number == 2 && plant_number >= 1) {
+        score += 11.5;
+        plant_number -= 2;
+    }
+    else if (pot_number == 2 && plant_number >= 2) {
+        score += 20 + 1;
+        plant_number -= 2;
+    }
+    score += 4 * 3  * std::min(plant_number, planter_number);
+
+    // Get solar degree from kernel
+    std::vector<double> solar_degree;
+    // kernel_->GetSolarDegree(solar_degree);
+
+    // When we are blue:
+    // 145~360
+    // Total: 360-145=215
+
+    // When we are yellow:
+    // 180~360, 0~35
+    // Total: 360-180+35=215
+
+    // Test solar
+    // score = 0;
+
+    if (team_ == "b") {
+        // Blue team
+        RCLCPP_INFO(node_->get_logger(), "[BTFinisher]: Blue team");
+        for (int i = 0; i < 3; i++) {
+            if (solar_degree[i] >= 145) {
+                score += 5;
+            }
+            else if (solar_degree[i] == -1 && solar_number_1 >= 1) {
+                score += 5;
+            }
+        }
+        for (int i = 3; i < (int)solar_degree.size(); i++) {
+            if (solar_degree[i] >= 145) {
+                score += 5;
+            }
+            else if (solar_degree[i] == -1 && solar_number_2 >= 1) {
+                score += 5;
+            }
+        }
+    }
+    else {
+        // Yellow team
+        RCLCPP_INFO(node_->get_logger(), "[BTFinisher]: Yellow team");
+        for (int i = 0; i < 3; i++) {
+            if (solar_degree[i] != -1 && (solar_degree[i] >= 180 || solar_degree[i] <= 35)) {
+                score += 5;
+            }
+            else if (solar_degree[i] == -1 && solar_number_1 >= 1) {
+                score += 5;
+            }
+        }
+        for (int i = 3; i < (int)solar_degree.size(); i++) {
+            if (solar_degree[i] != -1 && (solar_degree[i] >= 180 || solar_degree[i] <= 35)) {
+                score += 5;
+            }
+            else if (solar_degree[i] == -1 && solar_number_2 >= 1) {
+                score += 5;
+            }
+        }
+    }
+    score += 20;
+
+    if (got_home == 1) {
+        score += 10;
+    }
+
+    // Log the score
+    RCLCPP_INFO(node_->get_logger(), "[BTFinisher]: Current score: %f", score);
+
+    // Log solar degree and solar number
+    // RCLCPP_INFO(logger(), "[BTFinisher]: Solar degree: " << solar_degree[0] << " " << solar_degree[1] << " " << solar_degree[2] << " " << solar_degree[3] << " " << solar_degree[4]);
+    // RCLCPP_INFO(logger(), "[BTFinisher]: Solar number: " << solar_number_1 << " " << solar_number_2);
+    cout << "[BTFinisher]: Solar degree: " << solar_degree[0] << " " << solar_degree[1] << " " << solar_degree[2] << " " << solar_degree[3] << " " << solar_degree[4] << endl;
+    cout << "[BTFinisher]: Solar number: " << solar_number_1 << " " << solar_number_2 << endl;
+
+    // Degrade the score for mission plant
+    // score *= 0.9;
+
+    // Echo
+    std::string cmd = "echo " + std::to_string(round(score)) + " > " + score_filepath;
+    system(cmd.c_str());
+
+    // Set output port
+    setOutput<int>("result", game_status);
+
+    return BT::NodeStatus::SUCCESS;
 }
 
+/**************/
+/* Comparator */
+/**************/
+BT::PortsList Comparator::providedPorts() {
+    return { 
+        BT::InputPort<geometry_msgs::msg::TwistStamped>("compare_point"),
+        BT::InputPort<int>("mission_type"),
+        BT::InputPort<int>("mission_sub_type"),
+        BT::InputPort<int>("game_status")
+    };
+}
+
+BT::NodeStatus Comparator::tick() {
+
+    int mission_type = getInput<int>("mission_type").value();
+    int mission_sub_type = getInput<int>("mission_sub_type").value();
+
+    auto mi = getInput<geometry_msgs::msg::TwistStamped>("compare_point");
+    mission_.twist.linear = mi.value().twist.linear;
+
+    // Get current mission mask
+    int mission_mask = 1 << mission_sub_type;
+
+    // Check if the mission is finished
+    int game_status = getInput<int>("game_status").value();
+    if (mission_type == 0 && (game_status & mission_mask) != 0) {
+        return BT::NodeStatus::FAILURE;
+    }
+
+    if (mission_type == 0 && CheckRivalInThreshold(mission_, 0.2, 0.6)) {
+        return BT::NodeStatus::SUCCESS;
+    }
+    else if (mission_type != 0 && CheckRivalInRange(mission_, 0.5)) {
+        return BT::NodeStatus::SUCCESS;
+    }
+    else {
+        return BT::NodeStatus::FAILURE;
+    }
+}
+
+geometry_msgs::msg::TwistStamped Comparator::UpdateRobotPose() {
+
+    geometry_msgs::msg::TwistStamped robot_pose_;
+    geometry_msgs::msg::TransformStamped transformStamped;
+
+    try {
+        transformStamped = tf_buffer_.lookupTransform(
+        "robot/map" /* Parent frame - map */, 
+        "robot/base_footprint" /* Child frame - base */,
+        rclcpp::Time()
+        );
+
+        /* Extract (x, y, theta) from the transformed stamped */
+        robot_pose_.twist.linear.x = transformStamped.transform.translation.x;
+        robot_pose_.twist.linear.y = transformStamped.transform.translation.y;
+        double theta;
+        tf2::Quaternion q;
+        tf2::fromMsg(transformStamped.transform.rotation, q);
+        robot_pose_.twist.angular.z = tf2::impl::getYaw(q);
+    }
+    catch (tf2::TransformException &ex) {
+        // RCLCPP_WARN_STREAM(node->get_logger(), "[Kernel::UpdateRobotPose]: line " << __LINE__ << " " << ex.what());
+    }
+    return robot_pose_;
+}
+
+geometry_msgs::msg::TwistStamped Comparator::UpdateRivalPose() {
+
+    geometry_msgs::msg::TwistStamped rival_pose_;
+    geometry_msgs::msg::TransformStamped transformStamped;
+
+    try {
+        transformStamped = tf_buffer_.lookupTransform(
+        "rival/map" /* Parent frame - map */, 
+        "rival/base_footprint" /* Child frame - base */,
+        rclcpp::Time()
+        );
+
+        /* Extract (x, y, theta) from the transformed stamped */
+        rival_pose_.twist.linear.x = transformStamped.transform.translation.x;
+        rival_pose_.twist.linear.y = transformStamped.transform.translation.y;
+        double theta;
+        tf2::Quaternion q;
+        tf2::fromMsg(transformStamped.transform.rotation, q);
+        rival_pose_.twist.angular.z = tf2::impl::getYaw(q);
+    }
+    catch (tf2::TransformException &ex) {
+        // RCLCPP_WARN_STREAM(node->get_logger(), "[Kernel::UpdateRobotPose]: line " << __LINE__ << " " << ex.what());
+    }
+    return rival_pose_;
+}
+
+bool Comparator::CheckRivalInThreshold(geometry_msgs::msg::TwistStamped pose, double threshold, double range) {
+
+    geometry_msgs::msg::TwistStamped robot_pose = UpdateRobotPose();
+    geometry_msgs::msg::TwistStamped rival_pose = UpdateRivalPose();
+
+    RCLCPP_INFO_STREAM(rclcpp::get_logger("rclcpp"), "Robot pose: " << robot_pose.twist.linear.x << " " << robot_pose.twist.linear.y);
+    RCLCPP_INFO_STREAM(rclcpp::get_logger("rclcpp"), "Rival pose: " << rival_pose.twist.linear.x << " " << rival_pose.twist.linear.y);
+
+    if (Distance(pose, robot_pose) < Distance(pose, rival_pose)) {
+        // Log the distance
+        RCLCPP_INFO_STREAM(rclcpp::get_logger("rclcpp"), "Distance: " << Distance(pose, robot_pose) << " " << Distance(pose, rival_pose));
+
+        return true;
+    }
+    else if (abs(Distance(pose, robot_pose) - Distance(pose, rival_pose)) < threshold && Distance(pose, rival_pose) > range) {
+
+        // Log the distance
+        RCLCPP_INFO_STREAM(rclcpp::get_logger("rclcpp"), "Distance: " << Distance(pose, robot_pose) << " " << Distance(pose, rival_pose));
+
+        return true;
+    }
+    else {
+        return false;
+    }
+}
+
+bool Comparator::CheckRivalInRange(geometry_msgs::msg::TwistStamped pose, double range) {
+
+    geometry_msgs::msg::TwistStamped robot_pose = UpdateRobotPose();
+    geometry_msgs::msg::TwistStamped rival_pose = UpdateRivalPose();
+
+    RCLCPP_INFO_STREAM(rclcpp::get_logger("rclcpp"), "Robot pose: " << robot_pose.twist.linear.x << " " << robot_pose.twist.linear.y);
+    RCLCPP_INFO_STREAM(rclcpp::get_logger("rclcpp"), "Rival pose: " << rival_pose.twist.linear.x << " " << rival_pose.twist.linear.y);
+
+    if (Distance(pose, rival_pose) > range) {
+        return true;
+    }
+    else {
+        return false;
+    }
+}
+
+double Comparator::Distance(geometry_msgs::msg::TwistStamped pose1, geometry_msgs::msg::TwistStamped pose2) {
+    return sqrt(pow(pose1.twist.linear.x - pose2.twist.linear.x, 2) + pow(pose1.twist.linear.y - pose2.twist.linear.y, 2));
+}
+
+BT::PortsList TimerChecker::providedPorts() {
+    return { 
+        BT::InputPort<int>("timer_sec")
+    };
+}
+
+/****************/
+/* TimerChecker */
+/****************/
+BT::NodeStatus TimerChecker::tick() {
+
+    int timer = getInput<int>("timer_sec").value();
+
+    blackboard_->get("current_time", current_time_);
+
+    if (current_time_ < timer)
+        return BT::NodeStatus::FAILURE;
+    else
+        return BT::NodeStatus::SUCCESS;
+}
+
+PortsList LoopInt32::providedPorts()
+{
+    return {
+        // BT::InputPort<std::string>("queue"),
+        BT::InputPort<std::deque<int>>("queue"),
+        BT::InputPort<BT::NodeStatus>("if_empty"),
+        BT::OutputPort<int>("value")
+    };
+}
+
+NodeStatus LoopInt32::tick()
+{
+    // std::string str;
+    // getInput<std::string>("queue", str);
+    // auto parts = splitString(str, ',');
+    getInput<std::deque<int>>("queue", deque);
+
+    // for (int i = 0; i < (int)parts.size(); i++) {
+    //     deque.push_back(std::stoi(parts[i].data()));
+    // }
+
+    BT::NodeStatus child_status;
+    // Generate the path points
+    while (!deque.empty()) {
+        child_status = child_node_->executeTick();
+        switch (child_status)
+        {
+            case BT::NodeStatus::SUCCESS:
+                RCLCPP_INFO_STREAM(node_->get_logger(), "Success");
+                setOutput("value", deque.front());
+                deque.pop_front();
+                break;
+            case BT::NodeStatus::FAILURE:
+                RCLCPP_INFO_STREAM(node_->get_logger(), "Fail");
+                return BT::NodeStatus::FAILURE;
+            case BT::NodeStatus::RUNNING:
+                RCLCPP_INFO_STREAM(node_->get_logger(), "Running");
+                return BT::NodeStatus::RUNNING;
+            default:
+                break;
+        }
+    }
+    return BT::NodeStatus::SUCCESS;
+}
+
+PortsList Double2Int::providedPorts()
+{
+    return {
+        // BT::InputPort<std::string>("queue"),
+        BT::InputPort<double>("double"),
+        BT::OutputPort<int>("int")
+    };
+}
+
+NodeStatus Double2Int::tick()
+{
+    getInput<double>("double", double_);
+    RCLCPP_INFO_STREAM(node_->get_logger(), double_ << ", " << int(double_));
+    setOutput("int", int(double_));
+    return BT::NodeStatus::SUCCESS;
+}
 // /****************************************************/
 // /* Simple Node for finding the rival start position */
 // /****************************************************/

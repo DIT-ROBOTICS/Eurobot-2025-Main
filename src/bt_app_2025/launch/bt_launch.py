@@ -46,7 +46,7 @@ def generate_launch_description():
     map_points = LaunchConfiguration('params3')
 
     bt_m_node = TimerAction(
-        period=0.5,
+        period=2.0,
         actions=[
             Node(
                 parameters=[
@@ -64,14 +64,14 @@ def generate_launch_description():
         ]
     )
     startup_node = TimerAction(
-        period=0.5,
+        period=2.0,
         actions=[
             Node(
                 parameters=[
                     config_path,
                     map_points,
                     {"Robot_name": "Tongue"},  # Invisible or Tongue
-                    {"plan_code": 41} # 10e1: plan (start from 1), 10e0: color(0 for yellow, 1 for blue)
+                    {"plan_code": 40} # 10e1: plan (start from 1), 10e0: color(0 for yellow, 1 for blue)
                 ],
                 package = 'startup',
                 executable = 'startup',
