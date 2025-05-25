@@ -12,8 +12,8 @@ points_list = []
 yellow_home = '0.45'
 blue_home = '2.55'
 banner = []
-yellow_banner = ['2.7', '1.25', '0.75']
-blue_banner = ['0.3', '1.75', '2.25']
+yellow_banner = ['2.7', '1.175', '0.75']
+blue_banner = ['0.3', '1.825', '2.25']
 dock_type_list = ['dock_y_linearBoost_precise', 'dock_x_linearBoost_precise', 'dock_x_linearBoost_unerring', 'dock_y_linearBoost_precise', 'dock_y_linearBoost_precise', 'dock_y_linearBoost_precise', 'dock_y_linearBoost_precise', 'dock_x_linearBoost_unerring', 'dock_x_linearBoost_precise', 'dock_y_linearBoost_precise', 'dock_y_linearBoost_precise', 'dock_x_linearBoost_precise', 'dock_y_linearBoost_precise', 'dock_y_linearBoost_precise', 'dock_y_linearBoost_precise', 'dock_x_linearBoost_precise', 'dock_y_linearBoost_precise', 'dock_y_linearBoost_precise', 'dock_y_linearBoost_precise', 'dock_y_linearBoost_precise']
 offset_list = ['0.1', '-0.1', '-0.1', '-0.1', '-0.1', '-0.1', '-0.1', '-0.1']
 
@@ -51,8 +51,8 @@ def read_input(root):
     for elt in root.iter():
         if (elt.tag == "BehaviorTree" and elt.get('ID') == "BannerMission"):
             for dock in elt.iter():
-                if (dock.tag == "Docking" and l < 11):
-                    dock.set('base', banner[l % 3] + ', 0.17, 3')
+                if (dock.tag == "Navigation" and l < 11):
+                    dock.set('goal', banner[l % 3] + ', 0.17, 3')
                     l += 1
                     if (l == 3 or l == 7):
                         l += 1
@@ -60,7 +60,7 @@ def read_input(root):
             for node in elt.iter():
                 if (node.tag == "Docking"):
                     node.set('base', home + ', 1.5, 0')
-        elif (elt.tag == "BehaviorTree" and (elt.get('ID') == "MissionPoint1" or elt.get('ID') == "MissionPoint2" or elt.get('ID') == "MissionPoint3new")):
+        elif (elt.tag == "BehaviorTree" and (elt.get('ID') == "MissionPoint1" or elt.get('ID') == "MissionPoint2" or elt.get('ID') == "MissionPoint3_11")):
             for node in elt.iter():
                 if (node.tag == "MaterialChecker" and node.get('base_index') != "-1"):
                     node.set('base_index', points_list[i])

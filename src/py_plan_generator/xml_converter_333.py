@@ -20,7 +20,7 @@ shift_list = ['0.055', '-0.055', '-0.055', '0.055', '-0.055', '-0.055', '-0.06',
 
 def read_input(root):
     i = 0
-    list_size = 3 + 4
+    list_size = 5 + 3
 
     color = input('input team color: ')
     output_file_name = input('input file name: ')
@@ -61,7 +61,7 @@ def read_input(root):
             for node in elt.iter():
                 if (node.tag == "Docking"):
                     node.set('base', home + ', 1.5, 0')
-        elif (elt.tag == "BehaviorTree" and (elt.get('ID') == "MissionPoint1" or elt.get('ID') == "MissionPoint2" or elt.get('ID') == "MissionPoint3_2")):
+        elif (elt.tag == "BehaviorTree" and (elt.get('ID') == "MissionPoint1" or elt.get('ID') == "MissionPoint2" or elt.get('ID') == "MissionPoint3_3")):
             for node in elt.iter():
                 if (node.tag == "MaterialChecker" and node.get('base_index') != "-1"):
                     node.set('base_index', points_list[i])
@@ -86,7 +86,7 @@ def read_input(root):
     tree.write(output_file_name, encoding="utf-8", xml_declaration=True)
 
 def create_tree():
-    input_tree = ET.parse('bot1_yellow_d.xml')
+    input_tree = ET.parse('bot1_yellow_f.xml')
     root_in = input_tree.getroot()
     root_out = ET.Element("root", {"BTCPP_format": "4"})
     root_out.clear()
