@@ -131,6 +131,7 @@ public:
         this->get_parameter("Bot2_BlueSpetial_config", name_of_bot2_blue_plans[number_of_plans_[3] - 1]);
 
         start_up_state = INIT;
+        plan_code_ = 0;
         timer_ = this->create_wall_timer(
             std::chrono::microseconds(100),
             std::bind(&StartUp::StateMachine, this)
@@ -376,7 +377,7 @@ public:
         }
         RCLCPP_INFO(this->get_logger(), "Response %d to %d", int(response->success), response->group);
     }
-    void PlanCallback(const std_msgs::msg::Int32::SharedPtr msg) {             // get plan code from pannel
+    void WebCallback(const std_msgs::msg::Int32::SharedPtr msg) {             // get plan code from pannel
         plan_code_ = msg->data;
     }
 
