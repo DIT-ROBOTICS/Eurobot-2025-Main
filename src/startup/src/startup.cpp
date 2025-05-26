@@ -419,7 +419,22 @@ public:
     // Continuously publish SIMA start signal at 10Hz
     void PublishSIMAStartSignal() {
         std_msgs::msg::Int16 sima_msg;
-        sima_msg.data = (team_colcor_ == 0) ? 1 : 2; // Yellow = 1, Blue = 2
+        int sima_plan_code = 0;
+        Json::Value root;
+        std::ifstream file(sima_config_path_);
+        if (file.is_open()) {
+            Json::CharReaderBuilder builder;
+            JSONCPP_STRING errs;
+            if (parseFromStream(builder, file, &root, &errs)) {
+                if (root.isMember("plan_code")) {
+                    sima_plan_code = root["plan_code"].asInt();
+                }
+            }
+        }
+        int team_digit = (team_colcor_ == 0) ? 1 : 2; // Yellow = 1, Blue = 2
+        sima_msg.data = sima_plan_code * 10 + team_digit;
+        // RCLCPP_INFO(this->get_logger(), "SIMA start signal: sima_plan_code=%d, team_color=%d, publishing=%d", 
+        //             sima_plan_code, team_colcor_, sima_msg.data);
         sima_start_pub_->publish(sima_msg);
     }
 
