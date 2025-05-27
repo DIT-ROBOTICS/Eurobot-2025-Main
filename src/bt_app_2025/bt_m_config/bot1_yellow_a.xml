@@ -13,9 +13,9 @@
             </ForceSuccess>
             <RetryUntilSuccessful num_attempts="10">
               <Switch3 case_1="0" case_2="1" case_3="2" variable="{remap_banner_place}">
-                <Navigation final_pose="{PrevGoal}" dock_type="dock_y_loose_linearBoost" goal="2.7, 0.17, 3" />
-                <Navigation final_pose="{PrevGoal}" dock_type="dock_y_loose_linearBoost" goal="1.175, 0.17, 3" />
-                <Navigation final_pose="{PrevGoal}" dock_type="dock_y_loose_linearBoost" goal="0.75, 0.17, 3" />
+                <Navigation final_pose="{PrevGoal}" dock_type="dock_y_loose_linearBoost" goal="2.7, 0.19, 3" />
+                <Navigation final_pose="{PrevGoal}" dock_type="dock_y_loose_linearBoost" goal="1.175, 0.19, 3" />
+                <Navigation final_pose="{PrevGoal}" dock_type="dock_y_loose_linearBoost" goal="0.75, 0.19, 3" />
                 <GetLocation locaization_target="robot" pose="{PrevGoal}" />
               </Switch3>
             </RetryUntilSuccessful>
