@@ -7,3 +7,4 @@ bt_app_2025:
     dock_ang_error: 0.4
     rotate_ang_error: 0.4
     safety_dist: 0.5
+    construction_shift: 0.1
