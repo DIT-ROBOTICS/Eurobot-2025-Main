@@ -272,20 +272,12 @@
 
   <BehaviorTree ID="MissionPointThree">
     <Sequence>
-      <Sequence>
-        <ForceSuccess>
-          <Timeout msec="5000">
-            <FirmwareMission mission_status="{x}"
-                             mission_type="10"/>
-          </Timeout>
-        </ForceSuccess>
-        <ForceSuccess>
-          <Timeout msec="5000">
-            <FirmwareMission mission_status="{x}"
-                             mission_type="28"/>
-          </Timeout>
-        </ForceSuccess>
-      </Sequence>
+      <ForceSuccess>
+        <Timeout msec="5000">
+          <FirmwareMission mission_status="{x}"
+                           mission_type="10"/>
+        </Timeout>
+      </ForceSuccess>
       <RetryUntilSuccessful num_attempts="2">
         <Docking final_pose="{PrevGoal}"
                  isPureDocking="0"
@@ -331,27 +323,49 @@
                  offset="0"
                  base="0.7, 1.2, 1"/>
       </RetryUntilSuccessful>
+      <RetryUntilSuccessful num_attempts="2">
+        <Docking final_pose="{PrevGoal}"
+                 isPureDocking="0"
+                 dock_type="dock_x"
+                 shift="0"
+                 offset="0.1"
+                 base="0.87, 0.29, 0"/>
+      </RetryUntilSuccessful>
+      <ForceSuccess>
+        <Timeout msec="6000">
+          <FirmwareMission mission_status="{x}"
+                           mission_type="17"/>
+        </Timeout>
+      </ForceSuccess>
+      <RetryUntilSuccessful num_attempts="2">
+        <Docking final_pose="{PrevGoal}"
+                 isPureDocking="0"
+                 dock_type="dock_x"
+                 shift="0"
+                 offset="-0.2"
+                 base="{PrevGoal}"/>
+      </RetryUntilSuccessful>
       <Parallel failure_count="2"
-                success_count="2">
-        <ForceSuccess>
-          <Timeout msec="5000">
-            <FirmwareMission mission_status="{x}"
-                             mission_type="13"/>
-          </Timeout>
-        </ForceSuccess>
+                success_count="1">
         <RetryUntilSuccessful num_attempts="2">
           <Docking final_pose="{PrevGoal}"
                    isPureDocking="0"
                    dock_type="dock_x"
                    shift="0"
                    offset="0"
-                   base="0.7, 0.29, 0"/>
+                   base="0.67, 0.29, 2"/>
         </RetryUntilSuccessful>
+        <ForceSuccess>
+          <Timeout msec="6000">
+            <FirmwareMission mission_status="{x}"
+                             mission_type="18"/>
+          </Timeout>
+        </ForceSuccess>
       </Parallel>
       <ForceSuccess>
         <Timeout msec="6000">
           <FirmwareMission mission_status="{x}"
-                           mission_type="12"/>
+                           mission_type="22"/>
         </Timeout>
       </ForceSuccess>
       <RetryUntilSuccessful num_attempts="2">
@@ -359,28 +373,13 @@
                  isPureDocking="0"
                  dock_type="dock_x"
                  shift="0"
-                 offset="0"
-                 base="0.58, 0.315, 0"/>
-      </RetryUntilSuccessful>
-      <ForceSuccess>
-        <Timeout msec="6000">
-          <FirmwareMission mission_status="{x}"
-                           mission_type="14"/>
-        </Timeout>
-      </ForceSuccess>
-      <Sleep msec="1000"/>
-      <RetryUntilSuccessful num_attempts="2">
-        <Docking final_pose="{PrevGoal}"
-                 isPureDocking="1"
-                 dock_type="dock_x_gentle_slow"
-                 shift="0"
-                 offset="0.17"
+                 offset="-0.12"
                  base="{PrevGoal}"/>
       </RetryUntilSuccessful>
       <ForceSuccess>
         <Timeout msec="6000">
           <FirmwareMission mission_status="{x}"
-                           mission_type="15"/>
+                           mission_type="24"/>
         </Timeout>
       </ForceSuccess>
       <Sleep msec="1000"/>
@@ -389,45 +388,52 @@
                  isPureDocking="0"
                  dock_type="dock_x"
                  shift="0"
-                 offset="0"
-                 base="0.97, 0.29, 0"/>
+                 offset="0.15"
+                 base="{PrevGoal}"/>
       </RetryUntilSuccessful>
       <ForceSuccess>
         <Timeout msec="6000">
           <FirmwareMission mission_status="{x}"
-                           mission_type="12"/>
+                           mission_type="25"/>
+        </Timeout>
+      </ForceSuccess>
+      <Sleep msec="1000"/>
+      <RetryUntilSuccessful num_attempts="2">
+        <Docking final_pose="{PrevGoal}"
+                 isPureDocking="0"
+                 dock_type="dock_x"
+                 shift="0"
+                 offset="0"
+                 base="0.97, 0.29, 2"/>
+      </RetryUntilSuccessful>
+      <ForceSuccess>
+        <Timeout msec="6000">
+          <FirmwareMission mission_status="{x}"
+                           mission_type="22"/>
         </Timeout>
       </ForceSuccess>
       <RetryUntilSuccessful num_attempts="2">
         <Docking final_pose="{PrevGoal}"
-                 isPureDocking="1"
+                 isPureDocking="0"
                  dock_type="dock_x"
                  shift="0"
-                 offset="-0.2"
+                 offset="-0.15"
                  base="{PrevGoal}"/>
       </RetryUntilSuccessful>
       <RetryUntilSuccessful num_attempts="2">
         <Docking final_pose="{PrevGoal}"
                  isPureDocking="0"
-                 dock_type="dock_y"
+                 dock_type="dock_x"
                  shift="0"
-                 offset="-0.2"
-                 base="0.78, 0.46, 1"/>
+                 offset="0"
+                 base="0.75, 0.29, 3"/>
       </RetryUntilSuccessful>
       <ForceSuccess>
         <Timeout msec="6000">
           <FirmwareMission mission_status="{x}"
-                           mission_type="29"/>
+                           mission_type="19"/>
         </Timeout>
       </ForceSuccess>
-      <RetryUntilSuccessful num_attempts="2">
-        <Docking final_pose="{PrevGoal}"
-                 isPureDocking="0"
-                 dock_type="dock_y"
-                 shift="0"
-                 offset="0"
-                 base="0.775, 0.7, 1"/>
-      </RetryUntilSuccessful>
     </Sequence>
   </BehaviorTree>
 
@@ -518,22 +524,31 @@
           </Timeout>
         </ForceSuccess>
       </Parallel>
-      <RetryUntilSuccessful num_attempts="2">
-        <Docking final_pose="{PrevGoal}"
-                 isPureDocking="0"
-                 dock_type="dock_x"
-                 shift="0"
-                 offset="0"
-                 base="0.87, 0.29, 0"/>
-      </RetryUntilSuccessful>
-      <Delay delay_msec="500">
-        <ForceSuccess>
-          <Timeout msec="6000">
-            <FirmwareMission mission_status="{x}"
-                             mission_type="12"/>
-          </Timeout>
-        </ForceSuccess>
-      </Delay>
+      <Parallel failure_count="2"
+                success_count="1">
+        <Delay delay_msec="500">
+          <ForceSuccess>
+            <Timeout msec="6000">
+              <FirmwareMission mission_status="{x}"
+                               mission_type="23"/>
+            </Timeout>
+          </ForceSuccess>
+        </Delay>
+        <RetryUntilSuccessful num_attempts="2">
+          <Docking final_pose="{PrevGoal}"
+                   isPureDocking="0"
+                   dock_type="dock_x"
+                   shift="0"
+                   offset="0"
+                   base="0.87, 0.29, 0"/>
+        </RetryUntilSuccessful>
+      </Parallel>
+      <ForceSuccess>
+        <Timeout msec="6000">
+          <FirmwareMission mission_status="{x}"
+                           mission_type="12"/>
+        </Timeout>
+      </ForceSuccess>
       <RetryUntilSuccessful num_attempts="2">
         <Docking final_pose="{PrevGoal}"
                  isPureDocking="0"
@@ -584,37 +599,7 @@
                  dock_type="dock_x"
                  shift="0"
                  offset="0"
-                 base="0.65, 0.29, 0"/>
-      </RetryUntilSuccessful>
-      <RetryUntilSuccessful num_attempts="2">
-        <Docking final_pose="{PrevGoal}"
-                 isPureDocking="0"
-                 dock_type="dock_x_fast"
-                 shift="0"
-                 offset="0"
-                 base="0.65, 0.29, 2"/>
-      </RetryUntilSuccessful>
-      <RetryUntilSuccessful num_attempts="2">
-        <Docking final_pose="{PrevGoal}"
-                 isPureDocking="0"
-                 dock_type="dock_x_slow"
-                 shift="0"
-                 offset="0"
-                 base="0.97, 0.29, 2"/>
-      </RetryUntilSuccessful>
-      <ForceSuccess>
-        <Timeout msec="6000">
-          <FirmwareMission mission_status="{x}"
-                           mission_type="27"/>
-        </Timeout>
-      </ForceSuccess>
-      <RetryUntilSuccessful num_attempts="2">
-        <Docking final_pose="{PrevGoal}"
-                 isPureDocking="1"
-                 dock_type="dock_x"
-                 shift="0"
-                 offset="-0.2"
-                 base="{PrevGoal}"/>
+                 base="0.8, 0.29, 0"/>
       </RetryUntilSuccessful>
     </Sequence>
   </BehaviorTree>
