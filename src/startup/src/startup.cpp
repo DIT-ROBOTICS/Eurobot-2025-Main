@@ -419,7 +419,7 @@ private:
     StartUpState prev_msg[4] = {INIT, INIT, INIT, INIT};                       // ready message from other programs
     StartUpState ready_feedback[4] = {INIT, START, INIT, START};   // it should be INIT        // ready message from other programs
     bool prev_start_msg = false;                                               // plug message
-    bool start = true;  // it should be false                                  // plug message
+    bool start = false;  // it should be false                                  // plug message
     double starting_time = 0;
     StartUpState start_up_state;                                               // state of startup program
     std::vector<double> material_points_;                                      // prepared for choosing start point
