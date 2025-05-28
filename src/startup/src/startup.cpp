@@ -3,6 +3,7 @@
 #include "std_srvs/srv/set_bool.hpp"
 #include "std_msgs/msg/bool.hpp"
 #include "std_msgs/msg/int32.hpp"
+#include "std_msgs/msg/int16.hpp"
 #include "std_msgs/msg/float32.hpp"
 #include "std_msgs/msg/string.hpp"
 #include "std_msgs/msg/int32_multi_array.hpp"
@@ -19,8 +20,8 @@
 #include <tf2_ros/buffer.h>
 #include <tf2/exceptions.h>
 
-// #include <jsoncpp/json/json.h>
-// #include <fstream>
+#include <jsoncpp/json/json.h>
+#include <fstream>
 #include <iostream>
 #include <stdexcept>
 #include <stdio.h>
@@ -52,6 +53,7 @@ public:
             "/robot/startup/ready_signal", std::bind(&StartUp::ReadyFeedback, this, std::placeholders::_1, std::placeholders::_2));
         start_srv_client = this->create_client<std_srvs::srv::SetBool>("/robot/startup/start_signal");
         obstacles_pub_ = this->create_publisher<btcpp_ros2_interfaces::msg::Obstacles>("ball_obstacles", 10);
+        sima_start_pub_ = this->create_publisher<std_msgs::msg::Int16>("/sima/start", 10);
         
         this->declare_parameter<std::string>("Robot_name", "Tongue");
         this->declare_parameter<std::vector<double>>("map_points_1", std::vector<double>{});
@@ -84,6 +86,7 @@ public:
         this->declare_parameter<std::string>("Bot1_BlueSpetial_config", "nan");
         this->declare_parameter<std::string>("Bot2_YellowSpetial_config", "nan");
         this->declare_parameter<std::string>("Bot2_BlueSpetial_config", "nan");
+        this->declare_parameter<std::string>("sima_config_path", "/home/ros/share/data/sima.json");
 
         this->get_parameter("Robot_name", Robot_name_);
         this->get_parameter("map_points_1", material_points_);
@@ -129,13 +132,39 @@ public:
             this->get_parameter(param_name, name_of_bot2_blue_plans[i]);
         }
         this->get_parameter("Bot2_BlueSpetial_config", name_of_bot2_blue_plans[number_of_plans_[3] - 1]);
+        this->get_parameter("sima_config_path", sima_config_path_);
+        sima_start_time_ = ReadSimaStartTime();
 
         start_up_state = INIT;
+        sima_timer_ = nullptr;  // Initialize timer pointer to null
         plan_code_ = 0;
         timer_ = this->create_wall_timer(
             std::chrono::microseconds(100),
             std::bind(&StartUp::StateMachine, this)
         );
+    }
+
+    double ReadSimaStartTime() {
+        Json::Value root;
+        std::ifstream file(sima_config_path_);
+        if (!file.is_open()) {
+            RCLCPP_WARN(this->get_logger(), "Could not open SIMA config file at %s, using default value 85", sima_config_path_.c_str());
+            return 85;
+        }
+        
+        Json::CharReaderBuilder builder;
+        JSONCPP_STRING errs;
+        if (!parseFromStream(builder, file, &root, &errs)) {
+            RCLCPP_ERROR(this->get_logger(), "Failed to parse SIMA config file: %s", errs.c_str());
+            return 85;
+        }
+
+        if (root.isMember("sima_start_time")) {
+            return root["sima_start_time"].asInt();
+        } else {
+            RCLCPP_WARN(this->get_logger(), "sima_start_time not found in config file, using default value 85");
+            return 85;
+        }
     }
 
     void StateMachine() {
@@ -213,7 +242,6 @@ public:
 
     // publish time to everyone
     void PublishTime(rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr pub) {
-
         // Get current time by second
         double current_time = this->get_clock()->now().seconds();
 
@@ -233,16 +261,23 @@ public:
         obstacles_msg.header.stamp = this->get_clock()->now();
         obstacles_pub_->publish(obstacles_msg);
 
-        static bool is_published = false;
+        static bool sima_start_enabled = false;
         static bool time_check = false;
 
-        if (msg.data >= 85 && !is_published) {
-            // RCLCPP_INFO(this->get_logger(), "[StartUp Program]: Send the ladybug!");
-
-            // Use system call the ladybug script
-            // system("/home/main_ws/scripts/ladybug.sh");
-
-            is_published = true;
+        // After sima_start_time_ seconds, start sending SIMA start signals continuously at 10Hz
+        if (msg.data >= sima_start_time_) {
+            if (!sima_start_enabled) {
+                RCLCPP_INFO(this->get_logger(), "[StartUp Program]: Starting continuous SIMA start signal at time %d!", sima_start_time_);
+                sima_start_enabled = true;
+                
+                // Create timer for continuous publishing if not already created
+                if (!sima_timer_) {
+                    sima_timer_ = this->create_wall_timer(
+                        std::chrono::milliseconds(100), // 10Hz (100ms)
+                        std::bind(&StartUp::PublishSIMAStartSignal, this)
+                    );
+                }
+            }
         }
 
         if (msg.data >= 100 && !time_check) {                                  // check if it's timeout
@@ -388,8 +423,31 @@ public:
         prev_start_msg = msg->data;
     }
 
+    // Continuously publish SIMA start signal at 10Hz
+    void PublishSIMAStartSignal() {
+        std_msgs::msg::Int16 sima_msg;
+        int sima_plan_code = 0;
+        Json::Value root;
+        std::ifstream file(sima_config_path_);
+        if (file.is_open()) {
+            Json::CharReaderBuilder builder;
+            JSONCPP_STRING errs;
+            if (parseFromStream(builder, file, &root, &errs)) {
+                if (root.isMember("plan_code")) {
+                    sima_plan_code = root["plan_code"].asInt();
+                }
+            }
+        }
+        int team_digit = (team_colcor_ == 0) ? 1 : 2; // Yellow = 1, Blue = 2
+        sima_msg.data = sima_plan_code * 10 + team_digit;
+        // RCLCPP_INFO(this->get_logger(), "SIMA start signal: sima_plan_code=%d, team_color=%d, publishing=%d", 
+        //             sima_plan_code, team_colcor_, sima_msg.data);
+        sima_start_pub_->publish(sima_msg);
+    }
+
 private:
     rclcpp::TimerBase::SharedPtr timer_;
+    rclcpp::TimerBase::SharedPtr sima_timer_;    // Timer for continuous SIMA publishing
     // rclcpp::Publisher<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr initial_pub;
     rclcpp::Publisher<std_msgs::msg::String>::SharedPtr ready_pub;             // publish plan message as ready signal to every groups
     rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr time_pub;
@@ -400,6 +458,7 @@ private:
     rclcpp::Client<std_srvs::srv::SetBool>::SharedPtr start_srv_client;        // it might can be removed, main can listen to start topic by plug directly
 
     rclcpp::Publisher<btcpp_ros2_interfaces::msg::Obstacles>::SharedPtr obstacles_pub_;
+    rclcpp::Publisher<std_msgs::msg::Int16>::SharedPtr sima_start_pub_;
 
     // Parameters
     std::string* name_of_bot1_yellow_plans = NULL;
@@ -430,6 +489,8 @@ private:
     std_msgs::msg::String start_plan;
     std_msgs::msg::Bool start_signal;
     std_msgs::msg::Int32MultiArray groups_state;
+    std::string sima_config_path_;
+    int sima_start_time_;
 };
 
 int main(int argc, char **argv) {
