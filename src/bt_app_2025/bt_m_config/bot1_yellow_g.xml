@@ -35,7 +35,7 @@
       </ForceSuccess>
       <Parallel failure_count="2" success_count="1">
         <SubTree ID="Approval" _autoremap="true" />
-        <Sleep msec="98000" />
+        <Sleep msec="95000" />
       </Parallel>
       <ForceSuccess>
         <Timeout msec="6000">
@@ -43,7 +43,7 @@
         </Timeout>
       </ForceSuccess>
       <GetLocation locaization_target="robot" pose="{PrevGoal}"/>
-      <Rotation final_pose="{PrevGoal}" degree="225" base="{PrevGoal}"/>
+      <Rotation final_pose="{PrevGoal}" degree="30" base="{PrevGoal}"/>
       <Docking final_pose="{PrevGoal}" isPureDocking="0" dock_type="dock_y_slow" shift="0" offset="0" base="2.55, 1.5, 0.5" />
     </Sequence>
   </BehaviorTree>
