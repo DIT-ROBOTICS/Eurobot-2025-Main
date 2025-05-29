@@ -41,6 +41,7 @@ ament_target_dependencies(startup
   "jsoncpp"
 )
 target_link_libraries(startup
+  jsoncpp
 )
 install(TARGETS
   startup
