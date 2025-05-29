@@ -30,6 +30,12 @@
       </ForceSuccess>
       <ForceSuccess>
         <Timeout msec="4000">
+          <FirmwareMission mission_status="{x}" mission_type="81" _description="back arm take raw material" />
+        </Timeout>
+      </ForceSuccess>
+      <Sleep msec="1000"/>
+      <ForceSuccess>
+        <Timeout msec="4000">
           <FirmwareMission mission_status="{x}" mission_type="80" _description="back arm take raw material" />
         </Timeout>
       </ForceSuccess>
