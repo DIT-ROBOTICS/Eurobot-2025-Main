@@ -235,7 +235,8 @@
             <SubTree ID="MissionPoint2" _autoremap="true" />
           </ForceSuccess>
           <ForceSuccess>
-            <SubTree ID="MissionPoint3_2" _autoremap="true" />
+            <Sleep msec="100000"/>
+            <!-- <SubTree ID="MissionPoint3_2" _autoremap="true" /> -->
           </ForceSuccess>
         </Sequence>
         <Sleep msec="96000"/>
@@ -299,7 +300,7 @@
         </Fallback>
         <SubTree ID="MissionBeforeTwoLevels"/>
       </Parallel>
-      <SubTree ID="TwoLevelsBot1new" back="0.2, 0.1, 0.05" forward="0.105, 0.12, 0.075" shift="0.10" index="{index}" _skipIf="last_mission_failed" _autoremap="true" />
+      <SubTree ID="TwoLevelsBot1new" back="0.2, 0.1, 0.05" forward="0.105, 0.13, 0.075" shift="0.10" index="{index}" _skipIf="last_mission_failed" _autoremap="true" />
       <Sequence>
         <ForceSuccess>
           <RetryUntilSuccessful num_attempts="10">
@@ -339,7 +340,7 @@
         </Fallback>
         <SubTree ID="MissionBeforeTwoLevels"/>
       </Parallel>
-      <SubTree ID="TwoLevelsBot1new" back="0.2, 0.1, 0.05" forward="0.105, 0.12, 0.075" shift="0.11" index="{index}" _skipIf="last_mission_failed" _autoremap="true" />
+      <SubTree ID="TwoLevelsBot1new" back="0.2, 0.1, 0.05" forward="0.105, 0.13, 0.075" shift="0.1" index="{index}" _skipIf="last_mission_failed" _autoremap="true" />
       <Sequence>
         <ForceSuccess>
           <MissionChecker level="{level}" remap_base="{base}" mission_type="back" base_index="14">

@@ -136,7 +136,7 @@
         <MissionChecker level="{level}" remap_base="{base}" mission_type="back" base_index="15">
           <Navigation final_pose="{PrevGoal}" dock_type="dock_x_linearBoost_precise" goal="{base}" />
         </MissionChecker>
-        <SubTree ID="ThreeLevelsBot1new" back="0.2, 0.1, 0.05" forward="0.15, 0.1, 0.065" shift="0" index="15" hasCompleteMaterial="{hasCompleteMaterial}" _autoremap="true" />
+        <SubTree ID="ThreeLevelsBot1new" back="0.2, 0.1, 0.18" forward="0.15, 0.1, 0.065" shift="0" index="15" hasCompleteMaterial="{hasCompleteMaterial}" _autoremap="true" />
       </Sequence>
       <Sequence>
         <SubTree ID="BannerMission" BANNER_PLACE="0" _autoremap="true" />
@@ -174,7 +174,8 @@
             <SubTree ID="MissionPoint2" _autoremap="true" />
           </ForceSuccess>
           <ForceSuccess>
-            <SubTree ID="MissionPoint3_2" _autoremap="true" />
+            <Sleep msec="100000"/>
+            <!-- <SubTree ID="MissionPoint3_2" _autoremap="true" /> -->
           </ForceSuccess>
         </Sequence>
         <Sleep msec="96000" />
@@ -238,7 +239,7 @@
         </Fallback>
         <SubTree ID="MissionBeforeTwoLevels" />
       </Parallel>
-      <SubTree ID="TwoLevelsBot1new" back="0.2, 0.1, 0.05" forward="0.105, 0.12, 0.075" shift="0.10" index="{index}" _skipIf="last_mission_failed" _autoremap="true" />
+      <SubTree ID="TwoLevelsBot1new" back="0.2, 0.1, 0.05" forward="0.105, 0.13, 0.075" shift="0.10" index="{index}" _skipIf="last_mission_failed" _autoremap="true" />
       <Sequence>
         <ForceSuccess>
           <RetryUntilSuccessful num_attempts="10">
@@ -258,7 +259,7 @@
             <Rotation final_pose="{PrevGoal}" degree="180" base="{PrevGoal}" />
             <SubTree ID="PlaceTwoLevels" back="0.2, 0.1, 0.05" forward="0.15, 0.095, 0.065" hasCompleteMaterial="{hasCompleteMaterial}" index="17" shift="0" _autoremap="true" />
           </Sequence>
-          <SubTree ID="ThreeLevelsBot1new" back="0.2, 0.1, 0.05" forward="0.15, 0.1, 0.065" shift="0" index="17" hasCompleteMaterial="{hasCompleteMaterial}" _autoremap="true" />
+          <SubTree ID="ThreeLevelsBot1new" back="0.2, 0.1, 0.18" forward="0.15, 0.11, 0.065" shift="0" index="17" hasCompleteMaterial="{hasCompleteMaterial}" _autoremap="true" />
         </Switch2>
       </Sequence>
     </Sequence>
@@ -278,7 +279,7 @@
         </Fallback>
         <SubTree ID="MissionBeforeTwoLevels" />
       </Parallel>
-      <SubTree ID="TwoLevelsBot1new" back="0.2, 0.1, 0.05" forward="0.105, 0.12, 0.075" shift="0.11" index="{index}" _skipIf="last_mission_failed" _autoremap="true" />
+      <SubTree ID="TwoLevelsBot1new" back="0.2, 0.1, 0.05" forward="0.105, 0.13, 0.075" shift="0.1" index="{index}" _skipIf="last_mission_failed" _autoremap="true" />
       <Sequence>
         <ForceSuccess>
           <MissionChecker level="{level}" remap_base="{base}" mission_type="back" base_index="18">
@@ -289,7 +290,7 @@
         <Switch2 case_1="1" case_2="2" variable="{level}">
           <SubTree ID="PlaceOneLevel" index="18" hasCompleteMaterial="{hasCompleteMaterial}" _autoremap="true" />
           <SubTree ID="PlaceTwoLevels" back="0.2, 0.1, 0.05" forward="0.15, 0.095, 0.065" hasCompleteMaterial="{hasCompleteMaterial}" index="18" shift="0" _autoremap="true" />
-          <SubTree ID="ThreeLevelsBot1new" back="0.2, 0.1, 0.05" forward="0.15, 0.1, 0.065" shift="0" index="18" hasCompleteMaterial="{hasCompleteMaterial}" _autoremap="true" />
+          <SubTree ID="ThreeLevelsBot1new" back="0.2, 0.1, 0.18" forward="0.15, 0.11, 0.065" shift="0" index="18" hasCompleteMaterial="{hasCompleteMaterial}" _autoremap="true" />
         </Switch2>
       </Sequence>
     </Sequence>
@@ -320,7 +321,7 @@
         <Switch2 case_1="1" case_2="2" variable="{level}">
           <SubTree ID="PlaceOneLevel" index="17" hasCompleteMaterial="{hasCompleteMaterial}" _autoremap="true" />
           <SubTree ID="PlaceTwoLevels" back="0.2, 0.1, 0.05" forward="0.15, 0.095, 0.065" hasCompleteMaterial="{hasCompleteMaterial}" index="17" shift="0" _autoremap="true" />
-          <SubTree ID="ThreeLevelsBot1new" back="0.2, 0.1, 0.05" forward="0.15, 0.1, 0.065" shift="0" index="17" hasCompleteMaterial="{hasCompleteMaterial}" _autoremap="true" />
+          <SubTree ID="ThreeLevelsBot1new" back="0.2, 0.1, 0.18" forward="0.15, 0.1, 0.065" shift="0" index="17" hasCompleteMaterial="{hasCompleteMaterial}" _autoremap="true" />
         </Switch2>
       </Sequence>
     </Sequence>
@@ -362,7 +363,7 @@
         <Switch2 case_1="1" case_2="2" variable="{level}">
           <SubTree ID="PlaceOneLevel" index="13" hasCompleteMaterial="{hasCompleteMaterial}" _autoremap="true" />
           <SubTree ID="PlaceTwoLevels" back="0.2, 0.1, 0.05" forward="0.15, 0.095, 0.065" hasCompleteMaterial="{hasCompleteMaterial}" index="13" shift="0" _autoremap="true" />
-          <SubTree ID="ThreeLevelsBot1new" back="0.2, 0.1, 0.05" forward="0.15, 0.1, 0.065" hasCompleteMaterial="{hasCompleteMaterial}" index="13" shift="-0.055" _autoremap="true" />
+          <SubTree ID="ThreeLevelsBot1new" back="0.2, 0.1, 0.18" forward="0.15, 0.1, 0.065" hasCompleteMaterial="{hasCompleteMaterial}" index="13" shift="-0.055" _autoremap="true" />
         </Switch2>
         <ForceSuccess>
           <RetryUntilSuccessful num_attempts="10">
@@ -379,7 +380,7 @@
         <Switch2 case_1="1" case_2="2" variable="{level}">
           <SubTree ID="PlaceOneLevel" index="13" hasCompleteMaterial="{hasCompleteMaterial}" _autoremap="true" />
           <SubTree ID="PlaceTwoLevels" back="0.2, 0.1, 0.05" forward="0.15, 0.095, 0.065" hasCompleteMaterial="{hasCompleteMaterial}" index="13" shift="0" _autoremap="true" />
-          <SubTree ID="ThreeLevelsBot1new" back="0.2, 0.1, 0.05" forward="0.15, 0.1, 0.065" hasCompleteMaterial="{hasCompleteMaterial}" index="13" shift="-0.055" _autoremap="true" />
+          <SubTree ID="ThreeLevelsBot1new" back="0.2, 0.1, 0.18" forward="0.15, 0.1, 0.065" hasCompleteMaterial="{hasCompleteMaterial}" index="13" shift="-0.055" _autoremap="true" />
         </Switch2>
       </Sequence>
     </Sequence>
@@ -644,7 +645,7 @@
               </Timeout>
             </ForceSuccess>
             <Sleep msec="500"/>
-            <SubTree ID="DockingSubTree" base="{PrevGoal}" dock_type="{DOCK_DIR}" final_pose="{PrevGoal}" isPureDocking="1" offset="{BACK_L}" retry="100" shift="0" sleep="100" timeout="6000" _autoremap="true" />
+            <SubTree ID="DockingSubTree" base="{PrevGoal}" dock_type="{DOCK_DIR}" final_pose="{PrevGoal}" isPureDocking="1" offset="{BACK_S}" retry="100" shift="0" sleep="100" timeout="6000" _autoremap="true" />
             <ForceSuccess>
               <Timeout msec="100">
                 <FirmwareMission mission_status="{x}" mission_type="25" _description="close back side arm" />
