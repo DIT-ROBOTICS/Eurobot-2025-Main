@@ -174,8 +174,8 @@ public:
 
             // // ReadJsonFile(file_path);
             // /* temp: will be delete and get the `plan_code_` from web pannel */ 
-            this->declare_parameter<int>("plan_code", 0);  // ten: plan, one: color
-            this->get_parameter("plan_code", plan_code_);
+            // this->declare_parameter<int>("plan_code", 0);  // ten: plan, one: color
+            // this->get_parameter("plan_code", plan_code_);
 
             /* choose plan from pannel and get robot init position */
             if (plan_code_) {
