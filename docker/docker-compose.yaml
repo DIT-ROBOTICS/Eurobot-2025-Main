@@ -31,6 +31,7 @@ services:
       # Mount app resources into container.
       - ../:/home/ros/Eurobot-2025-Main
       - /home/share/data:/home/ros/share/data
+      - /home/main/Eurobot-2025-Main/docker/entrypoint.sh:/entrypoint.sh
 
       # Mount local timezone into container.
       - /etc/timezone:/etc/timezone:ro
@@ -46,3 +47,22 @@ services:
     entrypoint: ["/entrypoint.sh"]
     command: ["${CUSTOM_COMMAND:-/bin/bash}"]
     # command: ["bash", "-c", " && ${CUSTOM_COMMAND:-/bin/bash}"]
+
+  micro-ros:
+    image: microros/micro-ros-agent:cyclone
+    container_name: micro-ros
+    privileged: true
+    network_mode: host
+    volumes:
+      - /dev/mission:/dev/mission
+    devices:
+      - /dev/bus/usb:/dev/bus/usb
+    device_cgroup_rules:
+      - 'c 189:* rmw'
+      - 'c 188:* rmw'
+    environment:
+      - ROS_DOMAIN_ID=${ROS_DOMAIN_ID}
+      - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+    restart: unless-stopped
+    command: ["serial", "-b", "115200", "-D", "/dev/mission"]
+    stop_grace_period: 1s

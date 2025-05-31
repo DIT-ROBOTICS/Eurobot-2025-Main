@@ -151,8 +151,8 @@ class FirmwareMission : public BT::StatefulActionNode
 public:
   FirmwareMission(const std::string& name, const BT::NodeConfig& config, const RosNodeParams& params, BT::Blackboard::Ptr blackboard)
     : BT::StatefulActionNode(name, config), node_(params.nh.lock()), blackboard_(blackboard), rate_(30) {
-    publisher_ = node_->create_publisher<std_msgs::msg::Int32>("mission_type", 10);
-    subscription_ = node_->create_subscription<std_msgs::msg::Int32>("mission_status", 10, std::bind(&FirmwareMission::mission_callback, this, std::placeholders::_1));
+    publisher_ = node_->create_publisher<std_msgs::msg::Int32>("mission_type",  2);
+    subscription_ = node_->create_subscription<std_msgs::msg::Int32>("mission_status", 2, std::bind(&FirmwareMission::mission_callback, this, std::placeholders::_1));
   }
 
   /* Node remapping function */

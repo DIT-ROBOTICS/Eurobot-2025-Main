@@ -372,6 +372,7 @@ BT::NodeStatus FirmwareMission::stopStep() {
         subscription_.reset();
         return BT::NodeStatus::SUCCESS;
     } else if (mission_status_ == 0 || (mission_status_ == 1 && mission_stamp_ != mission_type_)) {
+        RCLCPP_INFO(node_->get_logger(), "mission samp: %d, type: %d", mission_stamp_, mission_type_);
         return BT::NodeStatus::RUNNING;
     } else if (mission_status_ == -1) {
         // RCLCPP_INFO(node_->get_logger(), "Mission failed");
@@ -380,7 +381,7 @@ BT::NodeStatus FirmwareMission::stopStep() {
         subscription_.reset();
         return BT::NodeStatus::FAILURE;
     } else {
-        // RCLCPP_INFO(node_->get_logger(), "Unknown status code, Stop mission");
+        RCLCPP_INFO(node_->get_logger(), "Unknown status code, Stop mission");
         setOutput<int>("mission_status", -1);
         subscription_.reset();
         return BT::NodeStatus::FAILURE;
@@ -394,16 +395,16 @@ void FirmwareMission::mission_callback(const std_msgs::msg::Int32::SharedPtr sub
         int temp_ = sub_msg->data;
         mission_stamp_ = temp_ / 10;
         mission_status_ = temp_ % 10;
-        // RCLCPP_INFO(node_->get_logger(), "mission type: %d, return: %d, status: %d", mission_type_, mission_stamp_, mission_status_);
+        RCLCPP_INFO(node_->get_logger(), "mission type: %d, return: %d, status: %d", mission_type_, mission_stamp_, mission_status_);
     }
 }
 
 BT::NodeStatus FirmwareMission::onStart() {
-    // RCLCPP_INFO(node_->get_logger(), "Node start");
+    RCLCPP_INFO(node_->get_logger(), "Node start");
     getInput<int>("mission_type", mission_type_);
     blackboard_->get<int>("mission_progress", mission_progress_);
-    // RCLCPP_INFO(node_->get_logger(), "mission_type: %d", mission_type_);
-    // RCLCPP_INFO(node_->get_logger(), "-----------------");
+    RCLCPP_INFO(node_->get_logger(), "mission_type: %d", mission_type_);
+    RCLCPP_INFO(node_->get_logger(), "-----------------");
     return BT::NodeStatus::RUNNING;
 }
 
@@ -411,7 +412,7 @@ BT::NodeStatus FirmwareMission::onRunning() {
     pub_msg.data = mission_type_;
     publisher_->publish(pub_msg);
     // RCLCPP_INFO(node_->get_logger(), "mission_progress: %d", mission_progress_);
-    // RCLCPP_INFO(node_->get_logger(), "mission_type: %d", mission_type_);
+    RCLCPP_INFO(node_->get_logger(), "mission_type: %d", mission_type_);
     rate_.sleep();
     return stopStep();
     // **failure test**
