@@ -373,11 +373,11 @@
             <SubTree ID="MissionPoint2" _autoremap="true" />
           </ForceSuccess>
           <ForceSuccess>
-            <Sleep msec="100000"/>
-            <!-- <SubTree ID="MissionPoint3_2" _autoremap="true" /> -->
+            <!-- <Sleep msec="100000"/> -->
+            <SubTree ID="MissionPoint3_11" _autoremap="true" />
           </ForceSuccess>
         </Sequence>
-        <Sleep msec="96000"/>
+        <Sleep msec="97000"/>
       </Parallel>
       <StopRobot />
       <!-- <ForceSuccess>
