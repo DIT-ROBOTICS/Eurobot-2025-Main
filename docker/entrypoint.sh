@@ -57,8 +57,7 @@ fi
 if [ "${AUTO_RUN}" = "true" ]; then
     echo "Launching main program..."
     source "$ROS_WS/install/setup.bash"
-    ros2 launch bt_app_2025 bt_launch.py 2>&1 | tee $ROS_WS/bag/main_log.txt
-    ros2 launch bt_app_2025 bag.launch
+    ros2 launch bt_app_2025 bt_launch.py | tee -a main_log.txt
     # exit 0
 fi
 

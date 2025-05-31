@@ -151,7 +151,7 @@
           <FirmwareMission mission_status="{x}" mission_type="1" _description=""/>
         </Timeout>
       </RetryUntilSuccessful> -->
-      <!-- <ForceSuccess>
+      <ForceSuccess>
         <Timeout msec="6000">
           <FirmwareMission mission_status="{x}" mission_type="22" _description=""/>
         </Timeout>
@@ -161,18 +161,6 @@
           <FirmwareMission mission_status="{x}" mission_type="21" _description=""/>
         </Timeout>
       </ForceSuccess>
-      <Sleep msec="1000"/> -->
-      <!-- <ForceSuccess>
-        <Timeout msec="6000">
-          <FirmwareMission mission_status="{x}" mission_type="24" _description=""/>
-        </Timeout>
-      </ForceSuccess> -->
-      <Sleep msec="6000"/>
-      <!-- <ForceSuccess>
-        <Timeout msec="6000">
-          <FirmwareMission mission_status="{x}" mission_type="21" _description=""/>
-        </Timeout>
-      </ForceSuccess>
       <Sleep msec="1000"/>
       <ForceSuccess>
         <Timeout msec="6000">
@@ -190,8 +178,158 @@
         <Timeout msec="6000">
           <FirmwareMission mission_status="{x}" mission_type="24" _description=""/>
         </Timeout>
-      </ForceSuccess> -->
-      <!-- <Sleep msec="1000"/>
+      </ForceSuccess>
+      <ForceSuccess>
+        <Timeout msec="6000">
+          <FirmwareMission mission_status="{x}" mission_type="21" _description=""/>
+        </Timeout>
+      </ForceSuccess>
+      <Sleep msec="1000"/>
+      <ForceSuccess>
+        <Timeout msec="6000">
+          <FirmwareMission mission_status="{x}" mission_type="24" _description=""/>
+        </Timeout>
+      </ForceSuccess>
+      <Sleep msec="6000"/>
+      <ForceSuccess>
+        <Timeout msec="6000">
+          <FirmwareMission mission_status="{x}" mission_type="21" _description=""/>
+        </Timeout>
+      </ForceSuccess>
+      <Sleep msec="1000"/>
+      <ForceSuccess>
+        <Timeout msec="6000">
+          <FirmwareMission mission_status="{x}" mission_type="24" _description=""/>
+        </Timeout>
+      </ForceSuccess>
+      <ForceSuccess>
+        <Timeout msec="6000">
+          <FirmwareMission mission_status="{x}" mission_type="21" _description=""/>
+        </Timeout>
+      </ForceSuccess>
+      <Sleep msec="1000"/>
+      <ForceSuccess>
+        <Timeout msec="6000">
+          <FirmwareMission mission_status="{x}" mission_type="24" _description=""/>
+        </Timeout>
+      </ForceSuccess>
+      <Sleep msec="6000"/>
+      <ForceSuccess>
+        <Timeout msec="6000">
+          <FirmwareMission mission_status="{x}" mission_type="21" _description=""/>
+        </Timeout>
+      </ForceSuccess>
+      <Sleep msec="1000"/>
+      <ForceSuccess>
+        <Timeout msec="6000">
+          <FirmwareMission mission_status="{x}" mission_type="24" _description=""/>
+        </Timeout>
+      </ForceSuccess>
+      <ForceSuccess>
+        <Timeout msec="6000">
+          <FirmwareMission mission_status="{x}" mission_type="21" _description=""/>
+        </Timeout>
+      </ForceSuccess>
+      <Sleep msec="1000"/>
+      <ForceSuccess>
+        <Timeout msec="6000">
+          <FirmwareMission mission_status="{x}" mission_type="24" _description=""/>
+        </Timeout>
+      </ForceSuccess>
+      <Sleep msec="6000"/>
+      <ForceSuccess>
+        <Timeout msec="6000">
+          <FirmwareMission mission_status="{x}" mission_type="21" _description=""/>
+        </Timeout>
+      </ForceSuccess>
+      <Sleep msec="1000"/>
+      <ForceSuccess>
+        <Timeout msec="6000">
+          <FirmwareMission mission_status="{x}" mission_type="24" _description=""/>
+        </Timeout>
+      </ForceSuccess>
+      <ForceSuccess>
+        <Timeout msec="6000">
+          <FirmwareMission mission_status="{x}" mission_type="21" _description=""/>
+        </Timeout>
+      </ForceSuccess>
+      <Sleep msec="1000"/>
+      <ForceSuccess>
+        <Timeout msec="6000">
+          <FirmwareMission mission_status="{x}" mission_type="24" _description=""/>
+        </Timeout>
+      </ForceSuccess>
+      <Sleep msec="6000"/>
+      <ForceSuccess>
+        <Timeout msec="6000">
+          <FirmwareMission mission_status="{x}" mission_type="21" _description=""/>
+        </Timeout>
+      </ForceSuccess>
+      <Sleep msec="1000"/>
+      <ForceSuccess>
+        <Timeout msec="6000">
+          <FirmwareMission mission_status="{x}" mission_type="24" _description=""/>
+        </Timeout>
+      </ForceSuccess>
+      <ForceSuccess>
+        <Timeout msec="6000">
+          <FirmwareMission mission_status="{x}" mission_type="21" _description=""/>
+        </Timeout>
+      </ForceSuccess>
+      <Sleep msec="1000"/>
+      <ForceSuccess>
+        <Timeout msec="6000">
+          <FirmwareMission mission_status="{x}" mission_type="24" _description=""/>
+        </Timeout>
+      </ForceSuccess>
+      <Sleep msec="6000"/>
+      <ForceSuccess>
+        <Timeout msec="6000">
+          <FirmwareMission mission_status="{x}" mission_type="21" _description=""/>
+        </Timeout>
+      </ForceSuccess>
+      <Sleep msec="1000"/>
+      <ForceSuccess>
+        <Timeout msec="6000">
+          <FirmwareMission mission_status="{x}" mission_type="24" _description=""/>
+        </Timeout>
+      </ForceSuccess>
+      <ForceSuccess>
+        <Timeout msec="6000">
+          <FirmwareMission mission_status="{x}" mission_type="21" _description=""/>
+        </Timeout>
+      </ForceSuccess>
+      <Sleep msec="1000"/>
+      <ForceSuccess>
+        <Timeout msec="6000">
+          <FirmwareMission mission_status="{x}" mission_type="24" _description=""/>
+        </Timeout>
+      </ForceSuccess>
+      <Sleep msec="6000"/>
+      <ForceSuccess>
+        <Timeout msec="6000">
+          <FirmwareMission mission_status="{x}" mission_type="21" _description=""/>
+        </Timeout>
+      </ForceSuccess>
+      <Sleep msec="1000"/>
+      <ForceSuccess>
+        <Timeout msec="6000">
+          <FirmwareMission mission_status="{x}" mission_type="24" _description=""/>
+        </Timeout>
+      </ForceSuccess>
+      <Sleep msec="6000"/>
+      <ForceSuccess>
+        <Timeout msec="6000">
+          <FirmwareMission mission_status="{x}" mission_type="21" _description=""/>
+        </Timeout>
+      </ForceSuccess>
+      <Sleep msec="1000"/>
+      <ForceSuccess>
+        <Timeout msec="6000">
+          <FirmwareMission mission_status="{x}" mission_type="24" _description=""/>
+        </Timeout>
+      </ForceSuccess>
+      <Sleep msec="1000"/>
       <ForceSuccess>
         <Timeout msec="6000">
           <FirmwareMission mission_status="{x}" mission_type="20" _description=""/>
@@ -208,12 +346,12 @@
         <Timeout msec="6000">
           <FirmwareMission mission_status="{x}" mission_type="20" _description=""/>
         </Timeout>
-      </ForceSuccess> -->
-      <!-- <ForceSuccess>
+      </ForceSuccess>
+      <ForceSuccess>
         <Timeout msec="1000">
           <FirmwareMission mission_status="{x}" mission_type="0" _description=""/>
         </Timeout>
-      </ForceSuccess> -->
+      </ForceSuccess>
       <Sleep msec="50000" />
     </Sequence>
   </BehaviorTree>
@@ -320,7 +458,7 @@
             <Rotation final_pose="{PrevGoal}" degree="180" base="{PrevGoal}" />
             <SubTree ID="PlaceTwoLevels" back="0.2, 0.1, 0.05" forward="0.15, 0.095, 0.065" hasCompleteMaterial="{hasCompleteMaterial}" index="13" shift="0" _autoremap="true" />
           </Sequence>
-          <SubTree ID="ThreeLevelsBot1new" back="0.2, 0.1, 0.05" forward="0.15, 0.1, 0.065" shift="0" index="13" hasCompleteMaterial="{hasCompleteMaterial}" _autoremap="true" />
+          <SubTree ID="ThreeLevelsBot1new" back="0.2, 0.1, 0.18" forward="0.15, 0.1, 0.065" shift="0" index="13" hasCompleteMaterial="{hasCompleteMaterial}" _autoremap="true" />
         </Switch2>
       </Sequence>
     </Sequence>
@@ -351,7 +489,7 @@
         <Switch2 case_1="1" case_2="2" variable="{level}">
           <SubTree ID="PlaceOneLevel" index="14" hasCompleteMaterial="{hasCompleteMaterial}" _autoremap="true" />
           <SubTree ID="PlaceTwoLevels" back="0.2, 0.1, 0.05" forward="0.15, 0.095, 0.065" hasCompleteMaterial="{hasCompleteMaterial}" index="14" shift="0" _autoremap="true" />
-          <SubTree ID="ThreeLevelsBot1new" back="0.2, 0.1, 0.05" forward="0.15, 0.1, 0.065" shift="0" index="14" hasCompleteMaterial="{hasCompleteMaterial}" _autoremap="true" />
+          <SubTree ID="ThreeLevelsBot1new" back="0.2, 0.1, 0.18" forward="0.15, 0.1, 0.065" shift="0" index="14" hasCompleteMaterial="{hasCompleteMaterial}" _autoremap="true" />
         </Switch2>
       </Sequence>
     </Sequence>
@@ -701,7 +839,7 @@
               </Timeout>
             </ForceSuccess>
             <Sleep msec="500"/>
-            <SubTree ID="DockingSubTree" base="{PrevGoal}" dock_type="{DOCK_DIR}" final_pose="{PrevGoal}" isPureDocking="1" offset="{BACK_L}" retry="100" shift="0" sleep="100" timeout="6000" _autoremap="true" />
+            <SubTree ID="DockingSubTree" base="{PrevGoal}" dock_type="{DOCK_DIR}" final_pose="{PrevGoal}" isPureDocking="1" offset="{BACK_S}" retry="100" shift="0" sleep="100" timeout="6000" _autoremap="true" />
             <ForceSuccess>
               <Timeout msec="100">
                 <FirmwareMission mission_status="{x}" mission_type="25" _description="close back side arm" />

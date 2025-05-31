@@ -2,7 +2,7 @@ import os
 import launch_ros.actions
 
 from launch import LaunchDescription
-from launch.actions import TimerAction
+from launch.actions import TimerAction, ExecuteProcess
 from launch_ros.actions import Node
 # for including other launch file
 from launch.actions import IncludeLaunchDescription
@@ -79,6 +79,16 @@ def generate_launch_description():
             )
         ]
     )
+    bag_exec = TimerAction(
+        period=5.0,
+        actions=[
+            ExecuteProcess(
+                cmd=['ros2', 'bag', 'record', '/candidates', '/scan', '/goal_pose', '/local_filter', '/odom2map', '/final_pose', '/lidar_pose', '/raw_obstacles_visualization_pcl', '/rival/final_pose', '/cmd_vel', '/tf_static', '/tf', '-o', '/home/ros/Eurobot-2025-Main/bag/0530-2'],
+                output='log',
+                shell=False
+            )
+        ]
+    )
     firmware_node = Node(
         package='micro_ros_agent',
         executable='micro_ros_agent',
@@ -93,7 +103,8 @@ def generate_launch_description():
         finisher_arg,
         nav_parameters_arg,
         map_points_arg,
-        firmware_node
+        firmware_node,
+        bag_exec
         # TimerAction(
         #     period = 1.0,
         #     actions = [Node(
