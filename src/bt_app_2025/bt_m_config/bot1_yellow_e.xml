@@ -1,10 +1,25 @@
 <?xml version='1.0' encoding='utf-8'?>
 <root><BehaviorTree ID="BannerMission">
-    <Sequence>
-      <MySetBlackboard new_value="{NOT_NOW}" blackboard_value="{NOT_NOW}" blackboard_key="NOT_NOW" />
-      <Sequence _successIf="NOT_NOW">
-        <BannerChecker remap_banner_place="{remap_banner_place}" banner_place="{BANNER_PLACE}" />
-        <Parallel failure_count="1" success_count="2">
+    <Fallback>
+      <Sequence>
+        <MySetBlackboard new_value="{NOT_NOW}" blackboard_value="{NOT_NOW}" blackboard_key="NOT_NOW" />
+        <Sequence _successIf="NOT_NOW">
+          <BannerChecker remap_banner_place="{remap_banner_place}" banner_place="{BANNER_PLACE}" />
+          <Parallel failure_count="1" success_count="2">
+            <ForceSuccess>
+              <Timeout msec="6000">
+                <FirmwareMission mission_status="{x}" mission_type="30" _description="lift the front grabber" />
+              </Timeout>
+            </ForceSuccess>
+            <RetryUntilSuccessful num_attempts="10">
+              <Switch3 case_1="0" case_2="1" case_3="2" variable="{remap_banner_place}">
+                <Navigation final_pose="{PrevGoal}" dock_type="dock_y_loose_linearBoost" goal="2.7, 0.19, 3" />
+                <Navigation final_pose="{PrevGoal}" dock_type="dock_y_loose_linearBoost" goal="1.175, 0.19, 3" />
+                <Navigation final_pose="{PrevGoal}" dock_type="dock_y_loose_linearBoost" goal="0.75, 0.19, 3" />
+                <GetLocation locaization_target="robot" pose="{PrevGoal}" />
+              </Switch3>
+            </RetryUntilSuccessful>
+          </Parallel>
           <ForceSuccess>
             <Timeout msec="6000">
               <FirmwareMission mission_status="{x}" mission_type="30" _description="lift the front grabber" />

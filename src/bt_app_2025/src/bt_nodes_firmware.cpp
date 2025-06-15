@@ -176,24 +176,16 @@ PortsList MissionSuccess::providedPorts() {
 }
 
 BT::NodeStatus MissionSuccess::tick() {
-    int baseIndex_ = getInput<int>("base_index").value();
+    base_index_ = getInput<int>("base_index").value();
     int levels_ = getInput<int>("levels").value();
     bool lastMissionFailed_;
-    int score_;
 
     lastMissionFailed_ = false;
     blackboard_->set<bool>("last_mission_failed", lastMissionFailed_);
     blackboard_->get<int>("front_materials", front_materials_);
     blackboard_->get<int>("back_materials", back_materials_);
-    if (baseIndex_ > 10) {   // finish placement mission
-        // update mission_points_status_
-        blackboard_->get<std_msgs::msg::Int32MultiArray>("mission_points_status", mission_points_status_);
-        mission_points_status_.data[baseIndex_ - 11]++;
-        blackboard_->set<std_msgs::msg::Int32MultiArray>("mission_points_status", mission_points_status_);
-        // update score
-        blackboard_->get<int>("score_from_main", score_);
-        score_ += (pow(2, levels_) - 1) * 4;
-        blackboard_->set<int>("score_from_main", score_);
+    blackboard_->get<int>("score_from_main", score_);
+    if (base_index_ > 10) {   // finish placement mission
         switch (levels_) {
             case 1:
                 back_materials_ -= 1;
@@ -208,16 +200,18 @@ BT::NodeStatus MissionSuccess::tick() {
             default:
                 break;
         }
-        RCLCPP_INFO_STREAM(node_->get_logger(), "place materials at point " << baseIndex_ << " successfully, data: " << mission_points_status_.data[baseIndex_ - 11]);
-        // To Do: can merge the messages of mission_points_status & score_from_main in 1 parameter
-
-        // send the message to vision
-        mission_finished.data = baseIndex_;
+        // update mission_points_status_
+        blackboard_->get<std_msgs::msg::Int32MultiArray>("mission_points_status", mission_points_status_);
+        mission_points_status_.data[base_index_ - 11]++;
+        blackboard_->set<std_msgs::msg::Int32MultiArray>("mission_points_status", mission_points_status_);
+        // update score
+        score_ += (pow(2, levels_) - 1) * 4;
+        // send the finished area index to vision
+        // publish score from main
+        blackboard_->set<int>("score_from_main", score_);
         std::thread{std::bind(&MissionSuccess::timer_publisher, this)}.detach();
-    } else if (baseIndex_ >= 0) {  // finish taking material
-        blackboard_->get<std_msgs::msg::Int32MultiArray>("materials_info", materials_info_);
-        materials_info_.data[baseIndex_] = 0;
-        blackboard_->set<std_msgs::msg::Int32MultiArray>("materials_info", materials_info_);
+        RCLCPP_INFO_STREAM(node_->get_logger(), "place materials at point " << base_index_ << " successfully, data: " << mission_points_status_.data[base_index_ - 11]);
+    } else if (base_index_ >= 0) {  // finish taking material
         switch (levels_) {
             case 1:
                 back_materials_ += 2;
@@ -228,9 +222,17 @@ BT::NodeStatus MissionSuccess::tick() {
             default:
                 break;
         }
-        RCLCPP_INFO_STREAM(node_->get_logger(), "take materials at point " << baseIndex_ << " successfully");
-    } else { // finish banner mission
-        mission_finished.data = baseIndex_;
+        blackboard_->get<std_msgs::msg::Int32MultiArray>("materials_info", materials_info_);
+        materials_info_.data[base_index_] = 0;
+        blackboard_->set<std_msgs::msg::Int32MultiArray>("materials_info", materials_info_);
+        RCLCPP_INFO_STREAM(node_->get_logger(), "take materials at point " << base_index_ << " successfully");
+    } else if (base_index_ == -2) { // finish banner mission
+        score_ += 20;
+        blackboard_->set<int>("score_from_main", score_);
+        std::thread{std::bind(&MissionSuccess::timer_publisher, this)}.detach();
+    } else { // go home: -1
+        score_ += 10;
+        blackboard_->set<int>("score_from_main", score_);
         std::thread{std::bind(&MissionSuccess::timer_publisher, this)}.detach();
     }
     blackboard_->set<int>("front_materials", front_materials_);
@@ -240,6 +242,8 @@ BT::NodeStatus MissionSuccess::tick() {
 
 void MissionSuccess::timer_publisher() {
     rclcpp::Rate rate(100);
+    mission_finished.data = base_index_;
+    ideal_score.data = score_;
 
     while (rclcpp::ok() && publish_count < publish_times) { 
         vision_pub_->publish(mission_finished);

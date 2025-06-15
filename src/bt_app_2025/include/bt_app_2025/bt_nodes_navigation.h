@@ -226,6 +226,7 @@ public:
     static BT::PortsList providedPorts();
     BT::NodeStatus tick() override;
 private:
+    bool CheckCanShift(const int index_, const double rivalDirect_);
     BT::Blackboard::Ptr blackboard_;
     rclcpp::Node::SharedPtr node_;
     // for tf listener
