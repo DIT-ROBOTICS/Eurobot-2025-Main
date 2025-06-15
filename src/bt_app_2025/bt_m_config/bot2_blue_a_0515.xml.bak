@@ -47,7 +47,7 @@
                      _autoremap="true"/>
           </ForceSuccess>
         </Sequence>
-        <Delay delay_msec="150000">
+        <Delay delay_msec="100000">
           <Sleep msec="1"/>
         </Delay>
       </Parallel>
@@ -86,73 +86,42 @@
                  isPureDocking="0"
                  dock_type="dock_y_precise_gentle_slow"
                  shift="0"
-                 offset="0.2"
-                 base="1.91, 0.75, 1"
+                 offset="0.22"
+                 base="1.905, 0.7, 1"
                  _description="material point 9"/>
       </RetryUntilSuccessful>
-      <Parallel failure_count="2"
-                success_count="1">
-        <RetryUntilSuccessful num_attempts="2">
-          <Docking final_pose="{PrevGoal}"
-                   isPureDocking="1"
-                   dock_type="dock_y_precise_gentle_slow"
-                   shift="0"
-                   offset="0.1"
-                   base="{PrevGoal}"
-                   _description="material point 9"/>
-        </RetryUntilSuccessful>
-        <ForceSuccess>
-          <Timeout msec="6000">
-            <FirmwareMission mission_status="{x}"
-                             mission_type="15"
-                             _description="take the raw material"/>
-          </Timeout>
-        </ForceSuccess>
-      </Parallel>
+      <ForceSuccess>
+        <Timeout msec="6000">
+          <FirmwareMission mission_status="{x}"
+                           mission_type="12"
+                           _description="take the raw material"/>
+        </Timeout>
+      </ForceSuccess>
       <RetryUntilSuccessful num_attempts="2">
         <Docking final_pose="{PrevGoal}"
                  isPureDocking="0"
                  dock_type="dock_y_precise_gentle_slow"
                  shift="0"
-                 offset="-0.2"
-                 base="2.23, 0.5, 1"
-                 _description="material point 9"/>
-      </RetryUntilSuccessful>
-      <Parallel failure_count="2"
-                success_count="1">
-        <RetryUntilSuccessful num_attempts="2">
-          <Docking final_pose="{PrevGoal}"
-                   isPureDocking="1"
-                   dock_type="dock_y_precise_gentle_slow"
-                   shift="0"
-                   offset="-0.1"
-                   base="{PrevGoal}"
-                   _description="material point 7"/>
-        </RetryUntilSuccessful>
-        <ForceSuccess>
-          <Timeout msec="6000">
-            <FirmwareMission mission_status="{x}"
-                             mission_type="25"
-                             _description="take the raw material"/>
-          </Timeout>
-        </ForceSuccess>
-      </Parallel>
-      <RetryUntilSuccessful num_attempts="2">
-        <Docking final_pose="{PrevGoal}"
-                 isPureDocking="0"
-                 dock_type="dock_x_precise_linearBoost"
-                 shift="0"
-                 offset="0"
-                 base="0.285, 0.85, 2"
-                 _description="mission point 3"/>
+                 offset="-0.28"
+                 base="2.23, 0.6, 1"
+                 _description="material point 7"/>
       </RetryUntilSuccessful>
       <ForceSuccess>
-        <Timeout msec="5000">
+        <Timeout msec="6000">
           <FirmwareMission mission_status="{x}"
-                           mission_type="1222"
+                           mission_type="22"
                            _description="take the raw material"/>
         </Timeout>
       </ForceSuccess>
+      <RetryUntilSuccessful num_attempts="2">
+        <Docking final_pose="{PrevGoal}"
+                 isPureDocking="0"
+                 dock_type="dock_x_precise_linearBoost_delaySpin"
+                 shift="0"
+                 offset="0"
+                 base="0.3, 0.83, 2"
+                 _description="mission point 3"/>
+      </RetryUntilSuccessful>
       <ForceSuccess>
         <Timeout msec="5000">
           <FirmwareMission mission_status="{x}"
@@ -163,19 +132,28 @@
       <RetryUntilSuccessful num_attempts="2">
         <Docking final_pose="{PrevGoal}"
                  isPureDocking="0"
-                 dock_type="dock_x_slow_delaySpin"
+                 dock_type="dock_x_fast"
                  shift="0"
                  offset="0"
-                 base="0.9, 0.85, 0"
+                 base="0.7, 0.83, 2"
                  _description="mission point 3"/>
       </RetryUntilSuccessful>
       <RetryUntilSuccessful num_attempts="2">
         <Docking final_pose="{PrevGoal}"
                  isPureDocking="0"
-                 dock_type="dock_x_precise_slow"
+                 dock_type="dock_x_slow"
                  shift="0"
                  offset="0"
-                 base="0.5, 0.85, 0"
+                 base="0.7, 0.83, 0"
+                 _description="mission point 3"/>
+      </RetryUntilSuccessful>
+      <RetryUntilSuccessful num_attempts="2">
+        <Docking final_pose="{PrevGoal}"
+                 isPureDocking="1"
+                 dock_type="dock_x_precise"
+                 shift="0"
+                 offset="-0.20"
+                 base="{PrevGoal}"
                  _description="mission point 3"/>
       </RetryUntilSuccessful>
       <ForceSuccess>
@@ -185,15 +163,6 @@
                            _description="take the raw material"/>
         </Timeout>
       </ForceSuccess>
-      <RetryUntilSuccessful num_attempts="2">
-        <Docking final_pose="{PrevGoal}"
-                 isPureDocking="0"
-                 dock_type="dock_x_precise_slow"
-                 shift="0"
-                 offset="0"
-                 base="0.9, 0.85, 0"
-                 _description="mission point 3"/>
-      </RetryUntilSuccessful>
       <RetryUntilSuccessful num_attempts="2">
         <Docking final_pose="{PrevGoal}"
                  isPureDocking="0"
@@ -236,93 +205,53 @@
                  isPureDocking="0"
                  dock_type="dock_x_precise_gentle_slow"
                  shift="0"
-                 offset="0"
+                 offset="0.1"
                  base="2.7, 1.32, 0"
                  _description="material point 9"/>
       </RetryUntilSuccessful>
-      <RetryUntilSuccessful num_attempts="2">
-        <Docking final_pose="{PrevGoal}"
-                 isPureDocking="1"
-                 dock_type="dock_x_precise_gentle_slow"
-                 shift="0"
-                 offset="0.1"
-                 base="{PrevGoal}"
-                 _description="material point 9"/>
-      </RetryUntilSuccessful>
-      <Parallel failure_count="2"
-                success_count="1">
-        <RetryUntilSuccessful num_attempts="2">
-          <Docking final_pose="{PrevGoal}"
-                   isPureDocking="1"
-                   dock_type="dock_x_precise_gentle_slow"
-                   shift="0"
-                   offset="0.02"
-                   base="{PrevGoal}"
-                   _description="material point 7"/>
-        </RetryUntilSuccessful>
-        <ForceSuccess>
-          <Timeout msec="6000">
-            <FirmwareMission mission_status="{x}"
-                             mission_type="15"
-                             _description="take the raw material"/>
-          </Timeout>
-        </ForceSuccess>
-      </Parallel>
+      <Sleep msec="1500"/>
+      <ForceSuccess>
+        <Timeout msec="6000">
+          <FirmwareMission mission_status="{x}"
+                           mission_type="12"
+                           _description="take the raw material"/>
+        </Timeout>
+      </ForceSuccess>
       <RetryUntilSuccessful num_attempts="2">
         <Docking final_pose="{PrevGoal}"
                  isPureDocking="0"
-                 dock_type="dock_y_precise_gentle"
+                 dock_type="dock_y"
                  shift="0"
                  offset="0"
-                 base="2.19, 1.27, 3"
+                 base="2.166, 1.32, 3"
                  _description="material point 7"/>
       </RetryUntilSuccessful>
       <RetryUntilSuccessful num_attempts="2">
         <Docking final_pose="{PrevGoal}"
                  isPureDocking="0"
-                 dock_type="dock_y_precise_gentle"
+                 dock_type="dock_y_precise_gentle_slow"
                  shift="0"
                  offset="0"
-                 base="2.166, 1.55, 3"
+                 base="2.166, 1.59, 3"
                  _description="material point 7"/>
       </RetryUntilSuccessful>
       <RetryUntilSuccessful num_attempts="2">
         <Docking final_pose="{PrevGoal}"
-                 isPureDocking="1"
+                 isPureDocking="0"
                  dock_type="dock_y_precise_gentle_slow"
                  shift="0"
-                 offset="0.05"
-                 base="{PrevGoal}"
+                 offset="0"
+                 base="2.27, 1.59, 3"
                  _description="material point 7"/>
       </RetryUntilSuccessful>
-      <Parallel failure_count="2"
-                success_count="1">
-        <RetryUntilSuccessful num_attempts="2">
-          <Docking final_pose="{PrevGoal}"
-                   isPureDocking="1"
-                   dock_type="dock_y_precise_gentle_slow"
-                   shift="0"
-                   offset="0.02"
-                   base="{PrevGoal}"
-                   _description="material point 7"/>
-        </RetryUntilSuccessful>
-        <ForceSuccess>
-          <Timeout msec="6000">
-            <FirmwareMission mission_status="{x}"
-                             mission_type="25"
-                             _description="take the raw material"/>
-          </Timeout>
-        </ForceSuccess>
-      </Parallel>
-      <RetryUntilSuccessful num_attempts="2">
-        <Docking final_pose="{PrevGoal}"
-                 isPureDocking="1"
-                 dock_type="dock_y_precise_gentle_slow"
-                 shift="0"
-                 offset="-0.1"
-                 base="{PrevGoal}"
-                 _description="material point 7"/>
-      </RetryUntilSuccessful>
+      <Sleep msec="1500"/>
+      <ForceSuccess>
+        <Timeout msec="6000">
+          <FirmwareMission mission_status="{x}"
+                           mission_type="22"
+                           _description="take the raw material"/>
+        </Timeout>
+      </ForceSuccess>
       <RetryUntilSuccessful num_attempts="2">
         <Docking final_pose="{PrevGoal}"
                  isPureDocking="0"
@@ -332,13 +261,6 @@
                  base="1.75, 0.7, 3"
                  _description="mission point 3"/>
       </RetryUntilSuccessful>
-      <ForceSuccess>
-        <Timeout msec="5000">
-          <FirmwareMission mission_status="{x}"
-                           mission_type="1222"
-                           _description="take the raw material"/>
-        </Timeout>
-      </ForceSuccess>
       <RetryUntilSuccessful num_attempts="2">
         <Docking final_pose="{PrevGoal}"
                  isPureDocking="0"
@@ -416,10 +338,10 @@
       <RetryUntilSuccessful num_attempts="2">
         <Docking final_pose="{PrevGoal}"
                  isPureDocking="0"
-                 dock_type="dock_x_slow"
+                 dock_type="dock_x_precise_slow"
                  shift="0"
                  offset="0"
-                 base="0.31, 1.33, 0"
+                 base="0.43, 1.325, 0"
                  _description="material point 9"/>
       </RetryUntilSuccessful>
       <RetryUntilSuccessful num_attempts="2">
@@ -427,36 +349,25 @@
                  isPureDocking="1"
                  dock_type="dock_x_precise_gentle_slow"
                  shift="0"
-                 offset="-0.1"
+                 offset="-0.225"
                  base="{PrevGoal}"
-                 _description="material point 9"/>
+                 _description="material point 7"/>
       </RetryUntilSuccessful>
-      <Parallel failure_count="2"
-                success_count="1">
-        <RetryUntilSuccessful num_attempts="2">
-          <Docking final_pose="{PrevGoal}"
-                   isPureDocking="1"
-                   dock_type="dock_x_precise_gentle_slow"
-                   shift="0"
-                   offset="-0.06"
-                   base="{PrevGoal}"
-                   _description="material point 7"/>
-        </RetryUntilSuccessful>
-        <ForceSuccess>
-          <Timeout msec="6000">
-            <FirmwareMission mission_status="{x}"
-                             mission_type="25"
-                             _description="take the raw material"/>
-          </Timeout>
-        </ForceSuccess>
-      </Parallel>
+      <Sleep msec="1500"/>
+      <ForceSuccess>
+        <Timeout msec="6000">
+          <FirmwareMission mission_status="{x}"
+                           mission_type="22"
+                           _description="take the raw material"/>
+        </Timeout>
+      </ForceSuccess>
       <RetryUntilSuccessful num_attempts="2">
         <Docking final_pose="{PrevGoal}"
                  isPureDocking="0"
                  dock_type="dock_x_precise_fast_delaySpin"
                  shift="0"
                  offset="0"
-                 base="2.74, 0.42, 0"
+                 base="2.6, 0.4, 0"
                  _description="material point 7"/>
       </RetryUntilSuccessful>
       <RetryUntilSuccessful num_attempts="2">
@@ -464,21 +375,31 @@
                  isPureDocking="1"
                  dock_type="dock_x_precise_gentle_slow"
                  shift="0.0"
-                 offset="0.07"
+                 offset="0.19"
                  base="{PrevGoal}"
                  _description="material point 7"/>
       </RetryUntilSuccessful>
+      <Sleep msec="1500"/>
       <ForceSuccess>
         <Timeout msec="6000">
           <FirmwareMission mission_status="{x}"
-                           mission_type="1222"
+                           mission_type="12"
                            _description="take the raw material"/>
         </Timeout>
       </ForceSuccess>
       <RetryUntilSuccessful num_attempts="2">
         <Docking final_pose="{PrevGoal}"
                  isPureDocking="0"
-                 dock_type="dock_y_slow"
+                 dock_type="dock_x_fast"
+                 shift="0"
+                 offset="0"
+                 base="2.35, 0.65, 0"
+                 _description="material point 7"/>
+      </RetryUntilSuccessful>
+      <RetryUntilSuccessful num_attempts="2">
+        <Docking final_pose="{PrevGoal}"
+                 isPureDocking="0"
+                 dock_type="dock_y_fast"
                  shift="0"
                  offset="0"
                  base="1.75, 0.25, 1"
@@ -497,16 +418,7 @@
                  dock_type="dock_y_fast"
                  shift="0"
                  offset="0"
-                 base="1.75, 0.6, 1"
-                 _description="mission point 3"/>
-      </RetryUntilSuccessful>
-      <RetryUntilSuccessful num_attempts="2">
-        <Docking final_pose="{PrevGoal}"
-                 isPureDocking="0"
-                 dock_type="dock_y_slow"
-                 shift="0"
-                 offset="0"
-                 base="1.75, 0.6, 3"
+                 base="1.75, 0.7, 1"
                  _description="mission point 3"/>
       </RetryUntilSuccessful>
       <RetryUntilSuccessful num_attempts="2">
