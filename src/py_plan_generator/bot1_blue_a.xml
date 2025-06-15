@@ -13,9 +13,9 @@
             </ForceSuccess>
             <RetryUntilSuccessful num_attempts="10">
               <Switch3 case_1="0" case_2="1" case_3="2" variable="{remap_banner_place}">
-                <Navigation final_pose="{PrevGoal}" dock_type="dock_y_loose_linearBoost" goal="0.3, 0.17, 3" />
-                <Navigation final_pose="{PrevGoal}" dock_type="dock_y_loose_linearBoost" goal="1.825, 0.17, 3" />
-                <Navigation final_pose="{PrevGoal}" dock_type="dock_y_loose_linearBoost" goal="2.25, 0.17, 3" />
+                <Navigation final_pose="{PrevGoal}" dock_type="dock_y_loose_linearBoost" goal="0.3, 0.19, 3" />
+                <Navigation final_pose="{PrevGoal}" dock_type="dock_y_loose_linearBoost" goal="1.825, 0.19, 3" />
+                <Navigation final_pose="{PrevGoal}" dock_type="dock_y_loose_linearBoost" goal="2.25, 0.19, 3" />
                 <GetLocation locaization_target="robot" pose="{PrevGoal}" />
               </Switch3>
             </RetryUntilSuccessful>
@@ -180,11 +180,6 @@
         <Sleep msec="98000" />
       </Parallel>
       <StopRobot />
-      <ForceSuccess>
-        <Timeout msec="100">
-          <FirmwareMission mission_status="{x}" mission_type="10" _description="arm up" />
-        </Timeout>
-      </ForceSuccess>
       <Parallel failure_count="2" success_count="2">
         <Docking final_pose="{PrevGoal}" isPureDocking="0" dock_type="dock_y_fast" shift="0" offset="0" base="2.55, 1.5, 0" />
         <ForceSuccess>
@@ -299,7 +294,7 @@
     <Sequence>
       <Parallel failure_count="1" success_count="2">
         <Fallback>
-          <MaterialChecker remap_offset="{offset}" remap_shift="{shift}" remap_dock_type="{dock_type}" remap_base="{base}" remap_index="{index}" shift="0.045" offset="0.2" mission_type="front" dock_type="precise_linearBoost" base_index="8">
+          <MaterialChecker remap_offset="{offset}" remap_shift="{shift}" remap_dock_type="{dock_type}" remap_base="{base}" remap_index="{index}" shift="0.045" offset="0.2" mission_type="front" dock_type="precise_linearBoost" base_index="4">
             <Docking final_pose="{PrevGoal}" isPureDocking="0" dock_type="{dock_type}" shift="{shift}" offset="{offset}" base="{base}" />
           </MaterialChecker>
           <MaterialChecker remap_offset="{offset}" remap_shift="{shift}" remap_dock_type="{dock_type}" remap_base="{base}" remap_index="{index}" shift="0" offset="-0.2" mission_type="front" dock_type="precise_linearBoost" base_index="-1">
@@ -312,15 +307,15 @@
       <SubTree ID="TwoLevelsBot1new" back="0.2, 0.1, 0.05" forward="0.105, 0.12, 0.075" shift="0.11" index="{index}" _skipIf="last_mission_failed" _autoremap="true" />
       <Sequence>
         <ForceSuccess>
-          <MissionChecker level="{level}" remap_base="{base}" mission_type="back" base_index="13">
+          <MissionChecker level="{level}" remap_base="{base}" mission_type="back" base_index="18">
             <Navigation final_pose="{PrevGoal}" dock_type="dock_y_linearBoost_precise" goal="{base}" />
           </MissionChecker>
         </ForceSuccess>
         <GetBlackboard blackboard_key="level" blackboard_type="int" />
         <Switch2 case_1="1" case_2="2" variable="{level}">
-          <SubTree ID="PlaceOneLevel" index="13" hasCompleteMaterial="{hasCompleteMaterial}" _autoremap="true" />
-          <SubTree ID="PlaceTwoLevels" back="0.2, 0.1, 0.05" forward="0.15, 0.095, 0.065" hasCompleteMaterial="{hasCompleteMaterial}" index="13" shift="0" _autoremap="true" />
-          <SubTree ID="ThreeLevelsBot1new" back="0.2, 0.1, 0.05" forward="0.15, 0.1, 0.065" shift="0" index="13" hasCompleteMaterial="{hasCompleteMaterial}" _autoremap="true" />
+          <SubTree ID="PlaceOneLevel" index="18" hasCompleteMaterial="{hasCompleteMaterial}" _autoremap="true" />
+          <SubTree ID="PlaceTwoLevels" back="0.2, 0.1, 0.05" forward="0.15, 0.095, 0.065" hasCompleteMaterial="{hasCompleteMaterial}" index="18" shift="0" _autoremap="true" />
+          <SubTree ID="ThreeLevelsBot1new" back="0.2, 0.1, 0.05" forward="0.15, 0.1, 0.065" shift="0" index="18" hasCompleteMaterial="{hasCompleteMaterial}" _autoremap="true" />
         </Switch2>
       </Sequence>
     </Sequence>
