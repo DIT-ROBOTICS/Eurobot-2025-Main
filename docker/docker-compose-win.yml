@@ -1,24 +1,26 @@
-version: '3'
-name: eurobot-main
 services:
   main-ws:
     build:
       context: .
+      dockerfile: Dockerfile
+      target: final
       args:
-        USERNAME: user
-    image: tedwang2/main-ws:1.1
+        ROS_DISTRO: humble
+        USERNAME: ros
+    # image: tedwang2/main-ws:1.1
+    image: scx/main:humble
     container_name: main-ws
     stdin_open: true
     tty: true
     privileged: true
     stop_grace_period: 3s
-    network_mode: host
-    working_dir: /home/user/Eurobot-2025-Main
+    network_mode: "host"
+    working_dir: /home/ros/Eurobot-2025-Main
     environment:
       - DISPLAY=host.docker.internal:0.0
       - XAUTHORITY=/root/.Xauthority
-      - ROS_WS=/home/user/Eurobot-2025-Main
-      - GROOT_APPIMAGE=/home/user/Eurobot-2025-Main-ws/groot/groot.AppImage
+      - ROS_WS=/home/ros/Eurobot-2025-Main
+      - GROOT_APPIMAGE=/home/ros/Eurobot-2025-Main-ws/groot/groot.AppImage
       - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
       - ROS_DOMAIN_ID=25
     volumes:
