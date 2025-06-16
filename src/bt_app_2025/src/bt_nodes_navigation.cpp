@@ -249,7 +249,7 @@ NodeStatus Docking::goalErrorDetect() {
     } else {
         nav_error_ = true;
         RCLCPP_INFO_STREAM(logger(), "fail! final_pose: " << robot_pose_.pose.position.x << ", " << robot_pose_.pose.position.y << ", " << ConvertPoseFormat(robot_pose_).pose.position.z);
-        RCLCPP_INFO_STREAM(logger(), "z" << ConvertPoseFormat(goal_).pose.position.z);
+        // RCLCPP_INFO_STREAM(logger(), "z" << ConvertPoseFormat(goal_).pose.position.z);
         RCLCPP_INFO_STREAM(logger(), "-----------------");
         setOutput<geometry_msgs::msg::PoseStamped>("final_pose", ConvertPoseFormat(goal_));
         return NodeStatus::SUCCESS;

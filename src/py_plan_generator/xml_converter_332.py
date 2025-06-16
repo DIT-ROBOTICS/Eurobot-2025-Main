@@ -7,7 +7,7 @@ import glob
 # root = ET.Element("root", {"BTCPP_format": "4"})
 # main_tree = ET.ElementTree(root)
 
-output_file_name = 'bot1_blue_e.xml'
+input_file_name = 'bot1_yellow_b.xml'
 points_list = []
 yellow_home = '0.45'
 blue_home = '2.55'
@@ -15,8 +15,6 @@ banner = []
 yellow_banner = ['2.7', '1.175', '0.75']
 blue_banner = ['0.3', '1.825', '2.25']
 dock_type_list = ['dock_y_linearBoost_precise', 'dock_x_linearBoost_precise', 'dock_x_linearBoost_unerring', 'dock_y_linearBoost_precise', 'dock_y_linearBoost_precise', 'dock_y_linearBoost_precise', 'dock_y_linearBoost_precise', 'dock_x_linearBoost_unerring', 'dock_x_linearBoost_precise', 'dock_y_linearBoost_precise', 'dock_y_linearBoost_precise', 'dock_x_linearBoost_precise', 'dock_y_linearBoost_precise', 'dock_y_linearBoost_precise', 'dock_y_linearBoost_precise', 'dock_x_linearBoost_precise', 'dock_y_linearBoost_precise', 'dock_y_linearBoost_precise', 'dock_y_linearBoost_precise', 'dock_y_linearBoost_precise']
-offset_list = ['0.1', '-0.1', '-0.1', '-0.1', '-0.1', '-0.1', '-0.1', '-0.1']
-shift_list = ['0.055', '-0.055', '-0.055', '0.055', '-0.055', '-0.055', '-0.06', '0.06', '0.055', '0.06', '0.055', '0.06', '0.06', '0', '-0.055', '-0.055', '-0.055', '-0.055', '0.055', '-0.055', '-0.055', '-0.055', '0']
 
 def read_input(root):
     i = 0
@@ -53,7 +51,7 @@ def read_input(root):
         if (elt.tag == "BehaviorTree" and elt.get('ID') == "BannerMission"):
             for dock in elt.iter():
                 if (dock.tag == "Navigation" and l < 11):
-                    dock.set('goal', banner[l % 3] + ', 0.17, 3')
+                    dock.set('goal', banner[l % 3] + ', 0.19, 3')
                     l += 1
                     if (l == 3 or l == 7):
                         l += 1
@@ -86,7 +84,7 @@ def read_input(root):
     tree.write(output_file_name, encoding="utf-8", xml_declaration=True)
 
 def create_tree():
-    input_tree = ET.parse('bot1_yellow_d.xml')
+    input_tree = ET.parse(input_file_name)
     root_in = input_tree.getroot()
     root_out = ET.Element("root", {"BTCPP_format": "4"})
     root_out.clear()

@@ -7,7 +7,7 @@ import glob
 # root = ET.Element("root", {"BTCPP_format": "4"})
 # main_tree = ET.ElementTree(root)
 
-output_file_name = 'bot1_blue_e.xml'
+input_file_name = 'bot1_yellow_d.xml'
 points_list = []
 yellow_home = '0.45'
 blue_home = '2.55'
@@ -52,7 +52,7 @@ def read_input(root):
         if (elt.tag == "BehaviorTree" and elt.get('ID') == "BannerMission"):
             for dock in elt.iter():
                 if (dock.tag == "Navigation" and l < 11):
-                    dock.set('goal', banner[l % 3] + ', 0.17, 3')
+                    dock.set('goal', banner[l % 3] + ', 0.19, 3')
                     l += 1
                     if (l == 3 or l == 7):
                         l += 1
@@ -60,7 +60,7 @@ def read_input(root):
             for node in elt.iter():
                 if (node.tag == "Docking"):
                     node.set('base', home + ', 1.5, 0')
-        elif (elt.tag == "BehaviorTree" and (elt.get('ID') == "MissionPoint1" or elt.get('ID') == "MissionPoint2" or elt.get('ID') == "MissionPoint3_11")):
+        elif (elt.tag == "BehaviorTree" and (elt.get('ID') == "MissionPoint1" or elt.get('ID') == "MissionPoint2" or elt.get('ID') == "MissionPoint3_2" or elt.get('ID') == "MissionPoint3_11")):
             for node in elt.iter():
                 if (node.tag == "MaterialChecker" and node.get('base_index') != "-1"):
                     node.set('base_index', points_list[i])
@@ -81,11 +81,13 @@ def read_input(root):
                         node.set('NOT_NOW', '1')
                     node.set('BANNER_PLACE', banner_pt)
                     j += 1
+            if (elt.get('ID') == "MissionPoint3_2"):
+                i -= 2
     tree = ET.ElementTree(root)
     tree.write(output_file_name, encoding="utf-8", xml_declaration=True)
 
 def create_tree():
-    input_tree = ET.parse('bot1_yellow_d.xml')
+    input_tree = ET.parse(input_file_name)
     root_in = input_tree.getroot()
     root_out = ET.Element("root", {"BTCPP_format": "4"})
     root_out.clear()

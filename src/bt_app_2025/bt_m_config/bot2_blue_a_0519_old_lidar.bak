@@ -86,18 +86,18 @@
                  isPureDocking="0"
                  dock_type="dock_y_precise_gentle_slow"
                  shift="0"
-                 offset="0.2"
-                 base="1.91, 0.75, 1"
+                 offset="0.12"
+                 base="1.895, 0.74, 1"
                  _description="material point 9"/>
       </RetryUntilSuccessful>
       <Parallel failure_count="2"
                 success_count="1">
         <RetryUntilSuccessful num_attempts="2">
           <Docking final_pose="{PrevGoal}"
-                   isPureDocking="1"
+                   isPureDocking="0"
                    dock_type="dock_y_precise_gentle_slow"
                    shift="0"
-                   offset="0.1"
+                   offset="0.2"
                    base="{PrevGoal}"
                    _description="material point 9"/>
         </RetryUntilSuccessful>
@@ -114,19 +114,19 @@
                  isPureDocking="0"
                  dock_type="dock_y_precise_gentle_slow"
                  shift="0"
-                 offset="-0.2"
-                 base="2.23, 0.5, 1"
+                 offset="-0.1"
+                 base="2.22, 0.52, 1"
                  _description="material point 9"/>
       </RetryUntilSuccessful>
       <Parallel failure_count="2"
                 success_count="1">
         <RetryUntilSuccessful num_attempts="2">
           <Docking final_pose="{PrevGoal}"
-                   isPureDocking="1"
+                   isPureDocking="0"
                    dock_type="dock_y_precise_gentle_slow"
                    shift="0"
-                   offset="-0.1"
-                   base="{PrevGoal}"
+                   offset="-0.2"
+                   base="2.22, 0.42, 1"
                    _description="material point 7"/>
         </RetryUntilSuccessful>
         <ForceSuccess>
@@ -140,10 +140,19 @@
       <RetryUntilSuccessful num_attempts="2">
         <Docking final_pose="{PrevGoal}"
                  isPureDocking="0"
+                 dock_type="dock_x_delaySpin"
+                 shift="0"
+                 offset="0"
+                 base="1.5, 1, 2"
+                 _description="mission point 3"/>
+      </RetryUntilSuccessful>
+      <RetryUntilSuccessful num_attempts="2">
+        <Docking final_pose="{PrevGoal}"
+                 isPureDocking="0"
                  dock_type="dock_x_precise_linearBoost"
                  shift="0"
                  offset="0"
-                 base="0.285, 0.85, 2"
+                 base="0.285, 0.79, 2"
                  _description="mission point 3"/>
       </RetryUntilSuccessful>
       <ForceSuccess>
@@ -166,7 +175,7 @@
                  dock_type="dock_x_slow_delaySpin"
                  shift="0"
                  offset="0"
-                 base="0.9, 0.85, 0"
+                 base="0.9, 0.8, 0"
                  _description="mission point 3"/>
       </RetryUntilSuccessful>
       <RetryUntilSuccessful num_attempts="2">
@@ -175,7 +184,7 @@
                  dock_type="dock_x_precise_slow"
                  shift="0"
                  offset="0"
-                 base="0.5, 0.85, 0"
+                 base="0.6, 0.8, 0"
                  _description="mission point 3"/>
       </RetryUntilSuccessful>
       <ForceSuccess>
@@ -191,7 +200,7 @@
                  dock_type="dock_x_precise_slow"
                  shift="0"
                  offset="0"
-                 base="0.9, 0.85, 0"
+                 base="0.9, 0.8, 0"
                  _description="mission point 3"/>
       </RetryUntilSuccessful>
       <RetryUntilSuccessful num_attempts="2">
@@ -245,7 +254,7 @@
                  isPureDocking="1"
                  dock_type="dock_x_precise_gentle_slow"
                  shift="0"
-                 offset="0.1"
+                 offset="0.09"
                  base="{PrevGoal}"
                  _description="material point 9"/>
       </RetryUntilSuccessful>
@@ -419,16 +428,16 @@
                  dock_type="dock_x_slow"
                  shift="0"
                  offset="0"
-                 base="0.31, 1.33, 0"
+                 base="0.31, 1.3, 0"
                  _description="material point 9"/>
       </RetryUntilSuccessful>
       <RetryUntilSuccessful num_attempts="2">
         <Docking final_pose="{PrevGoal}"
-                 isPureDocking="1"
+                 isPureDocking="0"
                  dock_type="dock_x_precise_gentle_slow"
                  shift="0"
-                 offset="-0.1"
-                 base="{PrevGoal}"
+                 offset="-0.09"
+                 base="0.31, 1.3, 0"
                  _description="material point 9"/>
       </RetryUntilSuccessful>
       <Parallel failure_count="2"
@@ -438,7 +447,7 @@
                    isPureDocking="1"
                    dock_type="dock_x_precise_gentle_slow"
                    shift="0"
-                   offset="-0.06"
+                   offset="-0.04"
                    base="{PrevGoal}"
                    _description="material point 7"/>
         </RetryUntilSuccessful>
@@ -456,7 +465,7 @@
                  dock_type="dock_x_precise_fast_delaySpin"
                  shift="0"
                  offset="0"
-                 base="2.74, 0.42, 0"
+                 base="2.734, 0.402, 0"
                  _description="material point 7"/>
       </RetryUntilSuccessful>
       <RetryUntilSuccessful num_attempts="2">
