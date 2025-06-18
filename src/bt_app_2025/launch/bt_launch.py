@@ -55,7 +55,7 @@ def generate_launch_description():
                     nav_parameters,
                     map_points,
                     {"frame_id": "base_footprint"},
-                    {"tree_name": "FuncTest"}, # "MissionPointOne"
+                    {"tree_name": "MainTree"}, # "MissionPointOne"
                 ],
                 package = 'bt_app_2025',
                 executable = 'bt_m',
@@ -71,7 +71,7 @@ def generate_launch_description():
                     config_path,
                     map_points,
                     {"Robot_name": "Tongue"},  # Invisible or Tongue
-                    {"plan_code": 41} # 10e1: plan (start from 1), 10e0: color(0 for yellow, 1 for blue)
+                    {"plan_code": 40} # 10e1: plan (start from 1), 10e0: color(0 for yellow, 1 for blue)
                 ],
                 package = 'startup',
                 executable = 'startup',

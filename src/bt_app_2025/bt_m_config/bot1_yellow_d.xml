@@ -12,7 +12,7 @@
               </Timeout>
             </ForceSuccess>
             <RetryUntilSuccessful num_attempts="10">
-              <Switch3 case_1="0" case_2="1" case_3="2" variable="{remap_banner_place}">
+              <Switch3 case_1="0" case_2="1" case_3="2" variable="3">
                 <Navigation final_pose="{PrevGoal}" dock_type="dock_y_loose_linearBoost" goal="2.7, 0.17, 3" />
                 <Navigation final_pose="{PrevGoal}" dock_type="dock_y_loose_linearBoost" goal="1.175, 0.17, 3" />
                 <Navigation final_pose="{PrevGoal}" dock_type="dock_y_loose_linearBoost" goal="0.75, 0.17, 3" />
@@ -238,7 +238,7 @@
             <SubTree ID="MissionPoint3_2" _autoremap="true" />
           </ForceSuccess>
         </Sequence>
-        <Sleep msec="98000"/>
+        <Sleep msec="198000"/>
       </Parallel>
       <StopRobot />
       <Parallel failure_count="2" success_count="2">
