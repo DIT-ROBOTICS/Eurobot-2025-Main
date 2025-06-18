@@ -174,8 +174,8 @@ public:
 
             // // ReadJsonFile(file_path);
             // /* temp: will be delete and get the `plan_code_` from web pannel */ 
-            // this->declare_parameter<int>("plan_code", 0);  // ten: plan, one: color
-            // this->get_parameter("plan_code", plan_code_);
+            this->declare_parameter<int>("plan_code", 0);  // ten: plan, one: color
+            this->get_parameter("plan_code", plan_code_);
 
             /* choose plan from pannel and get robot init position */
             if (plan_code_) {
@@ -413,7 +413,13 @@ public:
         RCLCPP_INFO(this->get_logger(), "Response %d to %d", int(response->success), response->group);
     }
     void PlanCallback(const std_msgs::msg::Int32::SharedPtr msg) {             // get plan code from pannel
-        plan_code_ = msg->data;
+        if (plan_code_)
+        {
+            plan_sub.reset();
+            return;
+        }
+        else
+            plan_code_ = msg->data;
     }
 
     void StartCallback(const std_msgs::msg::Bool::SharedPtr msg) {             // will be triggered by the plug
