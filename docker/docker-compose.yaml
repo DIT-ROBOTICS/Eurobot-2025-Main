@@ -9,10 +9,12 @@ services:
         USERNAME: ros
     image: scx/main:${ROS_DISTRO}
     container_name: main
+    cpu_shares: 4096
     stdin_open: true
     tty: true
     privileged: true
     network_mode: "host"
+    ipc: host
 
     working_dir: /home/ros
 

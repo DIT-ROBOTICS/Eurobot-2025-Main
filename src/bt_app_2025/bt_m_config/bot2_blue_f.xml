@@ -22,7 +22,7 @@
                      dock_type="dock_x_delaySpin"
                      shift="0"
                      offset="0"
-                     base="1.2, 0.5, 1"/>
+                     base="1.8, 0.5, 1"/>
             <Delay delay_msec="1000">
               <ForceSuccess>
                 <Timeout msec="6000">
@@ -70,7 +70,7 @@
                  dock_type="dock_x_didilong"
                  shift="0"
                  offset="0"
-                 base="0.4, 1.5, 1"/>
+                 base="2.6, 1.5, 1"/>
       </Parallel>
     </Sequence>
   </BehaviorTree>
@@ -83,7 +83,7 @@
                  dock_type="dock_y_precise_gentle"
                  shift="0"
                  offset="0.18"
-                 base="1.12, 0.75, 1"/>
+                 base="1.9, 0.75, 1"/>
       </RetryUntilSuccessful>
       <Parallel failure_count="2"
                 success_count="1">
@@ -108,7 +108,7 @@
                  dock_type="dock_y_precise_gentle"
                  shift="0"
                  offset="-0.18"
-                 base="0.78, 0.5, 1"/>
+                 base="2.225, 0.5, 1"/>
       </RetryUntilSuccessful>
       <Parallel failure_count="2"
                 success_count="1">
@@ -133,7 +133,7 @@
                  dock_type="dock_x_fast"
                  shift="0"
                  offset="0"
-                 base="1.22, 0.3, 2"/>
+                 base="1.78, 0.3, 0"/>
       </RetryUntilSuccessful>
       <Parallel failure_count="2"
                 success_count="1">
@@ -150,7 +150,7 @@
                      dock_type="dock_x"
                      shift="0"
                      offset="0"
-                     base="1.0, 0.3, 2"/>
+                     base="2.0, 0.3, 0"/>
           </RetryUntilSuccessful>
         </Delay>
       </Parallel>
@@ -162,7 +162,7 @@
                    dock_type="dock_x"
                    shift="0"
                    offset="0"
-                   base="1.0, 0.3, 0"/>
+                   base="2.0, 0.3, 2"/>
         </RetryUntilSuccessful>
         <Delay delay_msec="100">
           <ForceSuccess>
@@ -187,7 +187,7 @@
                  dock_type="dock_x_gentle"
                  shift="0"
                  offset="0"
-                 base="0.88, 0.3, 0"/>
+                 base="2.12, 0.3, 2"/>
       </RetryUntilSuccessful>
       <ForceSuccess>
         <Timeout msec="5000">
@@ -201,7 +201,7 @@
                  isPureDocking="1"
                  dock_type="dock_x_gentle_slow"
                  shift="0"
-                 offset="0.175"
+                 offset="-0.175"
                  base="{PrevGoal}"/>
       </RetryUntilSuccessful>
       <ForceSuccess>
@@ -217,7 +217,7 @@
                  dock_type="dock_x"
                  shift="0"
                  offset="0"
-                 base="1.25, 0.3, 0"/>
+                 base="1.75, 0.3, 2"/>
       </RetryUntilSuccessful>
       <Sleep msec="500"/>
       <ForceSuccess>
@@ -232,7 +232,7 @@
                  dock_type="dock_x"
                  shift="0"
                  offset="0"
-                 base="0.9, 0.3, 0"/>
+                 base="2.1, 0.3, 2"/>
       </RetryUntilSuccessful>
       <RetryUntilSuccessful num_attempts="2">
         <Docking final_pose="{PrevGoal}"
@@ -240,7 +240,7 @@
                  dock_type="dock_x_fast"
                  shift="0"
                  offset="0"
-                 base="0.9, 0.3, 2"/>
+                 base="2.1, 0.3, 0"/>
       </RetryUntilSuccessful>
       <ForceSuccess>
         <Timeout msec="5000">
@@ -254,7 +254,7 @@
                  dock_type="dock_x"
                  shift="0"
                  offset="0"
-                 base="1.12, 0.3, 2"/>
+                 base="1.88, 0.3, 0"/>
       </RetryUntilSuccessful>
       <ForceSuccess>
         <Timeout msec="5000">
@@ -279,7 +279,7 @@
                  dock_type="dock_y_precise_gentle_fast"
                  shift="0"
                  offset="0"
-                 base="0.834, 1.55, 1"/>
+                 base="2.166, 1.55, 1"/>
       </RetryUntilSuccessful>
       <Parallel failure_count="2"
                 success_count="1">
@@ -316,7 +316,7 @@
                  dock_type="dock_x"
                  shift="0"
                  offset="0"
-                 base="0.7, 1.2, 1"/>
+                 base="2.3, 1.2, 1"/>
       </RetryUntilSuccessful>
       <RetryUntilSuccessful num_attempts="2">
         <Docking final_pose="{PrevGoal}"
@@ -324,7 +324,7 @@
                  dock_type="dock_x"
                  shift="0"
                  offset="0.1"
-                 base="0.87, 0.3, 0"/>
+                 base="2.13, 0.3, 2"/>
       </RetryUntilSuccessful>
       <ForceSuccess>
         <Timeout msec="6000">
@@ -337,7 +337,7 @@
                  isPureDocking="1"
                  dock_type="dock_x"
                  shift="0"
-                 offset="-0.2"
+                 offset="0.2"
                  base="{PrevGoal}"/>
       </RetryUntilSuccessful>
       <Parallel failure_count="2"
@@ -348,7 +348,7 @@
                    dock_type="dock_x"
                    shift="0"
                    offset="0"
-                   base="0.67, 0.3, 2"/>
+                   base="2.33, 0.3, 0"/>
         </RetryUntilSuccessful>
         <ForceSuccess>
           <Timeout msec="6000">
@@ -369,7 +369,7 @@
                  dock_type="dock_x"
                  shift="0"
                  offset="0"
-                 base="0.55, 0.3, 2"/>
+                 base="2.45, 0.3, 0"/>
       </RetryUntilSuccessful>
       <ForceSuccess>
         <Timeout msec="6000">
@@ -383,7 +383,7 @@
                  isPureDocking="1"
                  dock_type="dock_x"
                  shift="0"
-                 offset="0.15"
+                 offset="-0.15"
                  base="{PrevGoal}"/>
       </RetryUntilSuccessful>
       <ForceSuccess>
@@ -399,9 +399,9 @@
                  dock_type="dock_x"
                  shift="0"
                  offset="0"
-                 base="0.97, 0.3, 2"/>
+                 base="2.03, 0.3, 0"/>
       </RetryUntilSuccessful>
-      <Sleep msec="3000"/>
+      <Sleep msec="1000"/>
       <ForceSuccess>
         <Timeout msec="6000">
           <FirmwareMission mission_status="{x}"
@@ -413,7 +413,7 @@
                  isPureDocking="1"
                  dock_type="dock_x"
                  shift="0"
-                 offset="-0.15"
+                 offset="0.15"
                  base="{PrevGoal}"/>
       </RetryUntilSuccessful>
       <RetryUntilSuccessful num_attempts="2">
@@ -422,7 +422,7 @@
                  dock_type="dock_x"
                  shift="0"
                  offset="0"
-                 base="0.75, 0.3, 3"/>
+                 base="2.25, 0.3, 3"/>
       </RetryUntilSuccessful>
       <ForceSuccess>
         <Timeout msec="6000">
@@ -443,7 +443,7 @@
                    dock_type="dock_x_precise"
                    shift="0"
                    offset="0"
-                   base="0.26, 0.413, 2"/>
+                   base="2.74, 0.413, 0"/>
         </RetryUntilSuccessful>
         <ForceSuccess>
           <Timeout msec="6000">
@@ -465,7 +465,7 @@
                    isPureDocking="1"
                    dock_type="dock_x_precise_gentle_slow"
                    shift="0"
-                   offset="-0.1"
+                   offset="0.1"
                    base="{PrevGoal}"/>
         </RetryUntilSuccessful>
         <Sleep msec="500"/>
@@ -477,7 +477,7 @@
                    isPureDocking="1"
                    dock_type="dock_x_precise_gentle_slow"
                    shift="0"
-                   offset="-0.1"
+                   offset="0.1"
                    base="{PrevGoal}"/>
         </RetryUntilSuccessful>
         <ForceSuccess>
@@ -501,7 +501,7 @@
                    dock_type="dock_x_precise_gentle_slow_delaySpin"
                    shift="0"
                    offset="0"
-                   base="0.26, 1.33, 0"/>
+                   base="2.74, 1.33, 2"/>
         </RetryUntilSuccessful>
       </Parallel>
       <Parallel failure_count="2"
@@ -511,7 +511,7 @@
                    isPureDocking="1"
                    dock_type="dock_x_precise_gentle_slow"
                    shift="0"
-                   offset="-0.1"
+                   offset="0.1"
                    base="{PrevGoal}"/>
         </RetryUntilSuccessful>
         <Sleep msec="500"/>
@@ -523,7 +523,7 @@
                    isPureDocking="1"
                    dock_type="dock_x_precise_gentle_slow"
                    shift="0"
-                   offset="-0.1"
+                   offset="0.1"
                    base="{PrevGoal}"/>
         </RetryUntilSuccessful>
         <ForceSuccess>
@@ -549,7 +549,7 @@
                    dock_type="dock_x"
                    shift="0"
                    offset="0"
-                   base="0.87, 0.3, 0"/>
+                   base="2.13, 0.3, 2"/>
         </RetryUntilSuccessful>
       </Parallel>
       <ForceSuccess>
@@ -564,7 +564,7 @@
                  dock_type="dock_x_precise_gentle_slow"
                  shift="0"
                  offset="0"
-                 base="0.75, 0.3, 0"/>
+                 base="2.25, 0.3, 2"/>
       </RetryUntilSuccessful>
       <ForceSuccess>
         <Timeout msec="6000">
@@ -578,7 +578,7 @@
                  isPureDocking="1"
                  dock_type="dock_x_precise_gentle_slow"
                  shift="0"
-                 offset="0.2"
+                 offset="-0.2"
                  base="{PrevGoal}"/>
       </RetryUntilSuccessful>
       <ForceSuccess>
@@ -594,7 +594,7 @@
                  dock_type="dock_x"
                  shift="0"
                  offset="0"
-                 base="1.12, 0.3, 0"/>
+                 base="1.88, 0.3, 2"/>
       </RetryUntilSuccessful>
       <ForceSuccess>
         <Timeout msec="6000">
@@ -608,7 +608,7 @@
                  dock_type="dock_x"
                  shift="0"
                  offset="0"
-                 base="0.8, 0.3, 0"/>
+                 base="2.2, 0.3, 2"/>
       </RetryUntilSuccessful>
     </Sequence>
   </BehaviorTree>

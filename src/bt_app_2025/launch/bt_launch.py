@@ -70,7 +70,7 @@ def generate_launch_description():
                 parameters=[
                     config_path,
                     map_points,
-                    {"Robot_name": "ByteBandit"},  # Invisible or Tongue
+                    {"Robot_name": "Raccoon"},  # Raccoon or Panda
                     {"plan_code": 11} # 10e1: plan (start from 1), 10e0: color(0 for yellow, 1 for blue)
                 ],
                 package = 'startup',

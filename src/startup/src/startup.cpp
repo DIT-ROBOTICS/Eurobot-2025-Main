@@ -55,7 +55,7 @@ public:
         obstacles_pub_ = this->create_publisher<btcpp_ros2_interfaces::msg::Obstacles>("ball_obstacles", 10);
         sima_start_pub_ = this->create_publisher<std_msgs::msg::Int16>("/sima/start", 10);
         
-        this->declare_parameter<std::string>("Robot_name", "Tongue");
+        this->declare_parameter<std::string>("Robot_name", "Panda");
         this->declare_parameter<std::vector<double>>("map_points_1", std::vector<double>{});
         this->declare_parameter<std::vector<double>>("number_of_plans", std::vector<double>{});
         this->declare_parameter<std::vector<double>>("start_points_bot1_yellow", std::vector<double>{});
@@ -478,7 +478,7 @@ private:
     StartUpState prev_msg[4] = {INIT, INIT, INIT, INIT};                       // ready message from other programs
     StartUpState ready_feedback[4] = {INIT, START, INIT, START};   // it should be INIT        // ready message from other programs
     bool prev_start_msg = false;                                               // plug message
-    bool start = true;  // it should be false                                  // plug message
+    bool start = false;  // it should be false                                  // plug message
     double starting_time = 0;
     StartUpState start_up_state;                                               // state of startup program
     std::vector<double> material_points_;                                      // prepared for choosing start point
