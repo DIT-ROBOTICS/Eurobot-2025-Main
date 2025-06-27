@@ -30,7 +30,6 @@ services:
     volumes:
       # Mount app resources into container.
       - ../:/home/ros/Eurobot-2025-Main
-      - /home/share/data:/home/ros/share/data
 
       # Mount local timezone into container.
       - /etc/timezone:/etc/timezone:ro
