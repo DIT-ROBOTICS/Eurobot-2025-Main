@@ -1,6 +1,7 @@
 /* Simple rclcpp publisher */
 #include "rclcpp/rclcpp.hpp"
 #include "std_srvs/srv/set_bool.hpp"
+#include "std_srvs/srv/trigger.hpp"
 #include "std_msgs/msg/bool.hpp"
 #include "std_msgs/msg/int32.hpp"
 #include "std_msgs/msg/int16.hpp"
@@ -47,7 +48,7 @@ public:
         ready_pub = this->create_publisher<std_msgs::msg::String>("/robot/startup/plan", 2);
         time_pub = this->create_publisher<std_msgs::msg::Float32>("/robot/startup/time", 2);
         group_state_pub = this->create_publisher<std_msgs::msg::Int32MultiArray>("/robot/startup/groups_state", 2);
-        plan_sub = this->create_subscription<std_msgs::msg::Int32>("/robot/startup/web_plan", 2, std::bind(&StartUp::PlanCallback, this, std::placeholders::_1));
+        web_plan_client = this->create_client<std_srvs::srv::Trigger>("/robot/startup/web_plan");
         start_sub = this->create_subscription<std_msgs::msg::Bool>("/robot/startup/plug", 2, std::bind(&StartUp::StartCallback, this, std::placeholders::_1));
         ready_srv_server = this->create_service<btcpp_ros2_interfaces::srv::StartUpSrv>(
             "/robot/startup/ready_signal", std::bind(&StartUp::ReadyFeedback, this, std::placeholders::_1, std::placeholders::_2));
@@ -138,6 +139,7 @@ public:
         start_up_state = INIT;
         sima_timer_ = nullptr;  // Initialize timer pointer to null
         plan_code_ = 0;
+        web_plan_requested_ = false;
         timer_ = this->create_wall_timer(
             std::chrono::microseconds(100),
             std::bind(&StartUp::StateMachine, this)
@@ -172,10 +174,10 @@ public:
 
         case INIT:
 
-            // // ReadJsonFile(file_path);
-            // /* temp: will be delete and get the `plan_code_` from web pannel */ 
-            // this->declare_parameter<int>("plan_code", 0);  // ten: plan, one: color
-            // this->get_parameter("plan_code", plan_code_);
+            // Call web_plan service to get plan code (only once)
+            if (!plan_code_ && !web_plan_requested_) {
+                CallWebPlanService();
+            }
 
             /* choose plan from pannel and get robot init position */
             if (plan_code_) {
@@ -412,8 +414,33 @@ public:
         }
         RCLCPP_INFO(this->get_logger(), "Response %d to %d", int(response->success), response->group);
     }
-    void PlanCallback(const std_msgs::msg::Int32::SharedPtr msg) {             // get plan code from pannel
-        plan_code_ = msg->data;
+
+    void CallWebPlanService() {
+        if (!web_plan_client->wait_for_service(std::chrono::milliseconds(100))) {
+            // Service not available yet, will try again in next cycle
+            return;
+        }
+
+        auto request = std::make_shared<std_srvs::srv::Trigger::Request>();
+        web_plan_requested_ = true;  // Set flag to prevent multiple calls
+        
+        web_plan_client->async_send_request(request, 
+            [this](rclcpp::Client<std_srvs::srv::Trigger>::SharedFuture future) {
+                try {
+                    auto response = future.get();
+                    if (response->success) {
+                        plan_code_ = std::stoi(response->message);
+                        RCLCPP_INFO(this->get_logger(), "Received plan code from web_plan service: %d", plan_code_);
+                    } else {
+                        RCLCPP_WARN(this->get_logger(), "Web plan service call failed");
+                        web_plan_requested_ = false;  // Reset flag to allow retry
+                    }
+                } catch (const std::exception& e) {
+                    RCLCPP_ERROR(this->get_logger(), "Error calling web plan service: %s", e.what());
+                    web_plan_requested_ = false;  // Reset flag to allow retry
+                }
+            }
+        );
     }
 
     void StartCallback(const std_msgs::msg::Bool::SharedPtr msg) {             // will be triggered by the plug
@@ -452,7 +479,7 @@ private:
     rclcpp::Publisher<std_msgs::msg::String>::SharedPtr ready_pub;             // publish plan message as ready signal to every groups
     rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr time_pub;
     rclcpp::Publisher<std_msgs::msg::Int32MultiArray>::SharedPtr group_state_pub;
-    rclcpp::Subscription<std_msgs::msg::Int32>::SharedPtr plan_sub;            // it might can be removed, startup can read the plan code value in a json file directly
+    rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr web_plan_client;
     rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr start_sub;            // plug message
     rclcpp::Service<btcpp_ros2_interfaces::srv::StartUpSrv>::SharedPtr ready_srv_server; // receive to check if every group start successfully
     rclcpp::Client<std_srvs::srv::SetBool>::SharedPtr start_srv_client;        // it might can be removed, main can listen to start topic by plug directly
@@ -491,6 +518,7 @@ private:
     std_msgs::msg::Int32MultiArray groups_state;
     std::string sima_config_path_;
     int sima_start_time_;
+    bool web_plan_requested_;
 };
 
 int main(int argc, char **argv) {
