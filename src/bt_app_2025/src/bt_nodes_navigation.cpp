@@ -551,6 +551,17 @@ PortsList MissionChecker::providedPorts() {
     };
 }
 
+bool MissionChecker::CheckCanShift(const int index_, const double rivalDirect_) {
+    if ((index_ == 13 && rivalDirect_ < 0) ||
+        (index_ == 17 && rivalDirect_ > 0) ||
+        (index_ == 13 && mission_points_status_.data[14 - 11] != 0 && rivalDirect_ > 0) ||
+        (index_ == 14 && mission_points_status_.data[13 - 11] != 0 && rivalDirect_ < 0) || 
+        (index_ == 18 && mission_points_status_.data[17 - 11] != 0 && rivalDirect_ > 0) || 
+        (index_ == 17 && mission_points_status_.data[18 - 11] != 0 && rivalDirect_ < 0)) 
+        return false;
+    return true;
+}
+
 NodeStatus MissionChecker::tick() {
     // get input
     int baseIndex_ = getInput<double>("base_index").value();
@@ -588,7 +599,8 @@ NodeStatus MissionChecker::tick() {
             // RCLCPP_INFO_STREAM(node_->get_logger(), "step back 5 cm, and then place the materials");
         }
         if (dist < safety_dist_ && abs(base_.pose.position.y - rival_pose_.pose.position.y) < safety_dist_) {
-            base_.pose.position.x += (base_.pose.position.x - rival_pose_.pose.position.x)/abs(base_.pose.position.x - rival_pose_.pose.position.x) * (abs(base_.pose.position.x - rival_pose_.pose.position.x) - safety_dist_);
+            if (CheckCanShift(baseIndex_, rival_pose_.pose.position.x - base_.pose.position.x))
+                base_.pose.position.x += (base_.pose.position.x - rival_pose_.pose.position.x)/abs(base_.pose.position.x - rival_pose_.pose.position.x) * (abs(base_.pose.position.x - rival_pose_.pose.position.x) - safety_dist_);
             // RCLCPP_INFO_STREAM(node_->get_logger(), "rival near the bot when placing the materials");
         }
     } else {
