@@ -174,8 +174,8 @@ public:
 
             // // ReadJsonFile(file_path);
             // /* temp: will be delete and get the `plan_code_` from web pannel */ 
-            // this->declare_parameter<int>("plan_code", 0);  // ten: plan, one: color
-            // this->get_parameter("plan_code", plan_code_);
+            this->declare_parameter<int>("plan_code", 0);  // ten: plan, one: color
+            this->get_parameter("plan_code", plan_code_);
 
             /* choose plan from pannel and get robot init position */
             if (plan_code_) {
@@ -476,9 +476,9 @@ private:
     int plan_code_;
     bool ready = false;
     StartUpState prev_msg[4] = {INIT, INIT, INIT, INIT};                       // ready message from other programs
-    StartUpState ready_feedback[4] = {INIT, START, INIT, START};   // it should be INIT        // ready message from other programs
+    StartUpState ready_feedback[4] = {INIT, START, START, START};   // it should be INIT        // ready message from other programs
     bool prev_start_msg = false;                                               // plug message
-    bool start = true;  // it should be false                                  // plug message
+    bool start = false;  // it should be false                                  // plug message
     double starting_time = 0;
     StartUpState start_up_state;                                               // state of startup program
     std::vector<double> material_points_;                                      // prepared for choosing start point
