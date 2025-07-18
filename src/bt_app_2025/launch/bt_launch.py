@@ -55,7 +55,8 @@ def generate_launch_description():
                     nav_parameters,
                     map_points,
                     {"frame_id": "base_footprint"},
-                    {"tree_name": "MainTree"}, # "MissionPointOne"
+                    {"tree_name": "MainTree"},
+                    # {"plan_script": [1, 2, 17]}
                 ],
                 package = 'bt_app_2025',
                 executable = 'bt_m',
@@ -71,8 +72,8 @@ def generate_launch_description():
                     config_path,
                     map_points,
                     {"Robot_name": "Panda"},  # Raccoon or Panda
-                    {"plan_code": 80}, # 10e1: plan (start from 1), 10e0: color(0 for yellow, 1 for blue)
-                    {"plan_script": [1, 2, 13]}
+                    {"plan_code": 70}, # 10e1: plan (start from 1), 10e0: color(0 for yellow, 1 for blue)
+                    {"plan_script": [1, 2, 17]}
                 ],
                 package = 'startup',
                 executable = 'startup',

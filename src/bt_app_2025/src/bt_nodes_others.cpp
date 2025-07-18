@@ -96,14 +96,16 @@ BT::PortsList DemoSourcePoint::providedPorts() {
     return {
         BT::OutputPort<int>("material_pt_1"),
         BT::OutputPort<int>("material_pt_2"),
-        BT::OutputPort<int>("mission_pt")
+        BT::OutputPort<int>("mission_pt"),
+        BT::OutputPort<int>("end_pt")
     };
 }
 
 BT::NodeStatus DemoSourcePoint::tick() {
-    setOutput<int>("material_pt_1", plan_script_[0]);
-    setOutput<int>("material_pt_2", plan_script_[1]);
-    setOutput<int>("mission_pt", plan_script_[2]);
+    setOutput<int>("material_pt_1", plan_script_[1]);
+    setOutput<int>("material_pt_2", plan_script_[2]);
+    setOutput<int>("mission_pt", plan_script_[3]);
+    setOutput<int>("end_pt", plan_script_[plan_script_.size() - 1]);
     return BT::NodeStatus::SUCCESS;
 }
 

@@ -29,6 +29,8 @@
 // C++
 #include <memory>
 #include <string>
+#include <jsoncpp/json/json.h>
+#include <fstream>
 
 using namespace BT;
 
@@ -142,10 +144,13 @@ public:
         // map points for 2 robots
         this->declare_parameter<std::vector<double>>("map_points_1", std::vector<double>{});
         this->declare_parameter<std::vector<double>>("map_points_2", std::vector<double>{});
+        this->declare_parameter<std::string>("demo_config_path", "/home/ros/share/data/button.json");
+        this->declare_parameter<std::vector<int>>("plan_script", std::vector<int>{});
         // get parameters
         this->get_parameter("groot_xml_config_directory", groot_xml_config_directory);
         this->get_parameter("tree_node_model_config_file", bt_tree_node_model);
         this->get_parameter("tree_name", tree_name);
+        this->get_parameter("demo_config_path", demo_config_path_);
     }
 
     void CreateTreeNodes() {
@@ -180,6 +185,46 @@ public:
         factory.registerNodeType<TimerChecker>("TimerChecker", blackboard);    // condition node
     }
 
+    void GetPlanSequence() {
+        // store script source points as ros parameters from json
+        RCLCPP_INFO(node_->get_logger(), "i");
+        plan_script_ = {17, 1, 2, 17};
+        rclcpp::Parameter param("plan_script", plan_script_);
+        Json::Value root;
+        std::ifstream file(demo_config_path_);
+        if (!file.is_open()) {
+            RCLCPP_WARN(this->get_logger(), "Could not open botton file at %s, using default plan", demo_config_path_.c_str());
+            node_->set_parameter(param);
+            return;
+        }
+        
+        Json::CharReaderBuilder builder;
+        JSONCPP_STRING errs;
+        if (!parseFromStream(builder, file, &root, &errs)) {
+            RCLCPP_ERROR(this->get_logger(), "Failed to parse botton config file: %s", errs.c_str());
+            node_->set_parameter(param);
+            return;
+        }
+        RCLCPP_INFO(node_->get_logger(), "ii");
+
+        if (root.isMember("sequence")) {
+            const Json::Value sequence = root["sequence"];
+            for (const auto& item : sequence) {
+                plan_script_.clear();
+                plan_script_.push_back(item.asInt());
+                rclcpp::Parameter param("plan_script", plan_script_);
+            }
+            node_->set_parameter(param);
+            return;
+        } else {
+            RCLCPP_WARN(this->get_logger(), "sequence not found in config file, using default value");
+            node_->set_parameter(param);
+            return;
+        }
+        RCLCPP_INFO(node_->get_logger(), "iii");
+        return;
+    }
+
     void CreatTree() {
         RCLCPP_INFO_STREAM(this->get_logger(), "--Loading XML--");
         while (rclcpp::ok() && !isReady) {
@@ -206,11 +251,9 @@ public:
     void RunTheTree() {
         // BT::Groot2Publisher publisher(tree, 2227);
         BT::NodeStatus status = BT::NodeStatus::RUNNING;
-        RCLCPP_INFO_STREAM(this->get_logger(), "i");
         while (rclcpp::ok() && !canStart) {
             rate.sleep();
         }
-        RCLCPP_INFO_STREAM(this->get_logger(), "ii");
         RCLCPP_INFO(this->get_logger(), "[BT Application]: Behavior Tree start running!");
         do {
             rate.sleep();
@@ -245,6 +288,8 @@ private:
     bool isReady = false;
     bool canStart = false;
     std::string groot_filename;
+    std::string demo_config_path_;
+    std::vector<int> plan_script_;
     // Parameters
     std::string groot_xml_config_directory;
     std::string bt_tree_node_model;
@@ -308,6 +353,7 @@ int main(int argc, char **argv) {
     node->InitParam();
     node->CreateTreeNodes();
     std::thread spin_thread([&]() { rclcpp::spin(node); });                    // create a thread to spin the node
+    node->GetPlanSequence();
     node->CreatTree();
     node->RunTheTree();
     rclcpp::shutdown();

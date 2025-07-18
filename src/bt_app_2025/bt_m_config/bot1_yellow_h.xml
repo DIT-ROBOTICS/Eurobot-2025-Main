@@ -170,7 +170,7 @@
             <FirmwareMission mission_status="{x}" mission_type="0" _description="stop all firmware" />
           </Timeout>
         </ForceSuccess>
-        <Docking final_pose="{PrevGoal}" isPureDocking="0" dock_type="dock_didilong" shift="0" offset="0" base="0.45, 1.5, 0" />
+        <Docking final_pose="{PrevGoal}" isPureDocking="0" dock_type="dock_slow" shift="0" offset="0" base="1.8, 0.4, 3" />
       </Parallel>
     </Sequence>
   </BehaviorTree>
@@ -619,7 +619,7 @@
     <Sequence>
       <!-- <BTStarter result="{STATUS}" /> -->
       <!-- <CamReceiver /> -->
-      <DemoSourcePoint material_pt_1="{pt_1}" material_pt_2="{pt_2}" mission_pt="{pt_3}" />
+      <DemoSourcePoint material_pt_1="{pt_1}" material_pt_2="{pt_2}" mission_pt="{pt_3}" end_pt="{pt_4}" />
       <ForceSuccess>
         <Timeout msec="6000">
           <FirmwareMission mission_status="{x}" mission_type="1" _description="" />
@@ -628,6 +628,11 @@
       <ForceSuccess>
         <Timeout msec="6000">
           <FirmwareMission mission_status="{x}" mission_type="90" _description="" />
+        </Timeout>
+      </ForceSuccess>
+      <ForceSuccess>
+        <Timeout msec="6000">
+          <FirmwareMission mission_status="{x}" mission_type="80" _description="" />
         </Timeout>
       </ForceSuccess>
       <SetBlackboard value="0" output_key="hasCompleteMaterial" />
@@ -941,6 +946,7 @@
       <output_port name="material_pt_1" type="int"/>
       <output_port name="material_pt_2" type="int"/>
       <output_port name="mission_pt" type="int"/>
+      <output_port name="end_pt" type="int"/>
     </Action>
     <Action ID="GetLocation">
       <output_port name="pose" type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;" />

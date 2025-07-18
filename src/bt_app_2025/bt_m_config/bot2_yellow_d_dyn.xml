@@ -18,6 +18,7 @@
           <Parallel failure_count="2"
                     success_count="1">
             <RetryUntilSuccessful num_attempts="2">
+            <!-- material point 6 -->
               <Docking final_pose="{PrevGoal}"
                        isPureDocking="0"
                        dock_type="dock_x_delaySpin"

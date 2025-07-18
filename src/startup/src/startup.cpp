@@ -88,9 +88,8 @@ public:
         this->declare_parameter<std::string>("Bot2_YellowSpetial_config", "nan");
         this->declare_parameter<std::string>("Bot2_BlueSpetial_config", "nan");
         this->declare_parameter<std::string>("sima_config_path", "/home/ros/share/data/sima.json");
-        this->declare_parameter<std::string>("demo_config_path", "/home/ros/share/data/demo.json");
         this->declare_parameter<int>("plan_code", 0);  // ten: plan, one: color
-        this->declare_parameter<std::vector<long>>("plan_script", std::vector<long>{});
+        // this->declare_parameter<std::vector<long>>("plan_script", std::vector<long>{});
 
         this->get_parameter("Robot_name", Robot_name_);
         this->get_parameter("map_points_1", material_points_);
@@ -137,13 +136,12 @@ public:
         }
         this->get_parameter("Bot2_BlueSpetial_config", name_of_bot2_blue_plans[number_of_plans_[3] - 1]);
         this->get_parameter("sima_config_path", sima_config_path_);
-        this->get_parameter("demo_config_path", demo_config_path_);
         this->get_parameter("plan_code", plan_code_);
         sima_start_time_ = ReadSimaStartTime();
 
         start_up_state = INIT;
         sima_timer_ = nullptr;  // Initialize timer pointer to null
-        plan_code_ = 0;
+        // plan_code_ = 0;
         web_plan_requested_ = false;
         timer_ = this->create_wall_timer(
             std::chrono::microseconds(100),
@@ -521,7 +519,6 @@ private:
     std_msgs::msg::Bool start_signal;
     std_msgs::msg::Int32MultiArray groups_state;
     std::string sima_config_path_;
-    std::string demo_config_path_;
     int sima_start_time_;
     bool web_plan_requested_;
 };
