@@ -187,7 +187,6 @@ public:
 
     void GetPlanSequence() {
         // store script source points as ros parameters from json
-        RCLCPP_INFO(node_->get_logger(), "i");
         plan_script_ = {17, 1, 2, 17};
         rclcpp::Parameter param("plan_script", plan_script_);
         Json::Value root;
@@ -205,15 +204,14 @@ public:
             node_->set_parameter(param);
             return;
         }
-        RCLCPP_INFO(node_->get_logger(), "ii");
 
-        if (root.isMember("sequence")) {
-            const Json::Value sequence = root["sequence"];
+        const Json::Value sequence = root["sequence"];
+        if (sequence.isArray()) {
+            plan_script_.clear();
             for (const auto& item : sequence) {
-                plan_script_.clear();
                 plan_script_.push_back(item.asInt());
-                rclcpp::Parameter param("plan_script", plan_script_);
             }
+            rclcpp::Parameter param("plan_script", plan_script_);
             node_->set_parameter(param);
             return;
         } else {
@@ -221,7 +219,6 @@ public:
             node_->set_parameter(param);
             return;
         }
-        RCLCPP_INFO(node_->get_logger(), "iii");
         return;
     }
 

@@ -71,9 +71,9 @@ def generate_launch_description():
                 parameters=[
                     config_path,
                     map_points,
-                    {"Robot_name": "Panda"},  # Raccoon or Panda
-                    {"plan_code": 70}, # 10e1: plan (start from 1), 10e0: color(0 for yellow, 1 for blue)
-                    {"plan_script": [1, 2, 17]}
+                    {"Robot_name": "Raccoon"},  # Raccoon or Panda
+                    {"plan_code": 60}, # 10e1: plan (start from 1), 10e0: color(0 for yellow, 1 for blue)
+                    {"plan_script": [6, 5, 13]}
                 ],
                 package = 'startup',
                 executable = 'startup',

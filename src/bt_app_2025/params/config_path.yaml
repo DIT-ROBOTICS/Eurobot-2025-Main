@@ -27,7 +27,6 @@
     Bot2_YellowD_config: "bot2_yellow_d.xml"
     Bot2_YellowE_config: "bot2_yellow_e.xml"
     Bot2_YellowF_config: "bot2_yellow_f.xml"
-    Bot2_YellowG_config: "bot2_yellow_g.xml"
     Bot2_YellowSpetial_config: "bot2_yellow_d_dyn.xml"
     start_points_bot2_blue: [17.0, 17.0, 17.0, 15.0]
     Bot2_BlueA_config: "bot2_blue_a.xml"
