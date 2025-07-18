@@ -172,6 +172,7 @@ public:
         factory.registerNodeType<MissionFailure>("MissionFailure", params, blackboard);
         factory.registerNodeType<BannerChecker>("BannerChecker", params, blackboard);
         /* others */
+        factory.registerNodeType<DemoSourcePoint>("DemoSourcePoint", params, blackboard);
         factory.registerNodeType<BTStarter>("BTStarter", params, blackboard);
         factory.registerNodeType<MySetBlackboard>("MySetBlackboard", params, blackboard);
         factory.registerNodeType<GetBlackboard>("GetBlackboard", params, blackboard);

@@ -92,6 +92,21 @@ BT::NodeStatus GetBlackboard::tick() {
     return BT::NodeStatus::SUCCESS;
 }
 
+BT::PortsList DemoSourcePoint::providedPorts() {
+    return {
+        BT::OutputPort<int>("material_pt_1"),
+        BT::OutputPort<int>("material_pt_2"),
+        BT::OutputPort<int>("mission_pt")
+    };
+}
+
+BT::NodeStatus DemoSourcePoint::tick() {
+    setOutput<int>("material_pt_1", plan_script_[0]);
+    setOutput<int>("material_pt_2", plan_script_[1]);
+    setOutput<int>("mission_pt", plan_script_[2]);
+    return BT::NodeStatus::SUCCESS;
+}
+
 BT::PortsList MySetBlackboard::providedPorts() {
     return {
         BT::InputPort<std::string>("blackboard_key"),

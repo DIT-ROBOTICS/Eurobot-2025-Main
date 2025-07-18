@@ -20,6 +20,11 @@
             <output_port name="mission_status" type="int"/>
             <input_port name="mission_type" type="int"/>
         </Action>
+        <Action ID="DemoSourcePoint">
+            <output_port name="material_pt_1" type="int"/>
+            <output_port name="material_pt_2" type="int"/>
+            <output_port name="mission_pt" type="int"/>
+        </Action>
         <Action ID="GetBlackboard">
             <input_port name="blackboard_type" type="std::string"/>
             <input_port name="blackboard_key" type="std::string"/>
