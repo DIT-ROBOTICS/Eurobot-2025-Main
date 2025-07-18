@@ -62,8 +62,8 @@ public:
     /* Start and running function */
     BT::NodeStatus tick() override;
 private:
-    BT::Blackboard::Ptr blackboard_;
     rclcpp::Node::SharedPtr node_;
+    BT::Blackboard::Ptr blackboard_;
     // for tf listener
     tf2_ros::Buffer tf_buffer_;
     tf2_ros::TransformListener listener_;

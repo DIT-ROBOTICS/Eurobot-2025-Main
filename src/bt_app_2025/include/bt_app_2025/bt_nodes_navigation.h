@@ -71,11 +71,13 @@ public:
     static PortsList providedPorts();
     bool setGoal(RosActionNode::Goal& goal) override;
     NodeStatus onResultReceived(const WrappedResult& wr) override;
-    virtual NodeStatus onFailure(ActionNodeErrorCode error) override;
+    // virtual NodeStatus onFailure(ActionNodeErrorCode error) override;
     NodeStatus onFeedback(const std::shared_ptr<const Feedback> feedback);
 private:
     NodeStatus goalErrorDetect();
     std::shared_ptr<rclcpp::Node> node_;
+    tf2_ros::Buffer tf_buffer_;
+    tf2_ros::TransformListener listener_;
     bool nav_finished_;
     bool nav_error_;
     int nav_recov_times_;
@@ -85,8 +87,6 @@ private:
     std::string dock_type_;
     geometry_msgs::msg::PoseStamped goal_;
     geometry_msgs::msg::PoseStamped robot_pose_;
-    tf2_ros::Buffer tf_buffer_;
-    tf2_ros::TransformListener listener_;
     std::string frame_id_;
 };
 
@@ -111,12 +111,14 @@ public:
     static PortsList providedPorts();
     bool setGoal(RosActionNode::Goal& goal) override;
     NodeStatus onResultReceived(const WrappedResult& wr) override;
-    virtual NodeStatus onFailure(ActionNodeErrorCode error) override;
+    // virtual NodeStatus onFailure(ActionNodeErrorCode error) override;
     NodeStatus onFeedback(const std::shared_ptr<const Feedback> feedback);
 private:
     NodeStatus goalErrorDetect();
-    BT::Blackboard::Ptr blackboard_;
     std::shared_ptr<rclcpp::Node> node_;
+    BT::Blackboard::Ptr blackboard_;
+    tf2_ros::Buffer tf_buffer_;
+    tf2_ros::TransformListener listener_;
     bool nav_finished_;
     bool nav_error_;
     bool isPureDocking_;
@@ -126,8 +128,6 @@ private:
     double shift_ = 0;
     geometry_msgs::msg::PoseStamped goal_;
     geometry_msgs::msg::PoseStamped robot_pose_;
-    tf2_ros::Buffer tf_buffer_;
-    tf2_ros::TransformListener listener_;
     std::string frame_id_;
 };
 
@@ -147,18 +147,18 @@ public:
     static PortsList providedPorts();
     bool setGoal(RosActionNode::Goal& goal) override;
     NodeStatus onResultReceived(const WrappedResult& wr) override;
-    virtual NodeStatus onFailure(ActionNodeErrorCode error) override;
+    // virtual NodeStatus onFailure(ActionNodeErrorCode error) override;
     NodeStatus onFeedback(const std::shared_ptr<const Feedback> feedback);
 
 private:
     NodeStatus goalErrorDetect();
     std::shared_ptr<rclcpp::Node> node_;
+    tf2_ros::Buffer tf_buffer_;
+    tf2_ros::TransformListener listener_;
     bool nav_finished_;
     bool nav_error_;
     int nav_recov_times_ = 0;
     std::string dock_type_;
-    tf2_ros::Buffer tf_buffer_;
-    tf2_ros::TransformListener listener_;
     std::string frame_id_;
     geometry_msgs::msg::PoseStamped goal_;
     geometry_msgs::msg::PoseStamped robot_pose_;
@@ -195,8 +195,8 @@ public:
     BT::NodeStatus tick() override;
 private:
     int findBestTarget();
-    BT::Blackboard::Ptr blackboard_;
     rclcpp::Node::SharedPtr node_;
+    BT::Blackboard::Ptr blackboard_;
     // for tf listener
     tf2_ros::Buffer tf_buffer_;
     tf2_ros::TransformListener listener_;
@@ -227,8 +227,8 @@ public:
     BT::NodeStatus tick() override;
 private:
     bool CheckCanShift(const int index_, const double rivalDirect_);
-    BT::Blackboard::Ptr blackboard_;
     rclcpp::Node::SharedPtr node_;
+    BT::Blackboard::Ptr blackboard_;
     // for tf listener
     tf2_ros::Buffer tf_buffer_;
     tf2_ros::TransformListener listener_;

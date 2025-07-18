@@ -54,12 +54,13 @@ public:
   static bool UpdateRobotPose(geometry_msgs::msg::PoseStamped &robot_pose_, tf2_ros::Buffer &tf_buffer_, std::string frame_id_);
   static bool UpdateRivalPose(geometry_msgs::msg::PoseStamped &rival_pose_, tf2_ros::Buffer &tf_buffer_, std::string frame_id_);
 private:
-  geometry_msgs::msg::PoseStamped robot_pose_;
-  geometry_msgs::msg::PoseStamped rival_pose_;
   std::shared_ptr<rclcpp::Node> node_;
   tf2_ros::Buffer tf_buffer_;
   tf2_ros::TransformListener listener_;
   std::string frame_id_;
+
+  geometry_msgs::msg::PoseStamped robot_pose_;
+  geometry_msgs::msg::PoseStamped rival_pose_;
 };
 
 /***************/
@@ -84,8 +85,10 @@ private:
   void topic_callback(const geometry_msgs::msg::PoseStamped::SharedPtr msg);
 
   rclcpp::Subscription<geometry_msgs::msg::PoseStamped>::SharedPtr subscription_;
+
   std::shared_ptr<rclcpp::Node> node_;
   BT::Blackboard::Ptr blackboard_;
+  
   geometry_msgs::msg::PoseStamped rival_predict_goal_;
 };
 
@@ -118,13 +121,13 @@ private:
   rclcpp::Subscription<std_msgs::msg::Int32>::SharedPtr sub_mission_info_;
   rclcpp::Subscription<std_msgs::msg::Int32>::SharedPtr sub_score_;
 
-  std_msgs::msg::Int32MultiArray materials_info_;
-  std_msgs::msg::Int32 score_;
-
   std::shared_ptr<rclcpp::Node> node_;
   BT::Blackboard::Ptr blackboard_;
   int mission_info_;
   int score_main_, score_vision_;
+
+  std_msgs::msg::Int32MultiArray materials_info_;
+  std_msgs::msg::Int32 score_;
 };
 
 class TopicSubTest : public BT::StatefulActionNode
