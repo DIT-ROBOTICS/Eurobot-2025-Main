@@ -298,7 +298,7 @@ private:
 
 void MainClass::timeCallback(const std_msgs::msg::Float32::SharedPtr msg) {
     game_time = msg->data;
-    blackboard->get<double>("current_time", game_time);
+    blackboard->set<double>("current_time", game_time);
 }
 
 // void MainClass::sendReadySignal(int group_, int state_) {
