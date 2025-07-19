@@ -117,7 +117,9 @@ void CamReceiver::mission_info_callback(const std_msgs::msg::Int32::SharedPtr ms
 
 void CamReceiver::score_callback(const std_msgs::msg::Int32::SharedPtr msg) {
     score_vision_ = msg->data;
-    blackboard_->get<int>("score_from_main", score_main_);
+    if (!blackboard_->get<int>("score_from_main", score_main_)) {
+        score_main_ = 0;
+    }
 }
 
 BT::NodeStatus CamReceiver::tick() {

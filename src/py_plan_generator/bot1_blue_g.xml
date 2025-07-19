@@ -103,7 +103,7 @@
     </Sequence>
   </BehaviorTree>
 
-  <BehaviorTree ID="OneLevelBot1new">
+  <BehaviorTree ID="TakeOneLevel">
     <Fallback>
       <Sequence _failureIf="last_mission_failed">
         <ForceSuccess>
@@ -257,7 +257,7 @@
           </MaterialChecker>
           <SubTree ID="MissionBeforeTwoLevels"/>
         </Parallel>
-        <SubTree ID="TwoLevelsBot1new" back="0.2, 0.1, 0.05" forward="0.105, 0.12, 0.075" shift="0.11" index="{index}" _skipIf="last_mission_failed" _autoremap="true" />
+        <SubTree ID="TakeTwoLevels" back="0.2, 0.1, 0.05" forward="0.105, 0.12, 0.075" shift="0.11" index="{index}" _skipIf="last_mission_failed" _autoremap="true" />
         <Sequence>
           <ForceSuccess>
             <MissionChecker level="2" remap_base="{base}" mission_type="front" base_index="{mission_index}">
@@ -271,7 +271,7 @@
   </BehaviorTree>
   
 
-  <BehaviorTree ID="ThreeLevelsBot1new">
+  <BehaviorTree ID="PlaceThreeLevels">
     <Fallback>
       <Sequence>
         <MissionStart BACK_IN="{back}" FORWARD_IN="{forward}" SHIFT_IN="{shift}" INDEX_IN="{index}" BACK_L="{BACK_L}" BACK_M="{BACK_M}" BACK_S="{BACK_S}" FORWARD_L="{FORWARD_L}" FORWARD_M="{FORWARD_M}" FORWARD_S="{FORWARD_S}" SHIFT="{SHIFT}" DOCK_DIR="{DOCK_DIR}" />
@@ -357,7 +357,7 @@
     </Fallback>
   </BehaviorTree>
 
-  <BehaviorTree ID="TwoLevelsBot1new">
+  <BehaviorTree ID="TakeTwoLevels">
     <Fallback>
       <Sequence>
         <MissionStart BACK_IN="{back}" FORWARD_IN="{forward}" SHIFT_IN="{shift}" INDEX_IN="{index}" BACK_L="{BACK_L}" BACK_M="{BACK_M}" BACK_S="{BACK_S}" FORWARD_L="{FORWARD_L}" FORWARD_M="{FORWARD_M}" FORWARD_S="{FORWARD_S}" SHIFT="{SHIFT}" DOCK_DIR="{DOCK_DIR}" />

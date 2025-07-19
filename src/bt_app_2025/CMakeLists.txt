@@ -24,6 +24,7 @@ find_package(tf2_geometry_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
 find_package(nav2_msgs REQUIRED)
+find_package(jsoncpp REQUIRED)
 find_package(btcpp_ros2_interfaces REQUIRED)
 find_package(opennav_docking_msgs REQUIRED)
 
@@ -39,6 +40,7 @@ target_link_libraries(bt_m
   BTNODE_NAVIGATION
   BTNODE_OTHERS
   BTNODE_UTIL
+  jsoncpp
   ${ARMADILLO_LIBRARIES})
 ament_target_dependencies(bt_m
   ${THIS_PACKAGE_DEPS}
@@ -52,6 +54,7 @@ ament_target_dependencies(bt_m
   "std_srvs"
   "std_msgs"
   "geometry_msgs"
+  "jsoncpp"
 )
 install(TARGETS
   bt_m

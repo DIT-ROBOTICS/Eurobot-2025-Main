@@ -62,8 +62,8 @@ public:
     /* Start and running function */
     BT::NodeStatus tick() override;
 private:
-    BT::Blackboard::Ptr blackboard_;
     rclcpp::Node::SharedPtr node_;
+    BT::Blackboard::Ptr blackboard_;
     // for tf listener
     tf2_ros::Buffer tf_buffer_;
     tf2_ros::TransformListener listener_;
@@ -103,6 +103,31 @@ public:
 private:
     std::shared_ptr<rclcpp::Node> node_;
     BT::Blackboard::Ptr blackboard_;
+};
+
+/*************************/
+/* Demo Script Generator */
+/*************************/
+class DemoSourcePoint : public BT::SyncActionNode {
+
+public:
+    DemoSourcePoint(const std::string& name, const BT::NodeConfig& config, const RosNodeParams& params, BT::Blackboard::Ptr blackboard)
+        : BT::SyncActionNode(name, config), node_(params.nh.lock()), blackboard_(blackboard)
+    {
+        node_->get_parameter("plan_script", long_vec);
+        plan_script_.assign(long_vec.begin(), long_vec.end());
+    }
+
+    /* Node remapping function */
+    static BT::PortsList providedPorts();
+
+    /* Start and running function */
+    BT::NodeStatus tick() override;
+private:
+    std::shared_ptr<rclcpp::Node> node_;
+    BT::Blackboard::Ptr blackboard_;
+    std::vector<long> long_vec;
+    std::vector<int> plan_script_;
 };
 
 /******************************/

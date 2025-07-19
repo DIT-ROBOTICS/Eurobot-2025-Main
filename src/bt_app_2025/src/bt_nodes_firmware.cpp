@@ -81,17 +81,24 @@ BT::NodeStatus MissionStart::tick() {
     auto forward_ = getInput<std::deque<double>>("FORWARD_IN");
     double shift_ = getInput<double>("SHIFT_IN").value();
     int index_ = getInput<int>("INDEX_IN").value();
-
-    std::string map_points;
-    blackboard_->get<std::string>("bot", map_points); 
+ 
+    int offset_dir_;
+    int offset_positivity_;
+    std::string mapPointsFile_, bot_;
     std_msgs::msg::Int32MultiArray materials_info_;
-    blackboard_->get<std_msgs::msg::Int32MultiArray>("materials_info", materials_info_);
+    if (!blackboard_->get<std::string>("bot", bot_) ||
+        !blackboard_->get<std_msgs::msg::Int32MultiArray>("materials_info", materials_info_)) {
+        throw std::runtime_error("blackboard variable not found!");
+    }
+    mapPointsFile_ = "map_points_" + bot_;
+    node_->get_parameter(mapPointsFile_, material_points_);
     RCLCPP_INFO_STREAM(node_->get_logger(), materials_info_.data[0] << materials_info_.data[1] << materials_info_.data[2] << materials_info_.data[3] << materials_info_.data[4] << materials_info_.data[5] << materials_info_.data[6] << materials_info_.data[7] << materials_info_.data[8] << materials_info_.data[9]);
-    map_points = "map_points_" + map_points;
-    node_->get_parameter(map_points, material_points_);
 
-    int offset_dir_ = (int)(1 - 2 * ((int)(material_points_[index_ * 7 + 2]) % 2));
-    int offset_positivity_ = (int)(material_points_[index_ * 7 + 3] / abs(material_points_[index_ * 7 + 3]));
+    offset_dir_ = (int)(1 - 2 * ((int)(material_points_[index_ * 7 + 2]) % 2));
+    if (material_points_[index_ * 7 + 3] != 0)
+        offset_positivity_ = (int)(material_points_[index_ * 7 + 3] / abs(material_points_[index_ * 7 + 3]));
+    else
+        offset_positivity_ = 0;
     forward_.value()[0] = material_points_[index_ * 7 + 6];
     RCLCPP_INFO_STREAM(node_->get_logger(), offset_positivity_);
     shift_ *= offset_dir_ * offset_positivity_;
@@ -106,10 +113,20 @@ BT::NodeStatus MissionStart::tick() {
         back_.value()[1] *= -1;
         back_.value()[2] *= -1;
     }
-    else {
+    else if (offset_positivity_ < 0) {
         forward_.value()[0] *= -1;
         forward_.value()[1] *= -1;
         forward_.value()[2] *= -1;
+    }
+    else if (material_points_[index_ * 7 + 2] == 0 || material_points_[index_ * 7 + 2] == 1){
+        back_.value()[0] *= -1;
+        back_.value()[1] *= -1;
+        back_.value()[2] *= -1;
+    }
+    else {
+        forward_.value()[0] *= -1;
+        forward_.value()[1] *= -1;
+        forward_.value()[2] *= -1;  
     }
     RCLCPP_INFO_STREAM(node_->get_logger(), back_.value()[0] << ", " << back_.value()[1] << ", " << back_.value()[2]);
     RCLCPP_INFO_STREAM(node_->get_logger(), forward_.value()[0] << ", " << forward_.value()[1] << ", " << forward_.value()[2]);
@@ -142,9 +159,11 @@ BT::NodeStatus MissionSuccess::tick() {
 
     lastMissionFailed_ = false;
     blackboard_->set<bool>("last_mission_failed", lastMissionFailed_);
-    blackboard_->get<int>("front_materials", front_materials_);
-    blackboard_->get<int>("back_materials", back_materials_);
-    blackboard_->get<int>("score_from_main", score_);
+    if (!blackboard_->get<int>("front_materials", front_materials_) ||
+        !blackboard_->get<int>("back_materials", back_materials_) ||
+        !blackboard_->get<int>("score_from_main", score_)) {
+        throw std::runtime_error("blackboard variable not found!");
+    }
     if (base_index_ > 10) {   // finish placement mission
         switch (levels_) {
             case 1:
@@ -161,7 +180,9 @@ BT::NodeStatus MissionSuccess::tick() {
                 break;
         }
         // update mission_points_status_
-        blackboard_->get<std_msgs::msg::Int32MultiArray>("mission_points_status", mission_points_status_);
+        if (!blackboard_->get<std_msgs::msg::Int32MultiArray>("mission_points_status", mission_points_status_)) {
+            throw std::runtime_error("blackboard variable not found!");
+        }
         mission_points_status_.data[base_index_ - 11]++;
         blackboard_->set<std_msgs::msg::Int32MultiArray>("mission_points_status", mission_points_status_);
         // update score
@@ -182,7 +203,9 @@ BT::NodeStatus MissionSuccess::tick() {
             default:
                 break;
         }
-        blackboard_->get<std_msgs::msg::Int32MultiArray>("materials_info", materials_info_);
+        if (!blackboard_->get<std_msgs::msg::Int32MultiArray>("materials_info", materials_info_)) {
+            throw std::runtime_error("blackboard variable not found!");
+        }
         materials_info_.data[base_index_] = 0;
         blackboard_->set<std_msgs::msg::Int32MultiArray>("materials_info", materials_info_);
         RCLCPP_INFO_STREAM(node_->get_logger(), "take materials at point " << base_index_ << " successfully");
@@ -231,9 +254,11 @@ BT::NodeStatus MissionFailure::onStart()
     getInput<int>("base_index", base_index_);
     getInput<std::deque<int>>("step_results", step_results_);
     getInput<bool>("robot_type", robot_type_);
-    blackboard_->get<int>("mission_progress", mission_progress_);
-    blackboard_->get<int>("front_materials", front_materials_);
-    blackboard_->get<int>("back_materials", back_materials_);
+    if (!blackboard_->get<int>("mission_progress", mission_progress_) ||
+        !blackboard_->get<int>("front_materials", front_materials_) ||
+        !blackboard_->get<int>("back_materials", back_materials_)) {
+        throw std::runtime_error("blackboard variable not found!");
+    }
     blackboard_->set<int>("mission_progress", 0);
     
     // RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "finisher get step_results: %d", step_results_.back());
@@ -322,7 +347,9 @@ BT::NodeStatus MissionFailure::onRunning()
             break;
     }
     if (base_index_ > 10) {
-        blackboard_->get<std_msgs::msg::Int32MultiArray>("mission_points_status", mission_points_status_);
+        if (!blackboard_->get<std_msgs::msg::Int32MultiArray>("mission_points_status", mission_points_status_)) {
+            throw std::runtime_error("blackboard variable not found!");
+        }
         mission_points_status_.data[base_index_ - 11]++;
         blackboard_->set<std_msgs::msg::Int32MultiArray>("mission_points_status", mission_points_status_);
     }
@@ -401,7 +428,9 @@ void FirmwareMission::mission_callback(const std_msgs::msg::Int32::SharedPtr sub
 BT::NodeStatus FirmwareMission::onStart() {
     // RCLCPP_INFO(node_->get_logger(), "Node start");
     getInput<int>("mission_type", mission_type_);
-    blackboard_->get<int>("mission_progress", mission_progress_);
+    if (!blackboard_->get<int>("mission_progress", mission_progress_)) {
+        throw std::runtime_error("blackboard variable not found!");
+    }
     // RCLCPP_INFO(node_->get_logger(), "mission_type: %d", mission_type_);
     // RCLCPP_INFO(node_->get_logger(), "-----------------");
     return BT::NodeStatus::RUNNING;
@@ -435,22 +464,25 @@ BT::PortsList BannerChecker::providedPorts() {
 
 void BannerChecker::onStart() {
     getInput<int>("banner_place", banner_place_);
-    blackboard_->get<std::string>("team", team_);
-    blackboard_->get<std_msgs::msg::Int32MultiArray>("mission_points_status", mission_points_status_);
+
+    std::string mapPointsFile_, bot_;
+    if (!blackboard_->get<std::string>("bot", bot_) ||
+        !blackboard_->get<std::string>("team", team_) ||
+        !blackboard_->get<std_msgs::msg::Int32MultiArray>("mission_points_status", mission_points_status_)) {
+        throw std::runtime_error("blackboard variable not found!");
+    }
     // get correspond map points according to bot name
-    std::string map_points;
-    blackboard_->get<std::string>("bot", map_points); 
-    map_points = "map_points_" + map_points;
-    node_->get_parameter(map_points, material_points_);
-    // node_->get_parameter("safety_dist", safety_dist_);
+    mapPointsFile_ = "map_points_" + bot_;
+    node_->get_parameter(mapPointsFile_, material_points_);
+    // node_->get_parameter("safety_dist", safety_dist_);                          // unused for now
     LocReceiver::UpdateRobotPose(robot_pose_, tf_buffer_, frame_id_);
-    // LocReceiver::UpdateRivalPose(rival_pose_, tf_buffer_, frame_id_);
+    // LocReceiver::UpdateRivalPose(rival_pose_, tf_buffer_, frame_id_);           // unused for now
 }
 
 int BannerChecker::DecodeBannerIndex(const int index) {
-    if (team_ == "y")
+    if (team_ == "yellow")
         return index + 12;
-    else if (team_ == "b")
+    else if (team_ == "blue")
         return index + 16;
     else
         throw("error team color");
@@ -520,7 +552,7 @@ BT::NodeStatus IntegratedMissionNode::onStart() {
     RCLCPP_INFO(node_->get_logger(), "Node start");
     getInput<std::string>("mission_set_name", mission_set_name_);
     getInput<geometry_msgs::msg::PoseStamped>("base", base_);
-    node_->declare_parameter<std::vector<int64_t>>(mission_set_name_, {});
+    node_->declare_parameter<std::vector<int64_t>>(mission_set_name_, std::vector<int64_t>{});
     node_->get_parameter(mission_set_name_, mission_queue_);
     return BT::NodeStatus::RUNNING;
 }
@@ -537,7 +569,7 @@ BT::NodeStatus IntegratedMissionNode::onRunning() {
         if (mission_type_ == 1) {
             // navigation
             double offset = base_.pose.position.z;
-            auto nav_client = std::make_shared<NavigateClient>(base_.pose, offset);
+            auto nav_client = std::make_shared<NavigateClient>(offset, base_.pose);
             while (!nav_client->is_nav_finished()) {
               rclcpp::spin_some(nav_client);
             }
