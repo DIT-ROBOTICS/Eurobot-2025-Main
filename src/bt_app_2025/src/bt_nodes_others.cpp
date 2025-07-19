@@ -97,6 +97,23 @@ BT::NodeStatus GetBlackboard::tick() {
     return BT::NodeStatus::SUCCESS;
 }
 
+BT::PortsList DemoSourcePoint::providedPorts() {
+    return {
+        BT::OutputPort<int>("material_pt_1"),
+        BT::OutputPort<int>("material_pt_2"),
+        BT::OutputPort<int>("mission_pt"),
+        BT::OutputPort<int>("end_pt")
+    };
+}
+
+BT::NodeStatus DemoSourcePoint::tick() {
+    setOutput<int>("material_pt_1", plan_script_[1]);
+    setOutput<int>("material_pt_2", plan_script_[2]);
+    setOutput<int>("mission_pt", plan_script_[3]);
+    setOutput<int>("end_pt", plan_script_[plan_script_.size() - 1]);
+    return BT::NodeStatus::SUCCESS;
+}
+
 BT::PortsList MySetBlackboard::providedPorts() {
     return {
         BT::InputPort<std::string>("blackboard_key"),
@@ -130,11 +147,11 @@ BT::NodeStatus BTStarter::tick() {
     if (!blackboard_->get<std::string>("team", team_)) {
         throw std::runtime_error("team not found in blackboard!");
     }
-    if (team_ == "y") {
+    if (team_ == "yellow") {
         keepout_zone_.data = "BCFGJ";
         RCLCPP_INFO_STREAM(node_->get_logger(), keepout_zone_.data);
     }
-    else if (team_ == "b") {
+    else if (team_ == "blue") {
         keepout_zone_.data = "ADEHI";
         RCLCPP_INFO_STREAM(node_->get_logger(), keepout_zone_.data);
     }

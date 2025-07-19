@@ -421,9 +421,9 @@ int MaterialChecker::findBestTarget() {
         if (materials_info_.data[i])
             candidate_.push_back(i);
     }
-    if (team_ == "b" && materials_info_.data[0])       // if it's blue team, then detect if the first point is empty
+    if (team_ == "blue" && materials_info_.data[0])       // if it's blue team, then detect if the first point is empty
         candidate_.push_back(0);
-    else if (team_ == "y" && materials_info_.data[9]) // if it's yellow team, then detect if the last point is empty
+    else if (team_ == "yellow" && materials_info_.data[9]) // if it's yellow team, then detect if the last point is empty
         candidate_.push_back(9);
     if (candidate_.empty()) {
         RCLCPP_INFO_STREAM(node_->get_logger(), "No material point detected");
@@ -517,8 +517,7 @@ NodeStatus MaterialChecker::tick() {
     // int offset_dir_ = (int)(1 - 2 * int(base_.pose.position.z) % 2);  // unused for now
     // int offset_positivity_ = (int)(offset_ / abs(offset_));           // unused for now
     if (missionType_ == "front") {
-        if (bot_ == "1")
-            offset_ -= offset_ / abs(offset_) * material_points_[baseIndex_ * 7 + 5];
+        offset_ = material_points_[baseIndex_ * 7 + 5];
         shift_ = material_points_[baseIndex_ * 7 + 4];
     } else if (missionType_ == "back") {
         base_.pose.position.z = ((int)base_.pose.position.z / 2) ? base_.pose.position.z - 2 : base_.pose.position.z + 2;
@@ -566,20 +565,18 @@ NodeStatus MissionChecker::tick() {
     double dist = 0;
     double offset = 0;
     // double shift_ = 0;                                                            // unused for now
+    std::string mapPointsFile_, bot_;
 
     // get parameters
-    std::string map_points;
-    if (!blackboard_->get<std::string>("bot", map_points)) {
-        map_points = "1";
-    }
-    map_points = "map_points_" + map_points;
-    node_->get_parameter(map_points, material_points_);
-    node_->get_parameter("safety_dist", safety_dist_);
-    if (!blackboard_->get<std_msgs::msg::Int32MultiArray>("mission_points_status", mission_points_status_) ||
+    if (!blackboard_->get<std::string>("bot", bot_) ||
+        !blackboard_->get<std_msgs::msg::Int32MultiArray>("mission_points_status", mission_points_status_) ||
         !blackboard_->get<int>("front_materials", front_materials_) ||
         !blackboard_->get<int>("back_materials", back_materials_)) {
         throw std::runtime_error("blackboard variable not found!");
     }
+    mapPointsFile_ = "map_points_" + bot_;
+    node_->get_parameter(mapPointsFile_, material_points_);
+    node_->get_parameter("safety_dist", safety_dist_);
     
     // get base & offset from map_points[i]
     base_.pose.position.x = material_points_[baseIndex_ * 7];

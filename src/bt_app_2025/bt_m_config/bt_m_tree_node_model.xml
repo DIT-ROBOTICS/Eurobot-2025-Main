@@ -8,6 +8,12 @@
             <input_port name="banner_place" type="int"/>
         </Action>
         <Action ID="CamReceiver"/>
+        <Action ID="DemoSourcePoint">
+            <output_port name="end_pt" type="int"/>
+            <output_port name="mission_pt" type="int"/>
+            <output_port name="material_pt_2" type="int"/>
+            <output_port name="material_pt_1" type="int"/>
+        </Action>
         <Action ID="Docking">
             <output_port name="final_pose" type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
             <input_port name="isPureDocking" type="bool"/>

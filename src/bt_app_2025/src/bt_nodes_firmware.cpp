@@ -81,21 +81,24 @@ BT::NodeStatus MissionStart::tick() {
     auto forward_ = getInput<std::deque<double>>("FORWARD_IN");
     double shift_ = getInput<double>("SHIFT_IN").value();
     int index_ = getInput<int>("INDEX_IN").value();
-
-    std::string map_points;
-    if (!blackboard_->get<std::string>("bot", map_points)) {
-        throw std::runtime_error("blackboard variable not found!");
-    }
+ 
+    int offset_dir_;
+    int offset_positivity_;
+    std::string mapPointsFile_, bot_;
     std_msgs::msg::Int32MultiArray materials_info_;
-    if (!blackboard_->get<std_msgs::msg::Int32MultiArray>("materials_info", materials_info_)) {
+    if (!blackboard_->get<std::string>("bot", bot_) ||
+        !blackboard_->get<std_msgs::msg::Int32MultiArray>("materials_info", materials_info_)) {
         throw std::runtime_error("blackboard variable not found!");
     }
+    mapPointsFile_ = "map_points_" + bot_;
+    node_->get_parameter(mapPointsFile_, material_points_);
     RCLCPP_INFO_STREAM(node_->get_logger(), materials_info_.data[0] << materials_info_.data[1] << materials_info_.data[2] << materials_info_.data[3] << materials_info_.data[4] << materials_info_.data[5] << materials_info_.data[6] << materials_info_.data[7] << materials_info_.data[8] << materials_info_.data[9]);
-    map_points = "map_points_" + map_points;
-    node_->get_parameter(map_points, material_points_);
 
-    int offset_dir_ = (int)(1 - 2 * ((int)(material_points_[index_ * 7 + 2]) % 2));
-    int offset_positivity_ = (int)(material_points_[index_ * 7 + 3] / abs(material_points_[index_ * 7 + 3]));
+    offset_dir_ = (int)(1 - 2 * ((int)(material_points_[index_ * 7 + 2]) % 2));
+    if (material_points_[index_ * 7 + 3] != 0)
+        offset_positivity_ = (int)(material_points_[index_ * 7 + 3] / abs(material_points_[index_ * 7 + 3]));
+    else
+        offset_positivity_ = 0;
     forward_.value()[0] = material_points_[index_ * 7 + 6];
     RCLCPP_INFO_STREAM(node_->get_logger(), offset_positivity_);
     shift_ *= offset_dir_ * offset_positivity_;
@@ -110,10 +113,20 @@ BT::NodeStatus MissionStart::tick() {
         back_.value()[1] *= -1;
         back_.value()[2] *= -1;
     }
-    else {
+    else if (offset_positivity_ < 0) {
         forward_.value()[0] *= -1;
         forward_.value()[1] *= -1;
         forward_.value()[2] *= -1;
+    }
+    else if (material_points_[index_ * 7 + 2] == 0 || material_points_[index_ * 7 + 2] == 1){
+        back_.value()[0] *= -1;
+        back_.value()[1] *= -1;
+        back_.value()[2] *= -1;
+    }
+    else {
+        forward_.value()[0] *= -1;
+        forward_.value()[1] *= -1;
+        forward_.value()[2] *= -1;  
     }
     RCLCPP_INFO_STREAM(node_->get_logger(), back_.value()[0] << ", " << back_.value()[1] << ", " << back_.value()[2]);
     RCLCPP_INFO_STREAM(node_->get_logger(), forward_.value()[0] << ", " << forward_.value()[1] << ", " << forward_.value()[2]);
@@ -451,26 +464,25 @@ BT::PortsList BannerChecker::providedPorts() {
 
 void BannerChecker::onStart() {
     getInput<int>("banner_place", banner_place_);
-    if (!blackboard_->get<std::string>("team", team_) ||
+
+    std::string mapPointsFile_, bot_;
+    if (!blackboard_->get<std::string>("bot", bot_) ||
+        !blackboard_->get<std::string>("team", team_) ||
         !blackboard_->get<std_msgs::msg::Int32MultiArray>("mission_points_status", mission_points_status_)) {
         throw std::runtime_error("blackboard variable not found!");
     }
     // get correspond map points according to bot name
-    std::string map_points;
-    if (!blackboard_->get<std::string>("bot", map_points)) {
-        map_points = "1";
-    }
-    map_points = "map_points_" + map_points;
-    node_->get_parameter(map_points, material_points_);
-    // node_->get_parameter("safety_dist", safety_dist_);
+    mapPointsFile_ = "map_points_" + bot_;
+    node_->get_parameter(mapPointsFile_, material_points_);
+    // node_->get_parameter("safety_dist", safety_dist_);                          // unused for now
     LocReceiver::UpdateRobotPose(robot_pose_, tf_buffer_, frame_id_);
-    // LocReceiver::UpdateRivalPose(rival_pose_, tf_buffer_, frame_id_);
+    // LocReceiver::UpdateRivalPose(rival_pose_, tf_buffer_, frame_id_);           // unused for now
 }
 
 int BannerChecker::DecodeBannerIndex(const int index) {
-    if (team_ == "y")
+    if (team_ == "yellow")
         return index + 12;
-    else if (team_ == "b")
+    else if (team_ == "blue")
         return index + 16;
     else
         throw("error team color");
