@@ -113,7 +113,7 @@ public:
         blackboard->set<std_msgs::msg::Int32MultiArray>("mission_points_status", mission_points_status_);  // record number of missions have done at each point
         blackboard->set<bool>("last_mission_failed", false);                   // set as true if any mission fail
         blackboard->set<bool>("Timeout", false);                               // a timeout param for docking sub tree
-        blackboard->set<std::string>("team", "y");                             // team color
+        blackboard->set<std::string>("team", "yellow");                             // team color
         blackboard->set<std::string>("bot", "1");                              // bot name code
         blackboard->set<int>("score_from_main", 0);                            // calculate score in main
         blackboard->set<bool>("enable_vision_check", true);                    // limit the decorator to be executed only 1 time
@@ -323,9 +323,9 @@ void MainClass::readyCallback(const std_msgs::msg::String::SharedPtr msg) {
     }
     team = msg->data.back();                                                   // get team color
     if (team == '0')
-        blackboard->set<std::string>("team", "y");                             // team color is yellow
+        blackboard->set<std::string>("team", "yellow");                             // team color is yellow
     else
-        blackboard->set<std::string>("team", "b");                             // team color is blue
+        blackboard->set<std::string>("team", "blue");                             // team color is blue
     msg->data.pop_back();                                                      // delete the last char of string 
     groot_filename = msg->data;                                                // the remain string is the plan xml file name
     blackboard->set<std::string>("bot", groot_filename.substr(3, 1)); 

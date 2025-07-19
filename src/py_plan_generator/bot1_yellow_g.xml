@@ -112,7 +112,7 @@
     </Sequence>
   </BehaviorTree>
 
-  <BehaviorTree ID="OneLevelBot1new">
+  <BehaviorTree ID="TakeOneLevel">
     <Fallback>
       <Sequence _failureIf="last_mission_failed">
         <ForceSuccess>
@@ -266,7 +266,7 @@
           </MaterialChecker>
           <SubTree ID="MissionBeforeTwoLevels"/>
         </Parallel>
-        <SubTree ID="TwoLevelsBot1new" back="0.2, 0.1, 0.05" forward="0.105, 0.12, 0.075" shift="0.11" index="{index}" _skipIf="last_mission_failed" _autoremap="true" />
+        <SubTree ID="TakeTwoLevels" back="0.2, 0.1, 0.05" forward="0.105, 0.12, 0.075" shift="0.11" index="{index}" _skipIf="last_mission_failed" _autoremap="true" />
         <Sequence>
           <ForceSuccess>
             <MissionChecker level="2" remap_base="{base}" mission_type="front" base_index="{mission_index}">
@@ -280,7 +280,7 @@
   </BehaviorTree>
   
 
-  <BehaviorTree ID="ThreeLevelsBot1new">
+  <BehaviorTree ID="PlaceThreeLevels">
     <Fallback>
       <Sequence>
         <MissionStart BACK_IN="{back}" FORWARD_IN="{forward}" SHIFT_IN="{shift}" INDEX_IN="{index}" BACK_L="{BACK_L}" BACK_M="{BACK_M}" BACK_S="{BACK_S}" FORWARD_L="{FORWARD_L}" FORWARD_M="{FORWARD_M}" FORWARD_S="{FORWARD_S}" SHIFT="{SHIFT}" DOCK_DIR="{DOCK_DIR}" />
@@ -366,7 +366,7 @@
     </Fallback>
   </BehaviorTree>
 
-  <BehaviorTree ID="TwoLevelsBot1new">
+  <BehaviorTree ID="TakeTwoLevels">
     <Fallback>
       <Sequence>
         <MissionStart BACK_IN="{back}" FORWARD_IN="{forward}" SHIFT_IN="{shift}" INDEX_IN="{index}" BACK_L="{BACK_L}" BACK_M="{BACK_M}" BACK_S="{BACK_S}" FORWARD_L="{FORWARD_L}" FORWARD_M="{FORWARD_M}" FORWARD_S="{FORWARD_S}" SHIFT="{SHIFT}" DOCK_DIR="{DOCK_DIR}" />
@@ -457,7 +457,7 @@
         </ForceSuccess>
       </Sequence>
       <ForceSuccess>
-        <MissionFailure failed_levels="{a}" success_levels="{b}" robot_type="1" step_results="4" />
+        <MissionFailure failed_levels="{a}" success_levels="{b}" base_index="{index}" robot_type="1" step_results="4" />
       </ForceSuccess>
     </Fallback>
   </BehaviorTree>
@@ -533,6 +533,7 @@
     <Action ID="MissionFailure">
       <output_port name="failed_levels" type="int" />
       <output_port name="success_levels" type="int" />
+      <input_port name="base_index" type="int" />
       <input_port name="robot_type" type="bool" />
       <input_port name="step_results" type="std::deque&lt;int, std::allocator&lt;int&gt; &gt;" />
     </Action>

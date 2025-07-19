@@ -84,13 +84,14 @@ BT::NodeStatus MissionStart::tick() {
 
     int offset_dir_;
     int offset_positivity_;
-    std::string map_points;
-    blackboard_->get<std::string>("bot", map_points); 
+    std::string mapPointsFile_, bot_;
     std_msgs::msg::Int32MultiArray materials_info_;
+    blackboard_->get<std::string>("bot", bot_); 
     blackboard_->get<std_msgs::msg::Int32MultiArray>("materials_info", materials_info_);
+    mapPointsFile_ = "map_points_" + bot_;
+    node_->get_parameter(mapPointsFile_, material_points_);
+
     RCLCPP_INFO_STREAM(node_->get_logger(), materials_info_.data[0] << materials_info_.data[1] << materials_info_.data[2] << materials_info_.data[3] << materials_info_.data[4] << materials_info_.data[5] << materials_info_.data[6] << materials_info_.data[7] << materials_info_.data[8] << materials_info_.data[9]);
-    map_points = "map_points_" + map_points;
-    node_->get_parameter(map_points, material_points_);
 
     offset_dir_ = (int)(1 - 2 * ((int)(material_points_[index_ * 7 + 2]) % 2));
     if (material_points_[index_ * 7 + 3] != 0)
@@ -450,22 +451,24 @@ BT::PortsList BannerChecker::providedPorts() {
 
 void BannerChecker::onStart() {
     getInput<int>("banner_place", banner_place_);
+
+    std::string mapPointsFile_, bot_;
+
     blackboard_->get<std::string>("team", team_);
+    blackboard_->get<std::string>("bot", bot_); 
     blackboard_->get<std_msgs::msg::Int32MultiArray>("mission_points_status", mission_points_status_);
     // get correspond map points according to bot name
-    std::string map_points;
-    blackboard_->get<std::string>("bot", map_points); 
-    map_points = "map_points_" + map_points;
-    node_->get_parameter(map_points, material_points_);
+    mapPointsFile_ = "map_points_" + bot_;
+    node_->get_parameter(mapPointsFile_, material_points_);
     // node_->get_parameter("safety_dist", safety_dist_);
     LocReceiver::UpdateRobotPose(robot_pose_, tf_buffer_, frame_id_);
     // LocReceiver::UpdateRivalPose(rival_pose_, tf_buffer_, frame_id_);
 }
 
 int BannerChecker::DecodeBannerIndex(const int index) {
-    if (team_ == "y")
+    if (team_ == "yellow")
         return index + 12;
-    else if (team_ == "b")
+    else if (team_ == "blue")
         return index + 16;
     else
         throw("error team color");
