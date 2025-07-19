@@ -520,8 +520,7 @@ NodeStatus MaterialChecker::tick() {
     int offset_dir_ = (int)(1 - 2 * int(base_.pose.position.z) % 2);
     int offset_positivity_ = (int)(offset_ / abs(offset_));
     if (missionType_ == "front") {
-        if (bot_ == "1")
-            offset_ -= offset_ / abs(offset_) * material_points_[baseIndex_ * 7 + 5];
+        offset_ = material_points_[baseIndex_ * 7 + 5];
         shift_ = material_points_[baseIndex_ * 7 + 4];
     } else if (missionType_ == "back") {
         base_.pose.position.z = ((int)base_.pose.position.z / 2) ? base_.pose.position.z - 2 : base_.pose.position.z + 2;

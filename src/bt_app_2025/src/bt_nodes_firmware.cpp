@@ -82,6 +82,8 @@ BT::NodeStatus MissionStart::tick() {
     double shift_ = getInput<double>("SHIFT_IN").value();
     int index_ = getInput<int>("INDEX_IN").value();
 
+    int offset_dir_;
+    int offset_positivity_;
     std::string map_points;
     blackboard_->get<std::string>("bot", map_points); 
     std_msgs::msg::Int32MultiArray materials_info_;
@@ -90,8 +92,11 @@ BT::NodeStatus MissionStart::tick() {
     map_points = "map_points_" + map_points;
     node_->get_parameter(map_points, material_points_);
 
-    int offset_dir_ = (int)(1 - 2 * ((int)(material_points_[index_ * 7 + 2]) % 2));
-    int offset_positivity_ = (int)(material_points_[index_ * 7 + 3] / abs(material_points_[index_ * 7 + 3]));
+    offset_dir_ = (int)(1 - 2 * ((int)(material_points_[index_ * 7 + 2]) % 2));
+    if (material_points_[index_ * 7 + 3] != 0)
+        offset_positivity_ = (int)(material_points_[index_ * 7 + 3] / abs(material_points_[index_ * 7 + 3]));
+    else
+        offset_positivity_ = 0;
     forward_.value()[0] = material_points_[index_ * 7 + 6];
     RCLCPP_INFO_STREAM(node_->get_logger(), offset_positivity_);
     shift_ *= offset_dir_ * offset_positivity_;
@@ -106,10 +111,20 @@ BT::NodeStatus MissionStart::tick() {
         back_.value()[1] *= -1;
         back_.value()[2] *= -1;
     }
-    else {
+    else if (offset_positivity_ < 0) {
         forward_.value()[0] *= -1;
         forward_.value()[1] *= -1;
         forward_.value()[2] *= -1;
+    }
+    else if (material_points_[index_ * 7 + 2] == 0 || material_points_[index_ * 7 + 2] == 1){
+        back_.value()[0] *= -1;
+        back_.value()[1] *= -1;
+        back_.value()[2] *= -1;
+    }
+    else {
+        forward_.value()[0] *= -1;
+        forward_.value()[1] *= -1;
+        forward_.value()[2] *= -1;  
     }
     RCLCPP_INFO_STREAM(node_->get_logger(), back_.value()[0] << ", " << back_.value()[1] << ", " << back_.value()[2]);
     RCLCPP_INFO_STREAM(node_->get_logger(), forward_.value()[0] << ", " << forward_.value()[1] << ", " << forward_.value()[2]);

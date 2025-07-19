@@ -860,7 +860,7 @@
         </ForceSuccess>
       </Sequence>
       <ForceSuccess>
-        <MissionFailure failed_levels="{a}" success_levels="{b}" robot_type="1" step_results="4" />
+        <MissionFailure failed_levels="{a}" success_levels="{b}" base_index="{index}" robot_type="1" step_results="4" />
       </ForceSuccess>
     </Fallback>
   </BehaviorTree>
@@ -932,6 +932,7 @@
     <Action ID="MissionFailure">
       <output_port name="failed_levels" type="int" />
       <output_port name="success_levels" type="int" />
+      <input_port name="base_index" type="int" />
       <input_port name="robot_type" type="bool" />
       <input_port name="step_results" type="std::deque&lt;int, std::allocator&lt;int&gt; &gt;" />
     </Action>
