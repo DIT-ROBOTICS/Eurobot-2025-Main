@@ -130,8 +130,8 @@
           </Timeout>
         </ForceSuccess>
         <Sleep msec="1000"/>
-        <Parallel failure_count="1"
-                  success_count="2">
+        <Parallel failure_count="2"
+                  success_count="1">
           <RetryUntilSuccessful num_attempts="2">
             <Docking final_pose="{PrevGoal}"
                      isPureDocking="0"
@@ -354,14 +354,6 @@
                            mission_type="29"/>
         </Timeout>
       </ForceSuccess>
-      <RetryUntilSuccessful num_attempts="2">
-        <Docking final_pose="{PrevGoal}"
-                 isPureDocking="1"
-                 dock_type="{DOCK_DIR}"
-                 shift="0"
-                 offset="{BACK_M}"
-                 base="{PrevGoal}"/>
-      </RetryUntilSuccessful>      
       <MissionSuccess levels="3"
                       base_index="{index}"/>
     </Sequence>
