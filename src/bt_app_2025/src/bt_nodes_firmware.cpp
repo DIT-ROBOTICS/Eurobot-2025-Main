@@ -552,7 +552,7 @@ BT::NodeStatus IntegratedMissionNode::onStart() {
     RCLCPP_INFO(node_->get_logger(), "Node start");
     getInput<std::string>("mission_set_name", mission_set_name_);
     getInput<geometry_msgs::msg::PoseStamped>("base", base_);
-    node_->declare_parameter<std::vector<int64_t>>(mission_set_name_, std::vector<int64_t>{});
+    node_->declare_parameter<std::vector<int64_t>>(mission_set_name_, {});
     node_->get_parameter(mission_set_name_, mission_queue_);
     return BT::NodeStatus::RUNNING;
 }
