@@ -295,28 +295,39 @@ BT::PortsList Rotation::providedPorts() {
 bool Rotation::setGoal(RosActionNode::Goal& goal) {
     auto m = getInput<geometry_msgs::msg::PoseStamped>("base");
     double rad = getInput<double>("degree").value() * PI / 180;
-    // double rad_base = acos(m.value().pose.orientation.w) * 2;
-    double rad_base = m.value().pose.position.z * PI / 2;
-    rad += rad_base;
+    
+    // Get current actual robot pose to avoid error accumulation
+    LocReceiver::UpdateRobotPose(robot_pose_, tf_buffer_, frame_id_);
+    tf2::Quaternion current_orientation;
+    tf2::fromMsg(robot_pose_.pose.orientation, current_orientation);
+    double current_yaw = tf2::impl::getYaw(current_orientation);
+    
+    // Calculate target angle: current angle + rotation angle
+    double target_yaw = current_yaw + rad;
+    
+    // Normalize angle to [-π, π] range
+    while (target_yaw > PI) target_yaw -= 2 * PI;
+    while (target_yaw < -PI) target_yaw += 2 * PI;
 
     rclcpp::Time now = this->now();
     goal_.header.stamp = now;
     goal_.header.frame_id = "map";
-    goal_.pose = m.value().pose; // calculate goal pose
+    goal_.pose = robot_pose_.pose; // Use current actual position
     goal_.pose.position.z = 0; // set offset distance as 0
     tf2::Quaternion q; // declare Quaternion
-    q.setRPY(0, 0, rad); // change degree-z into Quaternion
+    q.setRPY(0, 0, target_yaw); // Use calculated target angle
     goal_.pose.orientation.x = q.x();
     goal_.pose.orientation.y = q.y();
     goal_.pose.orientation.z = q.z();
     goal_.pose.orientation.w = q.w();
     goal.use_dock_id = false; // set use dock id
     goal.dock_pose = goal_; // send goal pose
-    goal.dock_type = "dock_x_slow_loose";    // determine the docking direction (x or y)
-    goal.max_staging_time = 1000.0; // set max staging time
+    goal.dock_type = "dock_slow_precise";    // determine the docking direction (x or y)
+    goal.max_staging_time = 2000.0; // set max staging time
     goal.navigate_to_staging_pose = 1;  // if it's pure docking, then don't need to navigate to staging pose
 
-    RCLCPP_INFO(logger(), "Start Rotating (%f, %f)", goal_.pose.orientation.w, goal_.pose.orientation.z);
+    RCLCPP_INFO(logger(), "Start Rotating from %f to %f (delta: %f deg)", 
+                current_yaw * 180 / PI, target_yaw * 180 / PI, rad * 180 / PI);
     return true;
 }
 
@@ -489,7 +500,7 @@ NodeStatus MaterialChecker::tick() {
     LocReceiver::UpdateRivalPose(rival_pose_, tf_buffer_, frame_id_);
     base_.pose.position.x = material_points_[baseIndex_ * 7];
     base_.pose.position.y = material_points_[baseIndex_ * 7 + 1];
-    if (materials_info_.data[baseIndex_] == 0 || baseIndex_ == -1 || calculateDistance(base_.pose, rival_pose_.pose) < safety_dist_) {
+    if ((materials_info_.data[baseIndex_] == 0 || baseIndex_ == -1 || calculateDistance(base_.pose, rival_pose_.pose) < safety_dist_) && baseIndex_ < 10) {
         baseIndex_ = findBestTarget();
         /**********************************************************/
         /* Notice!! this part need to be consider again carefully */
