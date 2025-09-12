@@ -236,13 +236,15 @@
           </ForceSuccess>
           <Fallback>
             <Sequence>
-              <TimerChecker target_time_sec="65"/>
+              <TimerChecker target_time_sec="80"/>
+              <!-- in origin condition, it should be 65 -->
               <ForceSuccess>
                 <SubTree ID="MissionPoint3_3" _autoremap="true" />
               </ForceSuccess>
             </Sequence>
             <Sequence>
-              <TimerChecker target_time_sec="73"/>
+              <TimerChecker target_time_sec="90"/>
+              <!-- in origin condition, it should be 73 -->
               <ForceSuccess>
                 <SubTree ID="MissionPoint3_2" _autoremap="true" />
               </ForceSuccess>
@@ -252,7 +254,7 @@
             </ForceSuccess>
           </Fallback>
         </Sequence>
-        <Sleep msec="98000" />
+        <Sleep msec="198000" />
       </Parallel>
       <StopRobot/>
       <Parallel failure_count="2" success_count="2">
