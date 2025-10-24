@@ -24,18 +24,3 @@ public:
 private:
 
 };
-
-class StartRace : public BT::SyncActionNode {
-
-public: 
-    StartRace(const std::string& name, const BT::NodeConfiguration& config) 
-        : BT::SyncActionNode(name, config) {}
-
-    static BT::PortsList providedPorts();
-
-    BT::NodeStatus tick() override;
-
-private:
-    // std::shared_ptr<Kernel> kernel_;
-
-};

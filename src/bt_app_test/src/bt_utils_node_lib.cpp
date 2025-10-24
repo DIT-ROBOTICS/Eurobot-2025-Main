@@ -23,18 +23,3 @@ BT::NodeStatus GeneratePathPoint::tick() {
 
     return BT::NodeStatus::SUCCESS;
 }
-
-// Starter
-BT::PortsList StartRace::providedPorts() {
-    return {
-        BT::OutputPort<std::string>("output")
-    };
-}
-
-BT::NodeStatus StartRace::tick() {
-    
-    // Set the race time
-    // kernel_->setRaceTime();
-
-    return BT::NodeStatus::SUCCESS;
-}
