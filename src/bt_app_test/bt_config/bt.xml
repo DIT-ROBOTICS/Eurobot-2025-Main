@@ -135,6 +135,51 @@
     </Sequence>
   </BehaviorTree>
 
+  <BehaviorTree ID="Stupid-Tree">
+    <Sequence>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.5, 1.3, 3.14"/>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.6, 1.3, 3.14"/>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.5, 0.4, 0"/>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.6, 0.4, 0"/>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.5, 0.4, 0"/>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.6, 0.4, 0"/>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.5, 0.4, 0"/>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.5, 0.9, 0"/>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.6, 0.9, 0"/>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.5, 0.9, 0"/>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.5, 0.9, 3.14"/>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.6, 0.9, 3.14"/>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.6, 0.9, 0"/>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.5, 0.9, 0"/>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.4, 0.9, 0"/>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.5, 0.9, 0"/>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.4, 0.9, 0"/>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.5, 0.9, 0"/>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.4, 0.9, 0"/>
+      <NavAction final_pose="{NavGoal}"
+                 goal="2.5, 0.9, 0"/>
+    </Sequence>
+  </BehaviorTree>
+
   <BehaviorTree ID="Topic-Demo">
     <Sequence>
       <StandardTopicPub number="3"
