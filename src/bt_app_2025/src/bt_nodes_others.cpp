@@ -20,6 +20,99 @@ template <> inline std::deque<int> BT::convertFromString(StringView str) {
     return output;
 }
 
+geometry_msgs::msg::PoseStamped inline ConvertPoseFormat(geometry_msgs::msg::PoseStamped pose_) {
+    tf2::Quaternion quaternion;
+    tf2::fromMsg(pose_.pose.orientation, quaternion);
+    pose_.pose.position.z = tf2::impl::getYaw(quaternion) * 2 / PI;
+    return pose_;
+}
+
+BT::PortsList GetLocation::providedPorts() {
+    return {
+        BT::InputPort<std::string>("locaization_target"),
+        BT::OutputPort<geometry_msgs::msg::PoseStamped>("pose")
+    };
+}
+
+BT::NodeStatus GetLocation::tick() {
+    std::string locaizationTarget_;
+
+    getInput<std::string>("locaization_target", locaizationTarget_);
+    if (locaizationTarget_ == "robot") {
+        LocReceiver::UpdateRobotPose(pose_, tf_buffer_, frame_id_);
+    } else if (locaizationTarget_ == "rival") {
+        LocReceiver::UpdateRivalPose(pose_, tf_buffer_, frame_id_);
+    } else {
+        return BT::NodeStatus::FAILURE;
+    }
+    setOutput<geometry_msgs::msg::PoseStamped>("pose", ConvertPoseFormat(pose_));
+
+    return BT::NodeStatus::SUCCESS;
+}
+
+BT::PortsList GetBlackboard::providedPorts() {
+    return {
+        BT::InputPort<std::string>("blackboard_key"),
+        BT::InputPort<std::string>("blackboard_type")
+    };
+}
+
+BT::NodeStatus GetBlackboard::tick() {
+    std::string blackboard_key_, blackboard_type_;
+
+    getInput<std::string>("blackboard_key", blackboard_key_);
+    getInput<std::string>("blackboard_type", blackboard_type_);
+    if (blackboard_type_ == "bool") {
+        bool blackboard_value_;
+        if (!blackboard_->get<bool>(blackboard_key_, blackboard_value_))
+            return BT::NodeStatus::FAILURE;
+        RCLCPP_INFO_STREAM(node_->get_logger(), "Get BlackBoard " << blackboard_key_ << ": " << blackboard_value_);
+    }
+    else if (blackboard_type_ == "int") {
+        int blackboard_value_;
+        if (!blackboard_->get<int>(blackboard_key_, blackboard_value_))
+            return BT::NodeStatus::FAILURE;
+        RCLCPP_INFO_STREAM(node_->get_logger(), "Get BlackBoard " << blackboard_key_ << ": " << blackboard_value_);
+    }
+    else if (blackboard_type_ == "float") {
+        float blackboard_value_;
+        if (!blackboard_->get<float>(blackboard_key_, blackboard_value_))
+            return BT::NodeStatus::FAILURE;
+        RCLCPP_INFO_STREAM(node_->get_logger(), "Get BlackBoard " << blackboard_key_ << ": " << blackboard_value_);
+    }
+    else if (blackboard_type_ == "double") {  
+        double blackboard_value_;
+        if (!blackboard_->get<double>(blackboard_key_, blackboard_value_))
+            return BT::NodeStatus::FAILURE;
+        RCLCPP_INFO_STREAM(node_->get_logger(), "Get BlackBoard " << blackboard_key_ << ": " << blackboard_value_);
+    }
+    else if (blackboard_type_ == "string") {
+        std::string blackboard_value_;
+        if (!blackboard_->get<std::string>(blackboard_key_, blackboard_value_))
+            return BT::NodeStatus::FAILURE;
+        RCLCPP_INFO_STREAM(node_->get_logger(), "Get BlackBoard " << blackboard_key_ << ": " << blackboard_value_);
+    }
+
+    return BT::NodeStatus::SUCCESS;
+}
+
+BT::PortsList DemoSourcePoint::providedPorts() {
+    return {
+        BT::OutputPort<int>("material_pt_1"),
+        BT::OutputPort<int>("material_pt_2"),
+        BT::OutputPort<int>("mission_pt"),
+        BT::OutputPort<int>("end_pt")
+    };
+}
+
+BT::NodeStatus DemoSourcePoint::tick() {
+    setOutput<int>("material_pt_1", plan_script_[1]);
+    setOutput<int>("material_pt_2", plan_script_[2]);
+    setOutput<int>("mission_pt", plan_script_[3]);
+    setOutput<int>("end_pt", plan_script_[plan_script_.size() - 1]);
+    return BT::NodeStatus::SUCCESS;
+}
+
 BT::PortsList MySetBlackboard::providedPorts() {
     return {
         BT::InputPort<std::string>("blackboard_key"),
@@ -50,14 +143,19 @@ BT::PortsList BTStarter::providedPorts() {
 BT::NodeStatus BTStarter::tick() {
     subscription_ = node_->create_subscription<std_msgs::msg::Float32>("/robot/startup/time", 10, std::bind(&BTStarter::topic_callback, this, std::placeholders::_1));
     keepout_zone_pub_ = node_->create_publisher<std_msgs::msg::String>("/keepout_zone", rclcpp::QoS(20).reliable().transient_local());
-    blackboard_->get<std::string>("team", team_);
-    if (team_ == "y") {
+    if (!blackboard_->get<std::string>("team", team_)) {
+        throw std::runtime_error("team not found in blackboard!");
+    }
+    if (team_ == "yellow") {
         keepout_zone_.data = "BCFGJ";
         RCLCPP_INFO_STREAM(node_->get_logger(), keepout_zone_.data);
     }
-    else {
+    else if (team_ == "blue") {
         keepout_zone_.data = "ADEHI";
         RCLCPP_INFO_STREAM(node_->get_logger(), keepout_zone_.data);
+    }
+    else {
+        throw std::runtime_error("team variable not correct!");
     }
     keepout_zone_pub_->publish(keepout_zone_);
 
@@ -116,9 +214,8 @@ BT::NodeStatus BTFinisher::tick() {
         game_status += 1 << 22;
     }
 
-    // Log game status
-    // RCLCPP_INFO(logger(), "[BTFinisher]: Game status: " << game_status);
-    cout << "[BTFinisher]: Game status: " << game_status << endl;
+    if (!blackboard_->get<double>("current_time", current_time_))
+        return BT::NodeStatus::FAILURE;
 
     int plant_number = 0; // Get by 2
     int pot_number = 0; // Get by 3

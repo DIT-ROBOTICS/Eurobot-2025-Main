@@ -12,27 +12,29 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.actions import DeclareLaunchArgument, LogInfo
 from launch.substitutions import LaunchConfiguration
 
+from ament_index_python.packages import get_package_share_directory
+
 def generate_launch_description():
+    pkg_dir = os.path.join('/home/ros/Eurobot-2025-Main/src/bt_app_test')
+    config_path_arg = DeclareLaunchArgument(
+        'params',
+        default_value=os.path.join(pkg_dir, 'params', 'config_path.yaml'),
+        description='Full path to parameter YAML file'
+    )
+    config_path = LaunchConfiguration('params')
+    # server = Node(
+    #     package = 'bt_app_test',
+    #     executable = 'topicPubServer',
+    #     name = 'topicPubServer'
+    # )
+    bt = Node(
+        package = 'bt_app_test',
+        executable = 'bt_ros2',
+        name = 'bt_ros2',
+        parameters = [config_path, {"tree_name": "Topic-Demo"}]
+    )
     return LaunchDescription([
-        DeclareLaunchArgument(
-            'param_file',
-            default_value=os.path.join(
-                os.path.dirname(__file__), '../params/config_path.yaml'
-            ),
-            description='Path to the parameter file'
-        ),
-        Node(
-            package = 'bt_app_test',
-            executable = 'topicPubServer',
-            name = 'topicPubServer'
-        ),
-        TimerAction(
-            period = 1.0,
-            actions = [Node(
-                package = 'bt_app_test',
-                executable = 'bt_ros2',
-                name = 'bt_ros2',
-                parameters=[LaunchConfiguration('param_file')]
-            )],
-        )
+        config_path_arg,
+        # server,
+        bt
     ])

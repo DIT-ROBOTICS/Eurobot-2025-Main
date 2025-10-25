@@ -125,13 +125,13 @@ PortsList TopicPubTest::providedPorts() {
 }
 
 BT::NodeStatus TopicPubTest::onStart() {
-  RCLCPP_INFO(node_->get_logger(), "Node start");
+  RCLCPP_INFO(node_->get_logger(), "TopicPubTest start");
   getInput<int>("number", a);
   return BT::NodeStatus::RUNNING;
 }
 
 BT::NodeStatus TopicPubTest::onRunning() {
-  RCLCPP_INFO(node_->get_logger(), "Testing Node running");
+  RCLCPP_INFO(node_->get_logger(), "TopicPubTest: %d", a);
   number.data = a;
   publisher_->publish(number);
   return BT::NodeStatus::SUCCESS;
@@ -139,36 +139,36 @@ BT::NodeStatus TopicPubTest::onRunning() {
 
 void TopicPubTest::onHalted() {
   // Reset the output port
-  RCLCPP_INFO(node_->get_logger(), "Testing Node halted");
+  RCLCPP_INFO(node_->get_logger(), "TopicPubTest Node halted");
   return;
 }
 
 PortsList TopicSubTest::providedPorts() {
   return { 
-    BT::OutputPort<int>("sum") 
+    BT::OutputPort<int>("out") 
   };
 }
 
 BT::NodeStatus TopicSubTest::topic_callback(const std_msgs::msg::Int32::SharedPtr msg) {
-  number += msg->data;
-  RCLCPP_INFO(node_->get_logger(), "I heard: '%d'", msg->data);
-  if (number > 3) {
-    subscription_.reset();
-  }
+  number = msg->data;
+  RCLCPP_INFO(node_->get_logger(), "TopicSubTest: %d", number);
+  // if (number > 3) {
+  //   subscription_.reset();
+  // }
   return BT::NodeStatus::SUCCESS;
 }
 
 BT::NodeStatus TopicSubTest::onStart() {
-  RCLCPP_INFO(node_->get_logger(), "Node start");
+  RCLCPP_INFO(node_->get_logger(), "TopicSubTest start");
   return BT::NodeStatus::RUNNING;
 }
 
 BT::NodeStatus TopicSubTest::onRunning() {
-  setOutput<int>("sum", number);
-  RCLCPP_INFO_STREAM(node_->get_logger(), number);
-  if (number > 3) {
-    subscription_.reset();
-  }
+  setOutput<int>("out", number);
+  // RCLCPP_INFO_STREAM(node_->get_logger(), number);
+  // if (number > 3) {
+  //   subscription_.reset();
+  // }
   return BT::NodeStatus::SUCCESS;
 }
 
@@ -176,24 +176,21 @@ void TopicSubTest::onHalted() {
   // Reset the output port
   subscription_.reset();
   setOutput<int>("sum", number);
-  RCLCPP_INFO(node_->get_logger(), "Testing Node halted");
+  RCLCPP_INFO(node_->get_logger(), "TopicSubTest Node halted");
   return;
 }
 
 PortsList StandardTopicPub::providedPorts() {
   return {
     BT::InputPort<std::string>("topic_name"), 
-    BT::InputPort<int>("base_number"),
-    BT::InputPort<int>("add_number"),
-    BT::OutputPort<int>("total_number") 
+    BT::InputPort<int>("number"),
   };
 }
 
 bool StandardTopicPub::setMessage(std_msgs::msg::Int32& msg) {
-  int a = getInput<int>("base_number").value();
-  int b = getInput<int>("add_number").value();
-  msg.data = a + b;
-  std::cout << a << " + " << b << " = " << msg.data << std::endl;
+  int a = getInput<int>("number").value();
+  msg.data = a;
+  RCLCPP_INFO(node_->get_logger(), "StandardTopicPub: %d", msg.data);
   setOutput<int>("total_number", msg.data); 
   return true;
 }
@@ -209,11 +206,11 @@ bool StandardTopicSub::latchLastMessage() const {
 }
 NodeStatus StandardTopicSub::onTick(const std::shared_ptr<std_msgs::msg::Int32>& last_msg) {
   if (last_msg) { // Check if the pointer is not null
-    std::cout << "Received data: " << last_msg->data << std::endl;
+    RCLCPP_INFO(logger(), "StandardTopicSub: %d", last_msg->data);
     return BT::NodeStatus::SUCCESS;
   }
   else {
-    std::cout << "No message received!" << std::endl;
+    RCLCPP_INFO(logger(), "No message received!");
     return BT::NodeStatus::FAILURE;
   }
 }
@@ -259,7 +256,7 @@ void LocalizationTemp::UpdateRobotPose() {
 
 BT::NodeStatus LocalizationTemp::onRunning() {
   UpdateRobotPose();
-  std::cout << "robot_pose_:(" << robot_pose_.twist.linear.x << ", " << robot_pose_.twist.linear.y << ")\n";
+  RCLCPP_INFO_STREAM(rclcpp::get_logger("bt_ros2"), "robot_pose_:(" << robot_pose_.twist.linear.x << ", " << robot_pose_.twist.linear.y << ")");
   // Set the output port
   setOutput<geometry_msgs::msg::TwistStamped>("output", robot_pose_);
 
@@ -278,8 +275,9 @@ void LocalizationTemp::onHalted() {
 }
 
 BT::PortsList NavigationTemp::providedPorts() {
-  // return providedBasicPorts({ InputPort<unsigned>("order") });
-  return providedBasicPorts({BT::InputPort<geometry_msgs::msg::TwistStamped>("goal")});
+  return {
+    BT::InputPort<geometry_msgs::msg::TwistStamped>("goal")
+  };
 }
 
 bool NavigationTemp::setGoal(RosActionNode::Goal& goal) {
@@ -318,7 +316,7 @@ NodeStatus BTMission::onResultReceived(const WrappedResult& wr) {
   // while(wr.result->sequence)
   // sequence_ = wr.result->sequence;
   RCLCPP_INFO_STREAM(rclcpp::get_logger("rclcpp"), "\n result: ");
-  for (int i = 0; i < wr.result->sequence.size(); i++) {
+  for (int i = 0; i < (int)wr.result->sequence.size(); i++) {
     sequence_.push_back(wr.result->sequence[i]);
     RCLCPP_INFO_STREAM(rclcpp::get_logger("rclcpp"), sequence_[i] << ", ");
   }
@@ -332,7 +330,7 @@ NodeStatus BTMission::onFailure(ActionNodeErrorCode error) {
 }
 NodeStatus BTMission::onFeedback(const std::shared_ptr<const Feedback> feedback) {
   RCLCPP_INFO_STREAM(rclcpp::get_logger("rclcpp"), "size: " << feedback->partial_sequence.size());
-  for (int i = 0; i < feedback->partial_sequence.size(); i++) {
+  for (int i = 0; i < (int)feedback->partial_sequence.size(); i++) {
     partial_sequence_.push_back(feedback->partial_sequence[i]);
     RCLCPP_INFO_STREAM(rclcpp::get_logger("rclcpp"), partial_sequence_[i] << ", ");
   }

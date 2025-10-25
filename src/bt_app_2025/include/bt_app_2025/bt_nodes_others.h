@@ -44,6 +44,48 @@ namespace BT {
     template <> inline std::deque<int> convertFromString(StringView str);
 }
 
+class GetLocation : public BT::SyncActionNode {
+
+public:
+    GetLocation(const std::string& name, const BT::NodeConfig& config, const RosNodeParams& params, BT::Blackboard::Ptr blackboard)
+        : BT::SyncActionNode(name, config), node_(params.nh.lock()), blackboard_(blackboard), tf_buffer_(node_->get_clock()), listener_(tf_buffer_)
+    {
+        node_->get_parameter("frame_id", frame_id_);
+        tf_buffer_.setUsingDedicatedThread(true);
+    }
+
+    /* Node remapping function */
+    static BT::PortsList providedPorts();
+
+    /* Start and running function */
+    BT::NodeStatus tick() override;
+private:
+    rclcpp::Node::SharedPtr node_;
+    BT::Blackboard::Ptr blackboard_;
+    // for tf listener
+    tf2_ros::Buffer tf_buffer_;
+    tf2_ros::TransformListener listener_;
+    std::string frame_id_;
+    geometry_msgs::msg::PoseStamped pose_;
+};
+
+class GetBlackboard : public BT::SyncActionNode {
+
+public:
+    GetBlackboard(const std::string& name, const BT::NodeConfig& config, const RosNodeParams& params, BT::Blackboard::Ptr blackboard)
+        : BT::SyncActionNode(name, config), node_(params.nh.lock()), blackboard_(blackboard)
+    {}
+
+    /* Node remapping function */
+    static BT::PortsList providedPorts();
+
+    /* Start and running function */
+    BT::NodeStatus tick() override;
+private:
+    std::shared_ptr<rclcpp::Node> node_;
+    BT::Blackboard::Ptr blackboard_;
+};
+
 class MySetBlackboard : public BT::SyncActionNode {
 
 public:
@@ -59,6 +101,31 @@ public:
 private:
     std::shared_ptr<rclcpp::Node> node_;
     BT::Blackboard::Ptr blackboard_;
+};
+
+/*************************/
+/* Demo Script Generator */
+/*************************/
+class DemoSourcePoint : public BT::SyncActionNode {
+
+public:
+    DemoSourcePoint(const std::string& name, const BT::NodeConfig& config, const RosNodeParams& params, BT::Blackboard::Ptr blackboard)
+        : BT::SyncActionNode(name, config), node_(params.nh.lock()), blackboard_(blackboard)
+    {
+        node_->get_parameter("plan_script", long_vec);
+        plan_script_.assign(long_vec.begin(), long_vec.end());
+    }
+
+    /* Node remapping function */
+    static BT::PortsList providedPorts();
+
+    /* Start and running function */
+    BT::NodeStatus tick() override;
+private:
+    std::shared_ptr<rclcpp::Node> node_;
+    BT::Blackboard::Ptr blackboard_;
+    std::vector<long> long_vec;
+    std::vector<int> plan_script_;
 };
 
 /******************************/

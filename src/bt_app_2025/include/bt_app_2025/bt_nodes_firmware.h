@@ -85,8 +85,8 @@ public:
   BT::NodeStatus tick() override;
 
 private:
-  BT::Blackboard::Ptr blackboard_;
   rclcpp::Node::SharedPtr node_;
+  BT::Blackboard::Ptr blackboard_;
   std::vector<double> material_points_;
 };
 
@@ -108,8 +108,8 @@ public:
   void timer_publisher();
 
 private:
-  BT::Blackboard::Ptr blackboard_;
   rclcpp::Node::SharedPtr node_;
+  BT::Blackboard::Ptr blackboard_;
   rclcpp::Publisher<std_msgs::msg::Int32>::SharedPtr vision_pub_;
   std_msgs::msg::Bool is_mission_finished;
   std_msgs::msg::Int32 mission_finished;
@@ -144,6 +144,7 @@ public:
   void onHalted() override;
 
 private:
+  rclcpp::Node::SharedPtr node_;
   BT::Blackboard::Ptr blackboard_;
   // step_results_-> 1: front_collect 2: back_collect 3: construct_1 4: construct_2 5: construct_3
   std::deque<int> step_results_;
@@ -155,10 +156,8 @@ private:
   int mission_progress_;
   int front_materials_;
   int back_materials_;
-
+  int base_index_;
   std::deque<int> stage_info_;
-
-  rclcpp::Node::SharedPtr node_;
 };
 
 /****************/
@@ -216,8 +215,8 @@ public:
 private:
     void onStart();
     int DecodeBannerIndex(const int index);
-    BT::Blackboard::Ptr blackboard_;
     rclcpp::Node::SharedPtr node_;
+    BT::Blackboard::Ptr blackboard_;
     // for tf listener
     tf2_ros::Buffer tf_buffer_;
     tf2_ros::TransformListener listener_;
@@ -307,8 +306,8 @@ class NavigateClient : public rclcpp::Node
 public:
   using NavigateToPose = nav2_msgs::action::NavigateToPose;
   using GoalHandleNavigation = rclcpp_action::ClientGoalHandle<NavigateToPose>;
-  NavigateClient(const geometry_msgs::msg::Pose& goal_pose, const double offset)
-  : Node("navigate_client"), goal_pose_(goal_pose), offset_(offset) {
+  NavigateClient(const double offset, const geometry_msgs::msg::Pose& goal_pose)
+  : Node("navigate_client"), offset_(offset), goal_pose_(goal_pose) {
     nav_finished_ = false;
     nav_error_ = false;
     this->client_ptr_ = rclcpp_action::create_client<NavigateToPose>(
