@@ -1,0 +1,103 @@
+######################################################################
+# - Base stage
+#   - This stage serves as the base image for the following stages.
+######################################################################
+
+ARG ROS_DISTRO=humble
+FROM osrf/ros:${ROS_DISTRO}-desktop AS base
+
+LABEL org.opencontainers.image.authors="wang.tw.ted@gmail.com"
+LABEL shell=bash
+
+ARG USERNAME=user
+ARG USER_UID=1000
+ARG USER_GID=$USER_UID
+
+######################################################################
+# - User setup stage
+#   - Create a non-root user with default bash shell.
+######################################################################
+
+FROM base AS user-setup
+
+RUN groupadd --gid $USER_GID $USERNAME \
+    && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME \
+    && apt-get update \
+    && apt-get install -y sudo gosu \
+    && echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME \
+    && chmod 0440 /etc/sudoers.d/$USERNAME \
+    && rm -rf /var/lib/apt/lists/*
+
+######################################################################
+# - Tools Installation stage
+#   - Install common tools for development.
+######################################################################
+
+FROM user-setup AS tools
+
+RUN apt-get update && apt-get install -y \
+    tmux \
+    htop \
+    tree \
+    net-tools \
+    vim \
+    git \
+    git-extras \
+    wget \
+    curl \
+    unzip \
+    usbutils \
+    python3-pip \
+    bash-completion \
+    # ssh
+    ssh \
+    openssh-server \
+    # read keybow
+    libncurses5-dev \
+    # DDS
+    ros-humble-rmw-cyclonedds-cpp \
+    # foxglove
+    ros-humble-rosbridge-server \
+    ros-humble-foxglove-bridge \
+    # ros2
+    ros-humble-ament-cmake \
+    ros-humble-rqt-plot \
+    ros-humble-rqt-tf-tree \
+    ros-humble-nav2-msgs \
+    ros-humble-nav2-util \
+    # Groot
+    libfuse2 \
+    fuse3 \
+    ros-humble-behaviortree-cpp \
+    ros-humble-generate-parameter-library
+
+RUN apt-get update && apt-get dist-upgrade -y \
+    # && git clone -b humble https://github.com/micro-ROS/micro_ros_setup.git src/micro_ros_setup \
+    && echo "source /opt/ros/humble/setup.bash" >> /etc/bash.bashrc \
+    && echo "source /home/ros/Eurobot-2025-Main/install/setup.bash" >> /etc/bash.bashrc \
+    && alias groot=./groot.AppImage \
+    && alias foxglove="ros2 launch foxglove_bridge foxglove_bridge_launch.xml port:=8765" \
+    && apt-get autoremove -y \
+    && apt-get autoclean -y \
+    && apt-get clean -y \
+    && rm -rf /var/lib/apt/lists/*
+
+######################################################################
+# - Final stage
+#   - Install the main packages and set the entrypoint.
+######################################################################
+
+FROM tools AS final
+
+# Set up the user environment
+ENV TZ=Asia/Taipei
+ENV SHELL=/bin/bash
+ENV TERM=xterm-256color
+
+USER root
+WORKDIR /home/$USERNAME
+
+COPY .bashrc .bashrc.conf
+RUN cat .bashrc.conf >> .bashrc && rm .bashrc.conf
+
+CMD ["/bin/bash", "-ic"]

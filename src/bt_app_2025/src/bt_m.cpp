@@ -227,8 +227,9 @@ public:
         while (rclcpp::ok() && !isReady) {
             rate.sleep();
         }
-        shellCmd("whoami", user_name);                                         // command to get user name
-        user_name.pop_back();
+        // shellCmd("whoami", user_name);                                         // command to get user name
+        // user_name.pop_back();
+        user_name = "ros";
         // register tree xml
         groot_filename = "/home/" + user_name + groot_xml_config_directory + groot_filename;
         RCLCPP_INFO_STREAM(this->get_logger(), groot_filename);
