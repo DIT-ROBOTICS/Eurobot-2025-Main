@@ -26,28 +26,19 @@
         </Action>
         <Action ID="NavigationTemp">
             <input_port name="goal" type="geometry_msgs::msg::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
-            <input_port name="action_name" type="std::string" default="">Action server name</input_port>
         </Action>
         <Action ID="Parallel_check">
             <output_port name="output" type="std::string"/>
             <input_port name="input" type="std::string"/>
         </Action>
-        <Decorator ID="RaceTimeCheck">
-            <input_port name="max_time_count" type="double"/>
-        </Decorator>
         <Condition ID="StandardTopicPub">
-            <input_port name="add_number" type="int"/>
-            <input_port name="base_number" type="int"/>
-            <output_port name="total_number" type="int"/>
+            <input_port name="number" type="int"/>
             <input_port name="topic_name" type="std::string"/>
         </Condition>
         <Condition ID="StandardTopicSub">
             <output_port name="output" type="int"/>
             <input_port name="topic_name" type="std::string"/>
         </Condition>
-        <Action ID="StartRace">
-            <output_port name="output" type="std::string"/>
-        </Action>
         <Action ID="Testing">
             <output_port name="output" type="std::string"/>
             <input_port name="input" type="std::string"/>
@@ -60,7 +51,7 @@
             <input_port name="topic_name" type="std::string"/>
         </Action>
         <Action ID="TopicSubTest">
-            <output_port name="sum" type="int"/>
+            <output_port name="out" type="int"/>
         </Action>
         <Action ID="count_10">
             <output_port name="output" type="std::string"/>

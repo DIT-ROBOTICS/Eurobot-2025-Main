@@ -70,21 +70,16 @@
     </Sequence>
   </BehaviorTree>
 
-  <BehaviorTree ID="Navigation-Simple-Demo">
+  <BehaviorTree ID="Navigation-Demo">
     <Sequence>
-      <GeneratePathPoint path_point="{point_que}"/>
-      <LoopWayPoint value="{point}"
-                    if_empty="SUCCESS"
-                    queue="{point_que}">
-        <NavigationTemp goal="{point}"
-                        action_name="NavToPose"/>
-      </LoopWayPoint>
+      <NavAction final_pose="{out}"
+                 goal="2, 1, 0"/>
     </Sequence>
   </BehaviorTree>
 
   <BehaviorTree ID="Parallel-Demo">
-    <Parallel failure_count="3"
-              success_count="2">
+    <Parallel failure_count="1"
+              success_count="3">
       <Repeat num_cycles="1">
         <Testing output=""
                  input="Test1"/>
@@ -111,52 +106,18 @@
     </Sequence>
   </BehaviorTree>
 
-  <BehaviorTree ID="Stupid-Tree">
+  <BehaviorTree ID="Simple-Navigation-Demo">
     <Sequence>
-      <NavAction final_pose="{NavGoal}"
-                 goal="2.5, 1.3, 3.14"/>
-      <NavAction final_pose="{NavGoal}"
-                 goal="2.6, 1.3, 3.14"/>
-      <NavAction final_pose="{NavGoal}"
-                 goal="2.5, 0.4, 0"/>
-      <NavAction final_pose="{NavGoal}"
-                 goal="2.6, 0.4, 0"/>
-      <NavAction final_pose="{NavGoal}"
-                 goal="2.5, 0.4, 0"/>
-      <NavAction final_pose="{NavGoal}"
-                 goal="2.6, 0.4, 0"/>
-      <NavAction final_pose="{NavGoal}"
-                 goal="2.5, 0.4, 0"/>
-      <NavAction final_pose="{NavGoal}"
-                 goal="2.5, 0.9, 0"/>
-      <NavAction final_pose="{NavGoal}"
-                 goal="2.6, 0.9, 0"/>
-      <NavAction final_pose="{NavGoal}"
-                 goal="2.5, 0.9, 0"/>
-      <NavAction final_pose="{NavGoal}"
-                 goal="2.5, 0.9, 3.14"/>
-      <NavAction final_pose="{NavGoal}"
-                 goal="2.6, 0.9, 3.14"/>
-      <NavAction final_pose="{NavGoal}"
-                 goal="2.6, 0.9, 0"/>
-      <NavAction final_pose="{NavGoal}"
-                 goal="2.5, 0.9, 0"/>
-      <NavAction final_pose="{NavGoal}"
-                 goal="2.4, 0.9, 0"/>
-      <NavAction final_pose="{NavGoal}"
-                 goal="2.5, 0.9, 0"/>
-      <NavAction final_pose="{NavGoal}"
-                 goal="2.4, 0.9, 0"/>
-      <NavAction final_pose="{NavGoal}"
-                 goal="2.5, 0.9, 0"/>
-      <NavAction final_pose="{NavGoal}"
-                 goal="2.4, 0.9, 0"/>
-      <NavAction final_pose="{NavGoal}"
-                 goal="2.5, 0.9, 0"/>
+      <GeneratePathPoint path_point="{point_que}"/>
+      <LoopWayPoint value="{point}"
+                    if_empty="SUCCESS"
+                    queue="{point_que}">
+        <NavigationTemp goal="{point}"/>
+      </LoopWayPoint>
     </Sequence>
   </BehaviorTree>
 
-  <BehaviorTree ID="SubTree-Remapping-Test-Wrong">
+  <BehaviorTree ID="SubTree-Remapping-Demo">
     <Sequence>
       <SubTree ID="Test-SubTree-remapping"
                _autoremap="false"/>
@@ -176,32 +137,24 @@
 
   <BehaviorTree ID="Topic-Demo">
     <Sequence>
-      <Parallel failure_count="1"
-                success_count="3">
-        <TopicPubTest number="10"
-                      topic_name="topic1"/>
-        <TopicSubTest sum=""/>
-        <StandardTopicSub output=""
-                          topic_name=""/>
-      </Parallel>
-      <Parallel failure_count="1"
-                success_count="3">
-        <StandardTopicPub add_number=""
-                          base_number=""
-                          total_number=""
-                          topic_name=""/>
-        <TopicSubTest sum=""/>
-        <StandardTopicSub output=""
-                          topic_name=""/>
-      </Parallel>
+      <StandardTopicPub number="3"
+                        topic_name="number"/>
+      <StandardTopicSub output="{out1}"
+                        topic_name="number"/>
+      <TopicPubTest number="10"
+                    topic_name="number"/>
+      <TopicSubTest out="{out2}"/>
     </Sequence>
   </BehaviorTree>
 
-  <BehaviorTree ID="tf-Broacast-Demo">
-    <Sequence>
-      <LocalizationTemp output=""
-                        input=""/>
-    </Sequence>
+  <BehaviorTree ID="tf-Broadcast-Demo">
+    <Repeat num_cycles="1000">
+      <Sequence>
+        <Sleep msec="100"/>
+        <LocalizationTemp output="{out}"
+                          input="1"/>
+      </Sequence>
+    </Repeat>
   </BehaviorTree>
 
   <!-- Description of Node Models (used by Groot) -->
@@ -238,16 +191,10 @@
     <Action ID="NavigationTemp">
       <input_port name="goal"
                   type="geometry_msgs::msg::TwistStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
-      <input_port name="action_name"
-                  type="std::string">Action server name</input_port>
     </Action>
     <Condition ID="StandardTopicPub">
-      <input_port name="add_number"
+      <input_port name="number"
                   type="int"/>
-      <input_port name="base_number"
-                  type="int"/>
-      <output_port name="total_number"
-                   type="int"/>
       <input_port name="topic_name"
                   type="std::string"/>
     </Condition>
@@ -270,7 +217,7 @@
                   type="std::string"/>
     </Action>
     <Action ID="TopicSubTest">
-      <output_port name="sum"
+      <output_port name="out"
                    type="int"/>
     </Action>
   </TreeNodesModel>

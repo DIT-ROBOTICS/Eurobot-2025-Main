@@ -78,6 +78,11 @@ ament_target_dependencies(topicPubServer
   "rclcpp"
 )
 target_link_libraries(topicPubServer
+  ${ARMADILLO_LIBRARIES}
+)
+install(TARGETS
+  topicPubServer
+  DESTINATION lib/${PROJECT_NAME}
 )
 
 add_library(navigationServer SHARED
@@ -188,7 +193,6 @@ install(TARGETS
   localizationServer
   actionServer
   actionClient
-  topicPubServer
   RUNTIME DESTINATION lib
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
