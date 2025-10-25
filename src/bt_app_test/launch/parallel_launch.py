@@ -22,19 +22,13 @@ def generate_launch_description():
         description='Full path to parameter YAML file'
     )
     config_path = LaunchConfiguration('params')
-    # server = Node(
-    #     package = 'bt_app_test',
-    #     executable = 'topicPubServer',
-    #     name = 'topicPubServer'
-    # )
     bt = Node(
         package = 'bt_app_test',
         executable = 'bt_ros2',
         name = 'bt_ros2',
-        parameters = [config_path, {"tree_name": "Topic-Demo"}]
+        parameters = [config_path, {"tree_name": "Parallel-Demo"}]
     )
     return LaunchDescription([
         config_path_arg,
-        # server,
         bt
     ])

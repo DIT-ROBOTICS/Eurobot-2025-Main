@@ -164,22 +164,20 @@
         </ForceSuccess>
       </Sequence>
       <StopRobot/>
-      <Parallel failure_count="2" success_count="2">
+      <!-- <Parallel failure_count="2" success_count="2">
         <ForceSuccess>
           <Timeout msec="6000">
             <FirmwareMission mission_status="{x}" mission_type="0" _description="stop all firmware" />
           </Timeout>
-        </ForceSuccess>
-        <Docking final_pose="{PrevGoal}" isPureDocking="0" dock_type="dock_slow" shift="0" offset="0" base="1.8, 0.4, 3" />
-      </Parallel>
+        </ForceSuccess> -->
+      <Docking final_pose="{PrevGoal}" isPureDocking="0" dock_type="dock_slow" shift="0" offset="0" base="1.2, 0.9, 0" />
+      <!-- </Parallel> -->
+      <SubTree ID="EndSubTree" _autoremap="true" />
     </Sequence>
   </BehaviorTree>
 
   <BehaviorTree ID="MissionPoint1">
     <Sequence>
-      <ForceSuccess>
-        <SubTree ID="BannerMission" BANNER_PLACE="1" NOT_NOW="0" _autoremap="true" />
-      </ForceSuccess>
       <Parallel failure_count="1" success_count="2">
         <ForceSuccess>
           <Timeout msec="6000">
@@ -239,6 +237,19 @@
           </Sequence>
           <SubTree ID="PlaceThreeLevels" back="0.2, 0.1, 0.05" forward="0.15, 0.1, 0.065" shift="0" index="{pt_3}" hasCompleteMaterial="{hasCompleteMaterial}" _autoremap="true" />
         </Switch2>
+        <!-- <ForceSuccess>
+          <RetryUntilSuccessful num_attempts="10">
+            <Fallback>
+              <MissionChecker level="{level}" remap_base="{base}" mission_type="front" base_index="{pt_3}">
+                <Navigation final_pose="{PrevGoal}" dock_type="dock_y_linearBoost_precise" goal="{base}" />
+              </MissionChecker>
+              <ForceFailure>
+                <Sleep msec="500" />
+              </ForceFailure>
+            </Fallback>
+          </RetryUntilSuccessful>
+        </ForceSuccess> -->
+        <!-- <SubTree ID="PlaceOneLevel" index="{pt_3}" hasCompleteMaterial="{hasCompleteMaterial}" _autoremap="true" /> -->
       </Sequence>
     </Sequence>
   </BehaviorTree>
@@ -630,8 +641,21 @@
           <FirmwareMission mission_status="{x}" mission_type="90" _description="" />
         </Timeout>
       </ForceSuccess>
+      <ForceSuccess>
+        <Timeout msec="6000">
+          <FirmwareMission mission_status="{x}" mission_type="80" _description="" />
+        </Timeout>
+      </ForceSuccess>
       <SetBlackboard value="0" output_key="hasCompleteMaterial" />
     </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="EndSubTree">
+    <KeepRunningUntilFailure>
+      <Sequence>
+        <Rotation final_pose="{PrevGoal}" degree="91" base="{PrevGoal}" />
+      </Sequence>
+    </KeepRunningUntilFailure>
   </BehaviorTree>
 
   <BehaviorTree ID="PointTestSubTree_back">

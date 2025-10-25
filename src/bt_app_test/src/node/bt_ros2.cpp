@@ -49,8 +49,6 @@ int main(int argc, char** argv)
   factory.registerNodeType<GeneratePathPoint>("GeneratePathPoint");
   factory.registerNodeType<BT::LoopNode<geometry_msgs::msg::TwistStamped>>("LoopWayPoint");
   factory.registerNodeType<ElapseTimeCheck>("ElapseTimeCheck");
-  factory.registerNodeType<StartRace>("StartRace");
-  factory.registerNodeType<RaceTimeCheck>("RaceTimeCheck");
   params.default_port_value = "fibonacci";
   factory.registerNodeType<BTMission>("BTMission", params);
   factory.registerNodeType<NavAction>("NavAction", node);

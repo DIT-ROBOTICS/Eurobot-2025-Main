@@ -415,8 +415,9 @@ public:
     }
 
     void CallWebPlanService() {
-        if (!web_plan_client->wait_for_service(std::chrono::milliseconds(100))) {
+        if (!web_plan_client->wait_for_service(std::chrono::milliseconds(2000))) {
             // Service not available yet, will try again in next cycle
+            plan_code_ = 40;
             return;
         }
 

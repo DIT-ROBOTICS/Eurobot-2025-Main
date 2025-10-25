@@ -66,7 +66,8 @@ BT::NodeStatus ElapseTimeCheck::tick() {
 
     if (time_started == false) {
         time_started = true;
-        // kernel_->getCurrentTimeInSecond(start_time);
+        auto now = std::chrono::system_clock::now();
+	    start_time = std::chrono::duration_cast<std::chrono::duration<double>>(now.time_since_epoch()).count();
     }
     
     // Tick the child node
@@ -78,8 +79,8 @@ BT::NodeStatus ElapseTimeCheck::tick() {
         child_status = child()->executeTick();
     }
 
-    // Get the current time from the kernel, and calculate the elapsed time
-    // kernel_->getCurrentTimeInSecond(current_time);
+    auto now = std::chrono::system_clock::now();
+    current_time = std::chrono::duration_cast<std::chrono::duration<double>>(now.time_since_epoch()).count();
     double elapsed_time = current_time - start_time;
     
     // Check if the child is completed
@@ -97,51 +98,6 @@ BT::NodeStatus ElapseTimeCheck::tick() {
         child_status = BT::NodeStatus::FAILURE;
 
         time_started = false;
-    }
-
-    return child_status;
-}
-
-// RaceTime
-BT::PortsList RaceTimeCheck::providedPorts() {
-    return { 
-        BT::InputPort<double>("max_time_count")
-    };
-}
-
-BT::NodeStatus RaceTimeCheck::tick() {
-    
-    // Get the input port
-    if (!getInput<double>("max_time_count", max_time_count)) {
-        throw BT::RuntimeError("[ElapseTimeCheck]: missing required input 'max_time_count'");
-    }
-    
-    // Tick the child node
-    // Because the child() function is not thread-safe, it may be called by multiple threads at the same time.
-    // So we need to lock the mutex to ensure that only one thread can call the child() function at the same time.
-    BT::NodeStatus child_status;
-    {
-        std::unique_lock<std::mutex> lock(mutex_lock_);
-        child_status = child()->executeTick();
-    }
-
-    // Get the race elapsed time from the kernel
-    // kernel_->getRaceElapsedTime(elapsed_time);
-    std::cout << "[RaceTimeCheck]: Elapsed time: " << elapsed_time << std::endl;
-    
-    // Check if the child is completed
-    if (isStatusCompleted(child_status)) {
-        resetChild();
-    }
-
-    // If flow is larger than max_tick_count, call the child to halt
-    // !!! Remember: If the child is running, it will get into the "onHalted" function of the child,
-    //               then you can add some cancellation logic in the "onHalted" function.
-    if (elapsed_time > max_time_count) {
-        std::unique_lock<std::mutex> lock(mutex_lock_);
-
-        haltChild();
-        child_status = BT::NodeStatus::FAILURE;
     }
 
     return child_status;

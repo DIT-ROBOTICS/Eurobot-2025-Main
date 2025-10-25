@@ -236,13 +236,15 @@
           </ForceSuccess>
           <Fallback>
             <Sequence>
-              <TimerChecker target_time_sec="65"/>
+              <TimerChecker target_time_sec="80"/>
+              <!-- in origin condition, it should be 65 -->
               <ForceSuccess>
                 <SubTree ID="MissionPoint3_3" _autoremap="true" />
               </ForceSuccess>
             </Sequence>
             <Sequence>
-              <TimerChecker target_time_sec="73"/>
+              <TimerChecker target_time_sec="90"/>
+              <!-- in origin condition, it should be 73 -->
               <ForceSuccess>
                 <SubTree ID="MissionPoint3_2" _autoremap="true" />
               </ForceSuccess>
@@ -252,7 +254,7 @@
             </ForceSuccess>
           </Fallback>
         </Sequence>
-        <Sleep msec="98000" />
+        <Sleep msec="198000" />
       </Parallel>
       <StopRobot/>
       <Parallel failure_count="2" success_count="2">
@@ -402,7 +404,7 @@
       </Parallel>
       <SubTree ID="TakeTwoLevels" back="0.2, 0.1, 0.05" forward="0.105, 0.12, 0.075" shift="0.11" index="{index}" _skipIf="last_mission_failed" _autoremap="true" />
       <Sequence>
-        <!-- <ForceSuccess>
+        <ForceSuccess>
           <RetryUntilSuccessful num_attempts="10">
             <Fallback>
               <MissionChecker level="{level}" remap_base="{base}" mission_type="back" base_index="13">
@@ -414,16 +416,20 @@
             </Fallback>
           </RetryUntilSuccessful>
         </ForceSuccess>
-        <Switch2 case_1="1" case_2="2" variable="1">
+        <Switch2 case_1="1" case_2="2" variable="{level}">
           <SubTree ID="PlaceOneLevel" index="13" hasCompleteMaterial="{hasCompleteMaterial}" _autoremap="true" />
           <SubTree ID="PlaceTwoLevels" back="0.2, 0.1, 0.05" forward="0.15, 0.095, 0.065" hasCompleteMaterial="{hasCompleteMaterial}" index="13" shift="0" _autoremap="true" />
           <SubTree ID="PlaceThreeLevels" back="0.2, 0.1, 0.05" forward="0.15, 0.1, 0.065" hasCompleteMaterial="{hasCompleteMaterial}" index="13" shift="-0.055" _autoremap="true" />
-        </Switch2> -->
+        </Switch2>
         <ForceSuccess>
           <RetryUntilSuccessful num_attempts="10">
             <Fallback>
-              <MissionChecker level="{level}" remap_base="{base}" mission_type="back" base_index="13">
-                <Navigation final_pose="{PrevGoal}" dock_type="dock_y_linearBoost_precise" goal="{base}" />
+              <MissionChecker level="{level}" remap_base="{base}" mission_type="front" base_index="13">
+                <Sequence>
+                  <Navigation final_pose="{PrevGoal}" dock_type="dock_y_linearBoost_precise" goal="{base}" />
+                  <Docking final_pose="{PrevGoal}" isPureDocking="1" dock_type="dock_y_linearBoost_precise" shift="0" offset="0.05" base="{PrevGoal}" />
+                  <Rotation final_pose="{PrevGoal}" degree="180" base="{PrevGoal}" />
+                </Sequence>
               </MissionChecker>
               <ForceFailure>
                 <Sleep msec="500" />

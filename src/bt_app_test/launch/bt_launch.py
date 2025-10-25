@@ -25,6 +25,13 @@ def generate_launch_description():
             package = 'bt_app_test',
             executable = 'bt_ros2',
             name = 'bt_ros2',
-            parameters = [params, {"tree_name": "MainTree"}]
+            parameters = [params, {"tree_name": "tf-Broadcast-Demo"}]
+            # parameters = [params, {"tree_name": "Simple-Navigation-Demo"}]
+            # parameters = [params, {"tree_name": "Navigation-Demo"}]
+            # parameters = [params, {"tree_name": "Parallel-Demo"}]
+            # parameters = [params, {"tree_name": "Loop-Demo"}]
+            # parameters = [params, {"tree_name": "Decorator-Simple-Demo"}]
+            # parameters = [params, {"tree_name": "Port-Remapping-Demo"}]
+            # parameters = [params, {"tree_name": "SubTree-Remapping-Demo"}]
         )
     ])

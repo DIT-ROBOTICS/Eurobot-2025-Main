@@ -4,6 +4,7 @@
 #include <filesystem>
 #include <fstream>
 #include <mutex>
+#include <chrono>
 
 // ROS related Libraries
 #include "rclcpp/rclcpp.hpp"
@@ -56,25 +57,6 @@ private:
     double max_time_count;
     double start_time = -1;
     double current_time;
-    std::mutex mutex_lock_;
-
-};
-
-class RaceTimeCheck : public BT::DecoratorNode {
-
-public:
-    RaceTimeCheck(const std::string& name, const BT::NodeConfig& config)
-        : BT::DecoratorNode(name, config) {}
-
-    /* Node remapping function */
-    static BT::PortsList providedPorts();
-
-    /* Start and running function */
-    BT::NodeStatus tick() override;
-
-private:
-    double max_time_count;
-    double elapsed_time;
     std::mutex mutex_lock_;
 
 };
